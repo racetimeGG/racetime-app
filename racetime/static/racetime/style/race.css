@@ -1,0 +1,146 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex: 1 1 0;
+}
+
+.container > .content {
+    align-items: stretch;
+    flex: 1 1 0;
+}
+
+aside, main {
+    display: flex;
+    flex-direction: column;
+}
+
+.race-entrants::-webkit-scrollbar,
+.race-chat > .messages::-webkit-scrollbar {
+  width: 7px;
+}
+.race-entrants,
+.race-chat > .messages {
+  scrollbar-color: #1da674 #36393f;
+  scrollbar-width: thin;
+}
+.race-entrants::-webkit-scrollbar-track,
+.race-chat > .messages::-webkit-scrollbar-track {
+  background: #36393f;
+}
+.race-entrants::-webkit-scrollbar-thumb,
+.race-chat > .messages::-webkit-scrollbar-thumb {
+  background-color: #1da674;
+  border: 1px solid #36393f;
+}
+
+main {
+}
+.race-entrants {
+    flex: 1 1 0;
+    overflow-y: auto;
+}
+
+.race-actions {
+    margin-bottom: 10px;
+}
+.race-actions:empty {
+    display: none;
+}
+.race-actions > ul {
+    display: flex;
+}
+.race-actions > ul > li {
+    flex: 1 1 0;
+    padding-left: 5px;
+}
+.race-actions > ul > li:first-child {
+    border-left: none;
+    padding-left: 0;
+}
+.race-actions > ul > li .btn {
+    display: block;
+    width: 100%;
+}
+.streaming-required {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.streaming-required > p {
+    color: #a0e9a0;
+    margin: 0 0 5px;
+    font-size: 13px;
+}
+.streaming-required > .btn {
+    width: auto;
+}
+
+.race-status {}
+.race-chat {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    font-size: 14px;
+}
+
+.race-chat > .messages {
+    flex: 1 1 0;
+    overflow-y: auto;
+    margin: 10px 0;
+}
+
+.race-chat > .messages > li {
+    word-break: break-word;
+}
+.race-chat > .messages > li.system {
+    color: #7a777a;
+}
+.race-chat > .messages > li.error {
+    color: #f08080;
+}
+.race-chat > .messages > li.highlight {
+    color: #a0e9a0;
+}
+.race-chat > .messages > li > .timestamp {
+    color: #7a777a;
+    font-size: 12px;
+    margin-right: 4px;
+}
+.race-chat > .messages > li > .user {
+    margin-right: 4px;
+}
+.race-chat > .messages > li > .user::after {
+    content: ':';
+}
+.race-chat > .messages > li > .message {}
+
+.race-chat > form {
+    display: flex;
+}
+.race-chat > form > ul {
+    flex-grow: 1;
+    margin-right: 5px;
+}
+.race-chat > form > button {
+    font-size: 14px;
+}
+.race-chat > form label {
+    display: none;
+}
+.race-chat > form textarea {
+    font-size: 14px;
+    height: 20px;
+    min-height: 0;
+    overflow: hidden;
+    resize: none;
+    width: calc(100% - 10px);
+}
+.race-chat > form textarea:invalid {
+    box-shadow: none;
+}

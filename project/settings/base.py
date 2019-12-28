@@ -1,0 +1,117 @@
+"""
+Quick-start development settings - unsuitable for production
+See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+"""
+from datetime import datetime
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+SECRET_KEY = '00aqmqedb05688z06d_%m%a==yu10am82ff)rcxk4il6@6%2=$'
+DEBUG = True
+ALLOWED_HOSTS = []
+
+# Application definition
+
+INSTALLED_APPS = [
+    'racetime',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.humanize',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'captcha',
+    'django.forms',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'project.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'racetime.apps.context_processor',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'project.wsgi.application'
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+# Database
+# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# Authentication
+
+AUTH_USER_MODEL = 'racetime.User'
+LOGIN_URL = '/account/login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Internationalization
+# https://docs.djangoproject.com/en/2.2/topics/i18n/
+
+LANGUAGE_CODE = 'en-gb'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'node_modules', 'jquery', 'dist'),
+    os.path.join(BASE_DIR, 'node_modules', 'jquery-form', 'dist'),
+]
+STATIC_URL = '/static/'
+
+# Media files
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+# Site details
+
+RT_SITE_INFO = {
+    'title': 'racetime.dev',
+    'header_text': 'racetime.dev',
+    'footer_text': 'Development environment. Last restart: ' + datetime.now().isoformat(),
+    'footer_links': [
+        ('Discord', 'https://discord.gg/65cvHG3'),
+        ('GitHub', 'https://github.com/deains/racetime-app'),
+    ],
+    'extra_scripts': [],
+    'fontawesome_script': 'https://kit.fontawesome.com/e6c3ac42ed.js',
+}
+
+RT_CACHE_TIMEOUT = 3600

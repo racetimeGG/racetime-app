@@ -1,0 +1,117 @@
+{% load humanize %}
+{% load static %}
+<li>
+    <span class="place">
+        {{ entrant.place|ordinal|default:'—' }}
+    </span>
+    <span class="user">
+        {% include 'racetime/pops/user.html' with user=entrant.user extra_class='inline' %}
+        {% if not race.is_done and entrant.user.twitch_channel %}
+            <span class="stream">
+                {% if entrant.stream_live %}
+                    <a href="{{ entrant.user.twitch_channel }}" target="_blank"" title="Stream online">
+                        <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
+                    </a>
+                {% else %}
+                    <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream offline">
+                        <img src="{% static 'racetime/image/twitch_offline.svg' %}" alt="Twitch.tv">
+                    </a>
+                {% endif %}
+            </span>
+        {% endif %}
+        {% if entrant.comment %}
+            <span class="comment">
+                <i class="fa fa-comment"></i>
+                <span class="text">{{ entrant.comment }}</span>
+            </span>
+        {% endif %}
+    </span>
+    {% if can_monitor and entrant.user != user %}
+        <ul class="monitor-actions">
+            {% if entrant.can_accept_request %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'accept_request' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Accept invite">
+                            <i class="fas fa-user-check"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_force_unready %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'force_unready' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Force unready">
+                            <i class="fas fa-clock"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_override_stream %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'override_stream' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Override stream requirement">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_remove %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'remove' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Remove">
+                            <i class="fas fa-user-slash"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_disqualify %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'disqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Disqualify">
+                            <i class="fas fa-gavel"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_undisqualify %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'undisqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Un-disqualify">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_add_monitor %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'add_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Promote to race monitor">
+                            <i class="fas fa-id-badge"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+            {% if entrant.can_remove_monitor %}
+                <li>
+                    <form method="post" class="race-action-form" action="{% url 'remove_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" title="Demote from race monitor">
+                            <i class="far fa-id-badge"></i>
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+    <span class="status {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
+        {{ entrant.summary.1 }}
+    </span>
+    <time class="finish-time">{{ entrant.finish_time_html|safe|default:'—' }}</time>
+</li>

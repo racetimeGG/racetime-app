@@ -1,0 +1,28 @@
+Hello {{ user.name }},
+
+You've just registered an account on {{ home_url }}
+Congrats! You can now start joining in races and become part of the community.
+
+Your account is registered with this email address:
+
+    {{ user.email }}
+
+Use this email to log in along with the password you gave during registration.
+
+First things first. Have a look at your account settings to make sure
+everything is in order:
+
+    {{ account_url }}
+
+If you have a Twitch.tv account, you can link it up from that page too, which
+will let you join races where streaming is required.
+
+If everything looks good, start browsing race categories and join in!
+
+If you didn't register an account, just reply to this email and we'll take a
+look into what happened.
+
+GLHF,
+
+The {{ site_info.title }} team
+{{ home_url }}

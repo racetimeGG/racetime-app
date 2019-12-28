@@ -1,0 +1,15 @@
+{% if user %}
+    <span class="user-pop {{ extra_class }} {{ user.flair }}">
+        {% if user.avatar %}
+        <span class="avatar" style="background-image: url({{ user.avatar.url }})"></span>
+        {% endif %}
+        <span class="name">{{ user.name }}</span>
+        {% if user.use_discriminator %}
+        <span class="scrim">#{{ user.discriminator }}</span>
+        {% endif %}
+    </span>
+{% else %}
+    <span class="user-pop {{ extra_class }}">
+        <span class="name">No-one</span>
+    </span>
+{% endif %}

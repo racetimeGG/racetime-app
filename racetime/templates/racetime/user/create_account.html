@@ -1,0 +1,12 @@
+{% extends 'racetime/base.html' %}
+
+{% block main %}
+    <h2>Create an account</h2>
+    <div class="create-account">
+        <form class="create-account-form layout-form" method="post">
+            {% csrf_token %}
+            <ul>{{ form.as_ul }}</ul>
+            <button class="btn" type="submit">Create account</button>
+        </form>
+    </div>
+{% endblock %}

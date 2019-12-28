@@ -1,0 +1,722 @@
+body {
+    background: #25272c;
+}
+
+body, button, input, textarea {
+    color: #ddd8dd;
+}
+
+body, button, input, select, textarea {
+    font-family: Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.375;
+    margin: 0;
+    padding: 0;
+}
+
+input, textarea {
+    background: rgba(0,0,0,0.2);
+    border: none;
+    border-bottom: 1px solid #1da674;
+    padding: 5px;
+}
+textarea {
+    height: 66px;
+    min-height: 66px;
+    resize: vertical;
+}
+
+h1, h2 {
+    font-family: 'Roboto Slab', serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+h2 {
+    font-size: 30px;
+    font-weight: normal;
+}
+
+h3 {
+    display: inline-block;
+    border-bottom: 1px solid #1da674;
+    margin: 10px 0 5px;
+}
+
+ol, ul, dl {
+    margin: 0;
+    padding: 0;
+}
+ol, ul {
+    list-style: none;
+}
+
+a {
+    color: #ddd8dd;
+}
+
+a:visited {
+    color: #b9b4b9;
+}
+
+.btn, .btn:visited {
+    background-color: #0c0f14;
+    border: solid #26dd9a;
+    border-width: 1px 0 0 1px;
+    color: #ddd8dd;
+    padding: 5px;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    border-color: #a6ebc4;
+    color: #beebd1;
+}
+
+.btn:active {
+    border-color: #1da674;
+    position: relative;
+        top: -1px;
+        left: -1px;
+}
+
+.btn:disabled,
+.btn:disabled:hover {
+    border-color: #666;
+    color: #666;
+}
+
+.btn.flat-left {
+    /*border-radius: 0 3px 3px 0;*/
+}
+
+.btn.flat-right {
+    /*border-radius: 3px 0 0 3px;*/
+}
+
+.breadcrumbs {
+    display: flex;
+    font-size: 13px;
+}
+
+.breadcrumbs > li::before {
+    color: #7a777a;
+    content: '⇒';
+    padding: 0 3px;
+}
+.breadcrumbs > li:first-child::before {
+    content: none;
+}
+
+.user-pop {
+    display: flex;
+    text-decoration: none;
+    align-items: center;
+}
+.user-pop > .avatar {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 100%;
+    height: 32px;
+    width: 32px;
+    margin-right: 5px;
+}
+.user-pop > .name {
+    white-space: nowrap;
+}
+.user-pop > .scrim {
+    color: #7a777a;
+    font-size: 13px;
+    line-height: 1.6923;
+}
+.user-pop.inline {
+    display: inline-flex;
+    vertical-align: top;
+}
+.user-pop.inline > .avatar {
+    height: 22px;
+    width: 22px;
+}
+.help {
+    color: #7a777a;
+    font-size: 13px;
+}
+
+h2 + .help,
+h3 + .help {
+    margin-top: 0;
+}
+
+header {
+    border-bottom: 1px solid #26dd9a;
+}
+
+header, .container, footer {
+    background: linear-gradient(to bottom, #36393f 0, #25272c 30px);
+    padding: 0 5%;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header > .title {
+    display: flex;
+    align-items: baseline;
+}
+header > .title > h1 {
+    font-weight: bold;
+    font-size: 50px;
+    line-height: 1;
+    margin: 0;
+    position: relative;
+        bottom: -4px;
+}
+header > .title > h1 > a,
+header > .title > h1 > a:visited {
+    color: #eee;
+    text-decoration: none;
+}
+header > .user-info {
+    display: flex;
+}
+
+header > .user-info > a,
+header > .user-info > form {
+    margin-left: 5px;
+}
+
+header > .current-race {
+    align-self: flex-start;
+}
+
+header > .current-race > a {
+    border: 2px solid rgba(0,0,0,0.2);
+    border-top: none;
+    background: linear-gradient(to top, #36393f 0, #25272c 100%);
+    border-radius: 0 0 5px 5px;
+    display: flex;
+    flex-wrap: wrap;
+    text-decoration: none;
+    height: 40px;
+    padding: 2px 5px;
+}
+
+header > .current-race > a > .goal {
+    flex: 1 0 100%;
+}
+
+header > .current-race > a > .goal,
+header > .current-race > a > .timer {
+    font-weight: bold;
+}
+
+header > .current-race > a > .state {
+    flex: 1 1 0;
+}
+
+header > .current-race > a > .state,
+header > .current-race > a > .timer {
+    font-size: 13px;
+}
+
+header > .current-race > a > .timer {
+    text-align: right;
+}
+
+.messages > ul {
+    background: rgba(0, 0, 0, 0.1);
+    border: 5px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 10px;
+}
+.messages > ul > li {
+    border-top: 1px solid rgba(0,0,0,0.75);
+    margin-top: 5px;
+    padding-top: 5px;
+}
+.messages > ul > li:first-child {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.container > .messages {
+    padding: 30px 0 0;
+}
+
+.container > .content {
+    display: flex;
+    padding: 30px 0;
+}
+
+.container > .content > main,
+.container > .content > aside {
+    background: rgba(0,0,0,0.1);
+    border: 10px solid rgba(0,0,0,0.2);
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.container > .content > main {
+    flex: 1 0 0;
+    margin-right: 10px;
+}
+.container > .content > main:last-child {
+    margin-right: 0;
+}
+.container > .content > aside {
+    flex: 0 0 300px;
+}
+
+.container > .content > aside:empty {
+    display: none;
+}
+
+.home-categories {
+    display: flex;
+    flex-wrap: wrap;
+}
+.home-categories > li {
+    flex: 0 1 14.285%;
+    padding: 4px;
+    box-sizing: border-box;
+}
+.home-categories > li > a {
+    text-decoration: none;
+}
+.home-categories > li > a > .image {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: block;
+    height: 0;
+    padding-top: 133.33%;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.home-categories > li > a > .no-image {
+    box-shadow: inset 0 0 10px #7a777a;
+    color: #7a777a;
+    display: flex;
+    position: relative;
+}
+.home-categories > li > a > .no-image > .short-name {
+    align-items: center;
+    border: 1px solid #7a777a;
+    display: flex;
+    font-family: 'Roboto Slab', serif;
+    font-size: 30px;
+    justify-content: center;
+    position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+}
+.home-categories > .request-category > a {
+}
+.home-categories > .request-category > a > .no-image {
+    box-shadow: inset 0 0 10px #1da674;
+}
+.home-categories > .request-category > a > .no-image > .short-name {
+    border-color: #1da674;
+    color: #1da674;
+}
+
+.home-categories > li > a > .name {
+    border-top: 1px solid #1da674;
+    display: block;
+    font-family: 'Roboto Slab', sans-serif;
+    font-weight: bold;
+}
+.home-categories > li > a > .active-races {
+}
+
+.category-intro {
+    display: flex;
+    padding-bottom: 10px;
+}
+.category-intro > .image {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 96px;
+    margin-right: 10px;
+    flex: 0 0 72px;
+}
+.category-info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+.category-info > .permalink {
+    font-size: 13px;
+}
+.category-info > .title > .name {
+    display: inline;
+}
+.category-info > .title > .short-name {
+    color: #7a777a;
+}
+.category-info > .title > .short-name::before {
+    content: '(';
+}
+.category-info > .title > .short-name::after {
+    content: ')';
+}
+
+.category-info {
+    align-items: baseline;
+    display: flex;
+    flex-grow: 1;
+}
+
+.category-info > .short-name {
+    color: #7a777a;
+    margin-left: 10px;
+}
+
+.category-info > .short-name::before {
+    content: '(';
+}
+.category-info > .short-name::after {
+    content: ')';
+}
+
+.category-races > ol {
+    display: flex;
+    flex-wrap: wrap;
+}
+.category-races > ol > li {
+    flex: 0 1 50%;
+}
+.start-new, .edit-category {
+    float: right;
+}
+.start-new::before {
+    content: '+';
+}
+.start-new + .edit-category {
+    margin-right: 10px;
+}
+
+.race-list > ol > li > a {
+    border: 5px solid rgba(0,0,0,0.2);
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    text-decoration: none;
+    flex-direction: column;
+    height: 50px;
+    margin: 5px;
+    padding: 5px;
+}
+
+.race-list > ol > li > a > .goal,
+.race-list > ol > li > a > .timer {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.race-list > ol > li > a > .entrants,
+.race-list > ol > li > a > .timer {
+    text-align: right;
+}
+
+.race-list > ol > li > a > .state > .recorded {
+    display: inline-flex;
+    font-size: 14px;
+}
+.race-list > ol > li > a > .state > .recorded::before {
+    content: '(';
+}
+.race-list > ol > li > a > .state > .recorded::after {
+    content: ')';
+}
+.category-side-info > :first-child {
+    margin-top: 0;
+}
+
+.race-intro {
+    display: flex;
+}
+.race-info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    padding-bottom: 10px;
+}
+
+.race-info > .category > .name {
+    font-family: 'Roboto Slab', sans-serif;
+    font-size: 30px;
+}
+.race-info > .category > .short-name {
+    color: #7a777a;
+}
+.race-info > .category > .short-name::before {
+    content: '(';
+}
+.race-info > .category > .short-name::after {
+    content: ')';
+}
+.race-info > .goal {
+    font-size: 20px;
+}
+.race-info > .info {
+    color: #7a777a;
+}
+
+.race-entrants {
+}
+.race-entrants > ol {
+}
+
+.race-entrants > ol > li {
+    border-top: 1px solid rgba(0,0,0,0.75);
+    display: flex;
+    padding: 5px;
+}
+.race-entrants > ol > li > .place {
+    flex: 0 0 50px;
+    text-align: center;
+}
+.race-entrants > ol > li > .user {
+    display: flex;
+    flex-grow: 1;
+}
+.race-entrants > ol > li > .user > .user-pop {
+    height: 22px;
+}
+.race-entrants > ol > li > .user > .stream > a {
+    display: block;
+    margin-left: 5px;
+}
+.race-entrants > ol > li > .user > .stream > a > img {
+    height: 22px;
+    vertical-align: top;
+}
+.race-entrants > ol > li > .user > .comment {
+    cursor: default;
+    display: flex;
+    margin-left: 5px;
+    padding: 0 5px;
+}
+.race-entrants > ol > li > .user > .comment:hover {
+    background: #18191d;
+    border-radius: 6px;
+}
+.race-entrants > ol > li > .user > .comment > svg {
+    margin-top: 3px;
+}
+.race-entrants > ol > li > .user > .comment > .text {
+    display: none;
+    opacity: 0;
+    padding-left: 5px;
+    word-break: break-word;
+    z-index: 1;
+}
+.race-entrants > ol > li > .user > .comment:hover > .text {
+    display: block;
+    opacity: 1;
+}
+.race-entrants > ol > li > .status {
+    flex: 0 0 100px;
+}
+.race-entrants > ol > li > .finish-time {
+    flex: 0 0 80px;
+    text-align: right;
+}
+.race-entrants > ol > li > .monitor-actions {
+    display: flex;
+}
+.race-entrants > ol > li > .monitor-actions > li {
+    margin-right: 5px;
+}
+.race-entrants > ol > li > .monitor-actions > li > form > .btn {
+    padding: 0;
+    min-width: 23px;
+}
+.race-entrants > ol > li > .monitor-actions > li > form > .btn > svg {
+}
+.race-entrants > .count {
+    border-top: 1px solid rgba(0,0,0,0.75);
+    padding: 5px;
+    text-align: right;
+}
+
+.race-monitor {
+    margin-top: 10px;
+}
+.race-monitor:empty {
+    display: none;
+}
+.race-monitor > ul {
+    display: flex;
+}
+.race-monitor > ul > li {
+    margin-left: 10px;
+}
+.race-monitor > ul > li:first-child {
+    margin-left: 0;
+}
+.race-monitor > ul > li > a {
+    display: block;
+}
+.race-monitor > ul > .invite > form {
+    display: flex;
+}
+.race-monitor > ul > .invite > form label {
+    display: none;
+}
+.race-monitor > ul > .invite > form input {
+    width: 180px;
+}
+.race-monitor > ul > .invite > form button {
+    margin-left: 5px;
+}
+.race-monitor > ul > .dangerous .btn {
+    border-color: #f08080;
+}
+.race-monitor > ul > .dangerous .btn:hover {
+    color: #f08080;
+}
+.race-monitor > ul > .dangerous .btn:disabled,
+.race-monitor > ul > .dangerous .btn:disabled:hover {
+    border-color: #666;
+    color: #666;
+}
+.race-status {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.25) 100%);
+    border-radius: 10px;
+}
+.race-status > .timer {
+    display: block;
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+}
+.race-status > .state {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding-bottom: 5px;
+    text-align: center;
+}
+.race-status > .state > .value {
+    font-size: 20px;
+}
+.race-status > .state > .help {
+    color: #7a777a;
+    font-size: 13px;
+}
+.race-status > .entrants {
+}
+
+.race-meta {
+
+}
+dt {
+    color: #7a777a;
+    display: inline-block;
+    border-bottom: 1px solid #1da674;
+    font-size: 13px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+dt::after {
+    content: ':';
+}
+dd {
+    margin-left: 22px;
+}
+dd > .user-pop {
+    /*margin-top: 2px;*/
+}
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    color: #7a777a;
+    font-size: 13px;
+    padding: 20px 5%;
+}
+
+footer > ul {
+    display: flex;
+}
+footer > ul > li {
+    display: flex;
+}
+footer > ul > li a {
+}
+footer > ul > li::before {
+    content: '|';
+    padding: 0 5px;
+}
+footer > ul > li:first-child::before {
+    content: none
+}
+
+.layout-form {}
+.layout-form > ul > li {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 5px;
+    border-bottom: 1px solid #111;
+}
+
+.layout-form > ul > li > .errorlist {
+    color: #f08080;
+    font-size: 13px;
+}
+
+.layout-form > ul > li > label {}
+
+.layout-form > ul > li > .errorlist,
+.layout-form > ul > li > input,
+.layout-form > ul > li > select,
+.layout-form > ul > li > textarea,
+.layout-form > ul > li > .helptext {
+    width: 100%;
+}
+
+.layout-form > ul > li > select,
+.layout-form > ul > li > input[type='checkbox'] {
+    margin-left: 10px;
+    width: auto;
+}
+.layout-form > ul > li > input[type='checkbox'] {
+}
+
+.layout-form > ul > li > .helptext {
+    color: #7a777a;
+    font-size: 13px;
+}
+.layout-form > ul > li > .file-initial,
+.layout-form > ul > li > .file-clear {
+    margin-left: 5px;
+}
+.layout-form > ul > li > .file-change {
+    flex: 0 0 100%;
+}
+.layout-form > button {
+    margin-top: 10px;
+}
+
+.login-form > .submit-row {
+    align-items: center;
+    display: flex;
+    margin-top: 10px;
+}
+.login-form > .submit-row > .password-reset-link {
+    font-size: 14px;
+    margin-left: 10px;
+}

@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "jquery-form": "^4.2.2"
+  }
+}

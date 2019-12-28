@@ -1,0 +1,17 @@
+{% extends 'racetime/base.html' %}
+
+{% block main %}
+    <h2>Log in</h2>
+    <div class="login">
+        <form class="login-form layout-form" method="post">
+            {% csrf_token %}
+            <ul>{{ form.as_ul }}</ul>
+            <span class="submit-row">
+                <button class="btn" type="submit">Log in</button>
+                <a href="{% url 'password_reset' %}" class="password-reset-link">
+                    Forgot your password?
+                </a>
+            </span>
+        </form>
+    </div>
+{% endblock %}

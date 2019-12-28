@@ -1,0 +1,18 @@
+<ul>
+    {% for action, text in available_actions %}
+    <li>
+        {% if action == 'not_live' %}
+            <button class="btn {{ action }}" disabled title="Streaming is required for this race. You may not ready up until you go live.">
+                {{ text }}
+            </button>
+        {% else %}
+            <form class="race-action-form {{ action }}" method="post" action="{% url action category=race.category.slug race=race.slug %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">
+                    {{ text }}
+                </button>
+            </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>

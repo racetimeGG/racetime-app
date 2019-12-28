@@ -1,0 +1,13 @@
+<ol>
+    {% for entrant in race.ordered_entrants %}
+        {% include 'racetime/pops/entrant_row.html' with entrant=entrant can_monitor=can_monitor user=user %}
+    {% empty %}
+        <li class="no-entrants">
+            No race entrants.
+        </li>
+    {% endfor %}
+</ol>
+<div class="count">
+    {{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }}
+    ({{ race.entrants_count_inactive }} inactive)
+</div>

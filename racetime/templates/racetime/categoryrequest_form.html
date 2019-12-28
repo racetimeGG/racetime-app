@@ -1,0 +1,15 @@
+{% extends 'racetime/base.html' %}
+
+{% block main %}
+    <h2>Request new category</h2>
+    <p class="help">
+        Submit a request to site staff to add a new category. Your request will
+        be reviewed and if successful, the new category will be created with
+        yourself as its owner.
+    </p>
+    <form class="category-request-form layout-form" method="post">
+        {% csrf_token %}
+        <ul>{{ form.as_ul }}</ul>
+        <button class="btn" type="submit">Submit request</button>
+    </form>
+{% endblock %}

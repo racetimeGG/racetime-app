@@ -1,0 +1,60 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'racetime/style/race.css' %}">
+{% endblock %}
+
+{% block js %}
+<script>
+var raceChatLink = '{% url 'race_chat' category=race.category.slug race=race.slug %}';
+var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=race.slug %}';
+</script>
+<script src="{% static 'racetime/script/race.js' %}"></script>
+{% endblock %}
+
+{% block nocurrentrace %}{% endblock nocurrentrace %}
+
+{% block main %}
+    <div class="race-intro">
+        {% include 'racetime/race/intro.html' with race=race %}
+    </div>
+    <div class="race-entrants">
+        {% include 'racetime/race/entrants.html' with race=race can_monitor=can_monitor %}
+    </div>
+    <div class="race-monitor">{% if can_monitor %}
+        {% include 'racetime/race/monitor.html' with race=race can_moderate=can_moderate invite_form=invite_form %}
+    {% endif %}</div>
+{% endblock %}
+
+{% block aside %}
+    {% if race.streaming_required and user.is_authenticated and not user.twitch_channel %}
+        <div class="streaming-required">
+            <p>
+                Streaming is required to join this race. Visit account settings
+                to link up your Twitch.tv account.
+            </p>
+            <a class="btn" href="{% url 'edit_account' %}" target="_blank">
+                Account settings
+            </a>
+        </div>
+    {% endif %}
+    <div class="race-actions">{% if available_actions %}
+        {% include 'racetime/race/actions.html' with race=race available_actions=available_actions %}
+    {% elif race.is_pending %}
+        {% include 'racetime/race/actions_pending.html' %}
+    {% endif %}</div>
+    <div class="race-status">
+        {% include 'racetime/race/status.html' with race=race %}
+    </div>
+    <div class="race-chat">
+        <ol class="messages"></ol>
+        {% if user.is_active %}
+        <form action="{% url 'message' category=race.category.slug race=race.slug %}" method="post">
+            {% csrf_token %}
+            <ul>{{ chat_form.as_ul }}</ul>
+            <button type="submit" class="btn">Chat</button>
+        </form>
+        {% endif %}
+    </div>
+{% endblock %}

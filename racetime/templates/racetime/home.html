@@ -1,0 +1,44 @@
+{% extends 'racetime/base.html' %}
+
+{% block main %}
+    {% if not user.is_authenticated %}
+    <h3 style="margin-top: 0">Welcome</h3>
+    <p style="margin-top: 0">
+        {{ site_info.title }} is a website for organising races online, with a
+        focus on video games and speedruns. Why not jump in and join a race?
+        <a href="{% url 'create_account' %}">Create an account</a> to get
+        started.
+    </p>
+    {% endif %}
+    <h3 style="margin-top: 0">Race categories</h3>
+    <ol class="home-categories">
+        {% for category in categories %}
+        <li>
+            <a href="{{ category.get_absolute_url }}">
+                {% if category.image %}
+                    <span class="image" style="background-image: url({{ category.image.url }})"></span>
+                {% else %}
+                    <span class="image no-image">
+                        <span class="short-name">{{ category.short_name }}</span>
+                    </span>
+                {% endif %}
+                <span class="name">{{ category.name }}</span>
+                <span class="active-races">
+                    {{ category.current_race_count }} active
+                    race{{ category.current_race_count|pluralize }}
+                </span>
+            </a>
+        </li>
+        {% endfor %}
+        {% if user.is_authenticated %}
+        <li class="request-category">
+            <a href="{% url 'request_category' %}">
+                <span class="image no-image">
+                    <span class="short-name">+ new</span>
+                </span>
+                <span class="name">Request a new category</span>
+            </a>
+        </li>
+        {% endif %}
+    </ol>
+{% endblock %}

@@ -1,0 +1,45 @@
+<ul>
+    {% if race.is_preparing %}
+        <li class="invite">
+            <form class="race-action-form" action="{% url 'invite_to_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <ul>{{ invite_form.as_ul }}</ul>
+            </form>
+        </li>
+        <li class="edit">
+            <a href="{% url 'edit_race' race=race.slug category=race.category.slug %}" class="btn">
+                Edit race
+            </a>
+        </li>
+    {% endif %}
+    {% if race.can_begin %}
+        <li class="dangerous force-start">
+            <form class="race-action-form" action="{% url 'begin_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Force start</button>
+            </form>
+        </li>
+    {% endif %}
+    {% if not race.is_done %}
+        <li class="dangerous cancel">
+            <form class="race-action-form" action="{% url 'cancel_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Cancel race</button>
+            </form>
+        </li>
+    {% endif %}
+    {% if can_moderate and race.state == 'finished' and race.recordable and not race.recorded %}
+        <li class="record">
+            <form class="race-action-form" action="{% url 'record_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Record race result</button>
+            </form>
+        </li>
+        <li class="dangerous cancel">
+            <form class="race-action-form" action="{% url 'unrecord_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Do not record</button>
+            </form>
+        </li>
+    {% endif %}
+</ul>
