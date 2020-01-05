@@ -9,6 +9,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from . import models
+from .utils import notice_exception
 
 
 class RaceBot:
@@ -218,8 +219,8 @@ class RaceBot:
             }, headers={'Client-ID': settings.TWITCH_CLIENT_ID})
             if resp.status_code != 200:
                 raise requests.RequestException
-        except requests.RequestException:
-            pass
+        except requests.RequestException as ex:
+            notice_exception(ex)
         else:
             live_users = [
                 int(stream.get('user_id'))

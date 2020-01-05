@@ -1,7 +1,7 @@
 import random
-from datetime import timedelta
 
 from django.conf import settings
+from django.utils.module_loading import import_string
 from hashids import Hashids
 
 __all__ = [
@@ -207,6 +207,21 @@ def get_hashids(cls):
     Return a Hashids object for generating hashids scoped to the given class.
     """
     return Hashids(salt=str(cls) + settings.SECRET_KEY, min_length=32)
+
+
+def notice_exception(exception):
+    """
+    Take notice of an exception. This function should be called when an error
+    is deliberately squashed instead of being raised, but still needs to be
+    logged somewhere.
+    """
+    try:
+        receiver = import_string(settings.RT_EXCEPTION_RECV)
+    except (AttributeError, ImportError):
+        # No exception receiver set up.
+        pass
+    else:
+        receiver(exception)
 
 
 def timer_str(delta, deciseconds=True):

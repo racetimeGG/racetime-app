@@ -19,6 +19,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from .base import UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
+from ..utils import notice_exception
 
 
 class CreateAccount(generic.CreateView):
@@ -170,7 +171,8 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                 })
                 if resp.status_code != 200:
                     raise requests.RequestException
-            except requests.RequestException:
+            except requests.RequestException as ex:
+                notice_exception(ex)
                 messages.error(
                     request,
                     'Something went wrong with the Twitch API. Please try '
