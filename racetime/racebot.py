@@ -14,6 +14,7 @@ from .utils import notice_exception
 
 class RaceBot:
     pid = None
+    last_adoption = None
     last_twitch_refresh = None
     races = []
     queryset = models.Race.objects.filter(
@@ -35,8 +36,10 @@ class RaceBot:
                 race['object'].refresh_from_db()
                 self.handle_race(race)
 
-        self.adopt_race()
-        self.unorphan_races()
+        if not self.last_adoption or timezone.now() - self.last_adoption > timedelta(seconds=10):
+            self.adopt_race()
+            self.unorphan_races()
+            self.last_adoption = timezone.now()
 
         if not self.last_twitch_refresh or timezone.now() - self.last_twitch_refresh > timedelta(seconds=10):
             self.update_live_status()
