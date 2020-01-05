@@ -288,6 +288,16 @@ header > .current-race > a > .timer {
     padding: 4px;
     box-sizing: border-box;
 }
+@media (max-width: 1200px) {
+    .home-categories > li {
+        flex: 0 1 16.667%;
+    }
+}
+@media (max-width: 1100px) {
+    .home-categories > li {
+        flex: 0 1 20%;
+    }
+}
 .home-categories > li > a {
     text-decoration: none;
 }
