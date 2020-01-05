@@ -19,7 +19,7 @@ class Home(generic.TemplateView):
         queryset = queryset.annotate(
             current_race_count=Count(
                 expression='race__id',
-                filter=Q(race__state__in=RaceStates.current),
+                filter=Q(race__state__in=RaceStates.current.value),
             ),
             total_race_count=Count(expression='race__id'),
         )
