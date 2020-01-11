@@ -1,5 +1,9 @@
 {% extends 'racetime/base.html' %}
 
+{% block title %}
+    Edit category | {{ category.name }} |
+{% endblock %}
+
 {% block main %}
     <ol class="breadcrumbs">
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>

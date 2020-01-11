@@ -1,5 +1,14 @@
 {% extends 'racetime/base.html' %}
 
+{% block title %}
+    {% if race %}
+    Edit race room ({{ race.slug }})
+    {% else %}
+    Start new {{ category.short_name }} race
+    {% endif %}
+    | {{ category.name }} |
+{% endblock %}
+
 {% block main %}
     <ol class="breadcrumbs">
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>

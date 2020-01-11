@@ -6,6 +6,14 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Roboto:400,700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="{% static 'racetime/style/base.css' %}">
         {% block css %}{% endblock %}
+
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="{{ site_info.meta_site_name }}">
+        {% block meta %}
+            <meta name="description" content="{{ site_info.meta_description }}">
+            <meta property="og:title" content="{{ site_info.title }}">
+            <meta property="og:description" content="{{ site_info.meta_description }}">
+        {% endblock %}
     </head>
     <body>
         <header>

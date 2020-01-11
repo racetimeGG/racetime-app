@@ -146,6 +146,8 @@ LOGGING = {
 RT_SITE_INFO = {
     'title': 'racetime.dev',
     'header_text': 'racetime.dev',
+    'meta_site_name': 'racetime.dev',
+    'meta_description': 'racetime development environment',
     'footer_text': 'Development environment. Last restart: ' + datetime.now().isoformat(),
     'footer_links': [
         ('Discord', 'https://discord.gg/65cvHG3'),
