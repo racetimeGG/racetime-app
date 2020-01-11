@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.db import models as db_models
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -30,7 +31,26 @@ class Category(UserMixin, generic.DetailView):
         return self.object.race_set.exclude(state__in=[
             models.RaceStates.finished,
             models.RaceStates.cancelled,
-        ]).all()
+        ]).annotate(
+            state_sort=db_models.Case(
+                # Open/Invitational
+                db_models.When(
+                    state__in=[models.RaceStates.open, models.RaceStates.invitational],
+                    then=1,
+                ),
+                # Pending/In progress
+                db_models.When(
+                    state=models.RaceStates.pending,
+                    then=2,
+                ),
+                db_models.When(
+                    state=models.RaceStates.in_progress,
+                    then=2,
+                ),
+                output_field=db_models.PositiveSmallIntegerField(),
+                default=0,
+            ),
+        ).order_by('state_sort', 'opened_at').all()
 
     def past_races(self):
         return self.object.race_set.filter(state__in=[
