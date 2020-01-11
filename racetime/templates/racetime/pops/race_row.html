@@ -1,4 +1,4 @@
-<a href="{{ race.get_absolute_url }}">
+<a href="{{ race.get_absolute_url }}"{% if not race.recorded and race.recordable %} class="recordable"{% endif %}>
     <span class="goal">
         {% if nocontext %}
             {{ race.category.short_name }}

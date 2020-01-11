@@ -22,6 +22,7 @@ class Category(UserMixin, generic.DetailView):
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
+            'can_moderate': self.object.can_moderate(self.user),
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
             'past_races': self.past_races(),
