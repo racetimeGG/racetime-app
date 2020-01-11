@@ -107,9 +107,9 @@ class RaceBot:
         """
         if race['object'].is_preparing:
             self.handle_open_race(race)
-        if race['object'].is_pending:
+        elif race['object'].is_pending:
             self.handle_pending_race(race)
-        if race['object'].is_in_progress:
+        elif race['object'].is_in_progress:
             self.handle_in_progress_race(race)
         else:
             race['object'].bot_pid = None
