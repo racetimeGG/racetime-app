@@ -610,15 +610,19 @@ class Race(models.Model):
                 'Race result recorded by %(recorded_by)s'
                 % {'recorded_by': recorded_by},
             )
+        else:
+            raise SafeException('Race is not recordable or already recorded.')
 
     def unrecord(self, unrecorded_by):
-        if not self.recorded and self.recordable:
+        if self.recordable and not self.recorded:
             self.recordable = False
             self.save()
             self.add_message(
                 'Race set to not recorded by %(unrecorded_by)s'
                 % {'unrecorded_by': unrecorded_by},
             )
+        else:
+            raise SafeException('Race is not recordable or already recorded.')
 
     def finish_if_none_remaining(self):
         """
@@ -637,6 +641,8 @@ class Race(models.Model):
                 user=user,
             )
             self.add_message('%(user)s joins the race.' % {'user': user})
+        else:
+            raise SafeException('You are not eligible to join this race.')
 
     def request_to_join(self, user):
         if self.can_join(user) and self.state == RaceStates.invitational.value:
@@ -645,6 +651,8 @@ class Race(models.Model):
                 state=EntrantStates.requested.value,
             )
             self.add_message('%(user)s requests to join the race.' % {'user': user})
+        else:
+            raise SafeException('You are not eligible to join this race.')
 
     def invite(self, user, invited_by):
         if self.can_join(user) and self.is_preparing:
@@ -656,6 +664,8 @@ class Race(models.Model):
                 '%(invited_by)s invites %(user)s to join the race.'
                 % {'invited_by': invited_by, 'user': user}
             )
+        else:
+            raise SafeException('User is not eligible to join this race.')
 
     @atomic
     def recalculate_places(self):
@@ -806,6 +816,8 @@ class Entrant(models.Model):
                 '%(user)s withdraws a request to join.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def accept_invite(self):
         if self.state == EntrantStates.invited.value:
@@ -815,6 +827,8 @@ class Entrant(models.Model):
                 '%(user)s accepts an invitation to join.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def decline_invite(self):
         if self.state == EntrantStates.invited.value:
@@ -824,6 +838,8 @@ class Entrant(models.Model):
                 '%(user)s declines an invitation to join.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def leave(self):
         if self.state == EntrantStates.joined.value and self.race.is_preparing:
@@ -832,6 +848,8 @@ class Entrant(models.Model):
                 '%(user)s quits the race.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def is_ready(self):
         if (
@@ -843,6 +861,8 @@ class Entrant(models.Model):
             self.ready = True
             self.save()
             self.race.add_message('%(user)s is ready!' % {'user': self.user})
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def not_ready(self):
         if self.state == EntrantStates.joined.value and self.race.is_preparing and self.ready:
@@ -852,6 +872,8 @@ class Entrant(models.Model):
                 '%(user)s is not ready.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def done(self):
         if self.state == EntrantStates.joined.value \
@@ -872,6 +894,8 @@ class Entrant(models.Model):
                 % {'user': self.user, 'place': ordinal(self.place), 'time': self.finish_time_str}
             )
             self.race.finish_if_none_remaining()
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def undone(self):
         if self.state == EntrantStates.joined.value \
@@ -888,6 +912,8 @@ class Entrant(models.Model):
                 % {'user': self.user}
             )
             self.race.recalculate_places()
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def forfeit(self):
         if self.state == EntrantStates.joined.value \
@@ -903,6 +929,8 @@ class Entrant(models.Model):
                 % {'user': self.user}
             )
             self.race.finish_if_none_remaining()
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def unforfeit(self):
         if self.state == EntrantStates.joined.value \
@@ -917,6 +945,8 @@ class Entrant(models.Model):
                 '%(user)s has un-forfeited from the race.'
                 % {'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_add_comment(self):
@@ -939,6 +969,8 @@ class Entrant(models.Model):
                 '%(user)s added a comment: "%(comment)s"'
                 % {'user': self.user, 'comment': comment}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_accept_request(self):
@@ -952,6 +984,8 @@ class Entrant(models.Model):
                 '%(accepted_by)s accepts a request to join from %(user)s.'
                 % {'accepted_by': accepted_by, 'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_force_unready(self):
@@ -969,6 +1003,8 @@ class Entrant(models.Model):
                 '%(forced_by)s unreadies %(user)s.'
                 % {'forced_by': forced_by, 'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_remove(self):
@@ -981,6 +1017,8 @@ class Entrant(models.Model):
                 '%(removed_by)s removes %(user)s from the race.'
                 % {'removed_by': removed_by, 'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_disqualify(self):
@@ -1003,6 +1041,8 @@ class Entrant(models.Model):
             if self.finish_time:
                 self.race.recalculate_places()
             self.race.finish_if_none_remaining()
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_undisqualify(self):
@@ -1021,6 +1061,8 @@ class Entrant(models.Model):
                 '%(user)s has been un-disqualified from the race by %(undisqualified_by)s.'
                 % {'undisqualified_by': undisqualified_by, 'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     @property
     def can_override_stream(self):
@@ -1039,6 +1081,8 @@ class Entrant(models.Model):
                 '%(overridden_by)s sets a stream override for %(user)s.'
                 % {'overridden_by': overridden_by, 'user': self.user}
             )
+        else:
+            raise SafeException('Possible sync error. Refresh to continue.')
 
     def __str__(self):
         return str(self.user)
