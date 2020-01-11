@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
 from django.views import generic
 
 from .base import BaseRaceAction
@@ -20,6 +23,17 @@ class Message(RaceAction, generic.FormView):
             and self.get_race().is_in_progress
         ):
             raise SafeException('You do not have permission to chat during the race.')
+
+        if (
+            self.get_race().is_done
+            and (
+                race.recorded
+                or not race.recordable
+                or race.ended_at <= timezone.now() - timedelta(hours=1)
+            )
+            and not self.user.is_superuser
+        ):
+            raise SafeException('This race chat is now closed. No new messages may be added.')
 
         form = self.get_form()
         if not form.is_valid():
