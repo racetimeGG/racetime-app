@@ -20,7 +20,7 @@ var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=ra
         {% include 'racetime/race/intro.html' with race=race %}
     </div>
     <div class="race-entrants">
-        {% include 'racetime/race/entrants.html' with race=race can_monitor=can_monitor %}
+        {% include 'racetime/race/entrants.html' with race=race can_moderate=can_moderate can_monitor=can_monitor %}
     </div>
     <div class="race-monitor">{% if can_monitor %}
         {% include 'racetime/race/monitor.html' with race=race can_moderate=can_moderate invite_form=invite_form %}

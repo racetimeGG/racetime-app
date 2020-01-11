@@ -15,6 +15,13 @@ class UserMixin:
         return self.request.user
 
 
+class CanModerateRaceMixin(UserMixin, UserPassesTestMixin):
+    def test_func(self):
+        if not self.user.is_authenticated:
+            return False
+        return self.get_object().category.can_moderate(self.user)
+
+
 class CanMonitorRaceMixin(UserMixin, UserPassesTestMixin):
     def test_func(self):
         if not self.user.is_authenticated:
@@ -27,6 +34,9 @@ class BaseRaceAction(UserMixin, generic.View):
 
     def action(self, race, user):
         raise NotImplementedError
+
+    def get_object(self):
+        return self.get_race()
 
     def get_race(self):
         if not self._race:

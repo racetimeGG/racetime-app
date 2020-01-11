@@ -14,18 +14,13 @@ Monitor actions (per-user):
 from django.http import Http404
 from django.views import generic
 
-from .base import BaseRaceAction, CanMonitorRaceMixin
+from .base import BaseRaceAction, CanModerateRaceMixin, CanMonitorRaceMixin
 from ..forms import InviteForm
 from ..models import Entrant, User
 from ..utils import SafeException
 
 
-class MonitorRaceAction(CanMonitorRaceMixin, BaseRaceAction):
-    def get_object(self):
-        return self.get_race()
-
-
-class MonitorEntrantAction(MonitorRaceAction):
+class EntrantAction:
     def action(self, race, entrant, user):
         raise NotImplementedError
 
@@ -42,6 +37,22 @@ class MonitorEntrantAction(MonitorRaceAction):
 
     def _do_action(self):
         self.action(self.get_race(), self.get_entrant(), self.user)
+
+
+class ModeratorRaceAction(CanModerateRaceMixin, BaseRaceAction):
+    pass
+
+
+class MonitorRaceAction(CanMonitorRaceMixin, BaseRaceAction):
+    pass
+
+
+class ModeratorEntrantAction(CanModerateRaceMixin, EntrantAction, BaseRaceAction):
+    pass
+
+
+class MonitorEntrantAction(CanMonitorRaceMixin, EntrantAction, BaseRaceAction):
+    pass
 
 
 class BeginRace(MonitorRaceAction):
@@ -79,12 +90,12 @@ class InviteToRace(MonitorRaceAction, generic.FormView):
         race.invite(invite.user, user)
 
 
-class RecordRace(MonitorRaceAction):
+class RecordRace(ModeratorRaceAction):
     def action(self, race, user):
         race.record(recorded_by=user)
 
 
-class UnrecordRace(MonitorRaceAction):
+class UnrecordRace(ModeratorRaceAction):
     def action(self, race, user):
         race.unrecord(unrecorded_by=user)
 
@@ -99,7 +110,7 @@ class ForceUnready(MonitorEntrantAction):
         entrant.force_unready(forced_by=user)
 
 
-class OverrideStream(MonitorEntrantAction):
+class OverrideStream(ModeratorRaceAction):
     def action(self, race, entrant, user):
         entrant.override_stream(overridden_by=user)
 
@@ -109,12 +120,12 @@ class Remove(MonitorEntrantAction):
         entrant.remove(removed_by=user)
 
 
-class Disqualify(MonitorEntrantAction):
+class Disqualify(ModeratorEntrantAction):
     def action(self, race, entrant, user):
         entrant.disqualify(disqualified_by=user)
 
 
-class Undisqualify(MonitorEntrantAction):
+class Undisqualify(ModeratorEntrantAction):
     def action(self, race, entrant, user):
         entrant.undisqualify(undisqualified_by=user)
 

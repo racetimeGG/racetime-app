@@ -402,11 +402,13 @@ class Race(models.Model):
             }
 
         available_actions = self.available_actions(user)
+        can_moderate = self.category.can_moderate(user)
         can_monitor = self.can_monitor(user)
 
         renders = {
             'actions': '',
             'entrants': render_to_string('racetime/race/entrants.html', {
+                'can_moderate': can_moderate,
                 'can_monitor': can_monitor,
                 'race': self,
             }, request),
