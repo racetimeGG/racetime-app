@@ -4,25 +4,28 @@ from . import views
 
 urlpatterns = [
     path('account', views.EditAccount.as_view(), name='edit_account'),
-    path('account/login', views.Login.as_view(), name='login'),
-    path('account/logout', views.Logout.as_view(), name='logout'),
-    path('account/create', views.CreateAccount.as_view(), name='create_account'),
-    path('account/twitch_auth', views.TwitchAuth.as_view(), name='twitch_auth'),
-    path('account/derp', views.PasswordResetView.as_view(), name='password_reset'),
-    path('account/derp/done', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('account/reset/<uidb64>/<token>', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('account/reset/complete', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('account/', include([
+        path('login', views.Login.as_view(), name='login'),
+        path('logout', views.Logout.as_view(), name='logout'),
+        path('create', views.CreateAccount.as_view(), name='create_account'),
+        path('twitch_auth', views.TwitchAuth.as_view(), name='twitch_auth'),
+        path('derp', views.PasswordResetView.as_view(), name='password_reset'),
+        path('derp/done', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+        path('reset/<uidb64>/<token>', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+        path('reset/complete', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    ])),
 
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
 
     path('<str:category>', views.Category.as_view(), name='category'),
-    path('<str:category>/data', views.CategoryData.as_view(), name='category_data'),
-    path('<str:category>/startrace', views.CreateRace.as_view(), name='create_race'),
-    path('<str:category>/edit', views.EditCategory.as_view(), name='edit_category'),
+    path('<str:category>/', include([
+        path('data', views.CategoryData.as_view(), name='category_data'),
+        path('edit', views.EditCategory.as_view(), name='edit_category'),
+        path('startrace', views.CreateRace.as_view(), name='create_race'),
+    ])),
 
     path('<str:category>/<str:race>', views.Race.as_view(), name='race'),
-
     path('<str:category>/<str:race>/', include([
         path('chat', views.RaceChat.as_view(), name='race_chat'),
         path('data', views.RaceData.as_view(), name='race_data'),
@@ -51,14 +54,16 @@ urlpatterns = [
             path('record', views.RecordRace.as_view(), name='record_race'),
             path('unrecord', views.UnrecordRace.as_view(), name='unrecord_race'),
 
-            path('accept_request/<str:entrant>', views.AcceptRequest.as_view(), name='accept_request'),
-            path('force_unready/<str:entrant>', views.ForceUnready.as_view(), name='force_unready'),
-            path('override_stream/<str:entrant>', views.OverrideStream.as_view(), name='override_stream'),
-            path('remove/<str:entrant>', views.Remove.as_view(), name='remove'),
-            path('disqualify/<str:entrant>', views.Disqualify.as_view(), name='disqualify'),
-            path('undisqualify/<str:entrant>', views.Undisqualify.as_view(), name='undisqualify'),
-            path('add_monitor/<str:entrant>', views.AddMonitor.as_view(), name='add_monitor'),
-            path('remove_monitor/<str:entrant>', views.RemoveMonitor.as_view(), name='remove_monitor'),
+            path('<str:entrant>/', include([
+                path('accept_request', views.AcceptRequest.as_view(), name='accept_request'),
+                path('force_unready', views.ForceUnready.as_view(), name='force_unready'),
+                path('override_stream', views.OverrideStream.as_view(), name='override_stream'),
+                path('remove', views.Remove.as_view(), name='remove'),
+                path('disqualify', views.Disqualify.as_view(), name='disqualify'),
+                path('undisqualify', views.Undisqualify.as_view(), name='undisqualify'),
+                path('add_monitor', views.AddMonitor.as_view(), name='add_monitor'),
+                path('remove_monitor', views.RemoveMonitor.as_view(), name='remove_monitor'),
+            ])),
         ])),
     ])),
 ]
