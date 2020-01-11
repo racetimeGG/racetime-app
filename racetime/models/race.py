@@ -486,6 +486,7 @@ class Race(models.Model):
             and not user.is_banned_from_category(self.category)
             and not self.in_race(user)
             and (not self.streaming_required or user.twitch_channel)
+            and not user.active_race_entrant
         )
 
     def can_monitor(self, user):
