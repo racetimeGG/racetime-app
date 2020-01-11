@@ -729,6 +729,7 @@ class Entrant(models.Model):
     )
     comment = models.TextField(
         null=True,
+        blank=True,
         help_text='Post-race pithy comeback from the entrant',
         max_length=200,
     )
