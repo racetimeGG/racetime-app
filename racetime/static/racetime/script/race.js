@@ -1,4 +1,26 @@
 $(function() {
+    var onError = function(xhr) {
+        if (xhr.status === 422) {
+            if (xhr.responseText.indexOf('<ul class="errorlist">') !== -1) {
+                var $errors = $(xhr.responseText);
+                $errors.children('li').each(function() {
+                    var field = $(this).text();
+                    $errors.children('li').each(function() {
+                        whoops(field + ': ' + $(this).text());
+                    });
+                });
+            } else {
+                whoops(xhr.responseText);
+            }
+            $('.race-action-form button').prop('disabled', false);
+        } else {
+            whoops(
+                'Something went wrong (code ' + xhr.status + '). ' +
+                'Reload the page to continue.'
+            );
+        }
+    };
+
     var whoops = function(message) {
         var $messages = $('.race-chat .messages');
         var date = new Date();
@@ -47,27 +69,7 @@ $(function() {
                     $input.appendTo($form);
                 }
             },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    if (xhr.responseText.indexOf('<ul class="errorlist">') !== -1) {
-                        var $errors = $(xhr.responseText);
-                        $errors.children('li').each(function() {
-                            var field = $(this).text();
-                            $errors.children('li').each(function() {
-                                whoops(field + ': ' + $(this).text());
-                            });
-                        });
-                    } else {
-                        whoops(xhr.responseText);
-                    }
-                    $('.race-action-form button').prop('disabled', false);
-                } else {
-                    whoops(
-                        'Something went wrong (code ' + xhr.status + '). ' +
-                        'Reload the page to continue.'
-                    );
-                }
-            },
+            error: onError,
             success: function() {
                 chatTick();
             }
@@ -133,12 +135,7 @@ $(function() {
     $('.race-action-form').each(ajaxifyActionForm);
 
     $('.race-chat form').ajaxForm({
-        error: function(xhr) {
-            whoops(
-                'Failed to send message (code ' + xhr.status + '). ' +
-                'Try reloading the page.'
-            );
-        },
+        error: onError,
         success: function() {
             chatTick();
             $('.race-chat form textarea').val('').height(20);
