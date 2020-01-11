@@ -13,6 +13,7 @@ from .utils import notice_exception
 
 
 class RaceBot:
+    logger = logging.getLogger('racebot')
     pid = None
     last_adoption = None
     last_twitch_refresh = None
@@ -42,6 +43,7 @@ class RaceBot:
             self.last_adoption = timezone.now()
 
         if not self.last_twitch_refresh or timezone.now() - self.last_twitch_refresh > timedelta(seconds=10):
+            self.logger.debug('[Twitch] Refreshing stream statuses.')
             self.update_live_status()
             self.last_twitch_refresh = timezone.now()
 
@@ -54,6 +56,8 @@ class RaceBot:
         The first orphaned race found will be adopted by setting the bot_pid
         field on it to this bot's PID.
         """
+        self.logger.debug('[Bot] Searching for races to adopt.')
+
         race = self.queryset.filter(bot_pid=None).first()
         if race:
             race.bot_pid = self.pid
@@ -64,7 +68,7 @@ class RaceBot:
                 'cancel_warning_posted': False,
                 'limit_warning_posted': False,
             })
-            logging.info('Adopted race %(race)s.' % {'race': race})
+            self.logger.info('[Bot] Adopted race %(race)s.' % {'race': race})
 
     def unorphan_races(self):
         """
@@ -72,6 +76,8 @@ class RaceBot:
         clear their bot_pid value. This will allow these races to be picked up
         again by a working racebot process.
         """
+        self.logger.debug('[Bot] Searching for orphaned races.')
+
         queryset = self.queryset.filter(bot_pid__isnull=False)
         queryset = queryset.exclude(bot_pid=self.pid)
         queryset = queryset.values_list('bot_pid', flat=True)
@@ -86,10 +92,12 @@ class RaceBot:
 
         if dead:
             count = self.queryset.filter(bot_pid__in=dead).update(bot_pid=None)
-            logging.warning(
-                'Found %(count)d orphaned race(s) from bot PID(s): %(pids)s'
+            self.logger.warning(
+                '[Bot] Found %(count)d orphaned race(s) from bot PID(s): %(pids)s'
                 % {'count': count, 'pids': ','.join(str(pid) for pid in dead)}
             )
+        else:
+            self.logger.debug('[Bot] No orphaned races found. Yay!')
 
     def handle_race(self, race):
         """
@@ -105,8 +113,8 @@ class RaceBot:
             race['object'].bot_pid = None
             race['object'].save()
             self.races.remove(race)
-            logging.info(
-                'Race %(race)s is complete.' % {'race': race['object']}
+            self.logger.info(
+                '[Race] %(race)s is complete.' % {'race': race['object']}
             )
 
     def handle_open_race(self, race):
@@ -133,6 +141,7 @@ class RaceBot:
                 'The race has begun! Good luck and have fun.',
                 highlight=True,
             )
+            self.logger.info('[Race] Started %(race)s.' % {'race': race['object']})
 
     def check_readiness(self, race):
         """
@@ -148,6 +157,7 @@ class RaceBot:
                 % {'delta': race['object'].start_delay.seconds},
                 highlight=True,
             )
+            self.logger.info('[Race] Begun countdown for %(race)s.' % {'race': race['object']})
 
     def check_open_time_limit(self, race):
         open_for = timezone.now() - race['object'].opened_at
@@ -156,6 +166,7 @@ class RaceBot:
             race['object'].add_message(
                 'This race has been cancelled. Reason: dead race room.'
             )
+            self.logger.info('[Race] Cancelled %(race)s (dead race room).' % {'race': race['object']})
 
     def check_open_time_limit_lowentrants(self, race):
         open_for = timezone.now() - race['object'].opened_at
@@ -165,6 +176,7 @@ class RaceBot:
                 'This race has been cancelled. Reason: less than 2 '
                 'entrants joined.'
             )
+            self.logger.info('[Race] Cancelled %(race)s (<2 entrants).' % {'race': race['object']})
         elif (
             open_for >= (race['object'].OPEN_TIME_LIMIT_LOWENTRANTS - timedelta(minutes=5))
             and not race['cancel_warning_posted']
@@ -175,6 +187,7 @@ class RaceBot:
                 highlight=True,
             )
             race['cancel_warning_posted'] = True
+            self.logger.info('[Race] Low entrant warning for %(race)s.' % {'race': race['object']})
 
     def check_time_limit(self, race):
         in_progress_for = timezone.now() - race['object'].started_at
@@ -184,6 +197,7 @@ class RaceBot:
                 'will now be expunged.'
             )
             race['object'].finish()
+            self.logger.info('[Race] Race time limit exceeded for %(race)s.' % {'race': race['object']})
         elif (
             in_progress_for >= (race['object'].time_limit - timedelta(minutes=5))
             and not race['limit_warning_posted']
@@ -194,9 +208,11 @@ class RaceBot:
                 highlight=True,
             )
             race['limit_warning_posted'] = True
+            self.logger.info('[Race] Race time limit warning for %(race)s.' % {'race': race['object']})
 
     def update_live_status(self):
         if not self.races:
+            self.logger.debug('[Twitch] No races to check.')
             return
 
         entrants = {}
@@ -213,6 +229,7 @@ class RaceBot:
             entrants[entrant.twitch_id].append(entrant)
 
         if not entrants:
+            self.logger.debug('[Twitch] No entrants to check.')
             return
 
         try:
@@ -224,6 +241,8 @@ class RaceBot:
                 raise requests.RequestException
         except requests.RequestException as ex:
             notice_exception(ex)
+            self.logger.error('[Twitch] API error occurred!')
+            self.logger.error(str(ex))
         else:
             live_users = [
                 int(stream.get('user_id'))
@@ -249,3 +268,10 @@ class RaceBot:
                 )
                 for race in races_to_reload:
                     race.add_silent_reload()
+
+                self.logger.info(
+                    '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
+                    % {'entrants': len(entrants_to_update), 'races': len(races_to_reload)}
+                )
+            else:
+                self.logger.debug('[Twitch] All stream info is up-to-date.')
