@@ -89,6 +89,8 @@ class RaceBot:
                 os.kill(pid, 0)
             except OSError:
                 dead.append(pid)
+            except SystemError:
+                pass
 
         if dead:
             count = self.queryset.filter(bot_pid__in=dead).update(bot_pid=None)
