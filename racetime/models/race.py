@@ -959,6 +959,8 @@ class Entrant(models.Model):
             and not self.comment
             and self.race.state != RaceStates.cancelled.value
             and self.race.allow_comments
+            and not self.race.recorded
+            and not (self.race.is_done and not self.race.recordable)
         )
 
     def add_comment(self, comment):
