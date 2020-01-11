@@ -14,6 +14,13 @@ class Message(RaceAction, generic.FormView):
     form_class = ChatForm
 
     def action(self, race, user):
+        if (
+            not self.get_race().allow_midrace_chat
+            and not self.get_race().can_monitor(self.user)
+            and self.get_race().is_in_progress
+        ):
+            raise SafeException('You do not have permission to chat during the race.')
+
         form = self.get_form()
         if not form.is_valid():
             raise SafeException(form.errors)
