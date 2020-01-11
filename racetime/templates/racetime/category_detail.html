@@ -19,6 +19,9 @@
     <meta property="og:title" content="All races for {{ category.name }}">
     <meta name="description" content="See all races and information for {{ category.short_name }}, or start your own race room.">
     <meta property="og:description" content="See all races and information for {{ category.short_name }}, or start your own race room.">
+    {% if meta_image %}
+        <meta property="og:image" content="{{ meta_image }}">
+    {% endif %}
 {% endblock %}
 
 {% block main %}

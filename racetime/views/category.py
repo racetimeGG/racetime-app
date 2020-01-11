@@ -26,6 +26,7 @@ class Category(UserMixin, generic.DetailView):
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
             'past_races': self.past_races(),
+            'meta_image': self.request.build_absolute_uri(self.object.image.url) if self.object.image else None,
         }
 
     def current_races(self):

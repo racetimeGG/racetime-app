@@ -31,6 +31,9 @@ var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=ra
         <meta name="description" content="This race was cancelled.">
         <meta property="og:description" content="This race was cancelled.">
     {% endif %}
+    {% if meta_image %}
+        <meta property="og:image" content="{{ meta_image }}">
+    {% endif %}
 {% endblock %}
 
 {% block nocurrentrace %}{% endblock nocurrentrace %}

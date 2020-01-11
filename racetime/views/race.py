@@ -28,6 +28,7 @@ class Race(UserMixin, generic.DetailView):
 			'can_moderate': race.category.can_moderate(self.user),
             'can_monitor': race.can_monitor(self.user),
             'invite_form': self.get_invite_form(),
+            'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
         }
 
     def get_queryset(self):
