@@ -183,6 +183,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             'name': self.name,
             'discriminator': self.discriminator if self.use_discriminator else None,
             'flair': self.flair(category=category, race=race),
+            'twitch_name': self.twitch_name,
+            'twitch_channel': self.twitch_channel,
         }
 
     def flair(self, category=None, race=None):

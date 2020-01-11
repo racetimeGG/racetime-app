@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.db.transaction import atomic
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views import generic
 
 from .base import UserMixin
@@ -35,6 +36,17 @@ class Category(UserMixin, generic.DetailView):
         return self.object.race_set.filter(state__in=[
             models.RaceStates.finished,
         ]).all()[:100]
+
+
+class CategoryData(Category):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        resp = HttpResponse(
+            content=self.object.json_data,
+            content_type='application/json',
+        )
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
 
 
 class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):

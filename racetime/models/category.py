@@ -1,10 +1,15 @@
+import json
 from functools import partial
 
-from django.db import models, IntegrityError
+from django.conf import settings
+from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import models
 from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils import timezone
 
+from .choices import RaceStates
 from ..utils import SafeException, generate_race_slug
 
 
@@ -79,6 +84,18 @@ class Category(models.Model):
     )
 
     @property
+    def json_data(self):
+        """
+        Return current race data as a JSON string.
+        """
+        return self.dump_json_data()
+        return cache.get_or_set(
+            str(self) + '/data',
+            self.dump_json_data,
+            settings.RT_CACHE_TIMEOUT,
+        )
+
+    @property
     def moderator_list(self):
         """
         Return a comma-separated string listing all moderators.
@@ -89,7 +106,9 @@ class Category(models.Model):
         return {
             'name': self.name,
             'short_name': self.short_name,
+            'slug': self.slug,
             'url': self.get_absolute_url(),
+            'data_url': self.get_data_url(),
         }
 
     def can_edit(self, user):
@@ -108,8 +127,49 @@ class Category(models.Model):
     def can_start_race(self, user):
         return self.active and user.is_active and not user.is_banned_from_category(self)
 
+    def dump_json_data(self):
+        value = json.dumps({
+            **self.api_dict_summary(),
+            'image': self.image.url if self.image else None,
+            'info': self.info,
+            'streaming_required': self.streaming_required,
+            'owner': self.owner.api_dict_summary(category=self),
+            'moderators': [user.api_dict_summary(category=self) for user in self.moderators.all()],
+            'current_races': [
+                {
+                    'name': str(race),
+                    'status': {
+                        'value': race.state_info.value,
+                        'verbose_value': race.state_info.verbose_value,
+                        'help_text': race.state_info.help_text,
+                    },
+                    'url': race.get_absolute_url(),
+                    'data_url': race.get_data_url(),
+                    'goal': {
+                        'name': race.goal_str,
+                        'custom': not race.goal,
+                    },
+                    'entrants_count': race.entrants_count,
+                    'entrants_count_inactive': race.entrants_count_inactive,
+                    'opened_at': race.opened_at,
+                    'started_at': race.started_at,
+                    'time_limit': race.time_limit,
+                }
+                for race in self.race_set.exclude(state__in=[
+                    RaceStates.finished,
+                    RaceStates.cancelled,
+                ]).all()
+            ],
+        }, cls=DjangoJSONEncoder)
+
+        cache.set(str(self) + '/data', value, None)
+        return value
+
     def get_absolute_url(self):
         return reverse('category', args=(self.slug,))
+
+    def get_data_url(self):
+        return reverse('category_data', args=(self.slug,))
 
     def generate_race_slug(self):
         """

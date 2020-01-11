@@ -26,7 +26,7 @@ def set_discriminator(sender, instance, **kwargs):
 
 
 @receiver(signals.post_save)
-def invalidate_race_caches(sender, instance, **kwargs):
+def invalidate_caches(sender, instance, **kwargs):
     if sender == models.Category:
         races = instance.race_set.all()
     elif sender == models.Entrant:
@@ -41,4 +41,5 @@ def invalidate_race_caches(sender, instance, **kwargs):
     cache.delete_many(
         [str(race) + '/data' for race in races]
         + [str(race) + '/renders' for race in races]
+        + [str(category) + '/data' for category in set(race.category for race in races)]
     )

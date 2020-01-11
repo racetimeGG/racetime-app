@@ -206,7 +206,7 @@ def get_hashids(cls):
     """
     Return a Hashids object for generating hashids scoped to the given class.
     """
-    return Hashids(salt=str(cls) + settings.SECRET_KEY, min_length=32)
+    return Hashids(salt=str(cls) + settings.SECRET_KEY, min_length=16)
 
 
 def notice_exception(exception):

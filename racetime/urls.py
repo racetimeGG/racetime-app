@@ -17,6 +17,7 @@ urlpatterns = [
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
 
     path('<str:category>', views.Category.as_view(), name='category'),
+    path('<str:category>/data', views.CategoryData.as_view(), name='category_data'),
     path('<str:category>/startrace', views.CreateRace.as_view(), name='create_race'),
     path('<str:category>/edit', views.EditCategory.as_view(), name='edit_category'),
 

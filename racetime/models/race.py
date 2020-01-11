@@ -347,6 +347,7 @@ class Race(models.Model):
                 'help_text': self.state_info.help_text,
             },
             'url': self.get_absolute_url(),
+            'data_url': self.get_data_url(),
             'category': self.category.api_dict_summary(),
             'goal': {
                 'name': self.goal_str,
@@ -357,7 +358,7 @@ class Race(models.Model):
             'entrants_count_inactive': self.entrants_count_inactive,
             'entrants': [
                 {
-                    'name': entrant.user.api_dict_summary(race=self),
+                    'user': entrant.user.api_dict_summary(race=self),
                     'status': {
                         'value': entrant.summary[0],
                         'verbose_value': entrant.summary[1],
@@ -367,6 +368,8 @@ class Race(models.Model):
                     'place': entrant.place,
                     'place_ordinal': ordinal(entrant.place) if entrant.place else None,
                     'comment': entrant.comment,
+                    'stream_live': entrant.stream_live,
+                    'stream_override': entrant.stream_override,
                 }
                 for entrant in self.ordered_entrants
             ],
@@ -378,6 +381,8 @@ class Race(models.Model):
             'opened_by': self.opened_by.api_dict_summary(race=self),
             'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
             'recordable': self.recordable,
+            'recorded': self.recorded,
+            'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
             'allow_comments': self.allow_comments,
             'allow_midrace_chat': self.allow_midrace_chat,
         }, cls=DjangoJSONEncoder)
@@ -666,6 +671,9 @@ class Race(models.Model):
 
     def get_absolute_url(self):
         return reverse('race', args=(self.category.slug, self.slug))
+
+    def get_data_url(self):
+        return reverse('race_data', args=(self.category.slug, self.slug))
 
     def __str__(self):
         return self.category.slug + '/' + self.slug

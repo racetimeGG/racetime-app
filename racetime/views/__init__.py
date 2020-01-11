@@ -6,7 +6,7 @@ from .auth import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
-from .category import Category, RequestCategory, EditCategory
+from .category import Category, CategoryData, RequestCategory, EditCategory
 from .home import Home
 from .race import (
     Race,
