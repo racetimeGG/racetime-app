@@ -41,5 +41,5 @@ def invalidate_caches(sender, instance, **kwargs):
     cache.delete_many(
         [str(race) + '/data' for race in races]
         + [str(race) + '/renders' for race in races]
-        + [str(category) + '/data' for category in set(race.category for race in races)]
+        + [category.slug + '/data' for category in set(race.category for race in races)]
     )

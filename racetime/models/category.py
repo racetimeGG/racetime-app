@@ -88,9 +88,8 @@ class Category(models.Model):
         """
         Return current race data as a JSON string.
         """
-        return self.dump_json_data()
         return cache.get_or_set(
-            str(self) + '/data',
+            self.slug + '/data',
             self.dump_json_data,
             settings.RT_CACHE_TIMEOUT,
         )
