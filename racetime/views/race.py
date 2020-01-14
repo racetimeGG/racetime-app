@@ -145,7 +145,7 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
     def form_valid(self, form):
         category = self.get_category()
 
-        if not self.user.is_staff and self.user.opened_races.filter(
+        if not self.user.is_staff and self.user.opened_races.exclude(
             state__in=[
                 models.RaceStates.finished.value,
                 models.RaceStates.cancelled.value,
