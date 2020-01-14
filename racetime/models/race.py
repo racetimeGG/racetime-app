@@ -568,7 +568,8 @@ class Race(models.Model):
         """
         if self.is_done:
             raise SafeException(
-                'Cannot cancel a race that is in %(state)s state.' % self.state
+                'Cannot cancel a race that is in %(state)s state.'
+                % {'state': self.state}
             )
 
         self.state = RaceStates.cancelled.value
