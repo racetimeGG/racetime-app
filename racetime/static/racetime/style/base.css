@@ -592,14 +592,14 @@ header > .current-race > a > .timer {
 .race-monitor > ul > .invite > form button {
     margin-left: 5px;
 }
-.race-monitor > ul > .dangerous .btn {
+.dangerous .btn {
     border-color: #f08080;
 }
-.race-monitor > ul > .dangerous .btn:hover {
+.dangerous .btn:hover {
     color: #f08080;
 }
-.race-monitor > ul > .dangerous .btn:disabled,
-.race-monitor > ul > .dangerous .btn:disabled:hover {
+.dangerous .btn:disabled,
+.dangerous .btn:disabled:hover {
     border-color: #666;
     color: #666;
 }

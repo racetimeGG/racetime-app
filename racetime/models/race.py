@@ -448,33 +448,33 @@ class Race(models.Model):
         entrant = self.in_race(user)
         if entrant:
             if entrant.state == EntrantStates.requested.value:
-                actions.append(('cancel_invite', 'Withdraw join request'))
+                actions.append(('cancel_invite', 'Withdraw join request', ''))
             elif entrant.state == EntrantStates.invited.value:
-                actions.append(('accept_invite', 'Accept invite'))
-                actions.append(('decline_invite', 'Decline invite'))
+                actions.append(('accept_invite', 'Accept invite', ''))
+                actions.append(('decline_invite', 'Decline invite', ''))
             elif entrant.state == EntrantStates.joined.value:
                 if self.is_preparing:
                     if not entrant.ready:
                         if not self.streaming_required or entrant.stream_live or entrant.stream_override:
-                            actions.append(('ready', 'Ready'))
+                            actions.append(('ready', 'Ready', ''))
                         else:
-                            actions.append(('not_live', 'Not live'))
+                            actions.append(('not_live', 'Not live', ''))
                     else:
-                        actions.append(('unready', 'Not ready'))
-                    actions.append(('leave', 'Quit'))
+                        actions.append(('unready', 'Not ready', ''))
+                    actions.append(('leave', 'Quit', ''))
                 if entrant.can_add_comment:
-                    actions.append(('add_comment', 'Add comment'))
+                    actions.append(('add_comment', 'Add comment', ''))
                 if self.is_in_progress:
                     if not entrant.dq and not entrant.dnf:
-                        actions.append(('done', 'Done') if not entrant.finish_time else ('undone', 'Undo finish'))
+                        actions.append(('done', 'Done', '') if not entrant.finish_time else ('undone', 'Undo finish', 'dangerous'))
                     if not entrant.dq and not entrant.finish_time:
-                        actions.append(('forfeit', 'Forfeit') if not entrant.dnf else ('unforfeit', 'Undo forfeit'))
+                        actions.append(('forfeit', 'Forfeit', 'dangerous') if not entrant.dnf else ('unforfeit', 'Undo forfeit', ''))
         else:
             if self.can_join(user):
                 if self.state == RaceStates.open.value:
-                    actions.append(('join', 'Join'))
+                    actions.append(('join', 'Join', ''))
                 elif self.state == RaceStates.invitational.value:
-                    actions.append(('join', 'Join') if self.can_monitor(user) else ('request_invite', 'Request to join'))
+                    actions.append(('join', 'Join', '') if self.can_monitor(user) else ('request_invite', 'Request to join', ''))
         return actions
 
     def can_join(self, user):
