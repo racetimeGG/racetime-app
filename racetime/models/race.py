@@ -891,7 +891,7 @@ class Entrant(models.Model):
             )) + 1
             self.save()
             self.race.add_message(
-                '%(user)s has finished in %(place)s place with a time of %(time)s!'
+                '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
                 % {'user': self.user, 'place': ordinal(self.place), 'time': self.finish_time_str}
             )
             self.race.finish_if_none_remaining()
@@ -926,7 +926,7 @@ class Entrant(models.Model):
             self.dnf = True
             self.save()
             self.race.add_message(
-                '%(user)s has forfeited from the race.'
+                '%(user)s has ##bad##forfeited## from the race.'
                 % {'user': self.user}
             )
             self.race.finish_if_none_remaining()
