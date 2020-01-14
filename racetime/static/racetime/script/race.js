@@ -86,6 +86,7 @@ $(function() {
             $.get(raceChatLink, {since: lastEnd}, function(data) {
                 var $messages = $('.race-chat .messages');
                 var updateRace = false;
+                var doScroll = false;
                 data.messages.forEach(function(message) {
                     if (messageIDs.indexOf(message.id) !== -1) {
                         return true;
@@ -102,6 +103,7 @@ $(function() {
                             );
                             $li.find('.message').text(message.message);
                             $messages.append($li);
+                            doScroll = true;
                         }
                         updateRace = true;
                     }
@@ -116,10 +118,11 @@ $(function() {
                         $li.find('.user').text(message.user.full_name);
                         $li.find('.message').text(message.message);
                         $messages.append($li);
+                        doScroll = true;
                     }
                     messageIDs.push(message.id);
                 });
-                if (data.messages) {
+                if (doScroll) {
                     $messages[0].scrollTop = $messages[0].scrollHeight
                 }
                 if (updateRace) {
