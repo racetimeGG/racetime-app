@@ -115,7 +115,7 @@ $(function() {
                             '<span class="message"></span>' +
                             '</li>'
                         );
-                        $li.find('.user').text(message.user.full_name);
+                        $li.find('.user').text(message.user.name);
                         $li.find('.message').text(message.message);
                         $messages.append($li);
                         doScroll = true;
