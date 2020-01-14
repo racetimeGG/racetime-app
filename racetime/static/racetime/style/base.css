@@ -272,7 +272,7 @@ header > .current-race > a > .timer {
     margin-right: 0;
 }
 .container > .content > aside {
-    flex: 0 0 300px;
+    flex: 0 0 320px;
 }
 
 .container > .content > aside:empty {
