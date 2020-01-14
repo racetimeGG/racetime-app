@@ -58,6 +58,19 @@ $(function() {
         });
     };
 
+    var lastChatTick = null;
+    var chatDisconnected = false;
+    var chatTickRate = 1000;
+    var lastRaceTick = null;
+
+    setInterval(function() {
+        // Warn the user if chat isn't updating
+        if (!chatDisconnected && new Date() - lastChatTick > chatTickRate * 3) {
+            chatDisconnected = true;
+            $('.race-chat').addClass('disconnected');
+        }
+    }, 1000);
+
     var raceTick = function() {
         $.get(raceRendersLink, function(data, status, xhr) {
             var latency = 0;
@@ -73,6 +86,7 @@ $(function() {
                     window.localiseDates.call($segment[0]);
                     $segment.find('.race-action-form').each(ajaxifyActionForm)
                 }
+                lastRaceTick = new Date();
             });
         });
     };
@@ -84,52 +98,68 @@ $(function() {
             clearTimeout(chatTickTimeout);
         }
         chatTickTimeout = setTimeout(function() {
-            $.get(raceChatLink, {since: lastEnd}, function(data) {
-                var $messages = $('.race-chat .messages');
-                var updateRace = false;
-                var doScroll = false;
-                data.messages.forEach(function(message) {
-                    if (messageIDs.indexOf(message.id) !== -1) {
-                        return true;
-                    }
-                    var date = new Date(message.posted_at);
-                    var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
-                    if (message.is_system) {
-                        if (message.message !== '.reload') {
+            $.get({
+                url: raceChatLink,
+                data: {since: lastEnd},
+                success: function(data) {
+                    if (!data) return;
+                    var $messages = $('.race-chat .messages');
+                    var updateRace = false;
+                    var doScroll = false;
+                    data.messages.forEach(function(message) {
+                        if (messageIDs.indexOf(message.id) !== -1) {
+                            return true;
+                        }
+                        var date = new Date(message.posted_at);
+                        var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
+                        if (message.is_system) {
+                            if (message.message !== '.reload') {
+                                var $li = $(
+                                    '<li class="system ' + (message.highlight ? 'highlight' : '') + '">' +
+                                    '<span class="timestamp">' + timestamp + '</span>' +
+                                    '<span class="message"></span>' +
+                                    '</li>'
+                                );
+                                var $message = $li.find('.message');
+                                $message.text(message.message);
+                                $message.html($message.html().replace(/##(\w+?)##(.+?)##/g, function(matches, $1, $2) {
+                                    return '<span class="' + $1 + '">' + $2 + '</span>';
+                                }));
+                                $messages.append($li);
+                                doScroll = true;
+                            }
+                            updateRace = true;
+                        }
+                        else {
                             var $li = $(
-                                '<li class="system ' + (message.highlight ? 'highlight' : '') + '">' +
+                                '<li class="' + (message.highlight ? 'highlight' : '') + '">' +
                                 '<span class="timestamp">' + timestamp + '</span>' +
+                                '<span class="user"></span>' +
                                 '<span class="message"></span>' +
                                 '</li>'
                             );
+                            $li.find('.user').text(message.user.name);
                             $li.find('.message').text(message.message);
                             $messages.append($li);
                             doScroll = true;
                         }
-                        updateRace = true;
+                        messageIDs.push(message.id);
+                    });
+                    chatDisconnected = false;
+                    $('.race-chat').removeClass('disconnected');
+                    chatTickRate = data.tick_rate;
+                    lastChatTick = new Date();
+                    if (doScroll) {
+                        $messages[0].scrollTop = $messages[0].scrollHeight
                     }
-                    else {
-                        var $li = $(
-                            '<li class="' + (message.highlight ? 'highlight' : '') + '">' +
-                            '<span class="timestamp">' + timestamp + '</span>' +
-                            '<span class="user"></span>' +
-                            '<span class="message"></span>' +
-                            '</li>'
-                        );
-                        $li.find('.user').text(message.user.name);
-                        $li.find('.message').text(message.message);
-                        $messages.append($li);
-                        doScroll = true;
+                    if (updateRace) {
+                        raceTick();
                     }
-                    messageIDs.push(message.id);
-                });
-                if (doScroll) {
-                    $messages[0].scrollTop = $messages[0].scrollHeight
+                    chatTick(data.end, data.tick_rate);
+                },
+                error: function() {
+                    chatTick(null, 1000);
                 }
-                if (updateRace) {
-                    raceTick();
-                }
-                chatTick(data.end, data.tick_rate);
             });
         }, timeout || 4);
     };
@@ -155,7 +185,6 @@ $(function() {
         }
     });
     $(document).on('change input keyup', '.race-chat form textarea', function() {
-        console.log($(this)[0].scrollHeight - 10);
         $(this).height($(this)[0].scrollHeight - 10);
     });
 

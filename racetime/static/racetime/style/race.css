@@ -89,6 +89,20 @@ main {
     font-size: 13px;
 }
 
+.race-chat > .disconnected {
+    background-color: #8c3030;
+    border-radius: 10px;
+    display: none;
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 5px;
+    text-align: center;
+}
+
+.race-chat.disconnected > .disconnected {
+    display: block;
+}
+
 .race-chat > .messages {
     flex: 1 1 0;
     overflow-y: auto;
@@ -120,6 +134,12 @@ main {
     content: ':';
 }
 .race-chat > .messages > li > .message {}
+.race-chat > .messages > li > .message .good {
+    color: #a0e9a0;
+}
+.race-chat > .messages > li > .message .bad {
+    color: #f08080;
+}
 
 .race-chat > form {
     display: flex;

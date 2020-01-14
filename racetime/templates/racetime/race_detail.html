@@ -71,6 +71,9 @@ var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=ra
         {% include 'racetime/race/status.html' with race=race %}
     </div>
     <div class="race-chat">
+        <div class="disconnected">
+            Unable to connect, try reloading the page.
+        </div>
         <ol class="messages"></ol>
         {% if user.is_active %}
         <form action="{% url 'message' category=race.category.slug race=race.slug %}" method="post">
