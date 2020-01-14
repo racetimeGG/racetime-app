@@ -76,6 +76,9 @@
         <ol>
             {% for race in past_races %}
                 <li>
+                    <time class="datetime" datetime="{{ race.started_at.isoformat }}">
+                        {{ race.opened_at }}
+                    </time>
                     {% include 'racetime/pops/race_row.html' with race=race %}
                 </li>
             {% empty %}

@@ -408,7 +408,7 @@ header > .current-race > a > .timer {
     flex-wrap: wrap;
 }
 .category-races > ol > li {
-    flex: 0 1 50%;
+    flex: 0 1 100%;
 }
 .start-new, .edit-category {
     float: right;
@@ -420,6 +420,11 @@ header > .current-race > a > .timer {
     margin-right: 10px;
 }
 
+.race-list > ol > li > time {
+    color: #7a777a;
+    font-size: 13px;
+    margin: 5px 10px 0;
+}
 .race-list > ol > li > a {
     border: 5px solid rgba(0,0,0,0.2);
     border-radius: 10px;
@@ -430,6 +435,9 @@ header > .current-race > a > .timer {
     height: 50px;
     margin: 5px;
     padding: 5px;
+}
+.race-list > ol > li > time + a {
+    margin-top: 0;
 }
 
 .race-list > ol > li > a > .goal,
