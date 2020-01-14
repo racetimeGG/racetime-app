@@ -239,7 +239,8 @@ class RaceCreationForm(RaceForm):
         required=False,
         help_text=(
             'Only allow invited users to join this race. Anyone may request '
-            'to join, but only race monitors can accept or decline.'
+            'to join, but only race monitors (including you) can accept or '
+            'decline. This setting cannot be changed after the room opens.'
         ),
     )
 

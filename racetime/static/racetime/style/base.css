@@ -145,6 +145,9 @@ a:visited {
     color: #7a777a;
     font-size: 13px;
 }
+.help strong {
+    color: #ddd8dd;
+}
 
 h2 + .help,
 h3 + .help {
