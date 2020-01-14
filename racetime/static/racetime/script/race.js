@@ -141,7 +141,7 @@ $(function() {
         error: onError,
         success: function() {
             chatTick();
-            $('.race-chat form textarea').val('').height(20);
+            $('.race-chat form textarea').val('').height(18);
         }
     });
 
@@ -154,6 +154,7 @@ $(function() {
         }
     });
     $(document).on('change input keyup', '.race-chat form textarea', function() {
+        console.log($(this)[0].scrollHeight - 10);
         $(this).height($(this)[0].scrollHeight - 10);
     });
 

@@ -86,7 +86,7 @@ main {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .race-chat > .messages {
@@ -113,6 +113,7 @@ main {
     margin-right: 4px;
 }
 .race-chat > .messages > li > .user {
+    color: #b9b4b9;
     margin-right: 4px;
 }
 .race-chat > .messages > li > .user::after {
@@ -128,15 +129,15 @@ main {
     margin-right: 5px;
 }
 .race-chat > form > button {
-    font-size: 14px;
+    font-size: 13px;
 }
 .race-chat > form label {
     display: none;
 }
 .race-chat > form textarea {
     caret-color: #1da674;
-    font-size: 14px;
-    height: 20px;
+    font-size: 13px;
+    height: 18px;
     min-height: 0;
     overflow: hidden;
     resize: none;
