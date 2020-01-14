@@ -59,6 +59,7 @@ __all__ = [
     'PasswordResetCompleteView',
     # category
     'Category',
+    'CategoryData',
     'EditCategory',
     'RequestCategory',
     # home
