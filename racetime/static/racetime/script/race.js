@@ -139,7 +139,11 @@ $(function() {
                                 '</li>'
                             );
                             $li.find('.user').text(message.user.name);
-                            $li.find('.message').text(message.message);
+                            var $message = $li.find('.message');
+                            $message.text(message.message);
+                            $message.html($message.html().replace(/(https?:\/\/[^\s]+)/g, function(matches, $1) {
+                                return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
+                            }));
                             $messages.append($li);
                             doScroll = true;
                         }
