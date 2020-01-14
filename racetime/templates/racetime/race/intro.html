@@ -25,4 +25,29 @@
             No-one
         {% endfor %}
     </dd>
+    {% if race.is_done %}
+        {% if race.started_at %}
+            <dt>Started at</dt>
+            <dd>
+                <time class="datetime" datetime="{{ race.started_at.isoformat }}">
+                    {{ race.started_at }}
+                </time>
+            </dd>
+            {% if race.ended_at %}
+            <dt>Ended at</dt>
+            <dd>
+                <time class="datetime" datetime="{{ race.ended_at.isoformat }}">
+                    {{ race.ended_at }}
+                </time>
+            </dd>
+            {% endif %}
+        {% else %}
+            <dt>Opened at</dt>
+            <dd>
+                <time class="datetime" datetime="{{ race.opened_at.isoformat }}">
+                    {{ race.opened_at }}
+                </time>
+            </dd>
+        {% endif %}
+    {% endif %}
 </dl>

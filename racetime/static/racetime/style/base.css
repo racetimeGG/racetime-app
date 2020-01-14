@@ -631,7 +631,8 @@ header > .current-race > a > .timer {
 }
 
 .race-meta {
-
+    padding-bottom: 10px;
+    white-space: nowrap;
 }
 dt {
     color: #7a777a;

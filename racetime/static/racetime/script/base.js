@@ -31,4 +31,31 @@ $(function() {
     };
 
     autotick();
+
+    window.localiseDates = function() {
+        $(this).find('time.datetime').each(function () {
+            var date = new Date($(this).attr('datetime'));
+            if ($(this).data('latency')) {
+                date = new Date(date.getTime() + $(this).data('latency'));
+            }
+            $(this).html(date.toLocaleString());
+            console.log(this);
+            console.log(date.toLocaleString());
+        });
+        $(this).find('time.onlydate').each(function () {
+            var date = new Date($(this).attr('datetime'));
+            if ($(this).data('latency')) {
+                date = new Date(date.getTime() + $(this).data('latency'));
+            }
+            $(this).html(date.toLocaleDateString());
+        });
+        $(this).find('time.onlytime').each(function () {
+            var date = new Date($(this).attr('datetime'));
+            if ($(this).data('latency')) {
+                date = new Date(date.getTime() + $(this).data('latency'));
+            }
+            $(this).html(date.toLocaleTimeString());
+        });
+    };
+    window.localiseDates.call(document.body);
 });

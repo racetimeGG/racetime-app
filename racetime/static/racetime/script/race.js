@@ -36,24 +36,6 @@ $(function() {
         $messages[0].scrollTop = $messages[0].scrollHeight
     };
 
-    var raceTick = function() {
-        $.get(raceRendersLink, function(data, status, xhr) {
-            var latency = 0;
-            if (xhr.getResponseHeader('X-Date-Exact')) {
-                latency = new Date(xhr.getResponseHeader('X-Date-Exact')) - new Date();
-            }
-            requestAnimationFrame(function() {
-                for (var segment in data) {
-                    if (!data.hasOwnProperty(segment)) continue;
-                    var $segment = $('.race-' + segment);
-                    $segment.html(data[segment]);
-                    $segment.find('time').data('latency', latency);
-                    $segment.find('.race-action-form').each(ajaxifyActionForm)
-                }
-            });
-        });
-    };
-
     var ajaxifyActionForm = function() {
         $(this).ajaxForm({
             clearForm: true,
@@ -73,6 +55,25 @@ $(function() {
             success: function() {
                 chatTick();
             }
+        });
+    };
+
+    var raceTick = function() {
+        $.get(raceRendersLink, function(data, status, xhr) {
+            var latency = 0;
+            if (xhr.getResponseHeader('X-Date-Exact')) {
+                latency = new Date(xhr.getResponseHeader('X-Date-Exact')) - new Date();
+            }
+            requestAnimationFrame(function() {
+                for (var segment in data) {
+                    if (!data.hasOwnProperty(segment)) continue;
+                    var $segment = $('.race-' + segment);
+                    $segment.html(data[segment]);
+                    $segment.find('time').data('latency', latency);
+                    window.localiseDates.call($segment[0]);
+                    $segment.find('.race-action-form').each(ajaxifyActionForm)
+                }
+            });
         });
     };
 
