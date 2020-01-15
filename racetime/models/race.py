@@ -87,7 +87,7 @@ class Race(models.Model):
         null=True,
     )
     start_delay = models.DurationField(
-        default=timedelta(seconds=10),
+        default=timedelta(seconds=15),
         validators=[
             MinValueValidator(timedelta(seconds=10)),
             MaxValueValidator(timedelta(seconds=60)),
