@@ -3,18 +3,38 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'racetime/style/race.css' %}">
+<style>
+.container {
+    padding: 0;
+}
+.container > .content {
+    padding: 0;
+}
+.container > .content > main {
+    border: none;
+    margin: 0;
+    padding-top: 5px;
+}
+.breadcrumbs {
+    margin-bottom: 5px;
+}
+</style>
 {% endblock %}
 
 {% block js %}
 <script>
 var raceChatLink = '{% url 'race_chat' category=race.category.slug race=race.slug %}';
 var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=race.slug %}';
+
+$(function() {
+    $('.race-chat textarea').focus();
+});
 </script>
 <script src="{% static 'racetime/script/race.js' %}"></script>
 {% endblock %}
 
 {% block title %}
-    Race room ({{ race.slug }}) | {{ race.category.name }} |
+    {{ race.slug }}
 {% endblock %}
 {% block meta %}
     <meta property="og:title" content="{{ race.category.name }} ~ {{ race.goal_str }} ({{ race.state_info.verbose_value }})">
@@ -37,19 +57,13 @@ var raceRendersLink = '{% url 'race_renders' category=race.category.slug race=ra
 {% endblock %}
 
 {% block nocurrentrace %}{% endblock nocurrentrace %}
+{% block header %}{% endblock header %}
+{% block footer %}{% endblock footer %}
 
 {% block main %}
-    <div class="race-intro">
-        {% include 'racetime/race/intro.html' with race=race %}
-    </div>
-    <div class="race-entrants">
-        {% include 'racetime/race/entrants.html' with race=race can_moderate=can_moderate can_monitor=can_monitor %}
-    </div>
-    <div class="race-monitor">{% if can_monitor %}
-        {% include 'racetime/race/monitor.html' with race=race can_moderate=can_moderate invite_form=invite_form %}
-    {% endif %}</div>
-{% endblock %}
-
-{% block aside %}
-    {% include 'racetime/race/aside.html' with popout=True %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ race.category.get_absolute_url }}" target="_blank">{{ race.category.slug }}</a></li>
+        <li><a href="{{ race.get_absolute_url }}" target="_blank">{{ race.slug }}</a></li>
+    </ol>
+    {% include 'racetime/race/aside.html' %}
 {% endblock %}

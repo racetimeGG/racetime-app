@@ -42,6 +42,10 @@ class Race(UserMixin, generic.DetailView):
         return queryset
 
 
+class RaceMini(Race):
+    template_name_suffix = '_mini'
+
+
 class RaceData(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

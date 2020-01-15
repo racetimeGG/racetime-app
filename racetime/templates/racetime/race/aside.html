@@ -1,0 +1,37 @@
+{% if race.streaming_required and user.is_authenticated and not user.twitch_channel %}
+    <div class="streaming-required">
+        <p>
+            Streaming is required to join this race. Visit account settings
+            to link up your Twitch.tv account.
+        </p>
+        <a class="btn" href="{% url 'edit_account' %}" target="_blank">
+            Account settings
+        </a>
+    </div>
+{% endif %}
+<div class="race-actions">{% if available_actions %}
+    {% include 'racetime/race/actions.html' with race=race available_actions=available_actions %}
+{% elif race.is_pending %}
+    {% include 'racetime/race/actions_pending.html' %}
+{% endif %}</div>
+<div class="race-status">
+    {% include 'racetime/race/status.html' with race=race %}
+</div>
+<div class="race-chat">
+    <div class="disconnected">
+        Unable to connect, try reloading the page.
+    </div>
+    <ol class="messages"></ol>
+    {% if user.is_active %}
+    <form action="{% url 'message' category=race.category.slug race=race.slug %}" method="post">
+        {% csrf_token %}
+        <ul>{{ chat_form.as_ul }}</ul>
+        <button type="submit" class="btn">Chat</button>
+        {% if popout %}
+        <a href="{% url 'race_mini' category=race.category.slug race=race.slug %}" class="btn popout" title="Show this panel in a separate window" onclick="open(this.href, '{{ race.slug }}', 'width=340,height=720'); return false">
+            <i class="fa fa-window-restore"></i>
+        </a>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>

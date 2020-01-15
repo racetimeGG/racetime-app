@@ -166,3 +166,8 @@ main {
 .race-chat > form textarea:invalid {
     box-shadow: none;
 }
+.race-chat > form > .popout {
+    align-items: center;
+    display: flex;
+    margin-left: 5px;
+}

@@ -10,6 +10,7 @@ from .category import Category, CategoryData, RequestCategory, EditCategory
 from .home import Home
 from .race import (
     Race,
+    RaceMini,
     RaceData,
     RaceRenders,
     RaceChat,
@@ -70,6 +71,7 @@ __all__ = [
     'Race',
     'RaceChat',
     'RaceData',
+    'RaceMini',
     'RaceRenders',
     # race_actions
     'Message',
