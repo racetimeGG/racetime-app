@@ -86,6 +86,10 @@ $(function() {
                     window.localiseDates.call($segment[0]);
                     $segment.find('.race-action-form').each(ajaxifyActionForm)
                 }
+                // This is kind of a fudge but replacing urlize is awful.
+                $('.race-info .info a').each(function() {
+                    $(this).attr('target', '_blank');
+                });
                 lastRaceTick = new Date();
             });
         });
