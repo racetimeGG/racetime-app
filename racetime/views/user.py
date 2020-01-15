@@ -42,9 +42,9 @@ class CreateAccount(generic.CreateView):
             'home_url': self.request.build_absolute_uri(reverse('home')),
         }
         send_mail(
-            subject=render_to_string('racetime/user/create_account_subject.txt', context, self.request),
-            message=render_to_string('racetime/user/create_account_email.txt', context, self.request),
-            html_message=render_to_string('racetime/user/create_account_email.html', context, self.request),
+            subject=render_to_string('racetime/email/create_account_subject.txt', context, self.request),
+            message=render_to_string('racetime/email/create_account_email.txt', context, self.request),
+            html_message=render_to_string('racetime/email/create_account_email.html', context, self.request),
             from_email=settings.EMAIL_FROM,
             recipient_list=[user.email],
         )

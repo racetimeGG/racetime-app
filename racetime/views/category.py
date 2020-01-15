@@ -1,8 +1,11 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.core.mail import send_mail
 from django.db import models as db_models
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
@@ -96,6 +99,19 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
             'accepted, it will appear on the site within 24-48 hours. You '
             'will be able to edit the category further once it is live.'
         )
+
+        context = {'object': self.object}
+        for user in models.User.objects.filter(
+            active=True,
+            is_superuser=True,
+        ):
+            send_mail(
+                subject=render_to_string('racetime/email/category_request_subject.txt', context, self.request),
+                message=render_to_string('racetime/email/category_request_email.txt', context, self.request),
+                from_email=settings.EMAIL_FROM,
+                recipient_list=[user.email],
+            )
+
         return HttpResponseRedirect(reverse('home'))
 
 
