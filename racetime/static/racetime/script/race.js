@@ -105,7 +105,7 @@ $(function() {
             $.get({
                 url: raceChatLink,
                 data: {
-                    since: $('.race-chat .messages').children('li').last().data('messageID')
+                    since: messageIDs[messageIDs.length - 1]
                 },
                 success: function(data) {
                     if (!data) return;
@@ -144,7 +144,6 @@ $(function() {
                                 '<span class="message"></span>' +
                                 '</li>'
                             );
-                            $li.data('messageID', message.id);
                             $li.find('.user').text(message.user.name);
                             var $message = $li.find('.message');
                             $message.text(message.message);
