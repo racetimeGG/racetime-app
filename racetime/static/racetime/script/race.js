@@ -97,14 +97,16 @@ $(function() {
 
     var chatTickTimeout = null;
     var messageIDs = [];
-    var chatTick = function(lastID, timeout) {
+    var chatTick = function(timeout) {
         if (chatTickTimeout) {
             clearTimeout(chatTickTimeout);
         }
         chatTickTimeout = setTimeout(function() {
             $.get({
                 url: raceChatLink,
-                data: {since: lastID},
+                data: {
+                    since: $('.race-chat .messages').children('li').last().data('messageID')
+                },
                 success: function(data) {
                     if (!data) return;
                     var $messages = $('.race-chat .messages');
@@ -142,6 +144,7 @@ $(function() {
                                 '<span class="message"></span>' +
                                 '</li>'
                             );
+                            $li.data('messageID', message.id);
                             $li.find('.user').text(message.user.name);
                             var $message = $li.find('.message');
                             $message.text(message.message);
@@ -152,7 +155,6 @@ $(function() {
                             doScroll = true;
                         }
                         messageIDs.push(message.id);
-                        lastID = message.id;
                     });
                     chatDisconnected = false;
                     $('.race-chat').removeClass('disconnected');
@@ -164,7 +166,7 @@ $(function() {
                     if (updateRace) {
                         raceTick();
                     }
-                    chatTick(lastID, data.tick_rate);
+                    chatTick(data.tick_rate);
                 },
                 error: function() {
                     chatTick(null, 1000);
