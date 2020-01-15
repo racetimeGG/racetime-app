@@ -26,7 +26,7 @@ class Race(UserMixin, generic.DetailView):
             **super().get_context_data(**kwargs),
             'chat_form': self.get_chat_form(),
             'available_actions': race.available_actions(self.user),
-			'can_moderate': race.category.can_moderate(self.user),
+            'can_moderate': race.category.can_moderate(self.user),
             'can_monitor': race.can_monitor(self.user),
             'invite_form': self.get_invite_form(),
             'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
