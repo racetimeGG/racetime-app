@@ -22,7 +22,18 @@ class Message(RaceAction, generic.FormView):
             and not self.get_race().can_monitor(self.user)
             and self.get_race().is_in_progress
         ):
-            raise SafeException('You do not have permission to chat during the race.')
+            raise SafeException(
+                'You do not have permission to chat during the race.'
+            )
+        if (
+            not self.get_race().allow_non_entrant_chat
+            and not self.get_race().can_monitor(self.user)
+            and not self.get_race().in_race(self.user)
+            and self.get_race().is_in_progress
+        ):
+            raise SafeException(
+                'You do not have permission to chat during the race.'
+            )
 
         if (
             self.get_race().is_done

@@ -126,6 +126,13 @@ class Race(models.Model):
             'use chat messages).'
         ),
     )
+    allow_non_entrant_chat = models.BooleanField(
+        default=False,
+        help_text=(
+            'Allow users who are not entered in the race to chat while the '
+            'race is in progress (anyone may use chat before and after the race).'
+        ),
+    )
     monitors = models.ManyToManyField(
         'User',
         related_name='+',
