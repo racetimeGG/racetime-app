@@ -192,14 +192,6 @@ class Race(models.Model):
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
 
     @property
-    def json_chat(self):
-        return cache.get_or_set(
-            str(self) + '/chat',
-            self.chat_data,
-            settings.RT_CACHE_TIMEOUT,
-        )
-
-    @property
     def json_data(self):
         """
         Return current race data as a JSON string.
@@ -361,7 +353,7 @@ class Race(models.Model):
                 'highlight': message.highlight,
                 'is_system': message.user.is_system,
             })
-            for message in reversed(messages.all()[:1000])
+            for message in reversed(messages[:100])
         )
 
     def dump_json_data(self):

@@ -72,7 +72,7 @@ class RaceChat(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        messages = self.object.json_chat
+        messages = self.object.chat_data()
 
         since = request.GET.get('since')
         if since:

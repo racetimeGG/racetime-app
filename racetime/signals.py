@@ -43,8 +43,3 @@ def invalidate_caches(sender, instance, **kwargs):
         + [str(race) + '/renders' for race in races]
         + [category.slug + '/data' for category in set(race.category for race in races)]
     )
-
-
-@receiver(signals.post_save, sender=models.Message)
-def invalidate_race_chat(sender, instance, **kwargs):
-    cache.delete(str(instance.race) + '/chat')
