@@ -89,9 +89,16 @@ class RaceChat(Race):
                     'Unable to parse given timestamp in "since" parameter.'
                 )
 
+        try:
+            end = list(messages.keys()).pop()
+        except IndexError:
+            end = since
+
         return JsonResponse({
             'messages': list(messages.values()),
             'tick_rate': self.object.tick_rate,
+            # BC unbreaker
+            'end': end,
         })
 
 
