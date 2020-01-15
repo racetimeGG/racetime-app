@@ -65,7 +65,7 @@ $(function() {
 
     setInterval(function() {
         // Warn the user if chat isn't updating
-        if (!chatDisconnected && new Date() - lastChatTick > chatTickRate * 3) {
+        if (!chatDisconnected && new Date() - lastChatTick > Math.max(1000, chatTickRate) * 3) {
             chatDisconnected = true;
             $('.race-chat').addClass('disconnected');
         }
@@ -93,14 +93,14 @@ $(function() {
 
     var chatTickTimeout = null;
     var messageIDs = [];
-    var chatTick = function(lastEnd, timeout) {
+    var chatTick = function(lastID, timeout) {
         if (chatTickTimeout) {
             clearTimeout(chatTickTimeout);
         }
         chatTickTimeout = setTimeout(function() {
             $.get({
                 url: raceChatLink,
-                data: {since: lastEnd},
+                data: {since: lastID},
                 success: function(data) {
                     if (!data) return;
                     var $messages = $('.race-chat .messages');
@@ -148,6 +148,7 @@ $(function() {
                             doScroll = true;
                         }
                         messageIDs.push(message.id);
+                        lastID = message.id;
                     });
                     chatDisconnected = false;
                     $('.race-chat').removeClass('disconnected');
@@ -159,7 +160,7 @@ $(function() {
                     if (updateRace) {
                         raceTick();
                     }
-                    chatTick(data.end, data.tick_rate);
+                    chatTick(lastID, data.tick_rate);
                 },
                 error: function() {
                     chatTick(null, 1000);

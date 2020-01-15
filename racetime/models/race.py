@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 from datetime import timedelta
 
 from django.apps import apps
@@ -191,6 +192,14 @@ class Race(models.Model):
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
 
     @property
+    def json_chat(self):
+        return cache.get_or_set(
+            str(self) + '/chat',
+            self.chat_data,
+            settings.RT_CACHE_TIMEOUT,
+        )
+
+    @property
     def json_data(self):
         """
         Return current race data as a JSON string.
@@ -297,7 +306,7 @@ class Race(models.Model):
         if self.ended_at and timezone.now() - self.ended_at > timedelta(hours=1):
             return 86400000
         if self.is_pending:
-            return 100
+            return 500
         return 1000
 
     @property
@@ -337,6 +346,23 @@ class Race(models.Model):
 
     def add_silent_reload(self):
         self.add_message('.reload')
+
+    def chat_data(self):
+        messages = self.message_set.filter(deleted=False).order_by('-posted_at')
+        return OrderedDict(
+            (message.hashid, {
+                'id': message.hashid,
+                'user': (
+                    message.user.api_dict_summary(race=self)
+                    if not message.user.is_system else None
+                ),
+                'posted_at': message.posted_at,
+                'message': message.message,
+                'highlight': message.highlight,
+                'is_system': message.user.is_system,
+            })
+            for message in reversed(messages.all()[:1000])
+        )
 
     def dump_json_data(self):
         value = json.dumps({

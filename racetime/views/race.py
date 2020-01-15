@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import dateutil.parser
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
@@ -71,50 +73,24 @@ class RaceChat(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        end = timezone.now()
-        messages = self.object.message_set.filter(
-            posted_at__lte=end,
-        ).order_by('-posted_at')
+        messages = self.object.json_chat
 
         since = request.GET.get('since')
         if since:
             try:
-                start = dateutil.parser.parse(since)
-                messages = messages.filter(
-                    posted_at__gt=start,
+                pos = tuple(messages).index(since)
+                enumerated = enumerate(messages.items())
+                messages = OrderedDict(
+                    item for index, item in enumerated
+                    if index > pos
                 )
-            except (ValueError, OverflowError):
+            except ValueError:
                 return HttpResponseBadRequest(
                     'Unable to parse given timestamp in "since" parameter.'
                 )
-        else:
-            start = None
-
-        can_see_deleted = self.object.can_monitor(request.user)
-        if not can_see_deleted:
-            messages = messages.filter(deleted=False)
 
         return JsonResponse({
-            'messages': [
-                {
-                    'id': message.hashid,
-                    'user': (
-                        message.user.api_dict_summary(race=self.object)
-                        if not message.user.is_system else None
-                    ),
-                    'posted_at': message.posted_at,
-                    'message': message.message,
-                    'highlight': message.highlight,
-                    'is_system': message.user.is_system,
-                    **({
-                        'deleted': message.deleted,
-                        'deleted_by': str(message.deleted_by),
-                    } if can_see_deleted else {}),
-                }
-                for message in reversed(messages.all()[:100])
-            ],
-            'start': start,
-            'end': end,
+            'messages': list(messages.values()),
             'tick_rate': self.object.tick_rate,
         })
 
