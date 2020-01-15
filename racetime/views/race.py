@@ -1,8 +1,7 @@
 from collections import OrderedDict
 
-import dateutil.parser
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
+from django import http
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
@@ -45,7 +44,7 @@ class Race(UserMixin, generic.DetailView):
 class RaceData(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        resp = HttpResponse(
+        resp = http.HttpResponse(
             content=self.object.json_data,
             content_type='application/json',
         )
@@ -57,11 +56,11 @@ class RaceRenders(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.user.is_authenticated:
-            resp = JsonResponse(
+            resp = http.JsonResponse(
                 self.object.get_renders(self.user, self.request)
             )
         else:
-            resp = HttpResponse(
+            resp = http.HttpResponse(
                 content=self.object.json_renders,
                 content_type='application/json',
             )
@@ -85,7 +84,7 @@ class RaceChat(Race):
                     if index > pos
                 )
             except ValueError:
-                return HttpResponseBadRequest(
+                return http.HttpResponseBadRequest(
                     'Unable to parse given timestamp in "since" parameter.'
                 )
 
@@ -94,7 +93,7 @@ class RaceChat(Race):
         except IndexError:
             end = since
 
-        return JsonResponse({
+        return http.JsonResponse({
             'messages': list(messages.values()),
             'tick_rate': self.object.tick_rate,
             # BC unbreaker
@@ -112,7 +111,6 @@ class RaceFormMixin:
             **super().get_context_data(**kwargs),
             'category': self.get_category(),
         }
-
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -149,7 +147,7 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
 
         race.save()
 
-        return HttpResponseRedirect(race.get_absolute_url())
+        return http.HttpResponseRedirect(race.get_absolute_url())
 
     def test_func(self):
         if not self.user.is_authenticated:
@@ -184,4 +182,4 @@ class EditRace(CanMonitorRaceMixin, UserMixin, RaceFormMixin, generic.UpdateView
             else:
                 race.add_message('Streaming is now NOT required for this race.')
 
-        return HttpResponseRedirect(race.get_absolute_url())
+        return http.HttpResponseRedirect(race.get_absolute_url())
