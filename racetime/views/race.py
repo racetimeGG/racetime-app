@@ -8,6 +8,7 @@ from django.views import generic
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
+from ..utils import get_hashids
 
 
 class Race(UserMixin, generic.DetailView):
@@ -72,32 +73,21 @@ class RaceChat(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        messages = self.object.chat_data()
-
         since = request.GET.get('since')
         if since:
             try:
-                pos = tuple(messages).index(since)
-                enumerated = enumerate(messages.items())
-                messages = OrderedDict(
-                    item for index, item in enumerated
-                    if index > pos
-                )
-            except ValueError:
+                message_id = get_hashids(models.Message).decode(since)[0]
+                messages = self.object.chat_data(last_seen=message_id)
+            except IndexError:
                 return http.HttpResponseBadRequest(
-                    'Unable to parse given timestamp in "since" parameter.'
+                    'Unable to parse given value in "since" parameter.'
                 )
-
-        try:
-            end = list(messages.keys()).pop()
-        except IndexError:
-            end = since
+        else:
+            messages = self.object.chat_data()
 
         return http.JsonResponse({
             'messages': list(messages.values()),
             'tick_rate': self.object.tick_rate,
-            # BC unbreaker
-            'end': end,
         })
 
 

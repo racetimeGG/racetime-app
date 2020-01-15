@@ -339,8 +339,11 @@ class Race(models.Model):
     def add_silent_reload(self):
         self.add_message('.reload')
 
-    def chat_data(self):
+    def chat_data(self, last_seen=None):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
+        messages = messages.select_related('user')
+        if last_seen:
+            messages.filter(id__gt=last_seen)
         return OrderedDict(
             (message.hashid, {
                 'id': message.hashid,
