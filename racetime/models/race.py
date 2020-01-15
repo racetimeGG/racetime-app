@@ -969,18 +969,24 @@ class Entrant(models.Model):
 
     @property
     def can_add_comment(self):
-        return (
-            self.state == EntrantStates.joined.value
-            and self.ready
-            and (self.finish_time or self.dnf)
-            and not self.dq
-            and not self.race.is_pending
-            and not self.comment
-            and self.race.state != RaceStates.cancelled.value
-            and self.race.allow_comments
-            and not self.race.recorded
-            and (self.race.recordable or timezone.now() - self.race.ended_at < timedelta(hours=1))
-        )
+        if self.race.state == RaceStates.in_progress.value:
+            return (
+                self.state == EntrantStates.joined.value
+                and (self.finish_time or self.dnf)
+                and not self.dq
+                and not self.comment
+                and self.race.allow_comments
+            )
+        if self.race.state == RaceStates.finished.value:
+            return (
+                self.state == EntrantStates.joined.value
+                and not self.dq
+                and not self.comment
+                and self.race.allow_comments
+                and not self.race.recorded
+                and (self.race.recordable or timezone.now() - self.race.ended_at < timedelta(hours=1))
+            )
+        return False
 
     def add_comment(self, comment):
         if self.can_add_comment:
