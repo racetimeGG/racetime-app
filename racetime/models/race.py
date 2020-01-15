@@ -987,7 +987,7 @@ class Entrant(models.Model):
             and self.race.state != RaceStates.cancelled.value
             and self.race.allow_comments
             and not self.race.recorded
-            and not (self.race.is_done and not self.race.recordable)
+            and (self.race.recordable or timezone.now() - self.race.ended_at < timedelta(hours=1))
         )
 
     def add_comment(self, comment):
