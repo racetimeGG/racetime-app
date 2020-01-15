@@ -348,7 +348,7 @@ class Race(models.Model):
             (message.hashid, {
                 'id': message.hashid,
                 'user': (
-                    message.user.api_dict_summary(race=self)
+                    message.user.api_dict_summary()
                     if not message.user.is_system else None
                 ),
                 'posted_at': message.posted_at,
