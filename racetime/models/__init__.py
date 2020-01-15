@@ -2,7 +2,7 @@ from .category import Category, CategoryRequest, Goal
 from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
-from .user import Ban, User, UserLog
+from .user import Ban, User, UserLog, UserRanking
 
 __all__ = [
     # category
@@ -21,4 +21,5 @@ __all__ = [
     'Ban',
     'User',
     'UserLog',
+    'UserRanking',
 ]

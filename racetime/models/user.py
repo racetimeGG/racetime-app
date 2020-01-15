@@ -234,6 +234,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.name
 
 
+class UserRanking(models.Model):
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+    )
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.CASCADE,
+    )
+    goal = models.ForeignKey(
+        'Goal',
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    points = models.PositiveSmallIntegerField(
+        default=0,
+        db_index=True,
+    )
+
+
 class Ban(models.Model):
     user = models.ForeignKey(
         'User',
