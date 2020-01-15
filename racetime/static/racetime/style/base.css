@@ -493,6 +493,7 @@ header > .current-race > a > .timer {
 }
 .race-info > .info {
     color: #7a777a;
+    word-break: break-word;
 }
 
 .race-entrants {
