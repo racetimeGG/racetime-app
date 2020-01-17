@@ -141,7 +141,8 @@ a {
     color: #7a777a;
     font-size: 13px;
 }
-.help strong {
+.help strong,
+.helptext strong {
     color: #ddd8dd;
 }
 

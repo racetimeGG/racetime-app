@@ -14,6 +14,7 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 
 from .choices import EntrantStates, RaceStates
 from ..utils import SafeException, timer_html, timer_str
@@ -39,15 +40,15 @@ class Race(models.Model):
         blank=True,
         default=None,
         help_text=(
-            'Set a custom goal for this race, if none of the category goals '
-            'are suitable. Custom races cannot be recorded.'
+            'Set a custom goal for this race, if none of the category goals are suitable. '
+            + mark_safe('<strong>Custom races cannot be recorded.</strong>')
         ),
     )
     info = models.TextField(
         max_length=1000,
         null=True,
         blank=True,
-        help_text='Any useful information for race entrants.',
+        help_text='Any useful information for race entrants (e.g. randomizer seed).',
     )
     slug = models.SlugField()
     state = models.CharField(
