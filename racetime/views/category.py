@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
@@ -22,13 +23,14 @@ class Category(UserMixin, generic.DetailView):
     )
 
     def get_context_data(self, **kwargs):
+        paginator = Paginator(self.past_races(), 10)
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
             'can_moderate': self.object.can_moderate(self.user),
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
-            'past_races': self.past_races(),
+            'past_races': paginator.get_page(self.request.GET.get('page')),
             'meta_image': self.request.build_absolute_uri(self.object.image.url) if self.object.image else None,
         }
 
