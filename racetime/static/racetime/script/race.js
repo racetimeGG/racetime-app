@@ -200,5 +200,5 @@ $(function() {
 
     $(document).on('click', '.dangerous .btn', function() {
         return confirm($(this).text().trim() + ': are you sure you want to do that?');
-    })
+    });
 });
