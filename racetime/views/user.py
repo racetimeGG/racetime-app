@@ -6,12 +6,15 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
+from django.db.models import Count
 from django.db.transaction import atomic
 from django import http
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.decorators import method_decorator, decorator_from_middleware
+from django.utils.translation import gettext as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -21,6 +24,56 @@ from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
 from ..utils import notice_exception
 
+
+class ViewProfile(generic.DetailView):
+    context_object_name = 'profile'
+    model = models.User
+
+    def get_context_data(self, **kwargs):
+        entrances = self.get_entrances()
+        paginator = Paginator(entrances, 10)
+
+        return {
+            **super().get_context_data(**kwargs),
+            'categories': self.get_favourite_categories(),
+            'entrances': paginator.get_page(self.request.GET.get('page')),
+            'stats': {
+                'joined': len(entrances),
+                'first': len(entrances.filter(place=1)),
+                'second': len(entrances.filter(place=2)),
+                'third': len(entrances.filter(place=3)),
+                'forfeits': len(entrances.filter(dnf=True)),
+                'dqs': len(entrances.filter(dq=True)),
+            },
+        }
+
+    def get_object(self, queryset=None):
+        hashid = self.kwargs.get('user')
+        try:
+            obj = models.User.objects.get_by_hashid(hashid)
+        except queryset.model.DoesNotExist:
+            raise http.Http404(
+                _("No %(verbose_name)s found matching the query") %
+                {'verbose_name': queryset.model._meta.verbose_name}
+            )
+        return obj
+
+    def get_entrances(self):
+        queryset = models.Entrant.objects.filter(
+            user=self.get_object(),
+            race__state=models.RaceStates.finished,
+        )
+        queryset = queryset.select_related('race')
+        queryset = queryset.order_by('-race__opened_at')
+        return queryset
+
+    def get_favourite_categories(self):
+        queryset = models.Category.objects.filter(
+            race__entrant__user=self.get_object(),
+        )
+        queryset = queryset.annotate(times_entered=Count('race__entrant'))
+        queryset = queryset.order_by('-times_entered')
+        return queryset[:3]
 
 class CreateAccount(generic.CreateView):
     form_class = forms.UserCreationForm

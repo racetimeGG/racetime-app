@@ -48,7 +48,12 @@ from .race_monitor_actions import (
     AddMonitor,
     RemoveMonitor,
 )
-from .user import CreateAccount, EditAccount, TwitchAuth
+from .user import (
+    CreateAccount,
+    EditAccount,
+    TwitchAuth,
+    ViewProfile,
+)
 
 __all__ = [
     # auth
@@ -106,4 +111,5 @@ __all__ = [
     'CreateAccount',
     'EditAccount',
     'TwitchAuth',
+    'ViewProfile',
 ]

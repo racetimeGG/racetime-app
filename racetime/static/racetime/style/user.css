@@ -1,0 +1,82 @@
+.container > .content > main > h3:first-child,
+.container > .content > aside > h3:first-child {
+    margin-top: 0;
+}
+
+.user-profile {
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+}
+.user-profile > .user-pop {
+    color: #eee;
+    font-size: 32px;
+    margin-top: 5px;
+}
+.user-profile > .user-pop > .avatar {
+    width: 64px;
+    height: 64px;
+}
+.user-profile > .user-pop > .scrim {
+    font-size: 26px;
+}
+.user-profile > .twitch-channel {
+    display: flex;
+    margin-top: 10px;
+}
+
+.user-profile > .twitch-channel > img {
+    height: 22px;
+    margin-right: 5px;
+}
+
+.race-list > ol > li > a {
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    margin: 10px 0 0;
+}
+
+.race-entrants {
+    border: 5px solid rgba(0,0,0,0.2);
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 5px;
+}
+
+.entrant-row {
+    border-top: 1px solid rgba(0,0,0,0.2);
+}
+
+.entrant-row.highlight {
+    background: rgba(0,0,0,0.2);
+}
+
+.user-categories > li {
+    border-top: 1px solid rgba(0,0,0,0.2);
+}
+.user-categories > li:first-child {
+    border-top: none;
+}
+.user-categories > li > a,
+.user-categories > li > span {
+    display: flex;
+    padding: 5px 0;
+    text-decoration: none;
+}
+.user-categories > li .image {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 72px;
+    margin-right: 5px;
+    flex: 0 0 54px;
+}
+.user-categories > li .info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+.user-categories > li .info > .times-entered {
+    color: #7a777a;
+    font-size: 15px;
+}

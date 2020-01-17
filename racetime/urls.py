@@ -17,6 +17,7 @@ urlpatterns = [
 
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
+    path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
 
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
