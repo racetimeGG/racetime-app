@@ -520,72 +520,72 @@ header > .current-race > a .timer {
 .race-entrants > ol {
 }
 
-.race-entrants > ol > li {
+.entrant-row {
     border-top: 1px solid rgba(0,0,0,0.75);
     display: flex;
     padding: 5px;
 }
-.race-entrants > ol > li > .place {
+.entrant-row > .place {
     flex: 0 0 50px;
     text-align: center;
 }
-.race-entrants > ol > li > .user {
+.entrant-row > .user {
     display: flex;
     flex-grow: 1;
 }
-.race-entrants > ol > li > .user > .user-pop {
+.entrant-row > .user > .user-pop {
     height: 22px;
 }
-.race-entrants > ol > li > .user > .stream > a {
+.entrant-row > .user > .stream > a {
     display: block;
     margin-left: 5px;
 }
-.race-entrants > ol > li > .user > .stream > a > img {
+.entrant-row > .user > .stream > a > img {
     height: 22px;
     vertical-align: top;
 }
-.race-entrants > ol > li > .user > .comment {
+.entrant-row > .user > .comment {
     cursor: default;
     display: flex;
     margin-left: 5px;
     padding: 0 5px;
 }
-.race-entrants > ol > li > .user > .comment:hover {
+.entrant-row > .user > .comment:hover {
     background: #18191d;
     border-radius: 6px;
 }
-.race-entrants > ol > li > .user > .comment > svg {
+.entrant-row > .user > .comment > svg {
     margin-top: 3px;
 }
-.race-entrants > ol > li > .user > .comment > .text {
+.entrant-row > .user > .comment > .text {
     display: none;
     opacity: 0;
     padding-left: 5px;
     word-break: break-word;
     z-index: 1;
 }
-.race-entrants > ol > li > .user > .comment:hover > .text {
+.entrant-row > .user > .comment:hover > .text {
     display: block;
     opacity: 1;
 }
-.race-entrants > ol > li > .status {
+.entrant-row > .status {
     flex: 0 0 100px;
 }
-.race-entrants > ol > li > .finish-time {
+.entrant-row > .finish-time {
     flex: 0 0 80px;
     text-align: right;
 }
-.race-entrants > ol > li > .monitor-actions {
+.entrant-row > .monitor-actions {
     display: flex;
 }
-.race-entrants > ol > li > .monitor-actions > li {
+.entrant-row > .monitor-actions > li {
     margin-right: 5px;
 }
-.race-entrants > ol > li > .monitor-actions > li > form > .btn {
+.entrant-row > .monitor-actions > li > form > .btn {
     padding: 0;
     min-width: 23px;
 }
-.race-entrants > ol > li > .monitor-actions > li > form > .btn > svg {
+.entrant-row > .monitor-actions > li > form > .btn > svg {
 }
 .race-entrants > .count {
     border-top: 1px solid rgba(0,0,0,0.75);
