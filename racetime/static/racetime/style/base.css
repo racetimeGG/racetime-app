@@ -56,10 +56,6 @@ a {
     color: #ddd8dd;
 }
 
-a:visited {
-    color: #b9b4b9;
-}
-
 .btn, .btn:visited {
     background-color: #0c0f14;
     border: solid #26dd9a;
