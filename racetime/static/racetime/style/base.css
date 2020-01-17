@@ -197,6 +197,7 @@ header > .user-info > form {
 
 header > .current-race {
     align-self: flex-start;
+    max-width: 40%;
 }
 
 header > .current-race > a {
@@ -205,31 +206,41 @@ header > .current-race > a {
     background: linear-gradient(to top, #36393f 0, #25272c 100%);
     border-radius: 0 0 5px 5px;
     display: flex;
-    flex-wrap: wrap;
-    text-decoration: none;
     height: 40px;
     padding: 2px 5px;
+    text-decoration: none;
 }
 
-header > .current-race > a > .goal {
-    flex: 1 0 100%;
+header > .current-race > a > span {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
 }
 
-header > .current-race > a > .goal,
-header > .current-race > a > .timer {
+header > .current-race > a > span:first-child {
+    margin-right: 5px;
+}
+
+header > .current-race > a .goal {
+    overflow: hidden;
+    word-break: break-word;
+}
+
+header > .current-race > a .goal,
+header > .current-race > a .timer {
     font-weight: bold;
 }
 
-header > .current-race > a > .state {
+header > .current-race > a .state {
     flex: 1 1 0;
 }
 
-header > .current-race > a > .state,
-header > .current-race > a > .timer {
+header > .current-race > a .entrants,
+header > .current-race > a .state {
     font-size: 13px;
 }
 
-header > .current-race > a > .timer {
+header > .current-race > a .timer {
     text-align: right;
 }
 
@@ -429,9 +440,7 @@ header > .current-race > a > .timer {
     border: 5px solid rgba(0,0,0,0.2);
     border-radius: 10px;
     display: flex;
-    flex-wrap: wrap;
     text-decoration: none;
-    flex-direction: column;
     height: 50px;
     margin: 5px;
     padding: 5px;
@@ -440,25 +449,34 @@ header > .current-race > a > .timer {
     margin-top: 0;
 }
 
-.race-list > ol > li > a > .goal,
-.race-list > ol > li > a > .timer {
+.race-list > ol > li > a > span {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.race-list > ol > li > a .goal,
+.race-list > ol > li > a .timer {
     font-size: 20px;
     font-weight: bold;
 }
+.race-list > ol > li > a .goal {
+    overflow: hidden;
+    word-break: break-word;
+}
 
-.race-list > ol > li > a > .entrants,
-.race-list > ol > li > a > .timer {
+.race-list > ol > li > a > .right {
     text-align: right;
 }
 
-.race-list > ol > li > a > .state > .recorded {
+.race-list > ol > li > a .state > .recorded {
     display: inline-flex;
     font-size: 14px;
 }
-.race-list > ol > li > a > .state > .recorded::before {
+.race-list > ol > li > a .state > .recorded::before {
     content: '(';
 }
-.race-list > ol > li > a > .state > .recorded::after {
+.race-list > ol > li > a .state > .recorded::after {
     content: ')';
 }
 .category-side-info > :first-child {
@@ -490,6 +508,7 @@ header > .current-race > a > .timer {
 }
 .race-info > .goal {
     font-size: 20px;
+    word-break: break-word;
 }
 .race-info > .info {
     color: #7a777a;
