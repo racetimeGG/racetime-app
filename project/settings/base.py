@@ -122,6 +122,7 @@ USE_TZ = True
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'node_modules', 'jquery', 'dist'),
     os.path.join(BASE_DIR, 'node_modules', 'jquery-form', 'dist'),
+    os.path.join(BASE_DIR, 'node_modules', 'jquery-ui-dist'),
 ]
 STATIC_URL = '/static/'
 
