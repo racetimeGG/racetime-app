@@ -417,6 +417,10 @@ header > .current-race > a .timer {
 .category-races > ol > li {
     flex: 0 1 100%;
 }
+.category-races > .pagination {
+    margin-left: 5px;
+    margin-right: 5px;
+}
 .start-new, .edit-category {
     float: right;
 }
@@ -757,4 +761,42 @@ footer > ul > li:first-child::before {
 .login-form > .submit-row > .password-reset-link {
     font-size: 14px;
     margin-left: 10px;
+}
+
+.pagination {
+    border: 3px solid #1a1c20;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 10px;
+}
+.pagination > .step-links {
+    display: flex;
+}
+.pagination > .step-links > a,
+.pagination > .step-links > span {
+    background: #1e1f24;
+    border-left: 3px solid #1a1c20;
+    padding: 5px;
+    flex: 0 0 15%;
+}
+.pagination > .step-links > a {
+    color: #26dd9a;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.pagination > .step-links > a:hover {
+    color: #beebd1;
+}
+.pagination > .step-links > span {
+    cursor: default;
+}
+.pagination > .step-links > .current {
+    background: none;
+    cursor: unset;
+    flex: 1 1 auto;
+}
+.pagination > .step-links > :first-child {
+    border-left: none;
+}
+.pagination > .step-links > :last-child {
 }
