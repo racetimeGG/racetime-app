@@ -624,6 +624,9 @@ class Race(models.Model):
 
         self.state = RaceStates.finished.value
         self.ended_at = timezone.now()
+        if not self.entrant_set.filter(finish_time__isnull=False):
+            # Nobody finished, so race should not be recorded.
+            self.recordable = False
         self.save()
         self.__dnf_remaining_entrants()
         self.add_message(
