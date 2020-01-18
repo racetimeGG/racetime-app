@@ -441,19 +441,24 @@ header > .current-race > a .timer {
     border: 5px solid rgba(0,0,0,0.2);
     border-radius: 10px;
     display: flex;
+    flex-direction: column;
     text-decoration: none;
-    height: 50px;
     margin: 5px;
     padding: 5px;
 }
 .race-list > ol > li > time + a {
     margin-top: 0;
 }
-
-.race-list > ol > li > a > span {
+.race-list > ol > li > a > .main {
+    display: flex;
+}
+.race-list > ol > li > a > .main > span {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
+}
+.race-list > ol > li > a > .main > .right {
+    text-align: right;
 }
 
 .race-list > ol > li > a .goal,
@@ -462,13 +467,11 @@ header > .current-race > a .timer {
     font-weight: bold;
 }
 .race-list > ol > li > a .goal {
+    height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
 
-.race-list > ol > li > a > .right {
-    text-align: right;
-}
 
 .race-list > ol > li > a .state > .recorded {
     display: inline-flex;
@@ -479,6 +482,13 @@ header > .current-race > a .timer {
 }
 .race-list > ol > li > a .state > .recorded::after {
     content: ')';
+}
+.race-list > ol > li > a > .info {
+    color: #7a777a;
+    font-size: 13px;
+    height: 1.375em;
+    overflow: hidden;
+    word-break: break-word;
 }
 .category-side-info > :first-child {
     margin-top: 0;
