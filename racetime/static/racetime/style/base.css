@@ -422,14 +422,14 @@ header > .current-race > a .timer {
     margin-left: 5px;
     margin-right: 5px;
 }
-.start-new, .edit-category {
+.category-nav {
     float: right;
+}
+.category-nav + .category-nav {
+    margin-right: 10px;
 }
 .start-new::before {
     content: '+';
-}
-.start-new + .edit-category {
-    margin-right: 10px;
 }
 
 .race-list > ol > li > time {
