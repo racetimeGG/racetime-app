@@ -114,4 +114,15 @@
         {{ entrant.summary.1 }}
     </span>
     <time class="finish-time">{{ entrant.finish_time_html|safe|default:'—' }}</time>
+    {% if entrant.score_change %}
+        {% if entrant.score_change > 0 %}
+            <span class="score-change positive">
+                {{ entrant.display_score_change|intcomma }}
+            </span>
+        {% else %}
+            <span class="score-change negative">
+                {{ entrant.display_score_change|intcomma|slice:'1:' }}
+            </span>
+        {% endif %}
+    {% endif %}
 </li>

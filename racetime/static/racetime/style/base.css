@@ -576,6 +576,25 @@ header > .current-race > a .timer {
     flex: 0 0 80px;
     text-align: right;
 }
+.entrant-row > .score-change {
+    align-items: center;
+    justify-content: flex-end;
+    display: flex;
+    flex: 0 0 50px;
+    font-size: 13px;
+}
+.entrant-row > .score-change.positive {
+    color: #a0e9a0;
+}
+.entrant-row > .score-change.positive::before {
+    content: '+';
+}
+.entrant-row > .score-change.negative {
+    color: #f08080;
+}
+.entrant-row > .score-change.negative::before {
+    content: '−';
+}
 .entrant-row > .monitor-actions {
     display: flex;
 }

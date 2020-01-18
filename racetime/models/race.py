@@ -779,6 +779,9 @@ class Entrant(models.Model):
     place = models.PositiveSmallIntegerField(
         null=True,
     )
+    score_change = models.FloatField(
+        null=True,
+    )
     comment = models.TextField(
         null=True,
         blank=True,
@@ -807,6 +810,12 @@ class Entrant(models.Model):
     @property
     def can_remove_monitor(self):
         return self.race.can_remove_monitor(self.user)
+
+    @property
+    def display_score_change(self):
+        if self.score_change:
+            return round(self.score_change * 100)
+        return None
 
     @property
     def finish_time_html(self):
