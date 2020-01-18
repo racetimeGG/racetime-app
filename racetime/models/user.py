@@ -246,12 +246,29 @@ class UserRanking(models.Model):
     goal = models.ForeignKey(
         'Goal',
         on_delete=models.CASCADE,
-        null=True,
     )
-    points = models.PositiveSmallIntegerField(
-        default=0,
+    score = models.FloatField(
+        default=0.0,
         db_index=True,
     )
+    confidence = models.FloatField(
+        default=0.0,
+    )
+
+    @property
+    def display_score(self):
+        return round(self.score * 100)
+
+    @cached_property
+    def times_raced(self):
+        Entrant = apps.get_model('racetime', 'Entrant')
+        return len(Entrant.objects.filter(
+            user=self.user,
+            race__category=self.category,
+            race__goal=self.goal,
+            race__state=RaceStates.finished,
+            race__recorded=True,
+        ))
 
 
 class Ban(models.Model):
