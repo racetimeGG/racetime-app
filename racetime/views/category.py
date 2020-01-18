@@ -76,6 +76,30 @@ class CategoryData(Category):
         return resp
 
 
+class CategoryLeaderboards(Category):
+    template_name_suffix = '_leaderboards'
+
+    def get_context_data(self, **kwargs):
+        paginator = Paginator(list(self.leaderboards()), 2)
+        return {
+            **super().get_context_data(**kwargs),
+            'leaderboards': paginator.get_page(self.request.GET.get('page')),
+        }
+
+    def leaderboards(self):
+        category = self.get_object()
+        goals = models.Goal.objects.filter(
+            category=category,
+            active=True,
+        ).order_by('name')
+        for goal in goals:
+            rankings = models.UserRanking.objects.filter(
+                category=category,
+                goal=goal,
+            ).order_by('-score')[:1000]
+            yield goal, rankings
+
+
 class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
     form_class = forms.CategoryRequestForm
     model = models.CategoryRequest

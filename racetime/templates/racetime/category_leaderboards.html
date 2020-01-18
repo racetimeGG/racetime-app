@@ -1,0 +1,30 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    {{ category.name }} (leaderboards) |
+{% endblock %}
+{% block meta %}
+    <meta property="og:title" content="Leaderboards for {{ category.name }}">
+    <meta name="description" content="Current user rankings for {{ category.short_name }} races.">
+    <meta property="og:description" content="Current user rankings for {{ category.short_name }} races.">
+    {% if meta_image %}
+        <meta property="og:image" content="{{ meta_image }}">
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/intro.html' %}
+    <h3>Leaderboards</h3>
+    {% include 'racetime/category/buttons.html' with races=True leaderboards=False %}
+    <div class="category-leaderboards">
+        {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+        <ol>
+            {% for goal, rankings in leaderboards %}
+                <li>
+                    {% include 'racetime/category/leaderboard.html' %}
+                </li>
+            {% endfor %}
+        </ol>
+        {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+    </div>
+{% endblock %}

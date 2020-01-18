@@ -820,3 +820,52 @@ footer > ul > li:first-child::before {
 }
 .pagination > .step-links > :last-child {
 }
+
+.category-leaderboards > ol {
+    display: flex;
+    margin-top: 10px;
+}
+.category-leaderboards > ol > li {
+    box-sizing: border-box;
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    flex: 0 1 50%;
+    margin-left: 10px;
+}
+@media (max-width: 1060px) {
+    .category-leaderboards > ol {
+        flex-wrap: wrap;
+    }
+    .category-leaderboards > ol > li {
+        flex: 0 1 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
+.category-leaderboards > ol > li:first-child {
+    margin-left: 0;
+    margin-top: 0;
+}
+.category-leaderboards > ol > li > h4 {
+    background: #1a1c20;
+    padding: 5px;
+}
+.category-leaderboards > ol > li > ol > li {
+    border-top: 1px solid #08090a;
+    display: flex;
+    line-height: 32px;
+    padding: 5px;
+}
+.category-leaderboards > ol > li > ol > li > .place {
+    flex: 0 0 50px;
+    text-align: center;
+}
+.category-leaderboards > ol > li > ol > li > .user {
+    flex: 1 1 auto;
+}
+.category-leaderboards > ol > li > ol > li > .races {
+    color: #7a777a;
+    flex: 0 0 80px;
+    font-size: 14px;
+    text-align: right;
+}

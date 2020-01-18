@@ -1,0 +1,22 @@
+{% load humanize %}
+<h4>{{ goal.name }}</h4>
+<ol>
+    {% for ranking in rankings %}
+        <li>
+            <span class="place">
+                {{ forloop.counter|ordinal }}
+            </span>
+            <span class="user">
+                {% include 'racetime/pops/user.html' with user=ranking.user %}
+            </span>
+            <span class="score">
+                {{ ranking.display_score|intcomma }}
+            </span>
+            <span class="races">
+                {{ ranking.times_raced|intcomma }} race{{ ranking.times_raced|pluralize }}
+            </span>
+        </li>
+    {% empty %}
+        <li>No recorded races for this goal.</li>
+    {% endfor %}
+</ol>

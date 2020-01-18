@@ -23,6 +23,7 @@ urlpatterns = [
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
         path('edit', views.EditCategory.as_view(), name='edit_category'),
+        path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),
     ])),
 

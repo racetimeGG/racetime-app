@@ -6,7 +6,13 @@ from .auth import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
-from .category import Category, CategoryData, RequestCategory, EditCategory
+from .category import (
+    Category,
+    CategoryData,
+    CategoryLeaderboards,
+    EditCategory,
+    RequestCategory,
+)
 from .home import Home
 from .race import (
     Race,
@@ -66,6 +72,7 @@ __all__ = [
     # category
     'Category',
     'CategoryData',
+    'CategoryLeaderboards',
     'EditCategory',
     'RequestCategory',
     # home
