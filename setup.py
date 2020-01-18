@@ -13,5 +13,6 @@ setup(
         'python-dateutil>=2.8.1,<2.9',
         'pytz==2019.3',
         'requests>=2.22.0,<2.23',
+        'trueskill==0.4.5',
     ],
 )
