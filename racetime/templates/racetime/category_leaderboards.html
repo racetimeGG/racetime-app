@@ -15,13 +15,13 @@
 {% block main %}
     {% include 'racetime/category/intro.html' %}
     <h3>Leaderboards</h3>
+    {% include 'racetime/category/buttons.html' with races=True leaderboards=False %}
     <p class="help">
         Note: leaderboards are currently in beta. The ranking algorithm is,
         well, a bit of a potato. A more well thought-out calculation system
         will be implemented later, but you can get a feel for general race
         performance with the scoring below.
     </p>
-    {% include 'racetime/category/buttons.html' with races=True leaderboards=False %}
     <div class="category-leaderboards">
         {% include 'racetime/pops/paginator.html' with page=leaderboards %}
         <ol>
