@@ -25,39 +25,9 @@
 {% endblock %}
 
 {% block main %}
-    <div class="category-intro">
-        {% if category.image %}
-        <span class="image" style="background-image: url({{ category.image.url }})"></span>
-        {% endif %}
-        <div class="category-info">
-            <ol class="breadcrumbs">
-                <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
-            </ol>
-            <span class="title">
-                <h2 class="name">{{ category.name }}</h2>
-                <span class="short-name">{{ category.short_name }}</span>
-            </span>
-        </div>
-        <dl class="category-meta">
-            <dt>Owner</dt>
-            <dd>
-                {% include 'racetime/pops/user.html' with user=category.owner extra_class='inline' %}
-            </dd>
-            <dt>Moderators</dt>
-            <dd>{{ category.moderator_list|default:'No-one' }}</dd>
-        </dl>
-    </div>
+    {% include 'racetime/category/intro.html' %}
     <h3>Current races</h3>
-    {% if can_start_race %}
-        <a href="{% url 'create_race' category=category.slug %}" class="start-new btn">
-            Start new race
-        </a>
-    {% endif %}
-    {% if can_edit %}
-        <a href="{% url 'edit_category' category=category.slug %}" class="edit-category btn">
-            Edit category
-        </a>
-    {% endif %}
+    {% include 'racetime/category/buttons.html' with races=False leaderboards=True %}
     <div class="category-races race-list current">
         <ol>
             {% for race in current_races %}
