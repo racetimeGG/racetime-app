@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 
 from .choices import EntrantStates, RaceStates
+from ..rating import rate_race
 from ..utils import SafeException, timer_html, timer_str
 
 
@@ -634,11 +635,15 @@ class Race(models.Model):
             highlight=True,
         )
 
+    @atomic
     def record(self, recorded_by):
         if self.recordable and not self.recorded:
             self.recorded = True
             self.recorded_by = recorded_by
             self.save()
+
+            rate_race(self)
+
             self.add_message(
                 'Race result recorded by %(recorded_by)s'
                 % {'recorded_by': recorded_by},
