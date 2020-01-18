@@ -39,8 +39,6 @@ $(function() {
                 date = new Date(date.getTime() + $(this).data('latency'));
             }
             $(this).html(date.toLocaleString());
-            console.log(this);
-            console.log(date.toLocaleString());
         });
         $(this).find('time.onlydate').each(function () {
             var date = new Date($(this).attr('datetime'));

@@ -1,14 +1,14 @@
 from collections import OrderedDict
 
-import dateutil.parser
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
+from django import http
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
+from ..utils import get_hashids
 
 
 class Race(UserMixin, generic.DetailView):
@@ -27,7 +27,7 @@ class Race(UserMixin, generic.DetailView):
             **super().get_context_data(**kwargs),
             'chat_form': self.get_chat_form(),
             'available_actions': race.available_actions(self.user),
-			'can_moderate': race.category.can_moderate(self.user),
+            'can_moderate': race.category.can_moderate(self.user),
             'can_monitor': race.can_monitor(self.user),
             'invite_form': self.get_invite_form(),
             'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
@@ -42,10 +42,14 @@ class Race(UserMixin, generic.DetailView):
         return queryset
 
 
+class RaceMini(Race):
+    template_name_suffix = '_mini'
+
+
 class RaceData(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        resp = HttpResponse(
+        resp = http.HttpResponse(
             content=self.object.json_data,
             content_type='application/json',
         )
@@ -57,11 +61,11 @@ class RaceRenders(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.user.is_authenticated:
-            resp = JsonResponse(
+            resp = http.JsonResponse(
                 self.object.get_renders(self.user, self.request)
             )
         else:
-            resp = HttpResponse(
+            resp = http.HttpResponse(
                 content=self.object.json_renders,
                 content_type='application/json',
             )
@@ -73,23 +77,19 @@ class RaceChat(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        messages = self.object.json_chat
-
         since = request.GET.get('since')
         if since:
             try:
-                pos = tuple(messages).index(since)
-                enumerated = enumerate(messages.items())
-                messages = OrderedDict(
-                    item for index, item in enumerated
-                    if index > pos
+                message_id = get_hashids(models.Message).decode(since)[0]
+                messages = self.object.chat_data(last_seen=message_id)
+            except IndexError:
+                return http.HttpResponseBadRequest(
+                    'Unable to parse given value in "since" parameter.'
                 )
-            except ValueError:
-                return HttpResponseBadRequest(
-                    'Unable to parse given timestamp in "since" parameter.'
-                )
+        else:
+            messages = self.object.chat_data()
 
-        return JsonResponse({
+        return http.JsonResponse({
             'messages': list(messages.values()),
             'tick_rate': self.object.tick_rate,
         })
@@ -105,7 +105,6 @@ class RaceFormMixin:
             **super().get_context_data(**kwargs),
             'category': self.get_category(),
         }
-
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -142,7 +141,7 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
 
         race.save()
 
-        return HttpResponseRedirect(race.get_absolute_url())
+        return http.HttpResponseRedirect(race.get_absolute_url())
 
     def test_func(self):
         if not self.user.is_authenticated:
@@ -177,4 +176,4 @@ class EditRace(CanMonitorRaceMixin, UserMixin, RaceFormMixin, generic.UpdateView
             else:
                 race.add_message('Streaming is now NOT required for this race.')
 
-        return HttpResponseRedirect(race.get_absolute_url())
+        return http.HttpResponseRedirect(race.get_absolute_url())

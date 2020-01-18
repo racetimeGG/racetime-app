@@ -256,6 +256,7 @@ class RaceCreationForm(RaceForm):
             'streaming_required',
             'allow_comments',
             'allow_midrace_chat',
+            'allow_non_entrant_chat',
         )
         model = models.Race
 
@@ -272,6 +273,7 @@ class RaceEditForm(RaceForm):
             'streaming_required',
             'allow_comments',
             'allow_midrace_chat',
+            'allow_non_entrant_chat',
         )
         model = models.Race
 

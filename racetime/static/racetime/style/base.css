@@ -56,10 +56,6 @@ a {
     color: #ddd8dd;
 }
 
-a:visited {
-    color: #b9b4b9;
-}
-
 .btn, .btn:visited {
     background-color: #0c0f14;
     border: solid #26dd9a;
@@ -145,7 +141,8 @@ a:visited {
     color: #7a777a;
     font-size: 13px;
 }
-.help strong {
+.help strong,
+.helptext strong {
     color: #ddd8dd;
 }
 
@@ -197,6 +194,7 @@ header > .user-info > form {
 
 header > .current-race {
     align-self: flex-start;
+    max-width: 40%;
 }
 
 header > .current-race > a {
@@ -205,31 +203,41 @@ header > .current-race > a {
     background: linear-gradient(to top, #36393f 0, #25272c 100%);
     border-radius: 0 0 5px 5px;
     display: flex;
-    flex-wrap: wrap;
-    text-decoration: none;
     height: 40px;
     padding: 2px 5px;
+    text-decoration: none;
 }
 
-header > .current-race > a > .goal {
-    flex: 1 0 100%;
+header > .current-race > a > span {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
 }
 
-header > .current-race > a > .goal,
-header > .current-race > a > .timer {
+header > .current-race > a > span:first-child {
+    margin-right: 5px;
+}
+
+header > .current-race > a .goal {
+    overflow: hidden;
+    word-break: break-word;
+}
+
+header > .current-race > a .goal,
+header > .current-race > a .timer {
     font-weight: bold;
 }
 
-header > .current-race > a > .state {
+header > .current-race > a .state {
     flex: 1 1 0;
 }
 
-header > .current-race > a > .state,
-header > .current-race > a > .timer {
+header > .current-race > a .entrants,
+header > .current-race > a .state {
     font-size: 13px;
 }
 
-header > .current-race > a > .timer {
+header > .current-race > a .timer {
     text-align: right;
 }
 
@@ -410,6 +418,10 @@ header > .current-race > a > .timer {
 .category-races > ol > li {
     flex: 0 1 100%;
 }
+.category-races > .pagination {
+    margin-left: 5px;
+    margin-right: 5px;
+}
 .start-new, .edit-category {
     float: right;
 }
@@ -429,9 +441,7 @@ header > .current-race > a > .timer {
     border: 5px solid rgba(0,0,0,0.2);
     border-radius: 10px;
     display: flex;
-    flex-wrap: wrap;
     text-decoration: none;
-    flex-direction: column;
     height: 50px;
     margin: 5px;
     padding: 5px;
@@ -440,25 +450,34 @@ header > .current-race > a > .timer {
     margin-top: 0;
 }
 
-.race-list > ol > li > a > .goal,
-.race-list > ol > li > a > .timer {
+.race-list > ol > li > a > span {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.race-list > ol > li > a .goal,
+.race-list > ol > li > a .timer {
     font-size: 20px;
     font-weight: bold;
 }
+.race-list > ol > li > a .goal {
+    overflow: hidden;
+    word-break: break-word;
+}
 
-.race-list > ol > li > a > .entrants,
-.race-list > ol > li > a > .timer {
+.race-list > ol > li > a > .right {
     text-align: right;
 }
 
-.race-list > ol > li > a > .state > .recorded {
+.race-list > ol > li > a .state > .recorded {
     display: inline-flex;
     font-size: 14px;
 }
-.race-list > ol > li > a > .state > .recorded::before {
+.race-list > ol > li > a .state > .recorded::before {
     content: '(';
 }
-.race-list > ol > li > a > .state > .recorded::after {
+.race-list > ol > li > a .state > .recorded::after {
     content: ')';
 }
 .category-side-info > :first-child {
@@ -490,9 +509,11 @@ header > .current-race > a > .timer {
 }
 .race-info > .goal {
     font-size: 20px;
+    word-break: break-word;
 }
 .race-info > .info {
     color: #7a777a;
+    word-break: break-word;
 }
 
 .race-entrants {
@@ -500,72 +521,72 @@ header > .current-race > a > .timer {
 .race-entrants > ol {
 }
 
-.race-entrants > ol > li {
+.entrant-row {
     border-top: 1px solid rgba(0,0,0,0.75);
     display: flex;
     padding: 5px;
 }
-.race-entrants > ol > li > .place {
+.entrant-row > .place {
     flex: 0 0 50px;
     text-align: center;
 }
-.race-entrants > ol > li > .user {
+.entrant-row > .user {
     display: flex;
     flex-grow: 1;
 }
-.race-entrants > ol > li > .user > .user-pop {
+.entrant-row > .user > .user-pop {
     height: 22px;
 }
-.race-entrants > ol > li > .user > .stream > a {
+.entrant-row > .user > .stream > a {
     display: block;
     margin-left: 5px;
 }
-.race-entrants > ol > li > .user > .stream > a > img {
+.entrant-row > .user > .stream > a > img {
     height: 22px;
     vertical-align: top;
 }
-.race-entrants > ol > li > .user > .comment {
+.entrant-row > .user > .comment {
     cursor: default;
     display: flex;
     margin-left: 5px;
     padding: 0 5px;
 }
-.race-entrants > ol > li > .user > .comment:hover {
+.entrant-row > .user > .comment:hover {
     background: #18191d;
     border-radius: 6px;
 }
-.race-entrants > ol > li > .user > .comment > svg {
+.entrant-row > .user > .comment > svg {
     margin-top: 3px;
 }
-.race-entrants > ol > li > .user > .comment > .text {
+.entrant-row > .user > .comment > .text {
     display: none;
     opacity: 0;
     padding-left: 5px;
     word-break: break-word;
     z-index: 1;
 }
-.race-entrants > ol > li > .user > .comment:hover > .text {
+.entrant-row > .user > .comment:hover > .text {
     display: block;
     opacity: 1;
 }
-.race-entrants > ol > li > .status {
+.entrant-row > .status {
     flex: 0 0 100px;
 }
-.race-entrants > ol > li > .finish-time {
+.entrant-row > .finish-time {
     flex: 0 0 80px;
     text-align: right;
 }
-.race-entrants > ol > li > .monitor-actions {
+.entrant-row > .monitor-actions {
     display: flex;
 }
-.race-entrants > ol > li > .monitor-actions > li {
+.entrant-row > .monitor-actions > li {
     margin-right: 5px;
 }
-.race-entrants > ol > li > .monitor-actions > li > form > .btn {
+.entrant-row > .monitor-actions > li > form > .btn {
     padding: 0;
     min-width: 23px;
 }
-.race-entrants > ol > li > .monitor-actions > li > form > .btn > svg {
+.entrant-row > .monitor-actions > li > form > .btn > svg {
 }
 .race-entrants > .count {
     border-top: 1px solid rgba(0,0,0,0.75);
@@ -741,4 +762,42 @@ footer > ul > li:first-child::before {
 .login-form > .submit-row > .password-reset-link {
     font-size: 14px;
     margin-left: 10px;
+}
+
+.pagination {
+    border: 3px solid #1a1c20;
+    border-radius: 6px;
+    text-align: center;
+    margin-top: 10px;
+}
+.pagination > .step-links {
+    display: flex;
+}
+.pagination > .step-links > a,
+.pagination > .step-links > span {
+    background: #1e1f24;
+    border-left: 3px solid #1a1c20;
+    padding: 5px;
+    flex: 0 0 15%;
+}
+.pagination > .step-links > a {
+    color: #26dd9a;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.pagination > .step-links > a:hover {
+    color: #beebd1;
+}
+.pagination > .step-links > span {
+    cursor: default;
+}
+.pagination > .step-links > .current {
+    background: none;
+    cursor: unset;
+    flex: 1 1 auto;
+}
+.pagination > .step-links > :first-child {
+    border-left: none;
+}
+.pagination > .step-links > :last-child {
 }

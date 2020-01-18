@@ -1,38 +1,40 @@
 <a href="{{ race.get_absolute_url }}"{% if not race.recorded and race.recordable %} class="recordable"{% endif %}>
-    <span class="goal">
-        {% if nocontext %}
-            {{ race.category.short_name }}
-        {% endif %}
-        {{ race.goal|default:race.custom_goal }}
-    </span>
-    <span class="state">
-        {{ race.state_info.verbose_value }}
-        {% if race.state == 'finished' %}
-            <span class="recorded">
-                {% if race.recorded %}
-                    recorded
-                {% else %}
-                    {% if race.recordable %}
-                        awaiting record
+    <span class="left">
+        <span class="goal">
+            {% if nocontext %}
+                {{ race.category.short_name }}
+            {% endif %}
+            {{ race.goal|default:race.custom_goal }}
+        </span>
+        <span class="state">
+            {{ race.state_info.verbose_value }}
+            {% if race.state == 'finished' %}
+                <span class="recorded">
+                    {% if race.recorded %}
+                        recorded
                     {% else %}
-                        not recorded
+                        {% if race.recordable %}
+                            awaiting record
+                        {% else %}
+                            not recorded
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            </span>
-        {% endif %}
+                </span>
+            {% endif %}
+        </span>
     </span>
-    {% if not nocontext %}
+    <span class="right">
         <span class="entrants">
             {{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }}
         </span>
-    {% endif %}
-    {% if race.started_at %}
-        <time class="timer {% if race.is_pending or race.is_in_progress %}autotick{% endif %}" datetime="{{ race.started_at.isoformat }}">
-            {{ race.timer_html|safe }}
-        </time>
-    {% else %}
-        <time class="timer">
-            {{ race.timer_html|safe }}
-        </time>
-    {% endif %}
+        {% if race.started_at %}
+            <time class="timer {% if race.is_pending or race.is_in_progress %}autotick{% endif %}" datetime="{{ race.started_at.isoformat }}">
+                {{ race.timer_html|safe }}
+            </time>
+        {% else %}
+            <time class="timer">
+                {{ race.timer_html|safe }}
+            </time>
+        {% endif %}
+    </span>
 </a>

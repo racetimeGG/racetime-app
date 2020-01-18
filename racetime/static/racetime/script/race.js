@@ -97,14 +97,16 @@ $(function() {
 
     var chatTickTimeout = null;
     var messageIDs = [];
-    var chatTick = function(lastID, timeout) {
+    var chatTick = function(timeout) {
         if (chatTickTimeout) {
             clearTimeout(chatTickTimeout);
         }
         chatTickTimeout = setTimeout(function() {
             $.get({
                 url: raceChatLink,
-                data: {since: lastID},
+                data: {
+                    since: messageIDs[messageIDs.length - 1]
+                },
                 success: function(data) {
                     if (!data) return;
                     var $messages = $('.race-chat .messages');
@@ -152,7 +154,6 @@ $(function() {
                             doScroll = true;
                         }
                         messageIDs.push(message.id);
-                        lastID = message.id;
                     });
                     chatDisconnected = false;
                     $('.race-chat').removeClass('disconnected');
@@ -164,7 +165,7 @@ $(function() {
                     if (updateRace) {
                         raceTick();
                     }
-                    chatTick(lastID, data.tick_rate);
+                    chatTick(data.tick_rate);
                 },
                 error: function() {
                     chatTick(null, 1000);
@@ -199,5 +200,5 @@ $(function() {
 
     $(document).on('click', '.dangerous .btn', function() {
         return confirm($(this).text().trim() + ': are you sure you want to do that?');
-    })
+    });
 });

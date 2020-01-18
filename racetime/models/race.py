@@ -14,6 +14,7 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 
 from .choices import EntrantStates, RaceStates
 from ..utils import SafeException, timer_html, timer_str
@@ -39,15 +40,15 @@ class Race(models.Model):
         blank=True,
         default=None,
         help_text=(
-            'Set a custom goal for this race, if none of the category goals '
-            'are suitable. Custom races cannot be recorded.'
+            'Set a custom goal for this race, if none of the category goals are suitable. '
+            + mark_safe('<strong>Custom races cannot be recorded.</strong>')
         ),
     )
     info = models.TextField(
         max_length=1000,
         null=True,
         blank=True,
-        help_text='Any useful information for race entrants.',
+        help_text='Any useful information for race entrants (e.g. randomizer seed).',
     )
     slug = models.SlugField()
     state = models.CharField(
@@ -87,7 +88,7 @@ class Race(models.Model):
         null=True,
     )
     start_delay = models.DurationField(
-        default=timedelta(seconds=10),
+        default=timedelta(seconds=15),
         validators=[
             MinValueValidator(timedelta(seconds=10)),
             MaxValueValidator(timedelta(seconds=60)),
@@ -124,6 +125,13 @@ class Race(models.Model):
         help_text=(
             'Allow users to chat during the race (race monitors can always '
             'use chat messages).'
+        ),
+    )
+    allow_non_entrant_chat = models.BooleanField(
+        default=False,
+        help_text=(
+            'Allow users who are not entered in the race to chat while the '
+            'race is in progress (anyone may use chat before and after the race).'
         ),
     )
     monitors = models.ManyToManyField(
@@ -190,14 +198,6 @@ class Race(models.Model):
     @property
     def is_done(self):
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
-
-    @property
-    def json_chat(self):
-        return cache.get_or_set(
-            str(self) + '/chat',
-            self.chat_data,
-            settings.RT_CACHE_TIMEOUT,
-        )
 
     @property
     def json_data(self):
@@ -347,13 +347,16 @@ class Race(models.Model):
     def add_silent_reload(self):
         self.add_message('.reload')
 
-    def chat_data(self):
+    def chat_data(self, last_seen=None):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
+        messages = messages.select_related('user')
+        if last_seen:
+            messages.filter(id__gt=last_seen)
         return OrderedDict(
             (message.hashid, {
                 'id': message.hashid,
                 'user': (
-                    message.user.api_dict_summary(race=self)
+                    message.user.api_dict_summary()
                     if not message.user.is_system else None
                 ),
                 'posted_at': message.posted_at,
@@ -361,7 +364,7 @@ class Race(models.Model):
                 'highlight': message.highlight,
                 'is_system': message.user.is_system,
             })
-            for message in reversed(messages.all()[:1000])
+            for message in reversed(messages[:100])
         )
 
     def dump_json_data(self):
@@ -977,18 +980,24 @@ class Entrant(models.Model):
 
     @property
     def can_add_comment(self):
-        return (
-            self.state == EntrantStates.joined.value
-            and self.ready
-            and (self.finish_time or self.dnf)
-            and not self.dq
-            and not self.race.is_pending
-            and not self.comment
-            and self.race.state != RaceStates.cancelled.value
-            and self.race.allow_comments
-            and not self.race.recorded
-            and not (self.race.is_done and not self.race.recordable)
-        )
+        if self.race.state == RaceStates.in_progress.value:
+            return (
+                self.state == EntrantStates.joined.value
+                and (self.finish_time or self.dnf)
+                and not self.dq
+                and not self.comment
+                and self.race.allow_comments
+            )
+        if self.race.state == RaceStates.finished.value:
+            return (
+                self.state == EntrantStates.joined.value
+                and not self.dq
+                and not self.comment
+                and self.race.allow_comments
+                and not self.race.recorded
+                and (self.race.recordable or timezone.now() - self.race.ended_at < timedelta(hours=1))
+            )
+        return False
 
     def add_comment(self, comment):
         if self.can_add_comment:

@@ -10,6 +10,7 @@ from .category import Category, CategoryData, RequestCategory, EditCategory
 from .home import Home
 from .race import (
     Race,
+    RaceMini,
     RaceData,
     RaceRenders,
     RaceChat,
@@ -47,7 +48,12 @@ from .race_monitor_actions import (
     AddMonitor,
     RemoveMonitor,
 )
-from .user import CreateAccount, EditAccount, TwitchAuth
+from .user import (
+    CreateAccount,
+    EditAccount,
+    TwitchAuth,
+    ViewProfile,
+)
 
 __all__ = [
     # auth
@@ -70,6 +76,7 @@ __all__ = [
     'Race',
     'RaceChat',
     'RaceData',
+    'RaceMini',
     'RaceRenders',
     # race_actions
     'Message',
@@ -104,4 +111,5 @@ __all__ = [
     'CreateAccount',
     'EditAccount',
     'TwitchAuth',
+    'ViewProfile',
 ]

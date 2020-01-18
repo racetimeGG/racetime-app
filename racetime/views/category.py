@@ -1,8 +1,12 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.core.mail import send_mail
+from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.db.transaction import atomic
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
@@ -19,13 +23,14 @@ class Category(UserMixin, generic.DetailView):
     )
 
     def get_context_data(self, **kwargs):
+        paginator = Paginator(self.past_races(), 10)
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
             'can_moderate': self.object.can_moderate(self.user),
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
-            'past_races': self.past_races(),
+            'past_races': paginator.get_page(self.request.GET.get('page')),
             'meta_image': self.request.build_absolute_uri(self.object.image.url) if self.object.image else None,
         }
 
@@ -96,6 +101,19 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
             'accepted, it will appear on the site within 24-48 hours. You '
             'will be able to edit the category further once it is live.'
         )
+
+        context = {'object': self.object}
+        for user in models.User.objects.filter(
+            active=True,
+            is_superuser=True,
+        ):
+            send_mail(
+                subject=render_to_string('racetime/email/category_request_subject.txt', context, self.request),
+                message=render_to_string('racetime/email/category_request_email.txt', context, self.request),
+                from_email=settings.EMAIL_FROM,
+                recipient_list=[user.email],
+            )
+
         return HttpResponseRedirect(reverse('home'))
 
 

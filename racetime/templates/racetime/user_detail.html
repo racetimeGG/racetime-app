@@ -1,0 +1,116 @@
+{% extends 'racetime/base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'racetime/style/user.css' %}">
+{% endblock %}
+
+{% block title %}
+    {{ profile }} |
+{% endblock %}
+
+{% block main %}
+    <h3>View user profile</h3>
+    <div class="user-profile">
+        {% include 'racetime/pops/user.html' with user=profile %}
+        {% if profile.twitch_channel %}
+            <a class="twitch-channel" href="{{ profile.twitch_channel }}" target="_blank">
+                <img src="{% static 'racetime/image/twitch.svg' %}" alt="">
+                {{ profile.twitch_name }}
+            </a>
+        {% endif %}
+    </div>
+    <h3>Race results</h3>
+    <div class="user-races race-list current">
+        {% include 'racetime/pops/paginator.html' with page=entrances %}
+        <ol>
+            {% for profile_entrant in entrances %}
+                <li>
+                    <time class="datetime" datetime="{{ profile_entrant.race.started_at.isoformat }}">
+                        {{ profile_entrant.race.opened_at }}
+                    </time>
+                    {% include 'racetime/pops/race_row.html' with race=profile_entrant.race nocontext=True %}
+                    <ol class="race-entrants">
+                        {% for entrant in profile_entrant.race.ordered_entrants %}
+                            <li class="entrant-row {% if entrant == profile_entrant %}highlight{% endif %}">
+                                <span class="place">
+                                    {{ entrant.place|ordinal|default:'—' }}
+                                </span>
+                                <span class="user">
+                                    {% include 'racetime/pops/user.html' with user=entrant.user extra_class='inline' %}
+                                    {% if entrant.comment %}
+                                        <span class="comment">
+                                            <i class="fa fa-comment"></i>
+                                            <span class="text">{{ entrant.comment }}</span>
+                                        </span>
+                                    {% endif %}
+                                </span>
+                                <span class="status {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
+                                    {{ entrant.summary.1 }}
+                                </span>
+                                <time class="finish-time">{{ entrant.finish_time_html|safe|default:'—' }}</time>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </li>
+            {% empty %}
+                <li>
+                    No races entered yet.
+                </li>
+            {% endfor %}
+        </ol>
+        {% include 'racetime/pops/paginator.html' with page=entrances %}
+    </div>
+{% endblock %}
+
+{% block aside %}
+    <h3>Statistics and info</h3>
+    <dl>
+        <dt>Joined on</dt>
+        <dd>
+            <time class="onlydate" datetime="{{ profile.date_joined.isoformat }}">
+                {{ profile.date_joined }}
+            </time>
+        </dd>
+        <dt>Races joined</dt>
+        <dd>{{ stats.joined }} race{{ stats.first|pluralize }}</dd>
+        <dt>Finished in 1st</dt>
+        <dd>{{ stats.first }} time{{ stats.first|pluralize }}</dd>
+        <dt>Finished in 2nd</dt>
+        <dd>{{ stats.second }} time{{ stats.second|pluralize }}</dd>
+        <dt>Finished in 3rd</dt>
+        <dd>{{ stats.third }} time{{ stats.third|pluralize }}</dd>
+        <dt>Forfeited</dt>
+        <dd>{{ stats.forfeits }} time{{ stats.forfeits|pluralize }}</dd>
+        <dt>Disqualified</dt>
+        <dd>{{ stats.dqs }} time{{ stats.dqs|pluralize }}</dd>
+    </dl>
+    <h3>Favourite categories</h3>
+    <ol class="user-categories">
+        {% for category in categories %}
+            <li>
+                {% if category.active %}<a href="{{ category.get_absolute_url }}">{% else %}<span>{% endif %}
+                    {% if category.image %}
+                        <span class="image" style="background-image: url({{ category.image.url }})"></span>
+                    {% else %}
+                        <span class="image no-image">
+                            <span class="short-name">{{ category.short_name }}</span>
+                        </span>
+                    {% endif %}
+                    <span class="info">
+                        <span class="name">
+                            {{ category.name }} {% if not category.active %}(inactive){% endif %}
+                        </span>
+                        <span class="times-entered">
+                            {{ category.times_entered }}
+                            race{{ category.times_entered|pluralize }}
+                        </span>
+                    </span>
+                {% if not category.active %}</span>{% else %}</a>{% endif %}
+            </li>
+        {% empty %}
+            <li>No races entered yet.</li>
+        {% endfor %}
+    </ol>
+{% endblock %}

@@ -16,62 +16,68 @@
         {% endblock %}
     </head>
     <body>
-        <header>
-            <div class="title">
-                <h1><a href="/">{{ site_info.header_text }}</a></h1>
-            </div>
-            {% block nocurrentrace %}
-                {% if user.is_authenticated and user.active_race_entrant %}
-                    <div class="current-race">
-                        {% include 'racetime/pops/race_row.html' with race=user.active_race_entrant.race nocontext=True %}
+        {% block body %}
+            {% block header %}
+                <header>
+                    <div class="title">
+                        <h1><a href="/">{{ site_info.header_text }}</a></h1>
                     </div>
+                    {% block nocurrentrace %}
+                        {% if user.is_authenticated and user.active_race_entrant %}
+                            <div class="current-race">
+                                {% include 'racetime/pops/race_row.html' with race=user.active_race_entrant.race nocontext=True %}
+                            </div>
+                        {% endif %}
+                    {% endblock nocurrentrace %}
+                    <div class="user-info">
+                        {% if user.is_authenticated %}
+                        {% include 'racetime/pops/user.html' with user=user %}
+                        <a href="{% url 'edit_account' %}" class="btn flat-right">Settings</a>
+                        <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="btn flat-left">Log out</button>
+                        </form>
+                        {% else %}
+                        <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-right">Log in</a>
+                        <a href="{% url 'create_account' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-left">Create account</a>
+                        {% endif %}
+                    </div>
+                </header>
+            {% endblock %}
+            <div class="container">
+                {% if messages %}
+                <div class="messages">
+                    <ul>
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endif %}
-            {% endblock nocurrentrace %}
-            <div class="user-info">
-                {% if user.is_authenticated %}
-                {% include 'racetime/pops/user.html' with user=user %}
-                <a href="{% url 'edit_account' %}" class="btn flat-right">Settings</a>
-                <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                <button type="submit" class="btn flat-left">Log out</button>
-                </form>
-                {% else %}
-                <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-right">Log in</a>
-                <a href="{% url 'create_account' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-left">Create account</a>
-                {% endif %}
+                <div class="content">
+                    <main>
+                        {% block main %}
+                        {% endblock %}
+                    </main>
+                    <aside>{% block aside %}{% endblock %}</aside>
+                </div>
             </div>
-        </header>
-        <div class="container">
-            {% if messages %}
-            <div class="messages">
-                <ul>
-                    {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            <div class="content">
-                <main>
-                    {% block main %}
-                    {% endblock %}
-                </main>
-                <aside>{% block aside %}{% endblock %}</aside>
-            </div>
-        </div>
-        <footer>
-            <ul>
-                {% for name, url in site_info.footer_links %}
-                <li>
-                    <a href="{{ url }}" target="_blank">{{ name }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            <span>
-                {{ site_info.footer_text }}
-            </span>
-        </footer>
+            {% block footer %}
+                <footer>
+                    <ul>
+                        {% for name, url in site_info.footer_links %}
+                        <li>
+                            <a href="{{ url }}" target="_blank">{{ name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <span>
+                        {{ site_info.footer_text }}
+                    </span>
+                </footer>
+            {% endblock %}
+        {% endblock %}
         <script src="{{ site_info.fontawesome_script }}" crossorigin="anonymous"></script>
         <script src="{% static 'jquery.min.js' %}"></script>
         <script src="{% static 'jquery.form.min.js' %}"></script>

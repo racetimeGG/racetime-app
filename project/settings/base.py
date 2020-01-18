@@ -143,6 +143,8 @@ LOGGING = {
 
 # Site details
 
+EMAIL_FROM = 'hello@racetime.dev'
+
 RT_SITE_INFO = {
     'title': 'racetime.dev',
     'header_text': 'racetime.dev',

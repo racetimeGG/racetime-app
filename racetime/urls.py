@@ -17,6 +17,7 @@ urlpatterns = [
 
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
+    path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
 
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
@@ -29,6 +30,7 @@ urlpatterns = [
     path('<str:category>/<str:race>/', include([
         path('chat', views.RaceChat.as_view(), name='race_chat'),
         path('data', views.RaceData.as_view(), name='race_data'),
+        path('mini', views.RaceMini.as_view(), name='race_mini'),
         path('renders', views.RaceRenders.as_view(), name='race_renders'),
 
         path('message', views.Message.as_view(), name='message'),
