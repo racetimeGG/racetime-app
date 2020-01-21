@@ -156,7 +156,6 @@ RT_SITE_INFO = {
         ('GitHub', 'https://github.com/deains/racetime-app'),
     ],
     'extra_scripts': [],
-    'fontawesome_script': 'https://kit.fontawesome.com/e6c3ac42ed.js',
 }
 
 RT_CACHE_TIMEOUT = 3600

@@ -4,6 +4,7 @@
     <head>
         <title>{% block title %}{% endblock %}{{ site_info.title }}</title>
         <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Roboto:400,700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="{% static 'racetime/style/base.css' %}">
         {% block css %}{% endblock %}
 
@@ -78,7 +79,6 @@
                 </footer>
             {% endblock %}
         {% endblock %}
-        <script src="{{ site_info.fontawesome_script }}" crossorigin="anonymous"></script>
         <script src="{% static 'jquery.min.js' %}"></script>
         <script src="{% static 'jquery.form.min.js' %}"></script>
         <script src="{% static 'racetime/script/base.js' %}"></script>

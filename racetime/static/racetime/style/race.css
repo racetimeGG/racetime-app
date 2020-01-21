@@ -170,4 +170,5 @@ main {
     align-items: center;
     display: flex;
     margin-left: 5px;
+    text-decoration: none;
 }

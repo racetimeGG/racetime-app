@@ -537,6 +537,9 @@ header > .current-race > a .timer {
     display: flex;
     padding: 5px;
 }
+.entrant-row .material-icons {
+    font-size: 18px;
+}
 .entrant-row > .place {
     flex: 0 0 50px;
     text-align: center;
@@ -566,8 +569,8 @@ header > .current-race > a .timer {
     background: #18191d;
     border-radius: 6px;
 }
-.entrant-row > .user > .comment > svg {
-    margin-top: 3px;
+.entrant-row > .user > .comment > i {
+    margin-top: 2px;
 }
 .entrant-row > .user > .comment > .text {
     display: none;
@@ -613,10 +616,22 @@ header > .current-race > a .timer {
     margin-right: 5px;
 }
 .entrant-row > .monitor-actions > li > form > .btn {
+    background: rgba(0,0,0,0.3);
+    border: none;
+    cursor: pointer;
+    height: 22px;
+    line-height: 22px;
     padding: 0;
-    min-width: 23px;
+    vertical-align: top;
+    width: 22px;
 }
-.entrant-row > .monitor-actions > li > form > .btn > svg {
+.entrant-row > .monitor-actions > li > form > .btn:hover {
+    background-color: rgba(166, 235, 196, 0.2);
+    color: white;
+}
+.entrant-row > .monitor-actions > li > form > .btn > .material-icons {
+    height: 22px;
+    line-height: 22px;
 }
 .race-entrants > .count {
     border-top: 1px solid rgba(0,0,0,0.75);
