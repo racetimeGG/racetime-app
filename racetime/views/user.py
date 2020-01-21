@@ -22,7 +22,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from .base import UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import notice_exception
+from ..utils import notice_exception, twitch_auth_url
 
 
 class ViewProfile(generic.DetailView):
@@ -183,7 +183,7 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
         kwargs.update({
             'account_form': self.get_form(forms.UserEditForm),
             'password_form': self.get_form(forms.PasswordChangeForm),
-            'twitch_url': self.get_twitch_url(),
+            'twitch_url': twitch_auth_url(self.request),
         })
         if 'form' in kwargs:
             if isinstance(kwargs['form'], forms.UserEditForm):
@@ -192,16 +192,6 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
                 kwargs['password_form'] = kwargs['form']
 
         return kwargs
-
-    def get_twitch_url(self):
-        return 'https://id.twitch.tv/oauth2/authorize?' + urlencode({
-            'client_id': settings.TWITCH_CLIENT_ID,
-            'redirect_uri': self.request.build_absolute_uri(reverse('twitch_auth')),
-            'response_type': 'code',
-            'scope': '',
-            'force_verify': 'true',
-            'state': self.request.META.get('CSRF_COOKIE'),
-        })
 
 
 class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
@@ -242,7 +232,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                 messages.success(
                     self.request,
                     'Thanks, you have successfully authorised your Twitch.tv '
-                    'account.',
+                    'account. You can now join races that requires streaming.',
                 )
 
             user.save()

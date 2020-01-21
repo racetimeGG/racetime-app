@@ -8,7 +8,7 @@ from django.views import generic
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
-from ..utils import get_hashids
+from ..utils import get_hashids, twitch_auth_url
 
 
 class Race(UserMixin, generic.DetailView):
@@ -40,6 +40,9 @@ class Race(UserMixin, generic.DetailView):
             category__slug=category_slug,
         )
         return queryset
+
+    def twitch_auth_url(self):
+        return twitch_auth_url(self.request)
 
 
 class RaceMini(Race):

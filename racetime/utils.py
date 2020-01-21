@@ -1,6 +1,8 @@
 import random
+from urllib.parse import urlencode
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils.module_loading import import_string
 from hashids import Hashids
 
@@ -10,6 +12,7 @@ __all__ = [
     'get_hashids',
     'timer_html',
     'timer_str',
+    'twitch_auth_url',
 ]
 
 slug_adjectives = [
@@ -258,3 +261,14 @@ def timer_html(delta, deciseconds=True):
         minutes,
         seconds,
     )
+
+
+def twitch_auth_url(request):
+    return 'https://id.twitch.tv/oauth2/authorize?' + urlencode({
+        'client_id': settings.TWITCH_CLIENT_ID,
+        'redirect_uri': request.build_absolute_uri(reverse('twitch_auth')),
+        'response_type': 'code',
+        'scope': '',
+        'force_verify': 'true',
+        'state': request.META.get('CSRF_COOKIE'),
+    })
