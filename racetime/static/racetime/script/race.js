@@ -65,7 +65,7 @@ $(function() {
 
     setInterval(function() {
         // Warn the user if chat isn't updating
-        if (!chatDisconnected && new Date() - lastChatTick > Math.max(1000, chatTickRate) * 3) {
+        if (!chatDisconnected && new Date() - lastChatTick > Math.max(10000, chatTickRate * 10)) {
             chatDisconnected = true;
             $('.race-chat').addClass('disconnected');
         }
