@@ -1,12 +1,8 @@
-from hashlib import md5
-from urllib.parse import urlencode
-
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
-from django.core.cache import cache
 from django.core.validators import RegexValidator, MinLengthValidator
 from django.db import models
 from django.db.models import Q
