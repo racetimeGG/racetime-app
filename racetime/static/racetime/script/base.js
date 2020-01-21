@@ -1,4 +1,12 @@
 $(function() {
+    var getNavigatorLanguage = function() {
+        if (navigator.languages && navigator.languages.length) {
+            return navigator.languages[0];
+        } else {
+            return navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en';
+        }
+    };
+
     var autotick = function() {
         $('time.autotick').each(function() {
             $(this).attr('datetime');
@@ -38,21 +46,21 @@ $(function() {
             if ($(this).data('latency')) {
                 date = new Date(date.getTime() + $(this).data('latency'));
             }
-            $(this).html(date.toLocaleString());
+            $(this).html(date.toLocaleString(getNavigatorLanguage()));
         });
         $(this).find('time.onlydate').each(function () {
             var date = new Date($(this).attr('datetime'));
             if ($(this).data('latency')) {
                 date = new Date(date.getTime() + $(this).data('latency'));
             }
-            $(this).html(date.toLocaleDateString());
+            $(this).html(date.toLocaleDateString(getNavigatorLanguage()));
         });
         $(this).find('time.onlytime').each(function () {
             var date = new Date($(this).attr('datetime'));
             if ($(this).data('latency')) {
                 date = new Date(date.getTime() + $(this).data('latency'));
             }
-            $(this).html(date.toLocaleTimeString());
+            $(this).html(date.toLocaleTimeString(getNavigatorLanguage()));
         });
     };
     window.localiseDates.call(document.body);
