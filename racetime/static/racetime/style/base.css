@@ -536,7 +536,10 @@ header > .current-race > a .timer {
 
 .race-entrants {
 }
-.race-entrants > ol {
+.race-entrants > ol > .no-entrants {
+    border-top: 1px solid rgba(0,0,0,0.75);
+    padding: 5px;
+    text-align: center;
 }
 
 .entrant-row {
