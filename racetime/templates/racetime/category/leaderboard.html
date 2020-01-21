@@ -1,5 +1,10 @@
 {% load humanize %}
-<h4>{{ goal.name }}</h4>
+<span class="header">
+    <h4>{{ goal.name }}</h4>
+    <span class="num-races">
+        {{ goal.num_races|intcomma }} race{{ goal.num_races|pluralize }}
+    </span>
+</span>
 <ol>
     {% for ranking in rankings %}
         <li>

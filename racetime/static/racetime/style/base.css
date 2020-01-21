@@ -857,9 +857,16 @@ footer > ul > li:first-child::before {
     margin-left: 0;
     margin-top: 0;
 }
-.category-leaderboards > ol > li > h4 {
+.category-leaderboards > ol > li > .header {
+    align-items: center;
     background: #1a1c20;
+    display: flex;
+    justify-content: space-between;
     padding: 5px;
+}
+.category-leaderboards > ol > li > .header > .num-races {
+    color: #7a777a;
+    font-size: 13px;
 }
 .category-leaderboards > ol > li > ol > li {
     border-top: 1px solid #08090a;

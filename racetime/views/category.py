@@ -91,7 +91,9 @@ class CategoryLeaderboards(Category):
         goals = models.Goal.objects.filter(
             category=category,
             active=True,
-        ).order_by('name')
+        )
+        goals = goals.annotate(num_races=db_models.Count('race__id'))
+        goals = goals.order_by('-num_races', 'name')
         for goal in goals:
             rankings = models.UserRanking.objects.filter(
                 category=category,
