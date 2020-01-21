@@ -99,6 +99,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text='Recommended size: 100x100. No larger than 100kb.',
     )
+    profile_bio = models.TextField(
+        null=True,
+        blank=True,
+        help_text=(
+            'Add some information to your public profile. Plug your Discord '
+            'server, stream schedule, or anything else you like.'
+        ),
+    )
     is_staff = models.BooleanField(
         default=False,
         editable=False,

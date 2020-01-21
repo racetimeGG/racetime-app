@@ -20,6 +20,9 @@
                 {{ profile.twitch_name }}
             </a>
         {% endif %}
+        {% if profile.profile_bio %}
+            <p class="bio">{{ profile.profile_bio|urlize }}</p>
+        {% endif %}
     </div>
     <h3>Race results</h3>
     <div class="user-races race-list current">

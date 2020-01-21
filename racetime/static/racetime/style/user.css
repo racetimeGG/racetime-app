@@ -30,6 +30,12 @@
     margin-right: 5px;
 }
 
+.user-profile > .bio {
+    margin: 10px 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .race-list > ol > li > a {
     border-bottom: 0;
     border-radius: 10px 10px 0 0;
