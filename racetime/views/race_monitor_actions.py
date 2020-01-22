@@ -1,16 +1,3 @@
-"""
-Monitor actions (race):
-    Invite user (inv)
-    Close to new entrants (open/inv)
-    Re-open to entrants (pending)
-    Cancel race (any)
-Monitor actions (per-user):
-    Accept invite
-    Force ready/un-ready (open/inv/pending)
-    Force quit (open/inv/pending)
-    Disqualify (in_prog/finished)
-
-"""
 from django.http import Http404
 from django.views import generic
 
