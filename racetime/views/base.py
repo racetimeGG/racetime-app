@@ -61,4 +61,6 @@ class BaseRaceAction(UserMixin, generic.View):
         return HttpResponseRedirect(self.get_race().get_absolute_url())
 
     def _do_action(self):
+        if self.user.is_banned_from_category(self.get_race().category):
+            raise SafeException('You are currently banned from this category.')
         self.action(self.get_race(), self.user)
