@@ -111,6 +111,8 @@ class CategoryForm(forms.ModelForm):
             return True
         if any(k for k in el.attrs.keys() if k not in self.ALLOWED_TAGS[el.name]):
             return True
+        if el.name.lower() == 'a' and el.attrs.get('href', '').startswith('javascript:'):
+            return True
         return False
 
     def clean_add_new_goals(self):
