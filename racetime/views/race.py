@@ -31,6 +31,12 @@ class Race(UserMixin, generic.DetailView):
             'can_monitor': race.can_monitor(self.user),
             'invite_form': self.get_invite_form(),
             'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
+            'js_vars': {
+                'urls': {
+                    'chat': race.get_chat_url(),
+                    'renders': race.get_renders_url(),
+                },
+            },
         }
 
     def get_queryset(self):
