@@ -18,6 +18,29 @@
 .breadcrumbs {
     margin-bottom: 5px;
 }
+.race-actions {
+    margin-bottom: 5px;
+}
+.race-chat > .messages {
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+@media (max-height: 600px) {
+    .race-status > .timer {
+        font-size: 40px;
+    }
+    .race-status > .state > .value {
+        font-size: 15px;
+    }
+    .race-status > .state > .help {
+        display: none;
+    }
+}
+@media (max-height: 500px) {
+    .race-status > .state {
+        display: none;
+    }
+}
 </style>
 {% endblock %}
 

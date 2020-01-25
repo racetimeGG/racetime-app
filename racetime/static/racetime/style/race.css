@@ -159,8 +159,10 @@ main {
     font-size: 13px;
     height: 18px;
     min-height: 0;
+    outline: none;
     overflow: hidden;
     resize: none;
+    vertical-align: top;
     width: calc(100% - 10px);
 }
 .race-chat > form textarea:invalid {
