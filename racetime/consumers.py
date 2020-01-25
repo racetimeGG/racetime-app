@@ -30,6 +30,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if event['message']['is_system']:
             await self.load_race()
 
+    async def race_data(self, event):
+        await self.send(text_data=json.dumps({
+            'type': event['type'],
+            'race': event['race'],
+        }, cls=DjangoJSONEncoder))
+
     @database_sync_to_async
     def load_race(self):
         try:

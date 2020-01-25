@@ -269,7 +269,7 @@ class RaceBot:
                     ['stream_live'],
                 )
                 for race in races_to_reload:
-                    race.add_silent_reload()
+                    race.broadcast_data()
 
                 self.logger.info(
                     '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'

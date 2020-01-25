@@ -143,6 +143,9 @@ Race.prototype.onSocketMessage = function(event) {
     }
 
     switch (data.type) {
+        case 'race.data':
+            this.raceTick();
+            break;
         case 'chat.message':
             this.addMessage(data.message);
             break;

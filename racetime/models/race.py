@@ -2,6 +2,8 @@ import json
 from collections import OrderedDict
 from datetime import timedelta
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.apps import apps
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
@@ -161,6 +163,56 @@ class Race(models.Model):
                 name='unique_category_slug',
             ),
         ]
+
+    @property
+    def as_dict(self):
+        return {
+            'name': str(self),
+            'status': {
+                'value': self.state_info.value,
+                'verbose_value': self.state_info.verbose_value,
+                'help_text': self.state_info.help_text,
+            },
+            'url': self.get_absolute_url(),
+            'data_url': self.get_data_url(),
+            'category': self.category.api_dict_summary(),
+            'goal': {
+                'name': self.goal_str,
+                'custom': not self.goal,
+            },
+            'info': self.info,
+            'entrants_count': self.entrants_count,
+            'entrants_count_inactive': self.entrants_count_inactive,
+            'entrants': [
+                {
+                    'user': entrant.user.api_dict_summary(race=self),
+                    'status': {
+                        'value': entrant.summary[0],
+                        'verbose_value': entrant.summary[1],
+                        'help_text': entrant.summary[2],
+                    },
+                    'finish_time': entrant.finish_time,
+                    'place': entrant.place,
+                    'place_ordinal': ordinal(entrant.place) if entrant.place else None,
+                    'comment': entrant.comment,
+                    'stream_live': entrant.stream_live,
+                    'stream_override': entrant.stream_override,
+                }
+                for entrant in self.ordered_entrants
+            ],
+            'opened_at': self.opened_at,
+            'start_delay': self.start_delay,
+            'started_at': self.started_at,
+            'ended_at': self.ended_at,
+            'time_limit': self.time_limit,
+            'opened_by': self.opened_by.api_dict_summary(race=self),
+            'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
+            'recordable': self.recordable,
+            'recorded': self.recorded,
+            'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
+            'allow_comments': self.allow_comments,
+            'allow_midrace_chat': self.allow_midrace_chat,
+        }
 
     @property
     def entrants_count(self):
@@ -344,9 +396,14 @@ class Race(models.Model):
             message=message,
             highlight=highlight,
         )
+        self.broadcast_data()
 
-    def add_silent_reload(self):
-        self.add_message('.reload')
+    def broadcast_data(self):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(self.slug, {
+            'type': 'race.data',
+            'race': self.as_dict,
+        })
 
     def chat_history(self):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
@@ -357,60 +414,12 @@ class Race(models.Model):
         )
 
     def dump_json_data(self):
-        value = json.dumps({
-            'name': str(self),
-            'status': {
-                'value': self.state_info.value,
-                'verbose_value': self.state_info.verbose_value,
-                'help_text': self.state_info.help_text,
-            },
-            'url': self.get_absolute_url(),
-            'data_url': self.get_data_url(),
-            'category': self.category.api_dict_summary(),
-            'goal': {
-                'name': self.goal_str,
-                'custom': not self.goal,
-            },
-            'info': self.info,
-            'entrants_count': self.entrants_count,
-            'entrants_count_inactive': self.entrants_count_inactive,
-            'entrants': [
-                {
-                    'user': entrant.user.api_dict_summary(race=self),
-                    'status': {
-                        'value': entrant.summary[0],
-                        'verbose_value': entrant.summary[1],
-                        'help_text': entrant.summary[2],
-                    },
-                    'finish_time': entrant.finish_time,
-                    'place': entrant.place,
-                    'place_ordinal': ordinal(entrant.place) if entrant.place else None,
-                    'comment': entrant.comment,
-                    'stream_live': entrant.stream_live,
-                    'stream_override': entrant.stream_override,
-                }
-                for entrant in self.ordered_entrants
-            ],
-            'opened_at': self.opened_at,
-            'start_delay': self.start_delay,
-            'started_at': self.started_at,
-            'ended_at': self.ended_at,
-            'time_limit': self.time_limit,
-            'opened_by': self.opened_by.api_dict_summary(race=self),
-            'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
-            'recordable': self.recordable,
-            'recorded': self.recorded,
-            'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
-            'allow_comments': self.allow_comments,
-            'allow_midrace_chat': self.allow_midrace_chat,
-        }, cls=DjangoJSONEncoder)
-
+        value = json.dumps(self.as_dict, cls=DjangoJSONEncoder)
         cache.set(str(self) + '/data', value, None)
         return value
 
     def dump_json_renders(self):
         value = json.dumps(self.get_renders(), cls=DjangoJSONEncoder)
-
         cache.set(str(self) + '/renders', value, None)
         return value
 
