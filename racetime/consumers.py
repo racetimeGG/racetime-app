@@ -22,13 +22,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.race_slug, self.channel_name)
 
     async def chat_message(self, event):
-        message = event['message']
-
         await self.send(text_data=json.dumps({
-            'message': message,
+            'type': event['type'],
+            'message': event['message'],
         }, cls=DjangoJSONEncoder))
 
-        if message['is_system']:
+        if event['message']['is_system']:
             await self.load_race()
 
     @database_sync_to_async
