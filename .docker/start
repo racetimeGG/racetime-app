@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for host in "$WAITFOR"; do
+    ./.docker/wait-for $host
+done
+
+if [ "$RUNMIGRATIONS" -eq 1 ]; then
+    python manage.py migrate
+fi
+
+python manage.py "$@"

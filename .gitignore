@@ -3,6 +3,7 @@ __pycache__
 
 /.coverage
 /db.sqlite3
+/docker-compose.override.yml
 /node_modules
 /project/settings/local.py
 /static

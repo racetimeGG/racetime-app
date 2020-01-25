@@ -12,6 +12,8 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+ASGI_APPLICATION = 'racetime.routing.application'
+
 INSTALLED_APPS = [
     'racetime',
     'django.contrib.admin',
@@ -22,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'captcha',
+    'channels',
     'django.forms',
 ]
 
@@ -60,14 +63,30 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('racetime.redis', 6379)],
+        },
+    },
+}
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'racetime',
+        'USER': 'racetime',
+        'PASSWORD': 'racetime',
+        'HOST': 'racetime.db',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+    },
 }
 
 # Authentication

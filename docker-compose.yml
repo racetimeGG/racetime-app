@@ -1,0 +1,37 @@
+version: '3.6'
+
+services:
+  racetime.web:
+    build:
+      context: .
+      target: web
+    environment:
+      - RUNMIGRATIONS=1
+      - WAITFOR=racetime.db:3306
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    volumes:
+      - ".:/opt/racetime"
+  racetime.racebot:
+    build:
+      context: .
+      target: racebot
+    restart: on-failure
+    volumes:
+      - ".:/opt/racetime"
+  racetime.db:
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      - MYSQL_DATABASE=racetime
+      - MYSQL_ROOT_PASSWORD=racetime
+      - MYSQL_USER=racetime
+      - MYSQL_PASSWORD=racetime
+      - WAITFOR=racetime.db:3306 racetime.web:8000
+    image: mariadb:10.4
+    volumes:
+      - db-data:/var/lib/mysql
+  racetime.redis:
+    image: redis:5-alpine
+volumes:
+  db-data:
