@@ -13,6 +13,11 @@ from . import models
 
 
 class ChatForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # This prevents browsers from showing "Please fill in this field" on mouseover.
+        self.fields['message'].widget.attrs['title'] = ''
+
     class Meta:
         fields = ('message',)
         model = models.Message
