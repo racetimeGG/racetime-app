@@ -11,7 +11,7 @@ function Race() {
         this.vars = JSON.parse($('#race-vars').text());
         for (var i in this.vars.chat_history) {
             if (!this.vars.chat_history.hasOwnProperty(i)) continue;
-            this.onMessage(this.vars.chat_history[i], true);
+            this.addMessage(this.vars.chat_history[i]);
         }
         this.open();
     } catch (e) {
@@ -41,6 +41,22 @@ Race.prototype.ajaxifyActionForm = function(form) {
         },
         error: self.onError.bind(self)
     });
+};
+
+Race.prototype.addMessage = function(message) {
+    var self = this;
+
+    if (self.messageIDs.indexOf(message.id) !== -1) {
+        return true;
+    }
+
+    if (!message.is_system || message.message !== '.reload') {
+        var $messages = $('.race-chat .messages');
+        $messages.append(self.createMessageItem(message));
+        $messages[0].scrollTop = $messages[0].scrollHeight
+    }
+
+    self.messageIDs.push(message.id);
 };
 
 Race.prototype.createMessageItem = function(message) {
@@ -101,26 +117,6 @@ Race.prototype.onError = function(xhr) {
     }
 };
 
-Race.prototype.onMessage = function(message, noRaceTick) {
-    var self = this;
-
-    if (self.messageIDs.indexOf(message.id) !== -1) {
-        return true;
-    }
-
-    if (!message.is_system || message.message !== '.reload') {
-        var $messages = $('.race-chat .messages');
-        $messages.append(self.createMessageItem(message));
-        $messages[0].scrollTop = $messages[0].scrollHeight
-    }
-
-    if (message.is_system && !noRaceTick) {
-        self.raceTick();
-    }
-
-    self.messageIDs.push(message.id);
-};
-
 Race.prototype.onSocketClose = function(event) {
     $('.race-chat').addClass('disconnected');
 
@@ -137,13 +133,19 @@ Race.prototype.onSocketError = function(event) {
 Race.prototype.onSocketMessage = function(event) {
     try {
         var data = JSON.parse(event.data);
-        this.onMessage(data.message);
     } catch (e) {
         if ('notice_exception' in window) {
             window.notice_exception(e);
+            return;
         } else {
             throw e;
         }
+    }
+
+    switch (data.type) {
+        case 'chat.message':
+            this.addMessage(data.message);
+            break;
     }
 };
 
