@@ -241,11 +241,10 @@ class Message(RaceAction, generic.FormView):
 
         if (
             self.get_race().is_done
-            and (
-                race.recorded
-                or not race.recordable
-                or race.ended_at <= timezone.now() - timedelta(hours=1)
-            )
+            and (race.recorded or (
+                not race.recordable
+                and race.ended_at <= timezone.now() - timedelta(hours=1)
+            ))
             and not self.user.is_superuser
         ):
             raise SafeException('This race chat is now closed. No new messages may be added.')
