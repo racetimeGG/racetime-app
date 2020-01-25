@@ -58,7 +58,8 @@ this is not compatible with the Twitch API, so you should always use
 
 ## Further information
 
-We have a Discord server where you can discuss the site and ongoing
+The [Wiki](/wiki) pages have some information that may prove useful to you.
+We also have a Discord server where you can discuss the site and ongoing
 developments, make suggestions and get involved:
 [join the Discord server here](https://discord.gg/65cvHG3).
 
