@@ -87,20 +87,42 @@ main {
     flex-direction: column;
     flex-grow: 1;
     font-size: 13px;
+    position: relative;
 }
 
 .race-chat > .disconnected {
-    background-color: #8c3030;
-    border-radius: 10px;
+    cursor: default;
     display: none;
     font-weight: bold;
-    margin-top: 10px;
-    padding: 5px;
-    text-align: center;
+    justify-content: center;
+    line-height: 27px;
+    pointer-events: none;
+    position: absolute;
+        top: 10px;
+        right: 0;
+        left: 0;
 }
 
 .race-chat.disconnected > .disconnected {
-    display: block;
+    display: flex;
+}
+
+.race-chat > .disconnected > span {
+    align-items: center;
+    background-color: #1a1c20;
+    border-radius: 10px;
+    display: flex;
+    padding: 0 10px;
+}
+
+@keyframes blink {
+    50% { opacity: 0.2 }
+}
+
+.race-chat > .disconnected > span > .material-icons {
+    animation: blink 1.2s ease-in-out infinite;
+    color: #8c3030;
+    margin-right: 5px;
 }
 
 .race-chat > .messages {

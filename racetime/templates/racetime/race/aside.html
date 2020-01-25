@@ -18,8 +18,11 @@
     {% include 'racetime/race/status.html' with race=race %}
 </div>
 <div class="race-chat">
-    <div class="disconnected">
-        Unable to connect, try reloading the page.
+    <div class="disconnected" title="If this message doesn't disappear after a while, try reloading the page.">
+        <span>
+            <i class="material-icons">sync_problem</i>
+            Reconnecting to chat…
+        </span>
     </div>
     <ol class="messages"></ol>
     {% if user.is_active %}
