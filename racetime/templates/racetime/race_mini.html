@@ -34,7 +34,7 @@ $(function() {
 {% endblock %}
 
 {% block title %}
-    {{ race.slug }}
+    {{ race.slug }} |
 {% endblock %}
 {% block meta %}
     <meta property="og:title" content="{{ race.category.name }} ~ {{ race.goal_str }} ({{ race.state_info.verbose_value }})">
