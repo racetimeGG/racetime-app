@@ -65,7 +65,6 @@ class RaceBot:
             self.races.append({
                 'last_refresh': timezone.now(),
                 'object': race,
-                'countdown_reload_posted': False,
                 'cancel_warning_posted': False,
                 'limit_warning_posted': False,
             })
@@ -145,15 +144,6 @@ class RaceBot:
                 highlight=True,
             )
             self.logger.info('[Race] Started %(race)s.' % {'race': race['object']})
-        elif (
-            time_to_start >= -race['object'].start_delay + timedelta(seconds=3)
-            and not race['countdown_reload_posted']
-        ):
-            # Add a silent reload a few seconds into the countdown. This helps
-            # ensure that everyone's timer starts on time if chat goes out of
-            # sync with the race cache.
-            race['object'].add_silent_reload()
-            race['countdown_reload_posted'] = True
 
     def check_readiness(self, race):
         """
