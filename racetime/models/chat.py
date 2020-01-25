@@ -14,6 +14,7 @@ class Message(models.Model):
     )
     posted_at = models.DateTimeField(
         auto_now_add=True,
+        db_index=True,
     )
     message = models.TextField(
         max_length=1000,
@@ -23,6 +24,7 @@ class Message(models.Model):
     )
     deleted = models.BooleanField(
         default=False,
+        db_index=True,
     )
     deleted_by = models.ForeignKey(
         'User',
