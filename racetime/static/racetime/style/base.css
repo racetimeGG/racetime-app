@@ -694,6 +694,21 @@ header > .current-race > a .timer {
     background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.25) 100%);
     border-radius: 10px;
 }
+@keyframes go {
+    0% {
+        box-shadow: inset 0 0 10px transparent;
+    }
+    10% {
+        box-shadow: inset 0 0 10px #26dd9a;
+        color: #26dd9a;
+    }
+    100% {
+        box-shadow: inset 0 0 10px transparent;
+    }
+}
+.race-status.go {
+    animation: go 1s linear none;
+}
 .race-status > .timer {
     display: block;
     font-size: 50px;

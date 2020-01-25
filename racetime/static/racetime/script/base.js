@@ -17,6 +17,10 @@ $(function() {
             }
             var negative = timer < 0;
 
+            if (negative && timer >= -100) {
+                $(this).closest('.race-status').addClass('go');
+            }
+
             timer = Math.abs(timer);
             var hours = (timer - (timer % 3600000)) / 3600000;
             timer -= hours * 3600000;
