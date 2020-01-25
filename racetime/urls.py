@@ -32,6 +32,7 @@ urlpatterns = [
         path('chat', views.RaceChat.as_view(), name='race_chat'),
         path('data', views.RaceData.as_view(), name='race_data'),
         path('mini', views.RaceMini.as_view(), name='race_mini'),
+        path('log', views.RaceChatLog.as_view(), name='race_log'),
         path('renders', views.RaceRenders.as_view(), name='race_renders'),
 
         path('message', views.Message.as_view(), name='message'),

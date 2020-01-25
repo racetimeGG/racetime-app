@@ -55,6 +55,31 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
+class RaceChatLog(Race):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        messages = self.object.message_set.filter(deleted=False).order_by('posted_at')
+        content = '\n'.join(
+            '[%s] %s' % (m.posted_at.replace(microsecond=0), m.message) if m.user.is_system
+            else '[%s] %s: %s' % (m.posted_at.replace(microsecond=0), m.user, m.message)
+            for m in messages
+        )
+
+        resp = http.HttpResponse(
+            content=content,
+            content_type='text/plain',
+        )
+
+        filename = '%s_%s_chatlog.txt' % (
+            self.object.category.slug,
+            self.object.slug,
+        )
+        resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        return resp
+
+
 class RaceData(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

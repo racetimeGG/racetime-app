@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 
@@ -210,6 +211,14 @@ class Message(RaceAction, generic.FormView):
                 race.add_message('Goal: ' + race.goal_str)
                 if race.info:
                     race.add_message(race.info)
+                return
+            elif command == 'log':
+                race.add_message(
+                    'Chat log download: %s'
+                    % self.request.build_absolute_uri(
+                        reverse('race_log', args=(race.category.slug, race.slug))
+                    )
+                )
                 return
 
         if (

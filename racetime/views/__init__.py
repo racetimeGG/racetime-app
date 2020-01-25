@@ -17,6 +17,7 @@ from .home import Home
 from .race import (
     Race,
     RaceMini,
+    RaceChatLog,
     RaceData,
     RaceRenders,
     RaceChat,
@@ -82,6 +83,7 @@ __all__ = [
     'EditRace',
     'Race',
     'RaceChat',
+    'RaceChatLog',
     'RaceData',
     'RaceMini',
     'RaceRenders',
