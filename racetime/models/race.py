@@ -348,23 +348,11 @@ class Race(models.Model):
     def add_silent_reload(self):
         self.add_message('.reload')
 
-    def chat_data(self, last_seen=None):
+    def chat_history(self):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
         messages = messages.select_related('user')
-        if last_seen:
-            messages.filter(id__gt=last_seen)
         return OrderedDict(
-            (message.hashid, {
-                'id': message.hashid,
-                'user': (
-                    message.user.api_dict_summary()
-                    if not message.user.is_system else None
-                ),
-                'posted_at': message.posted_at,
-                'message': message.message,
-                'highlight': message.highlight,
-                'is_system': message.user.is_system,
-            })
+            (message.hashid, message.as_dict)
             for message in reversed(messages[:100])
         )
 
@@ -722,7 +710,7 @@ class Race(models.Model):
         return reverse('race', args=(self.category.slug, self.slug))
 
     def get_chat_url(self):
-        return reverse('race_chat', args=(self.category.slug, self.slug))
+        return reverse('race_chat', args=(self.slug,), urlconf='racetime.routing')
 
     def get_data_url(self):
         return reverse('race_data', args=(self.category.slug, self.slug))

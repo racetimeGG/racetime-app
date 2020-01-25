@@ -20,7 +20,6 @@ from .race import (
     RaceChatLog,
     RaceData,
     RaceRenders,
-    RaceChat,
     CreateRace,
     EditRace,
 )
@@ -82,7 +81,6 @@ __all__ = [
     'CreateRace',
     'EditRace',
     'Race',
-    'RaceChat',
     'RaceChatLog',
     'RaceData',
     'RaceMini',

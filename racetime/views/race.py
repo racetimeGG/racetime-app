@@ -32,6 +32,7 @@ class Race(UserMixin, generic.DetailView):
             'invite_form': self.get_invite_form(),
             'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
             'js_vars': {
+                'chat_history': race.chat_history(),
                 'urls': {
                     'chat': race.get_chat_url(),
                     'renders': race.get_renders_url(),
@@ -105,28 +106,6 @@ class RaceRenders(Race):
             )
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
-
-
-class RaceChat(Race):
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        since = request.GET.get('since')
-        if since:
-            try:
-                message_id = get_hashids(models.Message).decode(since)[0]
-                messages = self.object.chat_data(last_seen=message_id)
-            except IndexError:
-                return http.HttpResponseBadRequest(
-                    'Unable to parse given value in "since" parameter.'
-                )
-        else:
-            messages = self.object.chat_data()
-
-        return http.JsonResponse({
-            'messages': list(messages.values()),
-            'tick_rate': self.object.tick_rate,
-        })
 
 
 class RaceFormMixin:

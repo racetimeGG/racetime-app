@@ -1,18 +1,31 @@
 function Race() {
-    this.vars = JSON.parse($('#race-vars').text());
-
-    this.chatDisconnected = false;
-    this.chatTickRate = 1000;
-    this.chatTickTimeout = null;
-    this.lastChatTick = null;
-    this.lastRaceTick = null;
+    this.socketListeners = {
+        close: this.onSocketClose.bind(this),
+        error: this.onSocketError.bind(this),
+        message: this.onSocketMessage.bind(this),
+        open: this.onSocketOpen.bind(this)
+    };
     this.messageIDs = [];
 
-    setInterval(this.monitor, 1000);
+    try {
+        this.vars = JSON.parse($('#race-vars').text());
+        for (var i in this.vars.chat_history) {
+            if (!this.vars.chat_history.hasOwnProperty(i)) continue;
+            this.onMessage(this.vars.chat_history[i], true);
+        }
+        this.open();
+    } catch (e) {
+        if ('notice_exception' in window) {
+            window.notice_exception(e);
+        } else {
+            throw e;
+        }
+    }
 }
 
-Race.prototype.ajaxifyActionForm = function() {
-    $(this).ajaxForm({
+Race.prototype.ajaxifyActionForm = function(form) {
+    var self = this;
+    $(form).ajaxForm({
         clearForm: true,
         beforeSubmit: function() {
             $('.race-action-form button').prop('disabled', true);
@@ -26,103 +39,43 @@ Race.prototype.ajaxifyActionForm = function() {
                 $input.appendTo($form);
             }
         },
-        error: this.onError,
-        success: this.chatTick
+        error: self.onError.bind(self)
     });
 };
 
-Race.prototype.chatTick = function(timeout) {
-    var self = this;
+Race.prototype.createMessageItem = function(message) {
+    var date = new Date(message.posted_at);
+    var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
 
-    if (self.chatTickTimeout) {
-        clearTimeout(self.chatTickTimeout);
+    var $li = $(
+        '<li>'
+        + '<span class="timestamp">' + timestamp + '</span>'
+        + '<span class="message"></span>'
+        + '</li>'
+    );
+
+    if (message.is_system) {
+        $li.addClass('system');
+    } else {
+        var $user = $('<span class="user"></span>');
+        $user.text(message.user.name);
+        $user.insertAfter($li.children('.timestamp'));
     }
-
-    self.chatTickTimeout = setTimeout(function() {
-        $.get({
-            url: self.vars.urls.chat,
-            data: {
-                since: self.messageIDs[self.messageIDs.length - 1]
-            },
-            success: function(data) {
-                if (!data) return;
-
-                var $messages = $('.race-chat .messages');
-
-                var updateRace = false;
-                var doScroll = false;
-
-                data.messages.forEach(function(message) {
-                    if (self.messageIDs.indexOf(message.id) !== -1) {
-                        return true;
-                    }
-
-                    var date = new Date(message.posted_at);
-                    var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
-
-                    if (message.is_system) {
-                        if (message.message !== '.reload') {
-                            var $li = $(
-                                '<li class="system ' + (message.highlight ? 'highlight' : '') + '">' +
-                                '<span class="timestamp">' + timestamp + '</span>' +
-                                '<span class="message"></span>' +
-                                '</li>'
-                            );
-                            var $message = $li.find('.message');
-                            $message.text(message.message);
-                            $message.html($message.html().replace(/##(\w+?)##(.+?)##/g, function(matches, $1, $2) {
-                                return '<span class="' + $1 + '">' + $2 + '</span>';
-                            }));
-                            $messages.append($li);
-                            doScroll = true;
-                        }
-                        updateRace = true;
-                    } else {
-                        var $li = $(
-                            '<li class="' + (message.highlight ? 'highlight' : '') + '">' +
-                            '<span class="timestamp">' + timestamp + '</span>' +
-                            '<span class="user"></span>' +
-                            '<span class="message"></span>' +
-                            '</li>'
-                        );
-                        $li.find('.user').text(message.user.name);
-                        var $message = $li.find('.message');
-                        $message.text(message.message);
-                        $message.html($message.html().replace(/(https?:\/\/[^\s]+)/g, function(matches, $1) {
-                            return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
-                        }));
-                        $messages.append($li);
-                        doScroll = true;
-                    }
-                    self.messageIDs.push(message.id);
-                });
-
-                $('.race-chat').removeClass('disconnected');
-                self.chatDisconnected = false;
-                self.chatTickRate = data.tick_rate;
-                self.lastChatTick = new Date();
-
-                if (doScroll) {
-                    $messages[0].scrollTop = $messages[0].scrollHeight
-                }
-                if (updateRace) {
-                    self.raceTick();
-                }
-                self.chatTick(data.tick_rate);
-            },
-            error: function() {
-                self.chatTick(1000);
-            }
-        });
-    }, timeout || 4);
-};
-
-Race.prototype.monitor = function() {
-    // Warn the user if chat isn't updating
-    if (!this.chatDisconnected && new Date() - this.lastChatTick > Math.max(10000, this.chatTickRate * 10)) {
-        this.chatDisconnected = true;
-        $('.race-chat').addClass('disconnected');
+    if (message.highlight) {
+        $li.addClass('highlight')
     }
+    var $message = $li.children('.message');
+    $message.text(message.message);
+    if (message.is_system) {
+        $message.html($message.html().replace(/##(\w+?)##(.+?)##/g, function(matches, $1, $2) {
+            return '<span class="' + $1 + '">' + $2 + '</span>';
+        }));
+    }
+    $message.html($message.html().replace(/(https?:\/\/[^\s]+)/g, function(matches, $1) {
+        return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
+    }));
+
+    return $li;
 };
 
 Race.prototype.onError = function(xhr) {
@@ -148,6 +101,64 @@ Race.prototype.onError = function(xhr) {
     }
 };
 
+Race.prototype.onMessage = function(message, noRaceTick) {
+    var self = this;
+
+    if (self.messageIDs.indexOf(message.id) !== -1) {
+        return true;
+    }
+
+    if (!message.is_system || message.message !== '.reload') {
+        var $messages = $('.race-chat .messages');
+        $messages.append(self.createMessageItem(message));
+        $messages[0].scrollTop = $messages[0].scrollHeight
+    }
+
+    if (message.is_system && !noRaceTick) {
+        self.raceTick();
+    }
+
+    self.messageIDs.push(message.id);
+};
+
+Race.prototype.onSocketClose = function(event) {
+    $('.race-chat').addClass('disconnected');
+
+    if (event.code !== 1000) {
+        this.reconnect();
+    }
+};
+
+Race.prototype.onSocketError = function(event) {
+    $('.race-chat').addClass('disconnected');
+    this.reconnect();
+};
+
+Race.prototype.onSocketMessage = function(event) {
+    try {
+        var data = JSON.parse(event.data);
+        this.onMessage(data.message);
+    } catch (e) {
+        if ('notice_exception' in window) {
+            window.notice_exception(e);
+        } else {
+            throw e;
+        }
+    }
+};
+
+Race.prototype.onSocketOpen = function(event) {
+    $('.race-chat').removeClass('disconnected');
+};
+
+Race.prototype.open = function() {
+    var proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    this.chatSocket = new WebSocket(proto + location.host + this.vars.urls.chat);
+    for (var type in this.socketListeners) {
+        this.chatSocket.addEventListener(type, this.socketListeners[type]);
+    }
+};
+
 Race.prototype.raceTick = function() {
     var self = this;
     $.get(self.vars.urls.renders, function(data, status, xhr) {
@@ -162,15 +173,26 @@ Race.prototype.raceTick = function() {
                 $segment.html(data[segment]);
                 $segment.find('time').data('latency', latency);
                 window.localiseDates.call($segment[0]);
-                $segment.find('.race-action-form').each(self.ajaxifyActionForm)
+                $segment.find('.race-action-form').each(function() {
+                    self.ajaxifyActionForm(this);
+                });
             }
             // This is kind of a fudge but replacing urlize is awful.
             $('.race-info .info a').each(function() {
                 $(this).attr('target', '_blank');
             });
-            self.lastRaceTick = new Date();
         });
     });
+};
+
+Race.prototype.reconnect = function() {
+    for (var type in this.socketListeners) {
+        this.chatSocket.removeEventListener(type, this.socketListeners[type]);
+    }
+
+    setTimeout(function() {
+        this.open();
+    }.bind(this), 1000);
 };
 
 Race.prototype.whoops = function(message) {
@@ -190,14 +212,15 @@ Race.prototype.whoops = function(message) {
 
 $(function() {
     var race = new Race();
+    window.race = race;
 
-    race.chatTick();
-    $('.race-action-form').each(race.ajaxifyActionForm);
+    $('.race-action-form').each(function() {
+        race.ajaxifyActionForm(this);
+    });
 
     $('.race-chat form').ajaxForm({
-        error: race.onError,
+        error: race.onError.bind(race),
         success: function() {
-            race.chatTick();
             $('.race-chat form textarea').val('').height(18);
         }
     });

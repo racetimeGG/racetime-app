@@ -39,5 +39,19 @@ class Message(models.Model):
     )
 
     @property
+    def as_dict(self):
+        return {
+            'id': self.hashid,
+            'user': (
+                self.user.api_dict_summary()
+                if not self.user.is_system else None
+            ),
+            'posted_at': self.posted_at.isoformat(),
+            'message': self.message,
+            'highlight': self.highlight,
+            'is_system': self.user.is_system,
+        }
+
+    @property
     def hashid(self):
         return get_hashids(self.__class__).encode(self.id)
