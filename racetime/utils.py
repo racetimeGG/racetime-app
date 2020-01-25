@@ -1,12 +1,16 @@
+import json
 import random
 from urllib.parse import urlencode
 
+from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import reverse
 from django.utils.module_loading import import_string
 from hashids import Hashids
 
 __all__ = [
+    'RedisChannelLayer',
     'SafeException',
     'generate_race_slug',
     'get_hashids',
@@ -188,6 +192,22 @@ slug_nouns = [
     'zelda',
     'zombie',
 ]
+
+
+class RedisChannelLayer(BaseRedisChannelLayer):
+    """
+    Custom channel layer that correctly serializes Django-ey data.
+    """
+    def serialize(self, message):
+        value = json.dumps(message, cls=DjangoJSONEncoder)
+        if self.crypter:
+            value = self.crypter.encrypt(value)
+        return value
+
+    def deserialize(self, message):
+        if self.crypter:
+            message = self.crypter.decrypt(message, self.expiry + 10)
+        return json.loads(message)
 
 
 class SafeException(Exception):

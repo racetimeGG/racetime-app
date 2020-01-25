@@ -65,7 +65,7 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'BACKEND': 'racetime.utils.RedisChannelLayer',
         'CONFIG': {
             "hosts": [('racetime.redis', 6379)],
         },
