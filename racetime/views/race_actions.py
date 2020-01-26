@@ -243,7 +243,7 @@ class Message(RaceAction, generic.FormView):
             self.get_race().is_done
             and (race.recorded or (
                 not race.recordable
-                and race.ended_at <= timezone.now() - timedelta(hours=1)
+                and (race.ended_at or race.cancelled_at) <= timezone.now() - timedelta(hours=1)
             ))
             and not self.user.is_superuser
         ):

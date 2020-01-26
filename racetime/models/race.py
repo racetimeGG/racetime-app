@@ -75,6 +75,9 @@ class Race(models.Model):
     ended_at = models.DateTimeField(
         null=True,
     )
+    cancelled_at = models.DateTimeField(
+        null=True,
+    )
     recordable = models.BooleanField(
         default=True,
         help_text=(
@@ -204,6 +207,7 @@ class Race(models.Model):
             'start_delay': self.start_delay,
             'started_at': self.started_at,
             'ended_at': self.ended_at,
+            'cancelled_at': self.cancelled_at,
             'time_limit': self.time_limit,
             'opened_by': self.opened_by.api_dict_summary(race=self),
             'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
@@ -601,8 +605,9 @@ class Race(models.Model):
 
         self.state = RaceStates.cancelled.value
         self.recordable = False
+        self.cancelled_at = timezone.now()
         if self.started_at:
-            self.ended_at = timezone.now()
+            self.ended_at = self.cancelled_at
             self.__dnf_remaining_entrants()
         self.save()
 
