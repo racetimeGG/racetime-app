@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views import generic
 
 from .base import BaseRaceAction
+from .. import models
 from ..forms import ChatForm, CommentForm
 from ..utils import SafeException
 
@@ -249,6 +250,15 @@ class Message(RaceAction, generic.FormView):
         ):
             raise SafeException('This race chat is now closed. No new messages may be added.')
 
+        if (
+            len(models.Message.objects.filter(
+                user=self.user,
+                race=self.get_race(),
+                posted_at__gte=timezone.now() - timedelta(seconds=5),
+            )) > 10
+            and not self.user.is_superuser
+        ):
+            raise SafeException('You are chatting too much. Please wait a few seconds.')
 
         message = form.save(commit=False)
         message.user = self.user
