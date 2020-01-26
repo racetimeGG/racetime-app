@@ -317,6 +317,8 @@ header > .current-race > a .timer {
     }
 }
 .home-categories > li > a {
+    display: flex;
+    flex-direction: column;
     text-decoration: none;
 }
 .home-categories > li > a > .image {
@@ -365,7 +367,19 @@ header > .current-race > a .timer {
     font-weight: bold;
     word-break: break-word;
 }
+.home-categories > li > a > .recordable-races,
+.home-categories > li > a > .active-races,
+.home-categories > li > a > .finished-races {
+    font-size: 13px;
+}
+.home-categories > li > a > .recordable-races {
+    color: #beebd1;
+}
 .home-categories > li > a > .active-races {
+    color: #1da674;
+}
+.home-categories > li > a > .finished-races {
+    color: #7a777a;
 }
 
 .category-intro {
