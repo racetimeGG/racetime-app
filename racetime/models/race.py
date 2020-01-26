@@ -359,14 +359,6 @@ class Race(models.Model):
         return getattr(RaceStates, self.state)
 
     @property
-    def tick_rate(self):
-        if self.ended_at and timezone.now() - self.ended_at > timedelta(hours=1):
-            return 86400000
-        if self.is_pending:
-            return 500
-        return 1000
-
-    @property
     def timer(self):
         """
         Return a timedelta for how long the race has been going on for, if
