@@ -64,6 +64,23 @@ services:
 
 Replace `<LOCAL>` with whatever port number you'd like.
 
+#### Expose the database port
+
+If you'd like to use a fancy client app to browse the database, you can set up
+a `docker-compose.override.yml` file to expose the database port to your local
+machine:
+
+```yaml
+version: '3.6'
+
+services:
+  racetime.db:
+    ports:
+      - "<LOCAL>:3306"
+```
+
+Replace `<LOCAL>` with whatever port number you'd like.
+
 #### localhost vs. 127.0.0.1
 
 You should not use an IP address to connect to the website in your browser, as
