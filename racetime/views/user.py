@@ -1,6 +1,5 @@
-from urllib.parse import urlencode
-
 import requests
+from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash, login
@@ -9,7 +8,6 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.transaction import atomic
-from django import http
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -74,6 +72,7 @@ class ViewProfile(generic.DetailView):
         queryset = queryset.annotate(times_entered=Count('race__entrant'))
         queryset = queryset.order_by('-times_entered')
         return queryset[:3]
+
 
 class CreateAccount(generic.CreateView):
     form_class = forms.UserCreationForm
