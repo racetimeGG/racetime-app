@@ -1,3 +1,4 @@
 -e .
 channels_redis
+django-cors-middleware
 mysqlclient
