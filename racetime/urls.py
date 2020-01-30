@@ -19,6 +19,8 @@ urlpatterns = [
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
 
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
