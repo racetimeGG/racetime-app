@@ -195,6 +195,7 @@ class Race(models.Model):
                         'help_text': entrant.summary[2],
                     },
                     'finish_time': entrant.finish_time,
+                    'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
                     'place': entrant.place,
                     'place_ordinal': ordinal(entrant.place) if entrant.place else None,
                     'comment': entrant.comment,
