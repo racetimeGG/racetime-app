@@ -6,7 +6,7 @@
 
 {% block main %}
     <h2>Account settings</h2>
-    <div class="edit-account">
+    <div class="division">
         <h3>Update your account</h3>
         <p class="help">
             Change your basic account settings here. Note that during a race,
@@ -17,6 +17,8 @@
             <ul>{{ account_form.as_ul }}</ul>
             <button class="btn" type="submit" name="update_account">Update account</button>
         </form>
+    </div>
+    <div class="division">
         <h3>Connect to Twitch.tv</h3>
         <p class="help">
             To join races where streaming is required, you must have an active

@@ -299,6 +299,25 @@ header > .current-race > a .timer {
     display: none;
 }
 
+.container > .content > main > .division,
+.container > .content > aside > .division {
+    border-bottom: 5px solid #1a1c20;
+    padding: 10px 0;
+}
+.container > .content > main > .division:last-child,
+.container > .content > aside > .division:last-child {
+    border-bottom: none;
+}
+
+.container > .content > main > .division > :first-child,
+.container > .content > aside > .division > :first-child {
+    margin-top: 0;
+}
+.container > .content > main > .division > :last-child,
+.container > .content > aside > .division > :last-child {
+    margin-bottom: 0;
+}
+
 .home-categories {
     display: flex;
     flex-wrap: wrap;
