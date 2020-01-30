@@ -12,6 +12,7 @@ from hashids import Hashids
 __all__ = [
     'RedisChannelLayer',
     'SafeException',
+    'exception_to_msglist',
     'generate_race_slug',
     'get_hashids',
     'timer_html',
@@ -215,6 +216,19 @@ class SafeException(Exception):
     Used to indicate an exception whose message is safe to display to end-users.
     """
     pass
+
+
+def exception_to_msglist(ex):
+    errors = []
+    for arg in ex.args:
+        if isinstance(arg, str):
+            errors.append(arg)
+        elif isinstance(arg, dict):
+            for field, messages in arg.items():
+                errors += [
+                    f'{field}: {message}' for message in messages
+                ]
+    return errors
 
 
 def generate_race_slug(custom_nouns=None):

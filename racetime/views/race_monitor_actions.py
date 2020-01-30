@@ -7,8 +7,8 @@ from ..models import Entrant, User
 from ..utils import SafeException
 
 
-class EntrantAction:
-    def action(self, race, entrant, user):
+class EntrantAction(BaseRaceAction):
+    def entrant_action(self, race, entrant, user, data):
         raise NotImplementedError
 
     def get_entrant(self):
@@ -23,7 +23,7 @@ class EntrantAction:
             raise Http404('No entrant matches the given query.')
 
     def _do_action(self):
-        self.action(self.get_race(), self.get_entrant(), self.user)
+        self.entrant_action(self.get_race(), self.get_entrant(), self.user, self.request.POST)
 
 
 class ModeratorRaceAction(CanModerateRaceMixin, BaseRaceAction):
@@ -34,28 +34,28 @@ class MonitorRaceAction(CanMonitorRaceMixin, BaseRaceAction):
     pass
 
 
-class ModeratorEntrantAction(CanModerateRaceMixin, EntrantAction, BaseRaceAction):
+class ModeratorEntrantAction(CanModerateRaceMixin, EntrantAction):
     pass
 
 
-class MonitorEntrantAction(CanMonitorRaceMixin, EntrantAction, BaseRaceAction):
+class MonitorEntrantAction(CanMonitorRaceMixin, EntrantAction):
     pass
 
 
 class BeginRace(MonitorRaceAction):
-    def action(self, race, user):
+    def action(self, race, user, data):
         race.begin(begun_by=user)
 
 
 class CancelRace(MonitorRaceAction):
-    def action(self, race, user):
+    def action(self, race, user, data):
         race.cancel(cancelled_by=user)
 
 
 class InviteToRace(MonitorRaceAction, generic.FormView):
     form_class = InviteForm
 
-    def action(self, race, user):
+    def action(self, race, user, data):
         form = self.get_form()
         if not form.is_valid():
             raise SafeException(form.errors)
@@ -78,50 +78,50 @@ class InviteToRace(MonitorRaceAction, generic.FormView):
 
 
 class RecordRace(ModeratorRaceAction):
-    def action(self, race, user):
+    def action(self, race, user, data):
         race.record(recorded_by=user)
 
 
 class UnrecordRace(ModeratorRaceAction):
-    def action(self, race, user):
+    def action(self, race, user, data):
         race.unrecord(unrecorded_by=user)
 
 
 class AcceptRequest(MonitorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         entrant.accept_request(accepted_by=user)
 
 
 class ForceUnready(MonitorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         entrant.force_unready(forced_by=user)
 
 
-class OverrideStream(ModeratorRaceAction):
-    def action(self, race, entrant, user):
+class OverrideStream(ModeratorEntrantAction):
+    def entrant_action(self, race, entrant, user, data):
         entrant.override_stream(overridden_by=user)
 
 
 class Remove(MonitorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         entrant.remove(removed_by=user)
 
 
 class Disqualify(ModeratorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         entrant.disqualify(disqualified_by=user)
 
 
 class Undisqualify(ModeratorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         entrant.undisqualify(undisqualified_by=user)
 
 
 class AddMonitor(MonitorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         race.add_monitor(entrant.user, added_by=user)
 
 
 class RemoveMonitor(MonitorEntrantAction):
-    def action(self, race, entrant, user):
+    def entrant_action(self, race, entrant, user, data):
         race.remove_monitor(entrant.user, removed_by=user)

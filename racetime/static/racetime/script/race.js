@@ -94,16 +94,17 @@ Race.prototype.createMessageItem = function(message) {
     return $li;
 };
 
+Race.prototype.guid = function() {
+    return Math.random().toString(36).substring(2, 15)
+        + Math.random().toString(36).substring(2, 15);
+};
+
 Race.prototype.onError = function(xhr) {
     var self = this;
     if (xhr.status === 422) {
-        if (xhr.responseText.indexOf('<ul class="errorlist">') !== -1) {
-            var $errors = $(xhr.responseText);
-            $errors.children('li').each(function() {
-                var field = $(this).text();
-                $errors.children('li').each(function() {
-                    self.whoops(field + ': ' + $(this).text());
-                });
+        if (xhr.responseJSON && 'errors' in xhr.responseJSON) {
+            xhr.responseJSON.errors.forEach(function(msg) {
+                self.whoops(msg);
             });
         } else {
             self.whoops(xhr.responseText);
@@ -224,6 +225,15 @@ $(function() {
     });
 
     $('.race-chat form').ajaxForm({
+        beforeSubmit: function(data, $form) {
+            if ($form.find('[name="message"]').val().trim() === ''){
+                return false;
+            }
+            data.push({
+                name: 'guid',
+                value: race.guid()
+            });
+        },
         error: race.onError.bind(race),
         success: function() {
             $('.race-chat form textarea').val('').height(18);

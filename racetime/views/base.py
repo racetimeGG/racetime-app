@@ -1,14 +1,15 @@
+from django import http
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.utils.functional import cached_property
 from django.views import generic
 
 from ..models import User, Race
-from ..utils import SafeException
+from ..utils import SafeException, exception_to_msglist
 
 
 class UserMixin:
-    @property
+    @cached_property
     def user(self):
         if self.request.user.is_authenticated:
             return User.objects.get(id=self.request.user.id)
@@ -30,9 +31,11 @@ class CanMonitorRaceMixin(UserMixin, UserPassesTestMixin):
 
 
 class BaseRaceAction(UserMixin, generic.View):
+    action_class = None
+
     _race = None
 
-    def action(self, race, user):
+    def action(self, race, user, data):
         raise NotImplementedError
 
     def get_object(self):
@@ -51,16 +54,19 @@ class BaseRaceAction(UserMixin, generic.View):
         return self._race
 
     def post(self, *args, **kwargs):
+        if self.user.is_banned_from_category(self.get_race().category):
+            raise SafeException('You are currently banned from this category.')
+
         try:
             self._do_action()
         except SafeException as ex:
-            return HttpResponse(str(ex), status=422)
+            return http.JsonResponse({
+                'errors': exception_to_msglist(ex)
+            }, status=422)
 
         if self.request.is_ajax():
-            return HttpResponse()
-        return HttpResponseRedirect(self.get_race().get_absolute_url())
+            return http.HttpResponse()
+        return http.HttpResponseRedirect(self.get_race().get_absolute_url())
 
     def _do_action(self):
-        if self.user.is_banned_from_category(self.get_race().category):
-            raise SafeException('You are currently banned from this category.')
-        self.action(self.get_race(), self.user)
+        self.action(self.get_race(), self.user, self.request.POST)

@@ -1,14 +1,12 @@
-from collections import OrderedDict
-
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django import http
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
-from ..utils import get_hashids, twitch_auth_url
+from ..utils import twitch_auth_url
 
 
 class Race(UserMixin, generic.DetailView):
@@ -162,7 +160,7 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
         return self.get_category().can_start_race(self.user)
 
 
-class EditRace(CanMonitorRaceMixin, UserMixin, RaceFormMixin, generic.UpdateView):
+class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
     form_class = forms.RaceEditForm
     model = models.Race
     slug_url_kwarg = 'race'
