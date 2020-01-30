@@ -61,10 +61,12 @@ a {
     border: solid #26dd9a;
     border-width: 1px 0 0 1px;
     color: #ddd8dd;
+    display: inline-block;
     padding: 5px;
     border-radius: 3px;
     text-decoration: none;
     transition: all 0.2s;
+    vertical-align: top;
 }
 
 .btn:hover {
