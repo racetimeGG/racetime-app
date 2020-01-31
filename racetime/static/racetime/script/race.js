@@ -91,6 +91,19 @@ Race.prototype.createMessageItem = function(message) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
+    delay = 0;
+    if(!(message.is_system)
+        && !(this.vars.user.full_name === message.user.full_name || message.user.flair || this.vars.user.can_monitor)) {
+        var delay = new Date(date.getTime() + message.chat_message_delay * 1000).getTime() - Date.now();
+    }
+
+    if(delay) {
+        $li.hide();
+        setTimeout(function() {
+            $li.show();
+        }, delay);
+    }
+
     return $li;
 };
 

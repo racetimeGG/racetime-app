@@ -50,6 +50,7 @@ class Message(models.Model):
             'message': self.message,
             'highlight': self.highlight,
             'is_system': self.user.is_system,
+            'chat_message_delay': self.race.chat_message_delay.seconds,
         }
 
     @property
