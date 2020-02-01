@@ -43,7 +43,7 @@ class Message(models.Model):
         return {
             'id': self.hashid,
             'user': (
-                self.user.api_dict_summary()
+                self.user.api_dict_summary(race=self.race)
                 if not self.user.is_system else None
             ),
             'posted_at': self.posted_at.isoformat(),
