@@ -101,6 +101,8 @@ Race.prototype.createMessageItem = function(message) {
         $li.hide();
         setTimeout(function() {
             $li.show();
+            var $messages = $('.race-chat .messages');
+            $messages[0].scrollTop = $messages[0].scrollHeight
         }, delay);
     }
 
