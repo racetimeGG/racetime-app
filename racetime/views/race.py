@@ -40,6 +40,7 @@ class Race(UserMixin, generic.DetailView):
                 'user': {
                     'full_name': self.user.get_full_name(),
                     'can_monitor': race.can_monitor(self.user),
+                    'flairs': self.user.flair(category=race.category, race=race),
                 },
             },
         }

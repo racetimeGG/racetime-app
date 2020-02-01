@@ -160,6 +160,9 @@ Race.prototype.onSocketMessage = function(event) {
     switch (data.type) {
         case 'race.data':
             this.raceTick();
+            if (this.vars.user.flairs.includes("staff") || this.vars.user.flairs.includes("moderator"))
+                break;
+            this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.full_name === this.vars.user.full_name));
             break;
         case 'chat.message':
             this.addMessage(data.message);
