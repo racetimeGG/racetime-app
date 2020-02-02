@@ -81,7 +81,8 @@ services:
       - "<LOCAL>:3306"
 ```
 
-Replace `<LOCAL>` with whatever port number you'd like.
+Replace `<LOCAL>` with whatever port number you'd like. The DB username,
+password and database name are all `racetime` by default.
 
 #### localhost vs. 127.0.0.1
 
