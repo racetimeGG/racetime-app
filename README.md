@@ -24,6 +24,8 @@ settings to configure this.
 1. Copy `project/settings/local.py.example` to `project/settings/local.py`.
 1. Edit the local.py file above and set your
    [dev.twitch.tv](https://dev.twitch.tv) client credentials.
+1. Run `npm install` to grab JS dependencies (you'll need 
+   [NodeJS](https://nodejs.org/en/) installed).
 1. Start the environment with `docker-compose up --build -d`.
 1. Run `docker-compose exec racetime.web python manage.py` to set up a database
    file with migrations.
@@ -87,6 +89,13 @@ You should not use an IP address to connect to the website in your browser, as
 this is not compatible with the Twitch API. Always use
 [http://localhost:8000](http://localhost:8000) to access the server instead of
 `http://127.0.0.1:8000`.
+
+#### Windows
+
+If you're developing on Windows, make sure to check out this repository with
+Linux-style line endings (LF not CRLF), in particular you need to make sure the
+Bash scripts in the `.docker` directory have the correct line endings or they
+will fail to execute.
 
 ## Further information
 
