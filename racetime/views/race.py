@@ -38,9 +38,9 @@ class Race(UserMixin, generic.DetailView):
                     'renders': race.get_renders_url(),
                 },
                 'user': {
-                    'full_name': self.user.get_full_name(),
+                    'id': self.user.hashid if self.user.is_authenticated else None,
+                    'can_moderate': race.category.can_moderate(self.user),
                     'can_monitor': race.can_monitor(self.user),
-                    'flairs': self.user.flair(category=race.category, race=race),
                 },
             },
         }

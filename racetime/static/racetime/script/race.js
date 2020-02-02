@@ -93,8 +93,8 @@ Race.prototype.createMessageItem = function(message) {
 
     delay = 0;
     if(!(message.is_system)
-        && !(this.vars.user.full_name === message.user.full_name || message.user.flair || this.vars.user.can_monitor)) {
-        var delay = new Date(date.getTime() + message.chat_message_delay * 1000).getTime() - Date.now();
+        && !(this.vars.user.id === message.user.id || message.user.flair || this.vars.user.can_monitor)) {
+        var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
     }
 
     if(delay) {
@@ -160,9 +160,9 @@ Race.prototype.onSocketMessage = function(event) {
     switch (data.type) {
         case 'race.data':
             this.raceTick();
-            if (this.vars.user.flairs.includes("staff") || this.vars.user.flairs.includes("moderator"))
+            if (this.vars.user.can_moderate)
                 break;
-            this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.full_name === this.vars.user.full_name));
+            this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
             break;
         case 'chat.message':
             this.addMessage(data.message);

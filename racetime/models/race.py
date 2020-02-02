@@ -147,7 +147,7 @@ class Race(models.Model):
             MaxValueValidator(timedelta(seconds=90)),
         ],
         help_text=(
-            'The length of time chat messages display for only moniotrs. '
+            'The length of time chat messages display for only monitors. '
             'After this delay messages that have not been deleted will display '
             'to everyone.'
         ),

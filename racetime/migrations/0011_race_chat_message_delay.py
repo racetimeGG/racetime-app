@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='race',
             name='chat_message_delay',
-            field=models.DurationField(default=datetime.timedelta(0), help_text='The length of time chat messages display for only moniotrs. After this delay messages that have not been deleted will display to everyone.', validators=[django.core.validators.MinValueValidator(datetime.timedelta(0)), django.core.validators.MaxValueValidator(datetime.timedelta(seconds=90))]),
+            field=models.DurationField(default=datetime.timedelta(0), help_text='The length of time chat messages display for only monitors. After this delay messages that have not been deleted will display to everyone.', validators=[django.core.validators.MinValueValidator(datetime.timedelta(0)), django.core.validators.MaxValueValidator(datetime.timedelta(seconds=90))]),
         ),
     ]
