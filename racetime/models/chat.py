@@ -43,14 +43,21 @@ class Message(models.Model):
         return {
             'id': self.hashid,
             'user': (
-                self.user.api_dict_summary()
+                self.user.api_dict_summary(race=self.race)
                 if not self.user.is_system else None
             ),
             'posted_at': self.posted_at.isoformat(),
             'message': self.message,
             'highlight': self.highlight,
             'is_system': self.user.is_system,
+            'delay': self.delay,
         }
+
+    @property
+    def delay(self):
+        if self.race.can_monitor(self.user) or self.user.is_system:
+            return 0
+        return self.race.chat_message_delay.seconds
 
     @property
     def hashid(self):

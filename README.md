@@ -24,9 +24,11 @@ settings to configure this.
 1. Copy `project/settings/local.py.example` to `project/settings/local.py`.
 1. Edit the local.py file above and set your
    [dev.twitch.tv](https://dev.twitch.tv) client credentials.
+1. Run `npm install` to grab JS dependencies (you'll need
+   [NodeJS](https://nodejs.org/en/) installed).
 1. Start the environment with `docker-compose up --build -d`.
-1. Run `docker-compose exec racetime.web python manage.py` to set up a database
-   file with migrations.
+1. Run `docker-compose exec racetime.web python manage.py migrate` to set up a
+   database with migrations.
    * Note: you may need to wait a minute or two for the environment to be ready.
 1. (Optional) Run
    `docker-compose exec racetime.web python manage.py createsuperuser` to
@@ -79,7 +81,8 @@ services:
       - "<LOCAL>:3306"
 ```
 
-Replace `<LOCAL>` with whatever port number you'd like.
+Replace `<LOCAL>` with whatever port number you'd like. The DB username,
+password and database name are all `racetime` by default.
 
 #### localhost vs. 127.0.0.1
 
@@ -88,12 +91,19 @@ this is not compatible with the Twitch API. Always use
 [http://localhost:8000](http://localhost:8000) to access the server instead of
 `http://127.0.0.1:8000`.
 
+#### Windows
+
+If you're developing on Windows, make sure to check out this repository with
+Linux-style line endings (LF not CRLF), in particular you need to make sure the
+Bash scripts in the `.docker` directory have the correct line endings or they
+will fail to execute.
+
 ## Further information
 
-The [Wiki](https://github.com/deains/racetime-app/wiki) pages have some information that may prove useful to you.
-We also have a Discord server where you can discuss the site and ongoing
-developments, make suggestions and get involved:
-[join the Discord server here](https://discord.gg/65cvHG3).
+The [Wiki](https://github.com/deains/racetime-app/wiki) pages have some
+information that may prove useful to you. We also have a Discord server where
+you can discuss the site and ongoing developments, make suggestions and get
+involved: [join the Discord server here](https://discord.gg/65cvHG3).
 
 ## Contributing
 
