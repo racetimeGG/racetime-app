@@ -50,8 +50,14 @@ class Message(models.Model):
             'message': self.message,
             'highlight': self.highlight,
             'is_system': self.user.is_system,
-            'delay': self.race.chat_message_delay.seconds,
+            'delay': self.delay,
         }
+
+    @property
+    def delay(self):
+        if self.race.can_monitor(self.user) or self.user.is_system:
+            return 0
+        return self.race.chat_message_delay.seconds
 
     @property
     def hashid(self):

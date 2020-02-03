@@ -91,13 +91,8 @@ Race.prototype.createMessageItem = function(message) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
-    delay = 0;
-    if(!(message.is_system)
-        && !(this.vars.user.id === message.user.id || message.user.flair || this.vars.user.can_monitor)) {
-        var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
-    }
-
-    if(delay) {
+    var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
+    if(delay > 0 && !(this.vars.user.id === message.user.id || this.vars.user.can_monitor)) {
         $li.hide();
         setTimeout(function() {
             $li.show();
