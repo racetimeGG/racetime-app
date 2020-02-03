@@ -91,6 +91,16 @@ Race.prototype.createMessageItem = function(message) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
+    var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
+    if(delay > 0 && !(this.vars.user.id === message.user.id || this.vars.user.can_monitor)) {
+        $li.hide();
+        setTimeout(function() {
+            $li.show();
+            var $messages = $('.race-chat .messages');
+            $messages[0].scrollTop = $messages[0].scrollHeight
+        }, delay);
+    }
+
     return $li;
 };
 
@@ -145,6 +155,9 @@ Race.prototype.onSocketMessage = function(event) {
     switch (data.type) {
         case 'race.data':
             this.raceTick();
+            if (this.vars.user.can_moderate)
+                break;
+            this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
             break;
         case 'chat.message':
             this.addMessage(data.message);

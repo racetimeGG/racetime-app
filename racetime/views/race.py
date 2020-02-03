@@ -37,6 +37,11 @@ class Race(UserMixin, generic.DetailView):
                     'chat': race.get_chat_url(),
                     'renders': race.get_renders_url(),
                 },
+                'user': {
+                    'id': self.user.hashid if self.user.is_authenticated else None,
+                    'can_moderate': race.category.can_moderate(self.user),
+                    'can_monitor': race.can_monitor(self.user),
+                },
             },
         }
 
@@ -188,5 +193,12 @@ class EditRace(CanMonitorRaceMixin, UserMixin, RaceFormMixin, generic.UpdateView
                 race.add_message('Streaming is now required for this race.')
             else:
                 race.add_message('Streaming is now NOT required for this race.')
+
+        if 'chat_message_delay' in form.changed_data:
+            if race.chat_message_delay:
+                race.add_message('Chat delay is now %(seconds)d seconds.'
+                                 % {'seconds': race.chat_message_delay.seconds})
+            else:
+                race.add_message('Chat delay has been removed.')
 
         return http.HttpResponseRedirect(race.get_absolute_url())

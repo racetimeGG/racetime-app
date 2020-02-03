@@ -140,6 +140,18 @@ class Race(models.Model):
             'race is in progress (anyone may use chat before and after the race).'
         ),
     )
+    chat_message_delay = models.DurationField(
+        default=timedelta(seconds=0),
+        validators=[
+            MinValueValidator(timedelta(seconds=0)),
+            MaxValueValidator(timedelta(seconds=90)),
+        ],
+        help_text=(
+            'The length of time chat messages display for only monitors. '
+            'After this delay messages that have not been deleted will display '
+            'to everyone.'
+        ),
+    )
     monitors = models.ManyToManyField(
         'User',
         related_name='+',
