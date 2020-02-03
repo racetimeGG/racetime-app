@@ -40,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware'
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -97,6 +98,10 @@ DATABASES = {
 
 # Authentication
 
+AUTHENTICATION_BACKENDS = (
+    'oauth2_provider.backends.OAuth2Backend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 AUTH_USER_MODEL = 'racetime.User'
 LOGIN_URL = '/account/login'
 LOGIN_REDIRECT_URL = '/'
