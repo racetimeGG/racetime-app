@@ -11,6 +11,7 @@ from .utils import SafeException, exception_to_msglist
 
 class ChatConsumer(AsyncWebsocketConsumer):
     can_monitor = False
+    race_dict = None
     race_slug = None
 
     async def connect(self):
@@ -19,6 +20,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.race_slug:
             await self.channel_layer.group_add(self.race_slug, self.channel_name)
             await self.accept()
+            await self.send_race()
 
     async def disconnect(self, close_code):
         if self.race_slug:
@@ -45,6 +47,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user = self.get_user()
             action = data.get('action')
             data = data.get('data')
+
+            if action == 'getrace':
+                await self.send_race()
+                return
 
             if action == 'message':
                 action_class = Message
@@ -91,6 +97,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'race': event['race'],
         }, cls=DjangoJSONEncoder))
 
+    async def send_race(self):
+        """
+        Send pre-loaded race data (assuming we have it).
+        """
+        if self.race_dict:
+            await self.send(text_data=json.dumps({
+                'type': 'race.data',
+                'race': self.race_dict,
+            }, cls=DjangoJSONEncoder))
+
     @database_sync_to_async
     def call_race_action(self, action_class, user, data):
         if not self.race_slug:
@@ -119,7 +135,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         except Race.DoesNotExist:
             self.can_monitor = False
+            self.race_dict = None
             self.race_slug = None
         else:
             self.can_monitor = race.can_monitor(self.scope['user'])
+            self.race_dict = race.as_dict
             self.race_slug = race.slug
