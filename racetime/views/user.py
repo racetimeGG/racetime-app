@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db.models import Count
@@ -11,11 +12,13 @@ from django.db.transaction import atomic
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator, decorator_from_middleware
 from django.utils.translation import gettext as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
+from oauth2_provider.views import ProtectedResourceView
 
 from .base import UserMixin
 from .. import forms, models
@@ -237,3 +240,20 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
             user.save()
 
         return http.HttpResponseRedirect(reverse('edit_account'))
+
+
+class OAuthUserInfo(ProtectedResourceView):
+    def get(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied()
+
+        data = self.request.user.api_dict_summary()
+
+        if self.request.user.active_race_entrant:
+            data['active_race'] = str(self.request.user.active_race_entrant.race)
+        else:
+            data['active_race'] = None
+
+        resp = http.JsonResponse(data)
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
