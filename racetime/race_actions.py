@@ -299,7 +299,7 @@ class Message:
         minutes. If so, it's almost certainly a duplicate message and we should
         silently ignore it.
         """
-        if not re.match(r'^[0-9a-z]+$', guid):
+        if not re.match(r'^[0-9a-z\-]+$', guid):
             raise SafeException(
                 'Bad request, no GUID supplied. A unique string is required '
                 'to prevent duplicate messaging.'
