@@ -17,6 +17,7 @@ urlpatterns = [
 
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
+    path('races/data', views.RaceListData.as_view(), name='race_list_data'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
 
     path('o/userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),

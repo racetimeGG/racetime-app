@@ -200,3 +200,39 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
                 race.add_message('Chat delay has been removed.')
 
         return http.HttpResponseRedirect(race.get_absolute_url())
+
+
+class RaceListData(generic.View):
+    def get(self, request, *args, **kwargs):
+        resp = http.JsonResponse({
+            'races': self.current_races(),
+        })
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+    def current_races(self):
+        return [
+            {
+                'name': str(race),
+                'status': {
+                    'value': race.state_info.value,
+                    'verbose_value': race.state_info.verbose_value,
+                    'help_text': race.state_info.help_text,
+                },
+                'url': race.get_absolute_url(),
+                'data_url': race.get_data_url(),
+                'goal': {
+                    'name': race.goal_str,
+                    'custom': not race.goal,
+                },
+                'entrants_count': race.entrants_count,
+                'entrants_count_inactive': race.entrants_count_inactive,
+                'opened_at': race.opened_at,
+                'started_at': race.started_at,
+                'time_limit': race.time_limit,
+            }
+            for race in models.Race.objects.exclude(state__in=[
+                models.RaceStates.finished,
+                models.RaceStates.cancelled,
+            ]).all()
+        ]
