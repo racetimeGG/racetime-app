@@ -64,3 +64,6 @@ class OAuth2TokenMiddleware(BaseMiddleware):
             or self.get_token_from_query(scope)
             or None
         )
+
+    async def resolve_scope(self, scope):
+        pass

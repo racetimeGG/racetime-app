@@ -62,14 +62,20 @@ class RaceConsumer(AsyncWebsocketConsumer):
         if self.race_slug:
             await self.channel_layer.group_discard(self.race_slug, self.channel_name)
 
+    async def deliver(self, event_type, **kwargs):
+        await self.send(text_data=json.dumps({
+            'type': event_type,
+            **kwargs,
+        }, cls=DjangoJSONEncoder))
+
+    async def whoops(self, *errors):
+        await self.deliver('error', errors=errors)
+
     async def chat_message(self, event):
         """
         Handler for chat.message type event.
         """
-        await self.send(text_data=json.dumps({
-            'type': event['type'],
-            'message': event['message'],
-        }, cls=DjangoJSONEncoder))
+        await self.deliver(event['type'], message=event['message'])
 
         if event['message']['is_system']:
             await self.load_race()
@@ -78,54 +84,27 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for error type event.
         """
-        await self.send(text_data=json.dumps({
-            'type': event['type'],
-            'errors': event['errors'],
-        }, cls=DjangoJSONEncoder))
+        await self.deliver(event['type'], errors=event['errors'])
 
     async def race_data(self, event):
         """
         Handler for race.data type event.
         """
-        await self.send(text_data=json.dumps({
-            'type': event['type'],
-            'race': event['race'],
-        }, cls=DjangoJSONEncoder))
+        await self.deliver(event['type'], race=event['race'])
 
     async def send_race(self):
         """
         Send pre-loaded race data (assuming we have it).
         """
         if self.race_dict:
-            await self.send(text_data=json.dumps({
-                'type': 'race.data',
-                'race': self.race_dict,
-            }, cls=DjangoJSONEncoder))
+            await self.deliver('race.data', race=self.race_dict)
 
-    async def bad_request(self):
-        """
-        Send an error message indicating bad request data.
-        """
-        await self.channel_layer.send(self.channel_name, {
-            'type': 'error',
-            'errors': [
-                'Unable to process that message (encountered invalid or '
-                'possibly corrupted data). Sorry about that.'
-            ],
-        })
-
-    async def permission_denied(self):
-        """
-        Send an error message indicating the user does not have permission to
-        do that.
-        """
-        await self.channel_layer.send(self.channel_name, {
-            'type': 'error',
-            'errors': [
-                'Permission denied, you may need to re-authorise this '
-                'application.'
-            ],
-        })
+    async def send_chat_history(self):
+        messages = await self.get_chat_history()
+        if messages:
+            await self.deliver('chat.history', messages=messages)
+        else:
+            await self.whoops('Could not retrieve chat history.')
 
     @database_sync_to_async
     def call_race_action(self, action_class, user, data):
@@ -137,6 +116,17 @@ class RaceConsumer(AsyncWebsocketConsumer):
         action = action_class()
         race = Race.objects.get(slug=self.race_slug)
         action.action(race, user, data)
+
+    @database_sync_to_async
+    def get_chat_history(self):
+        try:
+            race = Race.objects.get(
+                slug=self.race_slug
+            )
+        except Race.DoesNotExist:
+            return []
+        else:
+            return list(race.chat_history().values())
 
     @database_sync_to_async
     def load_race(self):
@@ -179,24 +169,32 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
         try:
             data = json.loads(text_data)
         except json.JSONDecodeError:
-            await self.bad_request()
+            await self.whoops(
+                'Unable to process that message (encountered invalid or '
+                'possibly corrupted data). Sorry about that.'
+            )
         else:
             action, data, action_class, scope = self.parse_data(data)
 
             if action == 'getrace':
                 await self.send_race()
+            elif action == 'gethistory':
+                await self.send_chat_history()
             else:
                 state = await self.get_oauth_state(scope)
 
-                if not state:
-                    await self.permission_denied()
-                elif not action_class:
-                    await self.bad_request()
+                if not action_class:
+                    await self.whoops(
+                        'Action is missing or not recognised. Check your '
+                        'input and try again.'
+                    )
+                elif not state:
+                    await self.whoops(
+                        'Permission denied, you may need to re-authorise this '
+                        'application.'
+                    )
                 else:
                     try:
                         await self.call_race_action(action_class, state.user, data)
                     except SafeException as ex:
-                        await self.channel_layer.send(self.channel_name, {
-                            'type': 'error',
-                            'errors': exception_to_msglist(ex),
-                        })
+                        await self.whoops(*exception_to_msglist(ex))
