@@ -1,0 +1,32 @@
+{% extends 'racetime/base.html' %}
+
+{% block body_class %}dialog{% endblock %}
+
+{% block title %}
+    Authorisation result |
+{% endblock %}
+
+{% block nocurrentrace %}{% endblock nocurrentrace %}
+
+{% block main %}
+    {% if error == 'access_denied' %}
+        <h2>Authorisation cancelled</h2>
+        <p>
+            Authorisation process was cancelled.
+        </p>
+    {% else %}
+        <h2>Authorisation successful</h2>
+        <p>
+            You have successfully authorised this app to connect to racetime.gg
+            with your user credentials.
+        </p>
+        <p>
+            You can visit your <a href="{% url 'edit_account' %}">account settings</a>
+            page to manage all your connected apps and revoke access at any time.
+        </p>
+    {% endif %}
+    <p>
+        You may close this browser tab (or window) now, or return to the
+        <a href="{% url 'home' %}">home page</a>.
+    </p>
+{% endblock %}

@@ -21,6 +21,8 @@ urlpatterns = [
         path('token', oauth2_views.TokenView.as_view(), name='oauth2_token'),
         path('revoke_token', oauth2_views.RevokeTokenView.as_view(), name='oauth2_revoke'),
 
+        path('delete/<pk>', views.OAuthDeleteToken.as_view(), name='oauth2_delete'),
+        path('done', views.OAuthDone.as_view(), name='oauth2_authorize_done'),
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
     ])),
 

@@ -37,13 +37,42 @@
             </p>
         {% endif %}
     </div>
+    <div class="division">
+        <h3>Applications</h3>
+        <p class="help">
+            Third-party applications that you have authorised to use your
+            account will be listed here.
+        </p>
+        <ul class="auth-token-list">
+            {% for authorized_token in authorized_tokens %}
+                <li>
+                    <span class="app">{{ authorized_token.application }}</span>
+                    <form action="{% url 'oauth2_delete' pk=authorized_token.pk %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn dangerous" type="submit" title="Revoke access for this application"><i class="material-icons">delete_forever</i></button>
+                    </form>
+                </li>
+                <ul class="scopes">
+                    {% for scope_name, scope_description in authorized_token.scopes.items %}
+                        <li>{{ scope_description }}</li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <li class="empty">
+                    You have not added any applications. If you do, they will
+                    appear here.
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 {% endblock %}
 {% block aside %}
     <div class="change-password">
         <h3>Change your password</h3>
         <p class="help">
             You may change your password at any time. Make sure to pick
-            something secure, and don't reuse passwords that you've used
+            something secure, and avoid re-using a password that you've used
             elsewhere.
         </p>
         <form class="change-password-form layout-form" method="post">

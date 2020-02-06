@@ -11,13 +11,14 @@ from django.db.models import Count
 from django.db.transaction import atomic
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator, decorator_from_middleware
 from django.utils.translation import gettext as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
+from oauth2_provider.models import get_access_token_model
 from oauth2_provider.views import ProtectedResourceView
 
 from .base import UserMixin
@@ -181,11 +182,18 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
             return forms.PasswordChangeForm
         return forms.UserEditForm
 
+    def get_authorized_tokens(self):
+        model = get_access_token_model()
+        queryset = model.objects.filter(user=self.request.user)
+        queryset = queryset.select_related('application')
+        return queryset
+
     def get_context_data(self, **kwargs):
         kwargs.update({
             'account_form': self.get_form(forms.UserEditForm),
             'password_form': self.get_form(forms.PasswordChangeForm),
             'twitch_url': twitch_auth_url(self.request),
+            'authorized_tokens': self.get_authorized_tokens(),
         })
         if 'form' in kwargs:
             if isinstance(kwargs['form'], forms.UserEditForm):
@@ -260,3 +268,21 @@ class OAuthUserInfo(ProtectedResourceView):
 
     def get_scopes(self):
         return ['read']
+
+
+class OAuthDeleteToken(LoginRequiredMixin, generic.DeleteView):
+    success_url = reverse_lazy('edit_account')
+    model = get_access_token_model()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
+
+
+class OAuthDone(generic.TemplateView):
+    template_name = 'racetime/user/oauth_done.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'error': self.request.GET.get('error'),
+        }
