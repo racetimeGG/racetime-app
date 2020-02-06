@@ -257,3 +257,6 @@ class OAuthUserInfo(ProtectedResourceView):
         resp = http.JsonResponse(data)
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+    def get_scopes(self):
+        return ['read']

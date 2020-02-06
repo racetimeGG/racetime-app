@@ -1,4 +1,5 @@
 from django.urls import path, include
+from oauth2_provider import views as oauth2_views
 
 from . import views
 
@@ -15,13 +16,18 @@ urlpatterns = [
         path('reset/complete', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     ])),
 
+    path('o/', include([
+        path('authorize', oauth2_views.AuthorizationView.as_view(), name='oauth2_authorize'),
+        path('token', oauth2_views.TokenView.as_view(), name='oauth2_token'),
+        path('revoke_token', oauth2_views.RevokeTokenView.as_view(), name='oauth2_revoke'),
+
+        path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
+    ])),
+
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
-
-    path('o/userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([

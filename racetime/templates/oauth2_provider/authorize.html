@@ -1,0 +1,50 @@
+{% extends "racetime/base.html" %}
+
+{% block body_class %}dialog{% endblock %}
+
+{% block title %}
+    Authorize {{ application.name }} |
+{% endblock %}
+
+{% block main %}
+    <h2>Authorize {{ application.name }}?</h2>
+    <p class="help">
+        You are authorizing this application to use your account details
+        on racetime.gg. Please check the information below to confirm this is
+        what you want to do.
+    </p>
+    <p class="help">
+        Applications you authorise will never have access to sensitive account
+        details like your email address or password.
+    </p>
+    {% if not error %}
+        <form class="oauth-auth-form layout-form" method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% endif %}
+            {% endfor %}
+
+            <h3>{{ application.name }} will be able to…</h3>
+            <ul class="permission-list">
+                {% for scope in scopes_descriptions %}
+                    <li>{{ scope }}</li>
+                {% endfor %}
+            </ul>
+
+            {{ form.errors }}
+            {{ form.non_field_errors }}
+
+            <div class="controls">
+                <button class="btn" type="submit" name="allow" value="Authorize">Authorize</button>
+                <button class="btn cancel" type="submit">Cancel</button>
+            </div>
+        </form>
+
+    {% else %}
+        <h2>Error: {{ error.error }}</h2>
+        <p>{{ error.description }}</p>
+    {% endif %}
+{% endblock %}

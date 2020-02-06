@@ -17,7 +17,7 @@
             <meta property="og:description" content="{{ site_info.meta_description }}">
         {% endblock %}
     </head>
-    <body>
+    <body class="{% block body_class %}{% endblock %}">
         {% block body %}
             {% block header %}
                 <header>

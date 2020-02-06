@@ -69,9 +69,19 @@ a {
     vertical-align: top;
 }
 
+.btn.cancel {
+    border-color: #ddd8dd;
+    color: #ddd8dd;
+}
+
 .btn:hover {
     border-color: #a6ebc4;
     color: #beebd1;
+}
+
+.btn.cancel:hover {
+    border-color: #f08080;
+    color: #f08080;
 }
 
 .btn:active {
@@ -274,6 +284,9 @@ header > .current-race > a .timer {
     margin: 0 auto;
     max-width: 1280px;
     padding: 30px 0;
+}
+.dialog .container > .content {
+    max-width: 600px;
 }
 
 .container > .content > main,
@@ -714,12 +727,16 @@ header > .current-race > a .timer {
 .race-monitor > ul > .invite > form button {
     margin-left: 5px;
 }
+.btn.dangerous,
 .dangerous .btn {
     border-color: #f08080;
 }
+.btn.dangerous:hover,
 .dangerous .btn:hover {
     color: #f08080;
 }
+.btn.dangerous:disabled,
+.btn.dangerous:disabled:hover,
 .dangerous .btn:disabled,
 .dangerous .btn:disabled:hover {
     border-color: #666;
@@ -961,4 +978,59 @@ footer > ul > li:first-child::before {
     flex: 0 0 80px;
     font-size: 14px;
     text-align: right;
+}
+
+.layout-form > .permission-list {
+    border-top: 1px solid #111;
+    margin: 10px 50px 20px;
+}
+
+.layout-form > .permission-list > li {
+    padding: 10px 5px;
+}
+
+.layout-form > .controls {
+    display: flex;
+    justify-content: space-around;
+}
+
+.auth-token-list {
+}
+.auth-token-list > li {
+    align-items: center;
+    background: #1a1c20;
+    border: 5px solid #1a1c20;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+    padding-left: 5px;
+    margin-top: 10px;
+}
+.auth-token-list > .empty {
+    background: none;
+    border: none;
+    padding: 0;
+}
+.auth-token-list > li > .app {
+    font-weight: bold;
+}
+.auth-token-list > li > form {
+}
+.auth-token-list > li > form > .btn {
+    padding: 2px;
+    margin: 5px;
+}
+.auth-token-list > li > form > .btn > .material-icons {
+    vertical-align: top;
+}
+.auth-token-list > .scopes {
+    border: 5px solid #1a1c20;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: 14px;
+}
+.auth-token-list > .scopes > li {
+    border-top: 1px solid #1a1c20;
+    padding: 5px;
 }
