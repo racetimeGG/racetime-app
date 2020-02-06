@@ -171,6 +171,17 @@ LOGGING = {
     }
 }
 
+# OAuth2 settings
+
+OAUTH2_PROVIDER = {
+    'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,
+    'SCOPES': {
+        'read': 'See your name, Twitch username and basic user information.',
+        'chat_message': 'Send chat messages to race rooms on your behalf.',
+        'race_action': 'Join and interact with races on your behalf.',
+    },
+}
+
 # Site details
 
 EMAIL_FROM = 'hello@racetime.dev'
