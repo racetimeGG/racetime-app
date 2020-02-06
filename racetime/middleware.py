@@ -1,9 +1,6 @@
 from urllib.parse import parse_qs
 
-from channels.auth import UserLazyObject
-from channels.db import database_sync_to_async
 from channels.middleware import BaseMiddleware
-from django.contrib.auth.models import AnonymousUser
 from django.middleware.csrf import (
     CsrfViewMiddleware,
     REASON_NO_CSRF_COOKIE,
@@ -11,7 +8,6 @@ from django.middleware.csrf import (
     _compare_salted_tokens,
     _sanitize_token,
 )
-from oauth2_provider.settings import oauth2_settings
 
 
 class CsrfViewMiddlewareTwitch(CsrfViewMiddleware):
@@ -34,9 +30,6 @@ class OAuth2TokenMiddleware(BaseMiddleware):
     """
     OAuth2 middleware for ASGI.
     """
-    request_class = type('Request', (object,), {})
-    validator_class = oauth2_settings.OAUTH2_VALIDATOR_CLASS
-
     @staticmethod
     def get_token_from_header(scope):
         """
@@ -71,26 +64,3 @@ class OAuth2TokenMiddleware(BaseMiddleware):
             or self.get_token_from_query(scope)
             or None
         )
-        scope['oauth_user'] = UserLazyObject()
-
-    async def resolve_scope(self, scope):
-        scope['oauth_user']._wrapped = await self.get_user(scope)
-
-    @database_sync_to_async
-    def get_user(self, scope):
-        """
-        Try and authenticate the user using their OAuth2 token.
-        """
-        token = scope.get('oauth_token')
-
-        if not token:
-            return AnonymousUser()
-
-        validator = self.validator_class()
-        request = self.request_class()
-
-        result = validator.validate_bearer_token(token, ['read', 'write'], request)
-
-        if result:
-            return request.user
-        return AnonymousUser()

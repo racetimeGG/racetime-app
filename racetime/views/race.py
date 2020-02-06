@@ -32,7 +32,7 @@ class Race(UserMixin, generic.DetailView):
             'js_vars': {
                 'chat_history': race.chat_history(),
                 'urls': {
-                    'chat': race.get_chat_url(),
+                    'chat': race.get_ws_url(),
                     'renders': race.get_renders_url(),
                 },
                 'user': {
