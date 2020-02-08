@@ -1,3 +1,4 @@
+from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
@@ -5,7 +6,6 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.db.transaction import atomic
-from django.http import HttpResponse, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -68,7 +68,7 @@ class Category(UserMixin, generic.DetailView):
 class CategoryData(Category):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        resp = HttpResponse(
+        resp = http.HttpResponse(
             content=self.object.json_data,
             content_type='application/json',
         )
@@ -140,7 +140,7 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
                 recipient_list=[user.email],
             )
 
-        return HttpResponseRedirect(reverse('home'))
+        return http.HttpResponseRedirect(reverse('home'))
 
 
 class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
@@ -180,4 +180,3 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
 
     def test_func(self):
         return self.get_object().can_edit(self.user)
-
