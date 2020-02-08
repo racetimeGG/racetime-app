@@ -214,6 +214,7 @@ class RaceListData(generic.View):
         return [
             {
                 'name': str(race),
+                'category': race.category.api_dict_summary(),
                 'status': {
                     'value': race.state_info.value,
                     'verbose_value': race.state_info.verbose_value,
