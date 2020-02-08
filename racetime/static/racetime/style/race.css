@@ -143,16 +143,22 @@ main {
 .race-chat > .messages > li.highlight {
     color: #a0e9a0;
 }
+.race-chat > .messages > li.bot {
+    color: #a0ace8;
+}
 .race-chat > .messages > li > .timestamp {
     color: #7a777a;
     font-size: 12px;
     margin-right: 4px;
 }
-.race-chat > .messages > li > .user {
+.race-chat > .messages > li > .name {
     color: #b9b4b9;
     margin-right: 4px;
 }
-.race-chat > .messages > li > .user::after {
+.race-chat > .messages > li.bot > .name {
+    color: #a0ace8;
+}
+.race-chat > .messages > li > .name::after {
     content: ':';
 }
 .race-chat > .messages > li > .message {}

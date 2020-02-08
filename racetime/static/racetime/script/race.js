@@ -72,8 +72,13 @@ Race.prototype.createMessageItem = function(message) {
 
     if (message.is_system) {
         $li.addClass('system');
+    } else if (message.is_bot) {
+        $li.addClass('bot');
+        var $bot = $('<span class="name"></span>');
+        $bot.text(message.bot);
+        $bot.insertAfter($li.children('.timestamp'));
     } else {
-        var $user = $('<span class="user"></span>');
+        var $user = $('<span class="name"></span>');
         $user.text(message.user.name);
         $user.insertAfter($li.children('.timestamp'));
     }
