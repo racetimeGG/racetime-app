@@ -226,7 +226,9 @@ def exception_to_msglist(ex):
         elif isinstance(arg, dict):
             for field, messages in arg.items():
                 errors += [
-                    f'{field}: {message}' for message in messages
+                    f'{field}: {message}'
+                    if field != '__all__' else message
+                    for message in messages
                 ]
     return errors
 
