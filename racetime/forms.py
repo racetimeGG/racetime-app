@@ -12,6 +12,12 @@ from django.template.loader import render_to_string
 from . import models
 
 
+class BotForm(forms.ModelForm):
+    class Meta:
+        fields = ('name',)
+        model = models.Bot
+
+
 class ChatForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -287,6 +293,17 @@ class RaceEditForm(RaceForm):
             'allow_midrace_chat',
             'allow_non_entrant_chat',
             'chat_message_delay',
+        )
+        model = models.Race
+
+
+class RaceSetInfoForm(RaceForm):
+    """
+    Race form that only sets the info field, used by chat bots.
+    """
+    class Meta:
+        fields = (
+            'info',
         )
         model = models.Race
 
