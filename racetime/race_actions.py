@@ -245,7 +245,6 @@ class Message:
 
         self.assert_can_chat(race, user)
 
-        message = form.save(commit=False)
         message.user = user
         message.race = race
         message.save()
