@@ -231,6 +231,8 @@ class Race(models.Model):
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
             'allow_comments': self.allow_comments,
             'allow_midrace_chat': self.allow_midrace_chat,
+            'allow_non_entrant_chat': self.allow_non_entrant_chat,
+            'chat_message_delay': self.chat_message_delay,
         }
 
     @property
