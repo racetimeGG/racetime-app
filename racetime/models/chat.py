@@ -7,6 +7,12 @@ class Message(models.Model):
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
+        null=True,
+    )
+    bot = models.ForeignKey(
+        'Bot',
+        on_delete=models.CASCADE,
+        null=True,
     )
     race = models.ForeignKey(
         'Race',
@@ -44,21 +50,34 @@ class Message(models.Model):
             'id': self.hashid,
             'user': (
                 self.user.api_dict_summary(race=self.race)
-                if not self.user.is_system else None
+                if self.user and not self.user.is_system else None
             ),
+            'bot': self.bot.name if self.bot else None,
             'posted_at': self.posted_at.isoformat(),
             'message': self.message,
             'highlight': self.highlight,
-            'is_system': self.user.is_system,
+            'is_bot': self.is_bot,
+            'is_system': self.is_system,
             'delay': self.delay,
         }
 
     @property
     def delay(self):
-        if self.race.can_monitor(self.user) or self.user.is_system:
+        if self.is_bot or self.is_system or self.race.can_monitor(self.user):
             return 0
         return self.race.chat_message_delay.seconds
 
     @property
     def hashid(self):
         return get_hashids(self.__class__).encode(self.id)
+
+    @property
+    def is_bot(self):
+        return self.bot is not None
+
+    @property
+    def is_system(self):
+        return (
+            (self.user is None and self.bot is None)
+            or (self.user and self.user.is_system)
+        )
