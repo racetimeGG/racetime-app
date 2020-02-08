@@ -95,6 +95,13 @@ class Category(models.Model):
         )
 
     @property
+    def max_bots(self):
+        """
+        This is a fixed quantity for now. May vary in the future.
+        """
+        return 3
+
+    @property
     def moderator_list(self):
         """
         Return a comma-separated string listing all moderators.
