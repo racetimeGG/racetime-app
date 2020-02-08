@@ -30,9 +30,6 @@ class OAuthConsumerMixin:
                 self.scopes = None
                 self.user = None
 
-            def __bool__(self):
-                return self.user is not None
-
         token = self.scope.get('oauth_token')
 
         state = OAuthState()
@@ -193,7 +190,7 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
                         'Action is missing or not recognised. Check your '
                         'input and try again.'
                     )
-                elif not state:
+                elif not state.user:
                     await self.whoops(
                         'Permission denied, you may need to re-authorise this '
                         'application.'
