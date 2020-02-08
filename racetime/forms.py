@@ -211,23 +211,27 @@ class GoalForm(forms.ModelForm):
 class RaceForm(forms.ModelForm):
     def __init__(self, category, can_moderate, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['info'].widget = forms.TextInput()
-        self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
-            category=category,
-            active=True,
-        )
-        self.fields['streaming_required'].initial = category.streaming_required
-        if not can_moderate:
-            self.fields['streaming_required'].disabled = True
+        if 'info' in self.fields:
+            self.fields['info'].widget = forms.TextInput()
+        if 'goal' in self.fields:
+            self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
+                category=category,
+                active=True,
+            )
+        if 'streaming_required' in self.fields:
+            self.fields['streaming_required'].initial = category.streaming_required
+            if not can_moderate:
+                self.fields['streaming_required'].disabled = True
 
     def clean(self):
         cleaned_data = super().clean()
 
-        if not cleaned_data.get('goal') and not cleaned_data.get('custom_goal'):
-            raise ValidationError('You need to set a goal for this race.')
+        if 'goal' in self.fields:
+            if not cleaned_data.get('goal') and not cleaned_data.get('custom_goal'):
+                raise ValidationError('You need to set a goal for this race.')
 
-        if cleaned_data.get('goal') and cleaned_data.get('custom_goal'):
-            raise ValidationError('The race must only have one goal.')
+            if cleaned_data.get('goal') and cleaned_data.get('custom_goal'):
+                raise ValidationError('The race must only have one goal.')
 
         return cleaned_data
 
