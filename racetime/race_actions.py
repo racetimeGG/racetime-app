@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from racetime import models
-from racetime.forms import ChatForm, CommentForm
+from racetime.forms import ChatForm, CommentForm, RaceSetInfoForm
 from racetime.utils import SafeException
 
 
@@ -307,3 +307,58 @@ class Message:
             return False
         cache.set('guid/message/' + guid, True, 300)
         return True
+
+
+class BotMessage(Message):
+    def action(self, race, bot, data):
+        if not self.guid_is_new(data.get('guid', '')):
+            return
+
+        form = ChatForm(data)
+        if not form.is_valid():
+            raise SafeException(form.errors)
+
+        self.assert_can_chat(race, bot)
+
+        message = form.save(commit=False)
+        message.bot = bot
+        message.race = race
+        message.save()
+
+    def assert_can_chat(self, race, bot):
+        if (
+            race.is_done
+            and (race.recorded or (
+                not race.recordable
+                and (race.ended_at or race.cancelled_at) <= timezone.now() - timedelta(hours=1)
+            ))
+        ):
+            raise SafeException(
+                'This race chat is now closed. No new messages may be added.'
+            )
+
+        if (
+            len(models.Message.objects.filter(
+                bot=bot,
+                race=race,
+                posted_at__gte=timezone.now() - timedelta(seconds=5),
+            )) > 5
+        ):
+            raise SafeException(
+                'You are chatting too much. Please wait a few seconds.'
+            )
+
+
+class BotSetInfo:
+    def action(self, race, bot, data):
+        form = RaceSetInfoForm(race.category, False, data=data)
+        if not form.is_valid():
+            raise SafeException(form.errors)
+
+        race.info = form.cleaned_data.get('info')
+        race.save()
+
+        race.add_message(
+            '%(bot)s updated the race information.'
+            % {'bot': bot}
+        )
