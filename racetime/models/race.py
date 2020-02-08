@@ -191,6 +191,7 @@ class Race(models.Model):
             'url': self.get_absolute_url(),
             'data_url': self.get_data_url(),
             'websocket_url': self.get_ws_url(),
+            'websocket_bot_url': self.get_ws_bot_url(),
             'websocket_oauth_url': self.get_ws_oauth_url(),
             'category': self.category.api_dict_summary(),
             'goal': {
@@ -743,6 +744,9 @@ class Race(models.Model):
 
     def get_ws_oauth_url(self):
         return reverse('oauth2_race_websocket', args=(self.slug,), urlconf='racetime.routing')
+
+    def get_ws_bot_url(self):
+        return reverse('oauth2_bot_websocket', args=(self.slug,), urlconf='racetime.routing')
 
     def __str__(self):
         return self.category.slug + '/' + self.slug

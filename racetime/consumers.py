@@ -5,8 +5,8 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from oauth2_provider.settings import oauth2_settings
 
-from .models import Race
-from .race_actions import commands, Message
+from .models import Bot, Race
+from . import race_actions
 from .utils import SafeException, exception_to_msglist
 
 
@@ -156,10 +156,10 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
         data = data.get('data')
 
         if action == 'message':
-            action_class = Message
+            action_class = race_actions.Message
             scope = 'chat_message'
-        elif action in commands:
-            action_class = commands[action]
+        elif action in race_actions.commands:
+            action_class = race_actions.commands[action]
             scope = 'race_action'
         else:
             action_class = None
@@ -200,3 +200,73 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
                         await self.call_race_action(action_class, state.user, data)
                     except SafeException as ex:
                         await self.whoops(*exception_to_msglist(ex))
+
+
+class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
+    def parse_data(self, data):
+        """
+        Read incoming data and process it so we know what to do.
+        """
+        action = data.get('action')
+        data = data.get('data')
+
+        if action == 'message':
+            action_class = race_actions.BotMessage
+        elif action == 'setinfo':
+            action_class = race_actions.BotSetInfo
+        else:
+            action_class = None
+
+        return action, data, action_class
+
+    async def receive(self, text_data=None, bytes_data=None):
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError:
+            await self.whoops(
+                'Unable to process that message (encountered invalid or '
+                'possibly corrupted data). Sorry about that.'
+            )
+        else:
+            action, data, action_class = self.parse_data(data)
+
+            if action == 'getrace':
+                await self.send_race()
+            elif action == 'gethistory':
+                await self.send_chat_history()
+            else:
+                state = await self.get_oauth_state()
+                bot = await self.get_bot(state.client)
+
+                if not action_class:
+                    await self.whoops(
+                        'Action is missing or not recognised. Check your '
+                        'input and try again.'
+                    )
+                elif not bot:
+                    await self.whoops(
+                        'Permission denied. Check your authorization token.'
+                    )
+                else:
+                    try:
+                        await self.call_race_action(action_class, bot, data)
+                    except SafeException as ex:
+                        await self.whoops(*exception_to_msglist(ex))
+
+    @database_sync_to_async
+    def get_bot(self, application):
+        """
+        Returns the Bot object associated to the given OAuth2 application, if
+        any.
+        """
+        if not application or not self.category_slug:
+            return None
+
+        try:
+            return Bot.objects.get(
+                application=application,
+                active=True,
+                category__slug=self.category_slug,
+            )
+        except Bot.DoesNotExist:
+            return None

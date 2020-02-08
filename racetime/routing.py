@@ -9,6 +9,7 @@ urlpatterns = [
     path('ws/chat/<str:race>', consumers.RaceConsumer),
     path('ws/race/<str:race>', consumers.RaceConsumer, name='race_websocket'),
     path('ws/o/race/<str:race>', consumers.OauthRaceConsumer, name='oauth2_race_websocket'),
+    path('ws/o/bot/<str:race>', consumers.BotRaceConsumer, name='oauth2_bot_websocket'),
 ]
 
 MiddlewareStack = lambda inner: OAuth2TokenMiddleware(AuthMiddlewareStack(inner))
