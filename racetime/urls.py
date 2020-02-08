@@ -34,7 +34,13 @@ urlpatterns = [
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
-        path('edit', views.EditCategory.as_view(), name='edit_category'),
+        path('manage/', include([
+            path('edit', views.EditCategory.as_view(), name='edit_category'),
+            path('bots', views.BotList.as_view(), name='category_bots'),
+            path('bots/new', views.CreateBot.as_view(), name='new_category_bot'),
+            path('bots/<str:bot>/deactivate', views.DeactivateBot.as_view(), name='deactivate_category_bot'),
+            path('bots/<str:bot>/reactivate', views.ReactivateBot.as_view(), name='reactivate_category_bot'),
+        ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),
     ])),

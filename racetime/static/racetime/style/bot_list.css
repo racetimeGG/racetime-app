@@ -1,0 +1,67 @@
+.bot-list > li > dl {
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+.bot-list > li > dl > dt,
+.bot-list > li > dl > dd {
+    border-top: 1px solid #1a1c20;
+    box-sizing: border-box;
+}
+
+.bot-list > li > dl > dt {
+    align-items: center;
+    border-bottom: none;
+    cursor: default;
+    display: flex;
+    flex: 1 1 20%;
+    font-size: inherit;
+    margin-bottom: 0;
+    padding: 5px;
+}
+.bot-list > li > dl > dt::after {
+    content: none;
+}
+.bot-list > li > dl > dt > .material-icons {
+    font-size: 18px;
+    margin-left: 4px;
+}
+.bot-list > li > dl > dd {
+    flex: 1 1 80%;
+    margin-left: 0;
+    padding: 5px;
+}
+.bot-list > li > dl > .name {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+.bot-list > li > dl > .name > span {
+}
+.bot-list > li > dl > .name > form {
+}
+.bot-list > li > dl > .name > form > .btn {
+}
+.bot-list > li > dl > .secret {
+    align-items: center;
+    display: flex;
+    min-height: calc(2.75em + 11px);
+    word-break: break-word;
+}
+.bot-list > li > dl > .secret::before {
+    content: '(Hover to reveal)';
+    color: #b9b4b9;
+}
+.bot-list > li > dl > .secret:hover {
+}
+.bot-list > li > dl > .secret:hover::before {
+    content: none;
+}
+.bot-list > li > dl > .secret > span {
+    display: none
+}
+.bot-list > li > dl > .secret:hover > span {
+    display: inherit;
+}

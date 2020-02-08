@@ -1,0 +1,113 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/bot_list.css' %}">
+{% endblock %}
+
+{% block title %}
+    Manage bots | {{ category.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/manage_tabs.html' with current='category_bots' %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+    </ol>
+    <h2>Manage bots</h2>
+    <p>
+        This page allows you to set up client credentials for bot users to interact
+        with any {{ category.short_name }} race room. For more details on how
+        category bots work and how to start writing your own, please read our
+        <a href="https://github.com/deains/racetime-app/wiki/Category-bots">bot documentation guide</a>
+        on GitHub.
+    </p>
+    <h3>Active bots</h3>
+    <p class="help">
+        All bot users that can currently interact with your category's races.
+    </p>
+    <ol class="bot-list">
+        {% for bot in view.active_bots %}
+            <li id="bot-{{ bot.hashid }}">
+                <dl>
+                    <dt>Name</dt>
+                    <dd class="name">
+                        <span>{{ bot.name }}</span>
+                        <form action="{% url 'deactivate_category_bot' bot=bot.hashid category=category.slug %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn dangerous" type="submit">Deactivate</button>
+                        </form>
+                    </dd>
+                    <dt class="copy-to-clipboard" data-target="#bot-{{ bot.hashid }} .client-id"
+                        title="Click to copy the client ID to your clipboard">
+                        <span>Client ID</span>
+                        <i class="material-icons">assignment</i>
+                    </dt>
+                    <dd class="client-id copy-to-clipboard">{{ bot.application.client_id }}</dd>
+                    <dt class="copy-to-clipboard" data-target="#bot-{{ bot.hashid }} .secret"
+                        title="Click to copy the client secret to your clipboard">
+                        <span>Client secret</span>
+                        <i class="material-icons">assignment</i>
+                    </dt>
+                    <dd class="secret copy-to-clipboard">
+                        <span>{{ bot.application.client_secret }}</span>
+                    </dd>
+                </dl>
+            </li>
+        {% empty %}
+            <li>
+                You do not have any active bots in this category.
+            </li>
+        {% endfor %}
+    </ol>
+    <h3>Inactive bots</h3>
+    <p class="help">
+        Inactive bots cannot perform any actions on races, but are kept visible
+        for any messages they may have sent prior to deactivation. You can
+        re-activate a bot to reclaim usage of its name, however its original
+        client credentials will not be retained.
+    </p>
+    <ol class="bot-list">
+        {% for bot in view.inactive_bots %}
+            <li>
+                <dl>
+                    <dt>Name</dt>
+                    <dd class="name">
+                        <span>{{ bot.name }}</span>
+                        <form action="{% url 'reactivate_category_bot' bot=bot.hashid category=category.slug %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn" type="submit">Reactivate</button>
+                        </form>
+                    </dd>
+                </dl>
+            </li>
+        {% empty %}
+            <li>
+                You do not have any inactive bots in this category.
+            </li>
+        {% endfor %}
+    </ol>
+    <h3>Create new bot</h3>
+    {% if view.available_bots > 0 %}
+        <p class="help">
+            Authorise a new bot account in this category, allowing you to set
+            up a third-party application that can interact with races. Please
+            see the documentation guide on how to use bots to get started.
+        </p>
+        <p>
+            You can create <strong>{{ view.available_bots }}</strong> more
+            bot{{ view.available_bots|pluralize }} for {{ category.short_name }}.
+        </p>
+        <form class="bot-form layout-form" action="{% url 'new_category_bot' category=category.slug %}" method="post">
+            {% csrf_token %}
+            <ul>{{ bot_form.as_ul }}</ul>
+            <button class="btn" type="submit">Create</button>
+        </form>
+    {% else %}
+        <p>
+            You have reached the maximum number of active bot users for this
+            category. To create another, you must first deactivate an existing
+            bot.
+        </p>
+    {% endif %}
+{% endblock %}

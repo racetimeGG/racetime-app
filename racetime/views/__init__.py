@@ -6,6 +6,12 @@ from .auth import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
+from .bot import (
+    BotList,
+    CreateBot,
+    DeactivateBot,
+    ReactivateBot,
+)
 from .category import (
     Category,
     CategoryData,
@@ -73,6 +79,11 @@ __all__ = [
     'PasswordResetDoneView',
     'PasswordResetConfirmView',
     'PasswordResetCompleteView',
+    # bot
+    'BotList',
+    'CreateBot',
+    'DeactivateBot',
+    'ReactivateBot',
     # category
     'Category',
     'CategoryData',

@@ -1,0 +1,12 @@
+<ul class="nav-tabs">
+    <li{% if current == 'edit_category' %} class="current"{% endif %}>
+        <a href="{% url 'edit_category' category=category.slug %}">
+            Edit category
+        </a>
+    </li>
+    <li{% if current == 'category_bots' %} class="current"{% endif %}>
+        <a href="{% url 'category_bots' category=category.slug %}">
+            Manage bots
+        </a>
+    </li>
+</ul>

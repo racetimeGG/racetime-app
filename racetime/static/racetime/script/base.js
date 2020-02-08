@@ -68,4 +68,35 @@ $(function() {
         });
     };
     window.localiseDates.call(document.body);
+
+    var lastCopyClicked = null;
+    $(document).on('click', '.copy-to-clipboard', function(e) {
+        if (this === lastCopyClicked) {
+            return true;
+        }
+        lastCopyClicked = this;
+
+        var $textarea = $('<textarea />');
+        var target = $(this).data('target') || this;
+        $textarea.val($(target).text().trim());
+        $textarea.appendTo('body');
+
+        $textarea[0].select();
+        document.execCommand('copy');
+
+        $textarea.remove();
+
+        var $copied = $('<span class="copied-to-clipboard" />');
+        $copied.css({
+            left: e.clientX + 10,
+            top: e.clientY
+        });
+        $copied.appendTo('body');
+        setTimeout(function() {
+            $copied.fadeOut(300, function () {
+                $(this).remove();
+                lastCopyClicked = null;
+            });
+        }, 400);
+    });
 });
