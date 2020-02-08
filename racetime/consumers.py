@@ -47,8 +47,11 @@ class OAuthConsumerMixin:
 
 
 class RaceConsumer(AsyncWebsocketConsumer):
-    race_dict = None
-    race_slug = None
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.category_slug = None
+        self.race_dict = None
+        self.race_slug = None
 
     async def connect(self):
         await self.load_race()
@@ -138,9 +141,11 @@ class RaceConsumer(AsyncWebsocketConsumer):
                 slug=self.scope['url_route']['kwargs']['race']
             )
         except Race.DoesNotExist:
+            self.category_slug = None
             self.race_dict = None
             self.race_slug = None
         else:
+            self.category_slug = race.category.slug
             self.race_dict = race.as_dict
             self.race_slug = race.slug
 
