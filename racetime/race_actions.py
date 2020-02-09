@@ -348,6 +348,6 @@ class BotSetInfo:
         race.save()
 
         race.add_message(
-            '%(bot)s updated the race information.'
+            '##bot##%(bot)s## updated the race information.'
             % {'bot': bot}
         )

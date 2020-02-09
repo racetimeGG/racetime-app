@@ -168,6 +168,9 @@ main {
 .race-chat > .messages > li > .message .bad {
     color: #f08080;
 }
+.race-chat > .messages > li > .message .bot {
+    color: #a0ace8;
+}
 
 .race-chat > form {
     display: flex;
