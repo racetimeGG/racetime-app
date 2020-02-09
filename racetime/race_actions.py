@@ -337,17 +337,6 @@ class BotMessage(Message):
                 'This race chat is now closed. No new messages may be added.'
             )
 
-        if (
-            len(models.Message.objects.filter(
-                bot=bot,
-                race=race,
-                posted_at__gte=timezone.now() - timedelta(seconds=5),
-            )) > 5
-        ):
-            raise SafeException(
-                'You are chatting too much. Please wait a few seconds.'
-            )
-
 
 class BotSetInfo:
     def action(self, race, bot, data):
