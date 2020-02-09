@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 
 from ..utils import get_hashids
@@ -55,6 +57,7 @@ class Message(models.Model):
             'bot': self.bot.name if self.bot else None,
             'posted_at': self.posted_at.isoformat(),
             'message': self.message,
+            'message_plain': self.message_plain,
             'highlight': self.highlight,
             'is_bot': self.is_bot,
             'is_system': self.is_system,
@@ -81,3 +84,10 @@ class Message(models.Model):
             (self.user is None and self.bot is None)
             or (self.user and self.user.is_system)
         )
+
+    @property
+    def message_plain(self):
+        """
+        Returns the message text without formatting markers.
+        """
+        return re.sub(r'##(\w+?)##(.+?)##', '\\2', self.message)
