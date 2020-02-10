@@ -97,7 +97,7 @@ Race.prototype.createMessageItem = function(message) {
     }));
 
     var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
-    if(delay > 0 && !(this.vars.user.id === message.user.id || this.vars.user.can_monitor)) {
+    if (delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
         $li.hide();
         setTimeout(function() {
             $li.show();
