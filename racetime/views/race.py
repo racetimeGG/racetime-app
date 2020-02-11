@@ -65,8 +65,8 @@ class RaceChatLog(Race):
 
         messages = self.object.message_set.filter(deleted=False).order_by('posted_at')
         content = '\n'.join(
-            '[%s] %s' % (m.posted_at.replace(microsecond=0), m.message) if m.user.is_system
-            else '[%s] %s: %s' % (m.posted_at.replace(microsecond=0), m.user, m.message)
+            '[%s] %s' % (m.posted_at.replace(microsecond=0), m.message) if m.is_system
+            else '[%s] %s: %s' % (m.posted_at.replace(microsecond=0), m.user or m.bot, m.message)
             for m in messages
         )
 
