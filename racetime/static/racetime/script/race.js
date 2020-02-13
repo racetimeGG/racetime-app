@@ -50,11 +50,9 @@ Race.prototype.addMessage = function(message) {
         return true;
     }
 
-    if (!message.is_system || message.message !== '.reload') {
-        var $messages = $('.race-chat .messages');
-        $messages.append(self.createMessageItem(message));
-        $messages[0].scrollTop = $messages[0].scrollHeight
-    }
+    var $messages = $('.race-chat .messages');
+    $messages.append(self.createMessageItem(message));
+    $messages[0].scrollTop = $messages[0].scrollHeight;
 
     self.messageIDs.push(message.id);
 };
