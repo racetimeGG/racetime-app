@@ -62,6 +62,29 @@ class RaceConsumer(AsyncWebsocketConsumer):
         if self.race_slug:
             await self.channel_layer.group_discard(self.race_slug, self.channel_name)
 
+    async def receive(self, text_data=None, bytes_data=None):
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError:
+            await self.whoops(
+                'Unable to process that message (encountered invalid or '
+                'possibly corrupted data). Sorry about that.'
+            )
+        else:
+            action = data.get('action')
+
+            if action == 'ping':
+                await self.pong()
+            elif action == 'getrace':
+                await self.send_race()
+            elif action == 'gethistory':
+                await self.send_chat_history()
+            else:
+                await self.do_receive(data)
+
+    async def do_receive(self, data):
+        pass
+
     async def deliver(self, event_type, **kwargs):
         await self.send(text_data=json.dumps({
             'type': event_type,
@@ -85,6 +108,9 @@ class RaceConsumer(AsyncWebsocketConsumer):
         Handler for error type event.
         """
         await self.deliver(event['type'], errors=event['errors'])
+
+    async def pong(self):
+        await self.deliver('pong')
 
     async def race_data(self, event):
         """
@@ -167,39 +193,26 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
 
         return action, data, action_class, scope
 
-    async def receive(self, text_data=None, bytes_data=None):
-        try:
-            data = json.loads(text_data)
-        except json.JSONDecodeError:
+    async def do_receive(self, data):
+        action, data, action_class, scope = self.parse_data(data)
+
+        state = await self.get_oauth_state(scope)
+
+        if not action_class:
             await self.whoops(
-                'Unable to process that message (encountered invalid or '
-                'possibly corrupted data). Sorry about that.'
+                'Action is missing or not recognised. Check your '
+                'input and try again.'
+            )
+        elif not state.user:
+            await self.whoops(
+                'Permission denied, you may need to re-authorise this '
+                'application.'
             )
         else:
-            action, data, action_class, scope = self.parse_data(data)
-
-            if action == 'getrace':
-                await self.send_race()
-            elif action == 'gethistory':
-                await self.send_chat_history()
-            else:
-                state = await self.get_oauth_state(scope)
-
-                if not action_class:
-                    await self.whoops(
-                        'Action is missing or not recognised. Check your '
-                        'input and try again.'
-                    )
-                elif not state.user:
-                    await self.whoops(
-                        'Permission denied, you may need to re-authorise this '
-                        'application.'
-                    )
-                else:
-                    try:
-                        await self.call_race_action(action_class, state.user, data)
-                    except SafeException as ex:
-                        await self.whoops(*exception_to_msglist(ex))
+            try:
+                await self.call_race_action(action_class, state.user, data)
+            except SafeException as ex:
+                await self.whoops(*exception_to_msglist(ex))
 
 
 class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
@@ -219,39 +232,26 @@ class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
 
         return action, data, action_class
 
-    async def receive(self, text_data=None, bytes_data=None):
-        try:
-            data = json.loads(text_data)
-        except json.JSONDecodeError:
+    async def do_receive(self, data):
+        action, data, action_class = self.parse_data(data)
+
+        state = await self.get_oauth_state()
+        bot = await self.get_bot(state.client)
+
+        if not action_class:
             await self.whoops(
-                'Unable to process that message (encountered invalid or '
-                'possibly corrupted data). Sorry about that.'
+                'Action is missing or not recognised. Check your '
+                'input and try again.'
+            )
+        elif not bot:
+            await self.whoops(
+                'Permission denied. Check your authorization token.'
             )
         else:
-            action, data, action_class = self.parse_data(data)
-
-            if action == 'getrace':
-                await self.send_race()
-            elif action == 'gethistory':
-                await self.send_chat_history()
-            else:
-                state = await self.get_oauth_state()
-                bot = await self.get_bot(state.client)
-
-                if not action_class:
-                    await self.whoops(
-                        'Action is missing or not recognised. Check your '
-                        'input and try again.'
-                    )
-                elif not bot:
-                    await self.whoops(
-                        'Permission denied. Check your authorization token.'
-                    )
-                else:
-                    try:
-                        await self.call_race_action(action_class, bot, data)
-                    except SafeException as ex:
-                        await self.whoops(*exception_to_msglist(ex))
+            try:
+                await self.call_race_action(action_class, bot, data)
+            except SafeException as ex:
+                await self.whoops(*exception_to_msglist(ex))
 
     @database_sync_to_async
     def get_bot(self, application):
