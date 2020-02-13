@@ -170,10 +170,12 @@ class AddComment:
             raise SafeException(form.errors)
 
         entrant = race.in_race(user)
-        if entrant:
-            entrant.add_comment(form.cleaned_data.get('comment'))
+        comment = form.cleaned_data.get('comment', '').strip()
+        if entrant and comment:
+            entrant.add_comment(comment)
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
+
 
 class ShowGoal:
     commands = ['goal']
@@ -234,8 +236,12 @@ class Message:
             command, msg = (message.message[1:] + ' ').split(' ', 1)
             if command in commands:
                 race_action = commands[command]()
+
+                if isinstance(race_action, AddComment) and not msg.strip():
+                    raise SafeException('Your comment cannot be blank.')
+
                 try:
-                    return race_action.action(race, user, data)
+                    return race_action.action(race, user, {'comment': msg})
                 except SafeException:
                     raise SafeException(
                         f'You cannot .{command} at this time (is your stream live yet?).'
