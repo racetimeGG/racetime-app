@@ -119,6 +119,19 @@ Race.prototype.guid = function() {
         + Math.random().toString(36).substring(2, 15);
 };
 
+Race.prototype.heartbeat = function() {
+    clearTimeout(this.pingTimeout);
+    clearTimeout(this.pongTimeout);
+    this.pingTimeout = setTimeout(function() {
+        this.chatSocket.send(JSON.stringify({
+            'action': 'ping'
+        }));
+    }.bind(this), 20000);
+    this.pongTimeout = setTimeout(function() {
+        this.chatSocket.close();
+    }.bind(this), 30000);
+};
+
 Race.prototype.onError = function(xhr) {
     var self = this;
     if (xhr.status === 422) {
@@ -140,10 +153,7 @@ Race.prototype.onError = function(xhr) {
 
 Race.prototype.onSocketClose = function(event) {
     $('.race-chat').addClass('disconnected');
-
-    if (event.code !== 1000) {
-        this.reconnect();
-    }
+    this.reconnect();
 };
 
 Race.prototype.onSocketError = function(event) {
@@ -162,6 +172,8 @@ Race.prototype.onSocketMessage = function(event) {
             throw e;
         }
     }
+
+    this.heartbeat();
 
     switch (data.type) {
         case 'race.data':
@@ -186,6 +198,7 @@ Race.prototype.open = function() {
     for (var type in this.socketListeners) {
         this.chatSocket.addEventListener(type, this.socketListeners[type]);
     }
+    this.heartbeat();
 };
 
 Race.prototype.raceTick = function() {
