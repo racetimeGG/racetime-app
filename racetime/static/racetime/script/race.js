@@ -260,15 +260,20 @@ $(function() {
         race.ajaxifyActionForm(this);
     });
 
+    var guid = race.guid();
+    var sending = null;
     $('.race-chat form').ajaxForm({
         beforeSubmit: function(data, $form) {
-            if ($form.find('[name="message"]').val().trim() === ''){
+            var message = $form.find('[name="message"]').val().trim();
+            if (message === '' || message === sending) {
                 return false;
             }
-            data.push({
-                name: 'guid',
-                value: race.guid()
-            });
+            data.push({name: 'guid', value: guid});
+            sending = message;
+        },
+        complete: function() {
+            guid = race.guid();
+            sending = null;
         },
         error: race.onError.bind(race),
         success: function() {
