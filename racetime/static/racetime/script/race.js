@@ -55,6 +55,13 @@ Race.prototype.addMessage = function(message) {
     $messages[0].scrollTop = $messages[0].scrollHeight;
 
     self.messageIDs.push(message.id);
+
+    if (self.messageIDs.length > 100) {
+        self.messageIDs.shift();
+    }
+    if ($messages.children().length > 100) {
+        $messages.children().first().remove();
+    }
 };
 
 Race.prototype.createMessageItem = function(message) {
