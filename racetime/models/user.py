@@ -29,6 +29,11 @@ class UserManager(BaseUserManager):
 
         return self._create_user(email, password, **extra_fields)
 
+    def filter_active(self):
+        return self.filter(active=True).exclude(
+            email=User.SYSTEM_USER,
+        )
+
     def get_by_hashid(self, hashid):
         try:
             user_id, = get_hashids(User).decode(hashid)
