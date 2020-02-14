@@ -373,6 +373,10 @@ class Race(models.Model):
         ).order_by('state_sort', 'place', 'finish_time', 'user__name').all()
 
     @property
+    def streaming_entrants(self):
+        return self.ordered_entrants.filter(stream_live=True)
+
+    @property
     def state_info(self):
         return getattr(RaceStates, self.state)
 
@@ -445,6 +449,7 @@ class Race(models.Model):
                 'intro': render_to_string('racetime/race/intro.html', {'race': self}, request),
                 'monitor': '',
                 'status': render_to_string('racetime/race/status.html', {'race': self}, request),
+                'streams': render_to_string('racetime/race/streams.html', {'race': self}, request),
             }
 
         available_actions = self.available_actions(user)
@@ -461,6 +466,7 @@ class Race(models.Model):
             'intro': render_to_string('racetime/race/intro.html', {'race': self}, request),
             'monitor': '',
             'status': render_to_string('racetime/race/status.html', {'race': self}, request),
+            'streams': render_to_string('racetime/race/streams.html', {'race': self}, request),
         }
 
         if available_actions:

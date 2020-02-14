@@ -59,3 +59,14 @@
         {% endif %}
     {% endif %}
 </dl>
+<div class="race-stream-control">
+    <ul>
+        <li class="go-spectate"><a href="{% url 'race_spectate' category=race.category.slug race=race.slug %}" title="Spectator view"><i class="material-icons">videocam</i></a></li>
+        <li class="go-list"><a href="{{ race.get_absolute_url }}" title="Back to race view"><i class="material-icons">list_alt</i></a></li>
+        <li class="streamctl" data-class="streamctl-2" data-unclass="streamctl-3 streamctl-4" title="Show 2 streams per row"><i class="material-icons">filter_2</i></li>
+        <li class="streamctl" data-class="streamctl-3" data-unclass="streamctl-2 streamctl-4" title="Show 3 streams per row"><i class="material-icons">filter_3</i></li>
+        <li class="streamctl" data-class="streamctl-4" data-unclass="streamctl-2 streamctl-3" title="Show 4 streams per row"><i class="material-icons">filter_4</i></li>
+        <li class="streamctl close" data-class="streamctl-close" title="Hide sidebar"><i class="material-icons">chevron_right</i></li>
+        <li class="streamctl open" data-unclass="streamctl-close" title="Show sidebar"><i class="material-icons">chevron_left</i></li>
+    </ul>
+</div>

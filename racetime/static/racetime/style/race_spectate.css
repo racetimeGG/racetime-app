@@ -1,0 +1,111 @@
+.race-info > .info,
+.race-meta,
+.entrant-row > .user > .stream,
+.entrant-row > .user > .comment,
+.entrant-row > .monitor-actions,
+.entrant-row > .status,
+.entrant-row > .score-change {
+    display: none;
+}
+
+.race-info > .category > .name {
+    font-size: 20px;
+}
+.entrant-row:first-child {
+    border-top: none;
+}
+
+.race-streams {
+}
+.race-streams > ol {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -5px;
+}
+.race-streams > ol > li {
+    box-sizing: border-box;
+    flex: 0 0 50%;
+    padding: 5px;
+    order: 2;
+}
+.streamctl-3 .race-streams > ol > li {
+    flex: 0 0 33.33%;
+}
+.streamctl-4 .race-streams > ol > li {
+    flex: 0 0 25%;
+}
+.race-streams > ol > .playing {
+    order: 1;
+}
+.race-streams > ol > li > .meta {
+    align-items: stretch;
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    display: flex;
+    line-height: 32px;
+    padding: 5px;
+}
+.race-streams > ol > .playing > .meta {
+    border-bottom-width: 0;
+    border-radius: 10px 10px 0 0;
+}
+.race-streams > ol > li > .meta > .visibility {
+    align-items: center;
+    cursor: default;
+    display: flex;
+    justify-content: center;
+    width: 32px;
+}
+.race-streams > ol > li > .meta > .visibility > .on {
+    display: none;
+}
+.race-streams > ol > li > .meta > .visibility > .off {}
+.race-streams > ol > .playing > .meta > .visibility > .on {
+    display: inherit;
+}
+.race-streams > ol > .playing > .meta > .visibility > .off {
+    display: none;
+}
+.race-streams > ol > li > .meta > .user-pop {
+}
+.race-streams > ol > li > .player {
+    background-color: black;
+    display: none;
+    padding-top: 56.25%;
+    position: relative;
+}
+.race-streams > ol > .playing > .player {
+    display: block;
+}
+.race-streams > ol > li > .player > iframe {
+    border: none;
+    height: 100%;
+    position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    width: 100%;
+}
+
+.race-stream-control > ul > li {
+    display: flex;
+}
+.race-stream-control > ul > .go-spectate {
+    display: none;
+}
+.race-stream-control > ul > .streamctl.open {
+    display: none;
+}
+.streamctl-close .race-stream-control > ul > .streamctl.open {
+    display: inherit;
+}
+.streamctl-close .race-stream-control > ul > .streamctl.close {
+    display: none;
+}
+.streamctl-close .container > .content > main {
+    margin-right: 0;
+}
+.streamctl-close .container > .content > aside {
+    display: none;
+}

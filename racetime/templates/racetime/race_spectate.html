@@ -1,0 +1,56 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/race.css' %}">
+    <link rel="stylesheet" href="{% static 'racetime/style/race_spectate.css' %}">
+{% endblock %}
+
+{% block js %}
+    {{ js_vars|json_script:"race-vars" }}
+    <script src="{% static 'racetime/script/race.js' %}"></script>
+    <script src="{% static 'racetime/script/race_spectate.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    Spectate race ({{ race.slug }}) | {{ race.category.name }} |
+{% endblock %}
+{% block meta %}
+    <meta property="og:title" content="{{ race.category.name }} ~ {{ race.goal_str }} ({{ race.state_info.verbose_value }})">
+    {% if race.is_preparing %}
+        <meta name="description" content="Race room open, {% if race.state == 'open' %}anyone may join this race{% else %}by invitation only{% endif %}.">
+        <meta property="og:description" content="Race room open, {% if race.state == 'open' %}anyone may join this race{% else %}by invitation only{% endif %}.">
+    {% elif race.is_pending or race.is_in_progress %}
+        <meta name="description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} are currently racing.">
+        <meta property="og:description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} are currently racing.">
+    {% elif race.state == 'finished' %}
+        <meta name="description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} finished this race in {{ race.timer_str }}.">
+        <meta property="og:description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} finished this race in {{ race.timer_str }}.">
+    {% else %}
+        <meta name="description" content="This race was cancelled.">
+        <meta property="og:description" content="This race was cancelled.">
+    {% endif %}
+    {% if meta_image %}
+        <meta property="og:image" content="{{ meta_image }}">
+    {% endif %}
+{% endblock %}
+
+{% block nocurrentrace %}{% endblock nocurrentrace %}
+
+{% block main %}
+    <div class="race-intro">
+        {% include 'racetime/race/intro.html' with short=True %}
+    </div>
+    <div class="race-streams">
+        {% include 'racetime/race/streams.html' %}
+    </div>
+{% endblock %}
+
+{% block aside %}
+    <div class="race-status">
+        {% include 'racetime/race/status.html' %}
+    </div>
+    <div class="race-entrants">
+        {% include 'racetime/race/entrants.html' with short=True %}
+    </div>
+{% endblock %}

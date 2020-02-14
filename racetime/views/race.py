@@ -59,6 +59,10 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
+class RaceSpectate(Race):
+    template_name_suffix = '_spectate'
+
+
 class RaceChatLog(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

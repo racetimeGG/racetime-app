@@ -29,6 +29,7 @@ from .race import (
     RaceListData,
     RaceMini,
     RaceRenders,
+    RaceSpectate,
 )
 from .race_actions import (
     Message,
@@ -101,6 +102,7 @@ __all__ = [
     'RaceListData',
     'RaceMini',
     'RaceRenders',
+    'RaceSpectate',
     # race_actions
     'Message',
     'Join',

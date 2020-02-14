@@ -205,3 +205,36 @@ main {
     margin-left: 5px;
     text-decoration: none;
 }
+
+.race-stream-control {
+    flex: 1 0 auto;
+    padding-bottom: 10px;
+}
+.race-stream-control > ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.race-stream-control > ul > li {
+    border: 2px solid #1a1c20;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none;
+    flex: 0 0 32px;
+    height: 32px;
+    justify-content: center;
+    line-height: 32px;
+    margin: 0 0 5px 5px;
+}
+.race-stream-control > ul > .go-spectate {
+    display: flex;
+}
+.race-stream-control > ul > li > a {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    text-decoration: none;
+}
+.race-stream-control > ul > li .material-icons {
+    line-height: 32px;
+}
