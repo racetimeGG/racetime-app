@@ -785,6 +785,7 @@ header > .current-race > a .timer {
 }
 
 .race-meta {
+    margin: 0 10px;
     padding-bottom: 10px;
     white-space: nowrap;
 }
