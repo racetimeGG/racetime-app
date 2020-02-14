@@ -34,12 +34,12 @@
                 </time>
             </dd>
             {% if race.ended_at %}
-            <dt>Ended at</dt>
-            <dd>
-                <time class="datetime" datetime="{{ race.ended_at.isoformat }}">
-                    {{ race.ended_at }}
-                </time>
-            </dd>
+                <dt>Ended at</dt>
+                <dd>
+                    <time class="datetime" datetime="{{ race.ended_at.isoformat }}">
+                        {{ race.ended_at }}
+                    </time>
+                </dd>
             {% endif %}
         {% else %}
             <dt>Opened at</dt>
