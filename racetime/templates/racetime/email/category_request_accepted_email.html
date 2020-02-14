@@ -1,0 +1,22 @@
+<p>
+    Hello {{ user.name }},
+</p><p>
+    The category you requested has just been added to the site:
+</p><p>
+    <a href="{{ category_url }}">{{ category.name }}</a>
+</p><p>
+    Now anyone may create {{ category.short_name }} races on
+    {{ site_info.title }}. Time to get racing!
+</p><p>
+    You have been given ownership of this category by default, this will allow
+    you to manage the category goals, moderators, and other details. You can
+    transfer the category ownership to another user if you don't want/need
+    this ability.
+</p><p>
+    If you need any help with category management, feel free to ask for
+    assistance in our Discord.
+</p><p>
+    GG,
+</p><p>
+    The <a href="{{ home_url }}">{{ site_info.title }}</a> team
+</p>

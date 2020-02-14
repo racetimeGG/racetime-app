@@ -3,9 +3,11 @@ from functools import partial
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.transaction import atomic
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -256,6 +258,30 @@ class CategoryRequest(models.Model):
         self.reviewed_at = timezone.now()
         self.accepted_as = category
         self.save()
+
+        context = {
+            'category': category,
+            'category_url': settings.RT_SITE_URI + category.get_absolute_url(),
+            'home_url': settings.RT_SITE_URI,
+            'site_info': settings.RT_SITE_INFO,
+            'user': self.requested_by,
+        }
+        send_mail(
+            subject=render_to_string(
+                'racetime/email/category_request_accepted_subject.txt',
+                context,
+            ),
+            message=render_to_string(
+                'racetime/email/category_request_accepted_email.txt',
+                context,
+            ),
+            html_message=render_to_string(
+                'racetime/email/category_request_accepted_email.html',
+                context,
+            ),
+            from_email=settings.EMAIL_FROM,
+            recipient_list=[self.requested_by.email],
+        )
 
     def reject(self):
         self.reviewed_at = timezone.now()
