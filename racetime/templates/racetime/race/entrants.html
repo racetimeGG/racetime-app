@@ -1,6 +1,6 @@
 <ol>
     {% for entrant in race.ordered_entrants %}
-        {% include 'racetime/pops/entrant_row.html' with entrant=entrant can_monitor=can_monitor user=user %}
+        {% include 'racetime/pops/entrant_row.html' %}
     {% empty %}
         <li class="no-entrants">
             No race entrants.
