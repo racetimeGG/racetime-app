@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from .choices import EntrantStates, RaceStates
-from ..utils import get_hashids
+from ..utils import get_hashids, timer_html
 
 
 class UserManager(BaseUserManager):
@@ -264,6 +264,13 @@ class UserRanking(models.Model):
     confidence = models.FloatField(
         default=0.0,
     )
+    best_time = models.DurationField(
+        null=True,
+    )
+
+    @property
+    def best_time_html(self):
+        return timer_html(self.best_time, False) if self.best_time else None
 
     @property
     def display_score(self):

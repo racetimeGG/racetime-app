@@ -17,8 +17,17 @@
             <span class="score">
                 {{ ranking.display_score|intcomma }}
             </span>
-            <span class="races">
-                {{ ranking.times_raced|intcomma }} race{{ ranking.times_raced|pluralize }}
+            <span class="extra">
+                {% if ranking.best_time %}
+                    <span class="best-time" title="Best recorded finish time">
+                        <i class="material-icons">star</i>
+                        {{ ranking.best_time_html }}
+                    </span>
+                {% endif %}
+                <span class="races" title="Races entered">
+                    <i class="material-icons">timer</i>
+                    {{ ranking.times_raced|intcomma }} race{{ ranking.times_raced|pluralize }}
+                </span>
             </span>
         </li>
     {% empty %}

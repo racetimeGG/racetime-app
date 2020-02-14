@@ -29,9 +29,14 @@ class UserRating:
     def save(self):
         self.ranking.save()
 
-    def set_rating(self, rating):
+    def set_rating(self, rating, finish_time):
         score_change = rating.mu - self.rating.mu
 
+        if finish_time and (
+            not self.ranking.best_time
+            or finish_time < self.ranking.best_time
+        ):
+            self.ranking.best_time = finish_time
         self.ranking.score = rating.mu
         self.ranking.confidence = rating.sigma
         self.ranking.save()
@@ -58,6 +63,6 @@ def rate_race(race):
     rated = env.rate(rating_groups, ranks)
 
     with atomic():
-        for group, user_rating in zip(rated, users):
+        for group, user_rating, entrant in zip(rated, users, entrants):
             rating = group[0]
-            user_rating.set_rating(rating)
+            user_rating.set_rating(rating, entrant.finish_time)

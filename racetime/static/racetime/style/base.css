@@ -974,11 +974,29 @@ footer > ul > li:first-child::before {
 .category-leaderboards > ol > li > ol > li > .user {
     flex: 1 1 auto;
 }
-.category-leaderboards > ol > li > ol > li > .races {
-    color: #7a777a;
+.category-leaderboards > ol > li > ol > li > .extra {
+    align-items: flex-end;
+    display: flex;
     flex: 0 0 80px;
+    flex-direction: column;
     font-size: 14px;
-    text-align: right;
+    line-height: 1;
+    justify-content: space-between;
+}
+.category-leaderboards > ol > li > ol > li > .extra > span {
+    align-items: center;
+    display: flex;
+}
+.category-leaderboards > ol > li > ol > li > .extra > span > .material-icons {
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 2px;
+}
+.category-leaderboards > ol > li > ol > li > .extra > .best-time {
+    color: #ebdfbe;
+}
+.category-leaderboards > ol > li > ol > li > .extra > .races {
+    color: #7a777a;
 }
 
 .layout-form > .permission-list {
