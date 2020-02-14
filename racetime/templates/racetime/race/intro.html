@@ -48,6 +48,14 @@
                     {{ race.opened_at }}
                 </time>
             </dd>
+            {% if race.cancelled_at %}
+                <dt>Cancelled at</dt>
+                <dd>
+                    <time class="datetime" datetime="{{ race.cancelled_at.isoformat }}">
+                        {{ race.cancelled_at }}
+                    </time>
+                </dd>
+            {% endif %}
         {% endif %}
     {% endif %}
 </dl>
