@@ -51,8 +51,10 @@ Race.prototype.addMessage = function(message) {
     }
 
     var $messages = $('.race-chat .messages');
-    $messages.append(self.createMessageItem(message));
-    $messages[0].scrollTop = $messages[0].scrollHeight;
+    if ($messages.length) {
+        $messages.append(self.createMessageItem(message));
+        $messages[0].scrollTop = $messages[0].scrollHeight;
+    }
 
     self.messageIDs.push(message.id);
 
