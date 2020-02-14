@@ -370,7 +370,7 @@ class Race(models.Model):
                 output_field=models.PositiveSmallIntegerField(),
                 default=0,
             ),
-        ).order_by('state_sort', 'place', 'finish_time').all()
+        ).order_by('state_sort', 'place', 'finish_time', 'user__name').all()
 
     @property
     def state_info(self):
