@@ -125,9 +125,11 @@ Race.prototype.heartbeat = function() {
     clearTimeout(this.pingTimeout);
     clearTimeout(this.pongTimeout);
     this.pingTimeout = setTimeout(function() {
-        this.chatSocket.send(JSON.stringify({
-            'action': 'ping'
-        }));
+        try {
+            this.chatSocket.send(JSON.stringify({
+                'action': 'ping'
+            }));
+        } catch (e) {}
     }.bind(this), 20000);
     this.pongTimeout = setTimeout(function() {
         this.chatSocket.close();
