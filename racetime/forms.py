@@ -8,8 +8,35 @@ from django.contrib.auth import forms as auth_forms
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.urls import reverse_lazy
 
 from . import models
+
+
+class UserSelectForm(forms.Form):
+    user = forms.CharField(
+        widget=forms.HiddenInput,
+    )
+    searcher = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'autocomplete-user',
+            'data-source': reverse_lazy('autocomplete_user'),
+        }),
+    )
+
+    def clean_user(self):
+        hashid = self.cleaned_data.get('user')
+        try:
+            user = models.User.objects.get_by_hashid(hashid)
+        except models.User.DoesNotExist:
+            user = None
+
+        if not user or not user.active or user.is_system:
+            raise ValidationError('That user does not exist.')
+
+        return user
+
 
 
 class BotForm(forms.ModelForm):

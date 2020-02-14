@@ -26,6 +26,10 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
     ])),
 
+    path('autocomplete/', include([
+        path('user', views.AutocompleteUser.as_view(), name='autocomplete_user'),
+    ])),
+
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
@@ -40,6 +44,10 @@ urlpatterns = [
             path('bots/new', views.CreateBot.as_view(), name='new_category_bot'),
             path('bots/<str:bot>/deactivate', views.DeactivateBot.as_view(), name='deactivate_category_bot'),
             path('bots/<str:bot>/reactivate', views.ReactivateBot.as_view(), name='reactivate_category_bot'),
+            path('mods', views.CategoryModerators.as_view(), name='category_mods'),
+            path('mods/add', views.AddModerator.as_view(), name='category_mods_add'),
+            path('mods/remove', views.RemoveModerator.as_view(), name='category_mods_remove'),
+            path('mods/transfer', views.TransferOwner.as_view(), name='category_transfer_owner'),
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),

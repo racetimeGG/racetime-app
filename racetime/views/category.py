@@ -6,9 +6,11 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.db.transaction import atomic
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.views import generic
 
 from .base import UserMixin
@@ -180,3 +182,131 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
 
     def test_func(self):
         return self.get_object().can_edit(self.user)
+
+
+class ModPageMixin(UserPassesTestMixin, UserMixin):
+    kwargs = NotImplemented
+
+    @cached_property
+    def category(self):
+        slug = self.kwargs.get('category')
+        return get_object_or_404(models.Category, slug=slug)
+
+    @property
+    def moderators(self):
+        return self.category.moderators.filter(active=True).order_by('name')
+
+    @property
+    def success_url(self):
+        return reverse('category_mods', args=(self.category.slug,))
+
+    def test_func(self):
+        return self.category.can_edit(self.user)
+
+
+class CategoryModerators(ModPageMixin, generic.TemplateView):
+    template_name = 'racetime/moderator_list.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'add_form': forms.UserSelectForm(),
+            'category': self.category,
+            'moderators': self.moderators,
+        }
+
+
+class AddModerator(ModPageMixin, generic.FormView):
+    form_class = forms.UserSelectForm
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.success_url)
+
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+
+        if user == self.category.owner or user in self.moderators:
+            messages.error(
+                self.request,
+                '%(user)s is already a moderator.'
+                % {'user': user}
+            )
+            return http.HttpResponseRedirect(self.success_url)
+        if len(self.moderators) >= self.category.max_moderators:
+            messages.error(
+                self.request,
+                'You cannot add any more moderators to this category.'
+            )
+            return http.HttpResponseRedirect(self.success_url)
+
+        self.category.moderators.add(user)
+
+        messages.success(
+            self.request,
+            '%(user)s added as a category moderator.'
+            % {'user': user}
+        )
+
+        return http.HttpResponseRedirect(self.success_url)
+
+
+class RemoveModerator(ModPageMixin, generic.FormView):
+    form_class = forms.UserSelectForm
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.success_url)
+
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+
+        if user not in self.moderators:
+            messages.error(
+                self.request,
+                '%(user)s is not a moderator for this category.'
+                % {'user': user}
+            )
+            return http.HttpResponseRedirect(self.success_url)
+
+        self.category.moderators.remove(user)
+
+        messages.success(
+            self.request,
+            '%(user)s removed from category moderators.'
+            % {'user': user}
+        )
+
+        return http.HttpResponseRedirect(self.success_url)
+
+
+class TransferOwner(ModPageMixin, generic.FormView):
+    form_class = forms.UserSelectForm
+
+    @property
+    def success_url(self):
+        return self.category.get_absolute_url()
+
+    @property
+    def error_url(self):
+        return super().success_url
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.error_url)
+
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+
+        category = self.category
+        category.owner = user
+        category.save()
+
+        messages.success(
+            self.request,
+            'Ownership of %(category)s has been transferred to %(user)s. You '
+            'are no longer the owner of this category.'
+            % {'category': category.name, 'user': user}
+        )
+
+        return http.HttpResponseRedirect(self.success_url)

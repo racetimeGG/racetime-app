@@ -20,6 +20,9 @@ input, textarea {
     border-bottom: 1px solid #1da674;
     padding: 5px;
 }
+.dangerous input, .dangerous textarea {
+    border-bottom-color: #f08080;
+}
 textarea {
     height: 66px;
     min-height: 66px;
@@ -42,6 +45,9 @@ h3 {
     display: inline-block;
     border-bottom: 1px solid #1da674;
     margin: 10px 0 5px;
+}
+h3.dangerous {
+    border-bottom-color: #f08080;
 }
 
 ol, ul, dl {
@@ -125,6 +131,7 @@ a {
     align-items: center;
 }
 .user-pop > .avatar {
+    background-image: radial-gradient(#1a1c20, #7a777a);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -1104,4 +1111,15 @@ footer > ul > li:first-child::before {
 }
 .copied-to-clipboard::before {
     content: 'Copied to clipboard!';
+}
+
+.ui-menu {
+    background-color: #25272c;
+    border: 3px solid #1a1c20;
+    border-radius: 6px;
+    margin-top: 2px;
+}
+.ui-menu .ui-state-active {
+    color: #beebd1;
+    margin: 0;
 }

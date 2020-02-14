@@ -4,6 +4,11 @@
             Edit category
         </a>
     </li>
+    <li{% if current == 'category_mods' %} class="current"{% endif %}>
+        <a href="{% url 'category_mods' category=category.slug %}">
+            Moderators &amp; ownership
+        </a>
+    </li>
     <li{% if current == 'category_bots' %} class="current"{% endif %}>
         <a href="{% url 'category_bots' category=category.slug %}">
             Manage bots

@@ -1,0 +1,19 @@
+.mod-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -5px;
+}
+
+.mod-list > li {
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    display: inline-flex;
+    padding: 5px;
+    justify-content: space-between;
+    margin: 5px;
+    vertical-align: top;
+}
+
+.mod-list > li > form {
+    margin-left: 10px;
+}

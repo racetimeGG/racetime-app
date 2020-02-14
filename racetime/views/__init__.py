@@ -6,6 +6,9 @@ from .auth import (
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
+from .autocomplete import (
+    AutocompleteUser,
+)
 from .bot import (
     BotList,
     CreateBot,
@@ -18,6 +21,10 @@ from .category import (
     CategoryLeaderboards,
     EditCategory,
     RequestCategory,
+    AddModerator,
+    CategoryModerators,
+    RemoveModerator,
+    TransferOwner,
 )
 from .home import Home
 from .race import (
@@ -80,6 +87,8 @@ __all__ = [
     'PasswordResetDoneView',
     'PasswordResetConfirmView',
     'PasswordResetCompleteView',
+    # autocomplete
+    'AutocompleteUser',
     # bot
     'BotList',
     'CreateBot',
@@ -91,6 +100,10 @@ __all__ = [
     'CategoryLeaderboards',
     'EditCategory',
     'RequestCategory',
+    'AddModerator',
+    'CategoryModerators',
+    'RemoveModerator',
+    'TransferOwner',
     # home
     'Home',
     # race

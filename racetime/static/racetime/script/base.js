@@ -69,6 +69,41 @@ $(function() {
     };
     window.localiseDates.call(document.body);
 
+    window.addAutocompleters = function() {
+        $(this).find('.autocomplete-user').each(function() {
+            var self = this;
+            $(this).autocomplete({
+                source: $(this).data('source'),
+                minLength: 2,
+                response: function(event, ui) {
+                    var content = ui.content.pop();
+                    $.each(content, (k, item) => ui.content.push(item));
+                },
+                select: function(event, ui) {
+                    $(self).closest('.user-pop')
+                        .find('.avatar')
+                        .css('background-image', ui.item.avatar ? 'url(' + ui.item.avatar + ')' : '');
+                    $(self).closest('form').find('[name="user"]').val(ui.item.id);
+                    $(self).val(ui.item.full_name);
+                    return false;
+                }
+            });
+            $(this).autocomplete('instance')._renderItem = function(ul, item) {
+                var $avatar = $('<span class="avatar">');
+                $avatar.css('background-image', item.avatar ? 'url(' + item.avatar + ')' : '');
+
+                var $name = $('<span class="name">');
+                $name.text(item.full_name);
+
+                var $pop = $('<span class="user-pop">');
+                $pop.append($avatar, $name);
+
+                return $('<li>').append($pop).appendTo(ul);
+            };
+        });
+    };
+    window.addAutocompleters.call(document.body);
+
     var lastCopyClicked = null;
     $(document).on('click', '.copy-to-clipboard', function(e) {
         if (this === lastCopyClicked) {
