@@ -191,6 +191,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'full_name': str(self),
             'name': self.name,
             'discriminator': self.discriminator if self.use_discriminator else None,
+            'avatar': self.avatar.url if self.avatar else None,
             'flair': self.flair(category=category, race=race),
             'twitch_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,
