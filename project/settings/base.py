@@ -187,6 +187,8 @@ OAUTH2_PROVIDER = {
 
 EMAIL_FROM = 'hello@racetime.dev'
 
+RT_SITE_URI = 'http://localhost:8000'
+
 RT_SITE_INFO = {
     'title': 'racetime.dev',
     'header_text': 'racetime.dev',
