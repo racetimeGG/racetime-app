@@ -1,6 +1,7 @@
 import re
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.cache import cache
 from django.urls import reverse
 from django.utils import timezone
@@ -187,14 +188,12 @@ class ShowGoal:
 
 
 class ShowLog:
-    commands = ['goal']
+    commands = ['log']
 
     def action(self, race, user, data):
         race.add_message(
             'Chat log download: %s'
-            % self.request.build_absolute_uri(
-                reverse('race_log', args=(race.category.slug, race.slug))
-            )
+            % settings.RT_SITE_URI + reverse('race_log', args=(race.category.slug, race.slug))
         )
 
 
