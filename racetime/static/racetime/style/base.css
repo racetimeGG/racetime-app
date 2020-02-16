@@ -1019,16 +1019,17 @@ footer > ul > li:first-child::before {
     flex: 0 0 80px;
     flex-direction: column;
     font-size: 14px;
+    justify-content: center;
     line-height: 1;
-    justify-content: space-between;
 }
 .category-leaderboards > ol > li > ol > li > .extra > span {
     align-items: center;
     display: flex;
+    line-height: 16px;
 }
 .category-leaderboards > ol > li > ol > li > .extra > span > .material-icons {
     font-size: 14px;
-    line-height: 1;
+    line-height: 16px;
     margin-right: 2px;
 }
 .category-leaderboards > ol > li > ol > li > .extra > .best-time {
