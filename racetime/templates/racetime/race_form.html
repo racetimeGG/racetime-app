@@ -1,4 +1,13 @@
 {% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/race_form.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'racetime/script/race_form.js' %}"></script>
+{% endblock %}
 
 {% block title %}
     {% if race %}
@@ -21,10 +30,6 @@
     {% else %}
     <h2>Start new {{ category.short_name }} race</h2>
     {% endif %}
-    <p class="help">
-        Supply the race details below. <strong>You must set either a goal or a
-        custom goal</strong>, all other fields are optional.
-    </p>
     <form class="race-form layout-form" method="post">
         {% csrf_token %}
         <ul>{{ form.as_ul }}</ul>

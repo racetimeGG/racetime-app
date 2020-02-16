@@ -1,0 +1,42 @@
+#id_goal {
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
+}
+#id_goal > li {
+    box-sizing: border-box;
+    flex: 0 0 33.33%;
+    padding: 10px;
+}
+#id_goal > li:first-child {
+    /* moves "Custom" to the end */
+    order: 1;
+}
+#id_goal > li > label {}
+#id_goal > li > label > input {
+    display: none;
+}
+#id_goal > li > label > span {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.25) 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    justify-content: center;
+    font-size: 20px;
+}
+#id_goal > li > label > input:checked + span {
+    box-shadow: inset 0 0 10px #26dd9a;
+    color: #26dd9a;
+}
+.toggle-additional {
+    cursor: default;
+    line-height: 30px;
+}
+.toggle-additional .material-icons {
+    line-height: 30px;
+    vertical-align: top;
+}
+.race-form > ul > li:nth-child(2) {}
+.race-form > ul > li:nth-child(2) ~ li {
+}

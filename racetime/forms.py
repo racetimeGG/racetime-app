@@ -7,6 +7,8 @@ from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.db.models import Count
+from django.forms.widgets import ChoiceWidget
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 
@@ -241,7 +243,23 @@ class GoalForm(forms.ModelForm):
         model = models.Goal
 
 
+class GoalWidget(forms.RadioSelect):
+    option_template_name = 'racetime/forms/goal_choice.html'
+
+
 class RaceForm(forms.ModelForm):
+    goal = forms.ModelChoiceField(
+        empty_label='Custom',
+        initial='_',  # This prevents custom being selected by default.
+        label='',
+        help_text='Select a goal for this race, or use a custom goal.',
+        queryset=models.Goal.objects.filter(active=True).annotate(
+            num_races=Count('race__id'),
+        ).order_by('-num_races', 'name'),
+        required=False,
+        widget=GoalWidget,
+    )
+
     def __init__(self, category, can_moderate, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if 'info' in self.fields:
@@ -249,7 +267,6 @@ class RaceForm(forms.ModelForm):
         if 'goal' in self.fields:
             self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
                 category=category,
-                active=True,
             )
         if 'streaming_required' in self.fields:
             self.fields['streaming_required'].initial = category.streaming_required
@@ -290,9 +307,9 @@ class RaceCreationForm(RaceForm):
 
     class Meta:
         fields = (
-            'invitational',
             'goal',
             'custom_goal',
+            'invitational',
             'info',
             'recordable',
             'start_delay',
