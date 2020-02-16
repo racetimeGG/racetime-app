@@ -33,6 +33,10 @@
             {% for race in current_races %}
                 <li>
                     {% include 'racetime/pops/race_row.html' with race=race %}
+                    <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
+                        <i class="material-icons">videocam</i>
+                        <span>Watch live</span>
+                    </a>
                 </li>
             {% empty %}
                 <li>

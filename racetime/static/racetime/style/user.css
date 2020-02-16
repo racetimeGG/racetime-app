@@ -36,7 +36,7 @@
     word-break: break-word;
 }
 
-.race-list > ol > li > a {
+.race-list > ol > li > .race {
     border-bottom: 0;
     border-radius: 10px 10px 0 0;
     margin: 10px 0 0;
@@ -46,6 +46,8 @@
     border: 5px solid rgba(0,0,0,0.2);
     border-top: 0;
     border-radius: 0 0 10px 10px;
+    box-sizing: border-box;
+    flex: 1 0 100%;
     margin-bottom: 5px;
 }
 

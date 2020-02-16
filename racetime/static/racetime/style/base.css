@@ -498,64 +498,93 @@ header > .current-race > a .timer {
     content: '+';
 }
 
-.race-list > ol > li > time {
-    color: #7a777a;
-    font-size: 13px;
-    margin: 5px 10px 0;
+.race-list > ol > li {
+    display: flex;
+    flex-wrap: wrap;
 }
-.race-list > ol > li > a {
+.race-list.current > ol > li {
+    flex-wrap: nowrap;
+}
+.race-list > ol > li > time {
+    box-sizing: border-box;
+    color: #7a777a;
+    flex: 1 0 100%;
+    font-size: 13px;
+    padding: 5px 10px 0;
+}
+.race-list > ol > li > .race {
     border: 5px solid rgba(0,0,0,0.2);
     border-radius: 10px;
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
     text-decoration: none;
     margin: 5px;
     padding: 5px;
 }
-.race-list > ol > li > time + a {
+.race-list > ol > li > time + .race {
     margin-top: 0;
 }
-.race-list > ol > li > a > .main {
+.race-list > ol > li > .race > .main {
     display: flex;
 }
-.race-list > ol > li > a > .main > span {
+.race-list > ol > li > .race > .main > span {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
 }
-.race-list > ol > li > a > .main > .right {
+.race-list > ol > li > .race > .main > .right {
     text-align: right;
 }
 
-.race-list > ol > li > a .goal,
-.race-list > ol > li > a .timer {
+.race-list > ol > li > .race .goal,
+.race-list > ol > li > .race .timer {
     font-size: 20px;
     font-weight: bold;
 }
-.race-list > ol > li > a .goal {
+.race-list > ol > li > .race .goal {
     height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
 
 
-.race-list > ol > li > a .state > .recorded {
+.race-list > ol > li > .race .state > .recorded {
     display: inline-flex;
     font-size: 14px;
 }
-.race-list > ol > li > a .state > .recorded::before {
+.race-list > ol > li > .race .state > .recorded::before {
     content: '(';
 }
-.race-list > ol > li > a .state > .recorded::after {
+.race-list > ol > li > .race .state > .recorded::after {
     content: ')';
 }
-.race-list > ol > li > a > .info {
+.race-list > ol > li > .race > .info {
     color: #7a777a;
     font-size: 13px;
     height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
+.race-list > ol > li > .watch-live {
+    border: 5px solid rgba(0,0,0,0.2);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 5px 5px 5px 0;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.race-list > ol > li > .watch-live > .material-icons {
+    font-size: 27.5px;
+}
+.race-list > ol > li > .watch-live > span {
+    font-weight: bold;
+}
+
 .category-side-info > :first-child {
     margin-top: 0;
 }
