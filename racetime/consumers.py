@@ -64,14 +64,14 @@ class RaceConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
-            data = json.loads(text_data)
+            message_data = json.loads(text_data)
         except json.JSONDecodeError:
             await self.whoops(
                 'Unable to process that message (encountered invalid or '
                 'possibly corrupted data). Sorry about that.'
             )
         else:
-            action = data.get('action')
+            action = message_data.get('action')
 
             if action == 'ping':
                 await self.pong()
@@ -80,9 +80,9 @@ class RaceConsumer(AsyncWebsocketConsumer):
             elif action == 'gethistory':
                 await self.send_chat_history()
             else:
-                await self.do_receive(data)
+                await self.do_receive(message_data)
 
-    async def do_receive(self, data):
+    async def do_receive(self, message_data):
         pass
 
     async def deliver(self, event_type, **kwargs):
@@ -171,12 +171,12 @@ class RaceConsumer(AsyncWebsocketConsumer):
 
 
 class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
-    def parse_data(self, data):
+    def parse_data(self, message_data):
         """
         Read incoming data and process it so we know what to do.
         """
-        action = data.get('action')
-        data = data.get('data')
+        action = message_data.get('action')
+        data = message_data.get('data')
 
         if action == 'message':
             action_class = race_actions.Message
@@ -190,8 +190,8 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
 
         return action, data, action_class, scope
 
-    async def do_receive(self, data):
-        action, data, action_class, scope = self.parse_data(data)
+    async def do_receive(self, message_data):
+        action, data, action_class, scope = self.parse_data(message_data)
 
         state = await self.get_oauth_state(scope)
 
@@ -213,12 +213,12 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
 
 
 class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
-    def parse_data(self, data):
+    def parse_data(self, message_data):
         """
         Read incoming data and process it so we know what to do.
         """
-        action = data.get('action')
-        data = data.get('data')
+        action = message_data.get('action')
+        data = message_data.get('data')
 
         if action == 'message':
             action_class = race_actions.BotMessage
@@ -229,8 +229,8 @@ class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
 
         return action, data, action_class
 
-    async def do_receive(self, data):
-        action, data, action_class = self.parse_data(data)
+    async def do_receive(self, message_data):
+        action, data, action_class = self.parse_data(message_data)
 
         state = await self.get_oauth_state()
         bot = await self.get_bot(state.client)
