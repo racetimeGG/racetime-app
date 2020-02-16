@@ -95,8 +95,8 @@ class CreateAccount(generic.CreateView):
         login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
 
         context = {
-            'account_url': self.request.build_absolute_uri(reverse('edit_account')),
-            'home_url': self.request.build_absolute_uri(reverse('home')),
+            'account_url': settings.RT_SITE_URI + reverse('edit_account'),
+            'home_url': settings.RT_SITE_URI + reverse('home'),
         }
         send_mail(
             subject=render_to_string('racetime/email/create_account_subject.txt', context, self.request),

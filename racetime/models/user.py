@@ -234,7 +234,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'client_secret': settings.TWITCH_CLIENT_SECRET,
             'code': self.twitch_code,
             'grant_type': 'authorization_code',
-            'redirect_uri': request.build_absolute_uri(reverse('twitch_auth')),
+            'redirect_uri': settings.RT_SITE_URI + reverse('twitch_auth'),
         })
         return resp.json().get('access_token')
 

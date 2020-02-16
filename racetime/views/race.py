@@ -1,4 +1,5 @@
 from django import http
+from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -28,7 +29,7 @@ class Race(UserMixin, generic.DetailView):
             'can_moderate': race.category.can_moderate(self.user),
             'can_monitor': race.can_monitor(self.user),
             'invite_form': self.get_invite_form(),
-            'meta_image': self.request.build_absolute_uri(race.category.image.url) if race.category.image else None,
+            'meta_image': (settings.RT_SITE_URI + race.category.image.url) if race.category.image else None,
             'js_vars': {
                 'chat_history': race.chat_history(),
                 'urls': {
