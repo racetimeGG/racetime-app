@@ -127,10 +127,7 @@ class RaceConsumer(AsyncWebsocketConsumer):
 
     async def send_chat_history(self):
         messages = await self.get_chat_history()
-        if messages:
-            await self.deliver('chat.history', messages=messages)
-        else:
-            await self.whoops('Could not retrieve chat history.')
+        await self.deliver('chat.history', messages=messages)
 
     @database_sync_to_async
     def call_race_action(self, action_class, user, data):
