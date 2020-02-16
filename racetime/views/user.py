@@ -54,10 +54,11 @@ class ViewProfile(generic.DetailView):
         try:
             obj = models.User.objects.get_by_hashid(hashid)
         except queryset.model.DoesNotExist:
-            raise http.Http404(
-                _("No %(verbose_name)s found matching the query") %
-                {'verbose_name': queryset.model._meta.verbose_name}
-            )
+            raise http.Http404
+
+        if not obj.active or obj.is_system:
+            raise http.Http404
+
         return obj
 
     def get_entrances(self):

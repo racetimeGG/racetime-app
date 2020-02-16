@@ -1,4 +1,4 @@
-{% if user %}
+{% if user and user.active %}
     <a class="user-pop {{ extra_class }} {{ user.flair }}" href="{% url 'view_profile' user=user.hashid %}">
         {% if user.avatar %}
         <span class="avatar" style="background-image: url({{ user.avatar.url }})"></span>
@@ -8,6 +8,10 @@
         <span class="scrim">#{{ user.discriminator }}</span>
         {% endif %}
     </a>
+{% elif user and not user.active %}
+    <span class="user-pop {{ extra_class }}">
+        <span class="name">(Inactive/Deleted user)</span>
+    </span>
 {% else %}
     <span class="user-pop {{ extra_class }}">
         <span class="name">No-one</span>
