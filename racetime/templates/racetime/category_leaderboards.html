@@ -14,8 +14,8 @@
 
 {% block main %}
     {% include 'racetime/category/intro.html' %}
+    {% include 'racetime/category/tabs.html' with current='leaderboards' %}
     <h3>Leaderboards</h3>
-    {% include 'racetime/category/buttons.html' with races=True leaderboards=False %}
     <p class="help">
         Note: leaderboards are currently in beta. The ranking algorithm is,
         well, a bit of a potato. A more well thought-out calculation system

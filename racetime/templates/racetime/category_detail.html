@@ -26,8 +26,9 @@
 
 {% block main %}
     {% include 'racetime/category/intro.html' %}
+    {% include 'racetime/category/tabs.html' with current='category' %}
     <h3>Current races</h3>
-    {% include 'racetime/category/buttons.html' with races=False leaderboards=True %}
+    {% include 'racetime/category/buttons.html' %}
     <div class="category-races race-list current">
         <ol>
             {% for race in current_races %}

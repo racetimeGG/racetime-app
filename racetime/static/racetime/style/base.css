@@ -489,13 +489,15 @@ header > .current-race > a .timer {
     margin-right: 5px;
 }
 .category-nav {
+    align-items: center;
+    display: flex;
     float: right;
 }
 .category-nav + .category-nav {
     margin-right: 10px;
 }
-.start-new::before {
-    content: '+';
+.category-nav .material-icons {
+    font-size: 22px;
 }
 
 .race-list > ol > li {

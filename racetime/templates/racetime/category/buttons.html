@@ -1,20 +1,11 @@
-{% if leaderboards %}
-    <a href="{% url 'leaderboards' category=category.slug %}" class="btn category-nav">
-        View leaderboards
-    </a>
-{% endif %}
-{% if races %}
-    <a href="{% url 'category' category=category.slug %}" class="btn category-nav">
-        View races
-    </a>
-{% endif %}
 {% if can_start_race %}
     <a href="{% url 'create_race' category=category.slug %}" class="start-new btn category-nav">
-        Start new race
+        <i class="material-icons">add</i>
+        <span>Start new race</span>
     </a>
 {% endif %}
 {% if can_edit %}
     <a href="{% url 'edit_category' category=category.slug %}" class="btn category-nav">
-        Manage
+        <span>Manage</span>
     </a>
 {% endif %}

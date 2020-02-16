@@ -1,0 +1,12 @@
+<ul class="nav-tabs">
+    <li{% if current == 'category' %} class="current"{% endif %}>
+        <a href="{% url 'category' category=category.slug %}">
+            Live races
+        </a>
+    </li>
+    <li{% if current == 'leaderboards' %} class="current"{% endif %}>
+        <a href="{% url 'leaderboards' category=category.slug %}">
+            Leaderboards
+        </a>
+    </li>
+</ul>
