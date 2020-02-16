@@ -25,7 +25,7 @@
         {% endif %}
     </div>
     <h3>Race results</h3>
-    <div class="user-races race-list current">
+    <div class="user-races race-list">
         {% include 'racetime/pops/paginator.html' with page=entrances %}
         <ol>
             {% for profile_entrant in entrances %}

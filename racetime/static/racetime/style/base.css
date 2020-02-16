@@ -473,6 +473,9 @@ header > .current-race > a .timer {
 .category-info > .short-name::after {
     content: ')';
 }
+.category-info + .category-meta {
+    margin-left: 10px;
+}
 
 .category-races > ol {
     display: flex;
