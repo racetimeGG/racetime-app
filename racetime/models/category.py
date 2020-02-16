@@ -10,6 +10,7 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 
 from .choices import RaceStates
 from ..utils import SafeException, generate_race_slug
@@ -330,6 +331,13 @@ class Goal(models.Model):
                 name='unique_category_name',
             ),
         ]
+
+    @cached_property
+    def completed_races(self):
+        return len(self.race_set.filter(
+            state=RaceStates.finished,
+            recorded=True,
+        ))
 
     def __str__(self):
         return self.name
