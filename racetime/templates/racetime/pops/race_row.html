@@ -39,7 +39,7 @@
             {% endif %}
         </span>
     </span>
-    {% if race.info %}
+    {% if race.info and not nocontext %}
         <span class="info">
             {{ race.info }}
         </span>
