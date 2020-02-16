@@ -336,7 +336,7 @@ def timer_html(delta, deciseconds=True):
 def twitch_auth_url(request):
     return 'https://id.twitch.tv/oauth2/authorize?' + urlencode({
         'client_id': settings.TWITCH_CLIENT_ID,
-        'redirect_uri': request.build_absolute_uri(reverse('twitch_auth')),
+        'redirect_uri': settings.RT_SITE_URI + reverse('twitch_auth'),
         'response_type': 'code',
         'scope': '',
         'force_verify': 'true',
