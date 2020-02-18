@@ -103,6 +103,8 @@ Race.prototype.createMessageItem = function(message) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
+    /*
+    Disabled for now. See #22
     var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
     if (delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
         $li.hide();
@@ -112,6 +114,7 @@ Race.prototype.createMessageItem = function(message) {
             $messages[0].scrollTop = $messages[0].scrollHeight
         }, delay);
     }
+    */
 
     return $li;
 };
