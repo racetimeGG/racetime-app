@@ -432,14 +432,10 @@ class Race(models.Model):
         )
 
     def dump_json_data(self):
-        value = json.dumps(self.as_dict, cls=DjangoJSONEncoder)
-        cache.set(str(self) + '/data', value, None)
-        return value
+        return json.dumps(self.as_dict, cls=DjangoJSONEncoder)
 
     def dump_json_renders(self):
-        value = json.dumps(self.get_renders(), cls=DjangoJSONEncoder)
-        cache.set(str(self) + '/renders', value, None)
-        return value
+        return json.dumps(self.get_renders(), cls=DjangoJSONEncoder)
 
     def get_renders(self, user=None, request=None):
         if not user or not user.is_active:

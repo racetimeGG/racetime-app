@@ -178,7 +178,6 @@ class Category(models.Model):
             ],
         }, cls=DjangoJSONEncoder)
 
-        cache.set(str(self) + '/data', value, None)
         return value
 
     def get_absolute_url(self):
