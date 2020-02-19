@@ -345,6 +345,8 @@ class RaceSetInfoForm(RaceForm):
     """
     Race form that only sets the info field, used by chat bots.
     """
+    goal = None
+
     class Meta:
         fields = (
             'info',
