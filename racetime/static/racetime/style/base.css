@@ -700,6 +700,9 @@ header > .current-race > a .timer {
 .entrant-row > .status {
     flex: 0 0 100px;
 }
+.entrant-row > .status-or-time {
+    display: none;
+}
 .entrant-row > .finish-time {
     flex: 0 0 80px;
     text-align: right;

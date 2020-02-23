@@ -114,6 +114,13 @@
         {{ entrant.summary.1 }}
     </span>
     <time class="finish-time">{{ entrant.finish_time_html|default:'—'|safe }}</time>
+    <span class="status-or-time {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
+        {% if entrant.finish_time %}
+            <time class="finish-time">{{ entrant.finish_time_html|default:'—'|safe }}</time>
+        {% else %}
+            {{ entrant.summary.1 }}
+        {% endif %}
+    </span>
     {% if entrant.score_change %}
         {% if entrant.score_change > 0 %}
             <span class="score-change positive">

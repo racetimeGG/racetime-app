@@ -4,6 +4,7 @@
 .entrant-row > .user > .comment,
 .entrant-row > .monitor-actions,
 .entrant-row > .status,
+.entrant-row > .finish-time,
 .entrant-row > .score-change {
     display: none;
 }
@@ -14,9 +15,10 @@
 .entrant-row:first-child {
     border-top: none;
 }
-
-.race-streams {
+.entrant-row > .status-or-time {
+    display: inherit;
 }
+
 .race-streams > ol {
     display: flex;
     flex-wrap: wrap;
