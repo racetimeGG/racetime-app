@@ -374,7 +374,11 @@ class Race(models.Model):
 
     @property
     def streaming_entrants(self):
-        return self.ordered_entrants.filter(stream_live=True)
+        return self.ordered_entrants.filter(
+            dnf=False,
+            dq=False,
+            stream_live=True,
+        )
 
     @property
     def state_info(self):
