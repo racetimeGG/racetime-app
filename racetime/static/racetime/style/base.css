@@ -489,6 +489,20 @@ header > .current-race > a .timer {
 .category-info + .category-meta {
     margin-left: 10px;
 }
+.meta-user-list {
+    font-size: 13px;
+}
+.meta-user-list .user-pop > .scrim {
+    line-height: inherit;
+}
+.meta-user-list > a::after,
+.meta-user-list > span::after {
+    content: ", ";
+}
+.meta-user-list > a:last-child::after,
+.meta-user-list > span:last-child::after {
+    content: none;
+}
 
 .category-races > ol {
     display: flex;

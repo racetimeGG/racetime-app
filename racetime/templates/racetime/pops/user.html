@@ -1,6 +1,6 @@
 {% if user and user.active %}
     <a class="user-pop {{ extra_class }} {{ user.flair }}" href="{% url 'view_profile' user=user.hashid %}">
-        {% if user.avatar %}
+        {% if user.avatar and not hide_avatar %}
         <span class="avatar" style="background-image: url({{ user.avatar.url }})"></span>
         {% endif %}
         <span class="name">{{ user.name }}</span>

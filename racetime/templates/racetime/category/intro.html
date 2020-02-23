@@ -17,6 +17,12 @@
             {% include 'racetime/pops/user.html' with user=category.owner extra_class='inline' %}
         </dd>
         <dt>Moderators</dt>
-        <dd>{{ category.moderator_list|default:'No-one' }}</dd>
+        <dd class="meta-user-list">
+            {% for moderator in category.moderators.all %}
+                {% include 'racetime/pops/user.html' with user=moderator extra_class='inline' hide_avatar=True %}
+            {% empty %}
+                No-one
+            {% endfor %}
+        </dd>
     </dl>
 </div>
