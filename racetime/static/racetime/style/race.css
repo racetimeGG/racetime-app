@@ -21,25 +21,23 @@ aside, main {
 
 .race-entrants::-webkit-scrollbar,
 .race-chat > .messages::-webkit-scrollbar {
-  width: 7px;
+    width: 7px;
 }
 .race-entrants,
 .race-chat > .messages {
-  scrollbar-color: #1da674 #36393f;
-  scrollbar-width: thin;
+    scrollbar-color: #1da674 #36393f;
+    scrollbar-width: thin;
 }
 .race-entrants::-webkit-scrollbar-track,
 .race-chat > .messages::-webkit-scrollbar-track {
-  background: #36393f;
+    background: #36393f;
 }
 .race-entrants::-webkit-scrollbar-thumb,
 .race-chat > .messages::-webkit-scrollbar-thumb {
-  background-color: #1da674;
-  border: 1px solid #36393f;
+    background-color: #1da674;
+    border: 1px solid #36393f;
 }
 
-main {
-}
 .race-entrants {
     flex: 1 1 0;
     overflow-y: auto;
@@ -81,7 +79,6 @@ main {
     width: auto;
 }
 
-.race-status {}
 .race-chat {
     display: flex;
     flex-direction: column;

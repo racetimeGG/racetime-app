@@ -38,12 +38,6 @@
     display: flex;
     justify-content: space-between;
 }
-.bot-list > li > dl > .name > span {
-}
-.bot-list > li > dl > .name > form {
-}
-.bot-list > li > dl > .name > form > .btn {
-}
 .bot-list > li > dl > .secret {
     align-items: center;
     display: flex;
@@ -53,8 +47,6 @@
 .bot-list > li > dl > .secret::before {
     content: '(Hover to reveal)';
     color: #b9b4b9;
-}
-.bot-list > li > dl > .secret:hover {
 }
 .bot-list > li > dl > .secret:hover::before {
     content: none;

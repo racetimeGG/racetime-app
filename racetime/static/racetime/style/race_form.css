@@ -12,7 +12,6 @@
     /* moves "Custom" to the end */
     order: 1;
 }
-#id_goal > li > label {}
 #id_goal > li > label > input {
     display: none;
 }
