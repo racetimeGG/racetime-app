@@ -1,3 +1,7 @@
+.container > .content {
+    max-width: none;
+}
+
 .race-info > .info,
 .race-meta,
 .entrant-row > .user > .stream,

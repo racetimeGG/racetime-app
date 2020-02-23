@@ -168,7 +168,7 @@ header {
 
 header, .container, footer {
     background: linear-gradient(to bottom, #36393f 0, #25272c 30px);
-    padding: 0 5%;
+    padding: 0 40px;
 }
 @media (max-width: 1024px) {
     header, .container, footer {
@@ -866,7 +866,8 @@ footer {
     justify-content: space-between;
     color: #7a777a;
     font-size: 13px;
-    padding: 20px 5%;
+    padding-bottom: 20px;
+    padding-top: 20px;
 }
 
 footer > ul {
