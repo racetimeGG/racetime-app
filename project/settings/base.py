@@ -191,7 +191,7 @@ RT_SITE_URI = 'http://localhost:8000'
 
 RT_SITE_INFO = {
     'title': 'racetime.dev',
-    'header_text': 'racetime.dev',
+    'header_text': 'racetime<span class="dot">.</span>dev',
     'meta_site_name': 'racetime.dev',
     'meta_description': 'racetime development environment',
     'footer_text': 'Development environment. Last restart: ' + datetime.now().isoformat(),

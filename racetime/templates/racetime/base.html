@@ -23,7 +23,7 @@
             {% block header %}
                 <header>
                     <div class="title">
-                        <h1><a href="/">{{ site_info.header_text }}</a></h1>
+                        <h1><a href="/">{{ site_info.header_text|safe }}</a></h1>
                     </div>
                     {% block nocurrentrace %}
                         {% if user.is_authenticated and user.active_race_entrant %}

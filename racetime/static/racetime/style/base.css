@@ -191,8 +191,7 @@ header {
 }
 
 header > .title {
-    display: flex;
-    align-items: baseline;
+    position: relative;
 }
 header > .title > h1 {
     font-weight: bold;
@@ -206,6 +205,20 @@ header > .title > h1 > a,
 header > .title > h1 > a:visited {
     color: #eee;
     text-decoration: none;
+    position: relative;
+}
+header > .title > h1 > a,
+header > .title > h1 > a > .dot {
+    background-image: linear-gradient(to bottom, #becccc 0%, #eee 50%, #becccc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+header > .title > h1 > a > .dot {
+    display: inline-block;
+    transform: rotate(45deg) translate(-9px, -2px);
+    transform-origin: 0 bottom;
 }
 header > .user-info {
     display: flex;
