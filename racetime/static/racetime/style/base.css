@@ -15,7 +15,7 @@ body, button, input, select, textarea {
 }
 
 input, textarea {
-    background: rgba(0,0,0,0.2);
+    background: #1a1c20;
     border: none;
     border-bottom: 1px solid #1da674;
     padding: 5px;
@@ -109,7 +109,7 @@ a {
 }
 
 .breadcrumbs > li::before {
-    color: #7a777a;
+    color: #8c898c;
     content: '⇒';
     padding: 0 3px;
 }
@@ -123,7 +123,7 @@ a {
     align-items: center;
 }
 .user-pop > .avatar {
-    background-image: radial-gradient(#1a1c20, #7a777a);
+    background-image: radial-gradient(#1a1c20, #8c898c);
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -136,7 +136,7 @@ a {
     white-space: nowrap;
 }
 .user-pop > .scrim {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
     line-height: 1.6923;
 }
@@ -149,7 +149,7 @@ a {
     width: 22px;
 }
 .help {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
 }
 .help strong,
@@ -227,7 +227,7 @@ header > .current-race {
 }
 
 header > .current-race > a {
-    border: 2px solid rgba(0,0,0,0.2);
+    border: 2px solid #1a1c20;
     border-top: none;
     background: linear-gradient(to top, #36393f 0, #25272c 100%);
     border-radius: 0 0 5px 5px;
@@ -271,13 +271,13 @@ header > .current-race > a .timer {
 }
 
 .messages > ul {
-    background: rgba(0, 0, 0, 0.1);
-    border: 5px solid rgba(0, 0, 0, 0.2);
+    background: #212328;
+    border: 5px solid #1a1c20;
     border-radius: 10px;
     padding: 10px;
 }
 .messages > ul > li {
-    border-top: 1px solid rgba(0,0,0,0.75);
+    border-top: 1px solid #08090a;
     margin-top: 5px;
     padding-top: 5px;
 }
@@ -303,8 +303,8 @@ header > .current-race > a .timer {
 
 .container > .content > main,
 .container > .content > aside {
-    background: rgba(0,0,0,0.1);
-    border: 10px solid rgba(0,0,0,0.2);
+    background: #212328;
+    border: 10px solid #1a1c20;
     border-radius: 20px;
     padding: 10px;
 }
@@ -378,14 +378,14 @@ header > .current-race > a .timer {
     width: 100%;
 }
 .home-categories > li > a > .no-image {
-    box-shadow: inset 0 0 0.8vw #7a777a;
-    color: #7a777a;
+    box-shadow: inset 0 0 0.8vw #8c898c;
+    color: #8c898c;
     display: flex;
     position: relative;
 }
 .home-categories > li > a > .no-image > .short-name {
     align-items: center;
-    border: 1px solid #7a777a;
+    border: 1px solid #8c898c;
     display: flex;
     font-family: 'Roboto Slab', serif;
     font-size: 30px;
@@ -423,7 +423,7 @@ header > .current-race > a .timer {
     color: #1da674;
 }
 .home-categories > li > a > .finished-races {
-    color: #7a777a;
+    color: #8c898c;
 }
 
 .category-intro {
@@ -450,7 +450,7 @@ header > .current-race > a .timer {
     display: inline;
 }
 .category-info > .title > .short-name {
-    color: #7a777a;
+    color: #8c898c;
 }
 .category-info > .title > .short-name::before {
     content: '(';
@@ -466,7 +466,7 @@ header > .current-race > a .timer {
 }
 
 .category-info > .short-name {
-    color: #7a777a;
+    color: #8c898c;
     margin-left: 10px;
 }
 
@@ -526,13 +526,13 @@ header > .current-race > a .timer {
 }
 .race-list > ol > li > time {
     box-sizing: border-box;
-    color: #7a777a;
+    color: #8c898c;
     flex: 1 0 100%;
     font-size: 13px;
     padding: 5px 10px 0;
 }
 .race-list > ol > li > .race {
-    border: 5px solid rgba(0,0,0,0.2);
+    border: 5px solid #1a1c20;
     border-radius: 10px;
     display: flex;
     flex: 1 1 auto;
@@ -579,14 +579,14 @@ header > .current-race > a .timer {
     content: ')';
 }
 .race-list > ol > li > .race > .info {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
     height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
 .race-list > ol > li > .watch-live {
-    border: 5px solid rgba(0,0,0,0.2);
+    border: 5px solid #1a1c20;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -623,7 +623,7 @@ header > .current-race > a .timer {
     font-size: 30px;
 }
 .race-info > .category > .short-name {
-    color: #7a777a;
+    color: #8c898c;
 }
 .race-info > .category > .short-name::before {
     content: '(';
@@ -636,18 +636,18 @@ header > .current-race > a .timer {
     word-break: break-word;
 }
 .race-info > .info {
-    color: #7a777a;
+    color: #8c898c;
     word-break: break-word;
 }
 
 .race-entrants > ol > .no-entrants {
-    border-top: 1px solid rgba(0,0,0,0.75);
+    border-top: 1px solid #08090a;
     padding: 5px;
     text-align: center;
 }
 
 .entrant-row {
-    border-top: 1px solid rgba(0,0,0,0.75);
+    border-top: 1px solid #08090a;
     display: flex;
     padding: 5px;
 }
@@ -733,7 +733,7 @@ header > .current-race > a .timer {
     margin-right: 5px;
 }
 .entrant-row > .monitor-actions > li > form > .btn {
-    background: rgba(0,0,0,0.3);
+    background: #17181b;
     border: none;
     cursor: pointer;
     height: 22px;
@@ -743,7 +743,7 @@ header > .current-race > a .timer {
     width: 22px;
 }
 .entrant-row > .monitor-actions > li > form > .btn:hover {
-    background-color: rgba(166, 235, 196, 0.2);
+    background-color: #3b4b47;
     color: white;
 }
 .entrant-row > .monitor-actions > li > form > .btn > .material-icons {
@@ -751,7 +751,7 @@ header > .current-race > a .timer {
     line-height: 22px;
 }
 .race-entrants > .count {
-    border-top: 1px solid rgba(0,0,0,0.75);
+    border-top: 1px solid #08090a;
     padding: 5px;
     text-align: right;
 }
@@ -802,7 +802,7 @@ header > .current-race > a .timer {
     color: #666;
 }
 .race-status {
-    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0, rgba(0,0,0,0.25) 100%);
+    background: linear-gradient(to bottom, #1e1f24 0, #191a1e 100%);
     border-radius: 10px;
 }
 @keyframes go {
@@ -837,7 +837,7 @@ header > .current-race > a .timer {
     font-size: 20px;
 }
 .race-status > .state > .help {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
 }
 
@@ -847,7 +847,7 @@ header > .current-race > a .timer {
     white-space: nowrap;
 }
 dt {
-    color: #7a777a;
+    color: #8c898c;
     display: inline-block;
     border-bottom: 1px solid #1da674;
     font-size: 13px;
@@ -864,7 +864,7 @@ dd {
 footer {
     display: flex;
     justify-content: space-between;
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
     padding-bottom: 20px;
     padding-top: 20px;
@@ -911,7 +911,7 @@ footer > ul > li:first-child::before {
 }
 
 .layout-form > ul > li > .helptext {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
 }
 .layout-form > ul > li > .file-initial,
@@ -1004,7 +1004,7 @@ footer > ul > li:first-child::before {
     padding: 5px;
 }
 .category-leaderboards > ol > li > .header > .num-races {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 13px;
 }
 .category-leaderboards > ol > li > ol > li {
@@ -1043,7 +1043,7 @@ footer > ul > li:first-child::before {
     color: #ebdfbe;
 }
 .category-leaderboards > ol > li > ol > li > .extra > .races {
-    color: #7a777a;
+    color: #8c898c;
 }
 
 .layout-form > .permission-list {

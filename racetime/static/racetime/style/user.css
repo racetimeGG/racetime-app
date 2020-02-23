@@ -43,7 +43,7 @@
 }
 
 .race-entrants {
-    border: 5px solid rgba(0,0,0,0.2);
+    border: 5px solid #1a1c20;
     border-top: 0;
     border-radius: 0 0 10px 10px;
     box-sizing: border-box;
@@ -52,15 +52,15 @@
 }
 
 .entrant-row {
-    border-top: 1px solid rgba(0,0,0,0.2);
+    border-top: 1px solid #1a1c20;
 }
 
 .entrant-row.highlight {
-    background: rgba(0,0,0,0.2);
+    background: #1a1c20;
 }
 
 .user-categories > li {
-    border-top: 1px solid rgba(0,0,0,0.2);
+    border-top: 1px solid #1a1c20;
 }
 .user-categories > li:first-child {
     border-top: none;
@@ -85,6 +85,6 @@
     flex-direction: column;
 }
 .user-categories > li .info > .times-entered {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 15px;
 }

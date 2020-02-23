@@ -132,7 +132,7 @@ aside, main {
     word-break: break-word;
 }
 .race-chat > .messages > li.system {
-    color: #7a777a;
+    color: #8c898c;
 }
 .race-chat > .messages > li.error {
     color: #f08080;
@@ -144,7 +144,7 @@ aside, main {
     color: #a0ace8;
 }
 .race-chat > .messages > li > .timestamp {
-    color: #7a777a;
+    color: #8c898c;
     font-size: 12px;
     margin-right: 4px;
 }
