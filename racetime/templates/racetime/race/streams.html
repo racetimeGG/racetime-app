@@ -1,7 +1,7 @@
 <ol>
     {% for entrant in race.streaming_entrants %}
         {% if entrant.stream_live %}
-            <li data-embed-uri="https://player.twitch.tv/?channel={{ entrant.user.twitch_name.lower }}">
+            <li class="not-playing" data-embed-uri="https://player.twitch.tv/?channel={{ entrant.user.twitch_name.lower }}">
                 <div class="meta">
                     <span class="visibility">
                         <i class="material-icons off">check_box_outline_blank</i>
