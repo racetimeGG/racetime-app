@@ -8,7 +8,6 @@ from django.contrib.auth import forms as auth_forms
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Count
-from django.forms.widgets import ChoiceWidget
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 

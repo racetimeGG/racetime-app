@@ -1,12 +1,12 @@
-from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
 from oauth2_provider.settings import oauth2_settings
 
-from .models import Bot, Race
 from . import race_actions
+from .models import Bot, Race
 from .utils import SafeException, exception_to_msglist
 
 
