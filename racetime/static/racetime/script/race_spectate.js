@@ -3,7 +3,7 @@ $(function() {
         var $li = $(this).closest('li');
         $li.toggleClass('playing');
         if ($li.hasClass('playing')) {
-            $('<iframe>').attr('src', $li.data('embed-uri'))
+            $('<iframe allowfullscreen>').attr('src', $li.data('embed-uri'))
                 .appendTo($li.find('.player'));
         } else {
             $li.find('.player iframe').remove();
