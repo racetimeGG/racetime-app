@@ -1,0 +1,70 @@
+{% extends 'racetime/base.html' %}
+
+{% block css %}
+    {% if can_moderate %}
+        <style>
+        .race-list.past .recordable {
+            box-shadow: inset 0 0 3px -1px #a6ebc4;
+        }
+        .race-list.past .recordable .recorded {
+            color: #a6ebc4;
+        }
+        </style>
+    {% endif %}
+{% endblock %}
+{% block title %}
+    Asynchronous races | {{ category.name }} |
+{% endblock %}
+{% block meta %}
+    <meta property="og:title" content="Asynchronous races for {{ category.name }}">
+    <meta name="description" content="See all async races and information for {{ category.short_name }}.">
+    <meta property="og:description" content="See all async races and information for {{ category.short_name }}.">
+    {% if meta_image %}
+        <meta property="og:image" content="{{ meta_image }}">
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/intro.html' %}
+    {% include 'racetime/category/tabs.html' with current='category_async' %}
+    <h3>Current async races</h3>
+    {% include 'racetime/category/buttons.html' %}
+    <div class="category-races race-list current">
+        <ol>
+            {% for race in current_races %}
+                <li>
+                    {% include 'racetime/pops/race_row.html' with race=race %}
+                </li>
+            {% empty %}
+                <li>
+                    No current async races in this category.
+                </li>
+            {% endfor %}
+        </ol>
+    </div>
+    <h3>Past async races</h3>
+    <div class="category-races race-list past">
+        {% include 'racetime/pops/paginator.html' with page=past_races %}
+        <ol>
+            {% for race in past_races %}
+                <li>
+                    <time class="datetime" datetime="{{ race.started_at.isoformat }}">
+                        {{ race.opened_at }}
+                    </time>
+                    {% include 'racetime/pops/race_row.html' with race=race %}
+                </li>
+            {% empty %}
+                <li>
+                    No completed async races in this category.
+                </li>
+            {% endfor %}
+        </ol>
+        {% include 'racetime/pops/paginator.html' with page=past_races %}
+    </div>
+{% endblock %}
+
+{% block aside %}{% if category.info %}
+    <div class="category-side-info">
+        {{ category.info|safe }}
+    </div>
+{% endif %}{% endblock %}

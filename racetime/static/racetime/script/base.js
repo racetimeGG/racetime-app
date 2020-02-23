@@ -12,6 +12,8 @@ $(function() {
     var autotick = function() {
         $('time.autotick').each(function() {
             $(this).attr('datetime');
+            var showNegative = !$(this).hasClass('autotick-abs');
+            var showDeciseconds = !$(this).hasClass('autotick-nodecisec');
 
             var timer = Date.now() - new Date($(this).attr('datetime'));
             timer += window.globalLatency;
@@ -22,6 +24,8 @@ $(function() {
             }
 
             timer = Math.abs(timer);
+            var days = (timer - (timer % 86400000)) / 86400000;
+            timer -= days * 86400000;
             var hours = (timer - (timer % 3600000)) / 3600000;
             timer -= hours * 3600000;
             var mins = (timer - (timer % 60000)) / 60000;
@@ -30,12 +34,21 @@ $(function() {
             timer -= secs * 1000;
             var ds = (timer - (timer % 100)) / 100;
 
+            if (days === 0) {
+                days = '';
+            } else if (days === 1) {
+                days = '1 day ';
+            } else {
+                days = days + ' days ';
+            }
+
             $(this).html(
-                (negative ? '-' : '')
+                (negative && showNegative ? '-' : '')
+                + days
                 + hours
                 + ':' + ('00' + mins).slice(-2)
                 + ':' + ('00' + secs).slice(-2)
-                + '<small>.' + ('' + ds) + '</small>'
+                + (showDeciseconds ? ('<small>.' + ('' + ds) + '</small>') : '')
             );
         });
 

@@ -68,6 +68,14 @@ class Category(models.Model):
             'Moderators may override this for individual races.'
         ),
     )
+    async_enabled = models.BooleanField(
+        default=False,
+        verbose_name='Use asynchronous races',
+        help_text=(
+            'Enable asynchronous races in this category. Moderators can start '
+            'new async races if this feature is enabled.'
+        ),
+    )
     active = models.BooleanField(
         default=True,
         help_text='Allow new races to be created in this category.'
@@ -147,6 +155,18 @@ class Category(models.Model):
         """
         return 10
 
+    @property
+    def show_asyncs(self):
+        """
+        Determine if async races should be displayed on the frontend.
+
+        Returns True if async is explicitly enabled or there is at least one
+        non-cancelled async race.
+        """
+        return self.async_enabled or self.asynchronousrace_set.filter(
+            cancelled_at__isnull=True,
+        ).exists()
+
     def api_dict_summary(self):
         """
         Return a summary dict of this category's data.
@@ -195,6 +215,9 @@ class Category(models.Model):
             or user.id == self.owner.id
             or user.id in self.all_moderator_ids
         )
+
+    def can_start_async(self, user):
+        return self.active and self.async_enabled and self.can_moderate(user)
 
     def can_start_race(self, user):
         """
@@ -260,9 +283,9 @@ class Category(models.Model):
         """
         return reverse('category_data', args=(self.slug,))
 
-    def generate_race_slug(self):
+    def generate_slug(self, race_set):
         """
-        Generate an unused, unique race slug for a new race in this category.
+        Generate an unused, unique race slug for races in the given set.
         """
         if self.slug_words:
             generator = partial(generate_race_slug, self.slug_words.split('\n'))
@@ -271,7 +294,7 @@ class Category(models.Model):
 
         slug = generator()
         attempts_left = 99
-        while self.race_set.filter(slug=slug).exists() and attempts_left > 0:
+        while race_set.filter(slug=slug).exists() and attempts_left > 0:
             slug = generator()
             attempts_left -= 1
 
@@ -282,6 +305,18 @@ class Category(models.Model):
             )
 
         return slug
+
+    def generate_race_slug(self):
+        """
+        Generate an unused, unique race slug for races in this category.
+        """
+        return self.generate_slug(self.race_set)
+
+    def generate_async_race_slug(self):
+        """
+        Generate an unused, unique race slug for async races in this category.
+        """
+        return self.generate_slug(self.asynchronousrace_set)
 
     def __str__(self):
         return self.name

@@ -1,3 +1,9 @@
+{% if can_start_async %}
+    <a href="{% url 'async_create_race' category=category.slug %}" class="start-new btn category-nav">
+        <i class="material-icons">add</i>
+        <span>New async race</span>
+    </a>
+{% endif %}
 {% if can_start_race %}
     <a href="{% url 'create_race' category=category.slug %}" class="start-new btn category-nav">
         <i class="material-icons">add</i>

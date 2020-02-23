@@ -4,6 +4,13 @@
             Live races
         </a>
     </li>
+    {% if category.show_asyncs %}
+        <li{% if current == 'category_async' %} class="current"{% endif %}>
+            <a href="{% url 'category_async' category=category.slug %}">
+                Asynchronous races
+            </a>
+        </li>
+    {% endif %}
     <li{% if current == 'leaderboards' %} class="current"{% endif %}>
         <a href="{% url 'leaderboards' category=category.slug %}">
             Leaderboards

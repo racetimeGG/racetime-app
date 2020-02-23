@@ -1,3 +1,4 @@
+from .async_race import AsynchronousEntrant, AsynchronousRace
 from .bot import Bot
 from .category import AuditLog, Category, CategoryRequest, Goal
 from .chat import Message
@@ -6,6 +7,9 @@ from .race import Entrant, Race
 from .user import Ban, User, UserLog, UserRanking
 
 __all__ = [
+    # async_race
+    'AsynchronousEntrant',
+    'AsynchronousRace',
     # bot
     'Bot',
     # category

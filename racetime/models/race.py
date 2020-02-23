@@ -286,6 +286,10 @@ class Race(models.Model):
         return str(self.goal) if self.goal else self.custom_goal
 
     @property
+    def is_async(self):
+        return False
+
+    @property
     def is_preparing(self):
         """
         Determine if the race is in a preparation state (open or invitational).

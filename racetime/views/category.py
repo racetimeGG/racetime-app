@@ -30,6 +30,7 @@ class Category(UserMixin, generic.DetailView):
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
             'can_moderate': self.object.can_moderate(self.user),
+            'can_start_async': self.object.can_start_async(self.user),
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
             'past_races': paginator.get_page(self.request.GET.get('page')),
@@ -76,6 +77,36 @@ class CategoryData(Category):
         )
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+
+class CategoryAsync(Category):
+    template_name_suffix = '_async'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.show_asyncs:
+            raise http.Http404
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        paginator = Paginator(self.past_races(), 10)
+        return {
+            **super().get_context_data(**kwargs),
+            'current_races': self.current_races(),
+            'past_races': paginator.get_page(self.request.GET.get('page')),
+        }
+
+    def current_races(self):
+        return self.object.asynchronousrace_set.exclude(
+            ended_at__lt=timezone.now(),
+            cancelled_at__isnull=False,
+        ).order_by('opened_at').all()
+
+    def past_races(self):
+        return self.object.asynchronousrace_set.filter(
+            ended_at__lt=timezone.now(),
+            cancelled_at__isnull=True,
+        ).order_by('-ended_at').all()[:100]
 
 
 class CategoryLeaderboards(Category):

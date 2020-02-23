@@ -8,8 +8,16 @@
                 {{ race.goal|default:race.custom_goal }}
             </span>
             <span class="state">
-                {{ race.state_info.verbose_value }}
-                {% if race.state == 'finished' %}
+                {% if not race.is_async %}
+                    {{ race.state_info.verbose_value }}
+                {% else %}
+                    {% if race.is_in_progress %}
+                        Accepting entries
+                    {% else %}
+                        Finished
+                    {% endif %}
+                {% endif %}
+                {% if race.is_done %}
                     <span class="recorded">
                         {% if race.recorded %}
                             recorded
@@ -28,14 +36,20 @@
             <span class="entrants">
                 {{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }}
             </span>
-            {% if race.started_at %}
-                <time class="timer {% if race.is_pending or race.is_in_progress %}autotick{% endif %}" datetime="{{ race.started_at.isoformat }}">
-                    {{ race.timer_html|safe }}
-                </time>
+            {% if not race.is_async %}
+                {% if race.started_at %}
+                    <time class="timer {% if race.is_pending or race.is_in_progress %}autotick{% endif %}" datetime="{{ race.started_at.isoformat }}">
+                        {{ race.timer_html|safe }}
+                    </time>
+                {% else %}
+                    <time class="timer">
+                        {{ race.timer_html|safe }}
+                    </time>
+                {% endif %}
             {% else %}
-                <time class="timer">
-                    {{ race.timer_html|safe }}
-                </time>
+                {% if race.is_in_progress %}
+                    <time class="timer autotick autotick-abs autotick-nodecisec" datetime="{{ race.ended_at.isoformat }}"></time>
+                {% endif %}
             {% endif %}
         </span>
     </span>

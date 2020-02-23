@@ -39,7 +39,11 @@ urlpatterns = [
 
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
+        path('async', views.CategoryAsync.as_view(), name='category_async'),
         path('data', views.CategoryData.as_view(), name='category_data'),
+        path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
+        path('startasync', views.CreateAsynchronousRace.as_view(), name='async_create_race'),
+        path('startrace', views.CreateRace.as_view(), name='create_race'),
         path('manage/', include([
             path('edit', views.EditCategory.as_view(), name='edit_category'),
             path('deactivate', views.DeactivateCategory.as_view(), name='category_deactivate'),
@@ -54,8 +58,23 @@ urlpatterns = [
             path('mods/transfer', views.TransferOwner.as_view(), name='category_transfer_owner'),
             path('log', views.CategoryAudit.as_view(), name='category_audit_log'),
         ])),
-        path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
-        path('startrace', views.CreateRace.as_view(), name='create_race'),
+    ])),
+
+    path('<str:category>/async/<str:race>', views.AsynchronousRace.as_view(), name='async_race'),
+    path('<str:category>/async/<str:race>', include([
+        path('update', views.UpdateAsynchronousRace.as_view(), name='async_update_race'),
+        path('cancel', views.CancelAsynchronousRace.as_view(), name='async_cancel_race'),
+        path('record', views.RecordAsynchronousRace.as_view(), name='async_record_race'),
+        path('unrecord', views.UnrecordAsynchronousRace.as_view(), name='async_unrecord_race'),
+
+        path('enter', views.EnterAsynchronousRace.as_view(), name='async_enter_race'),
+        path('update', views.UpdateEntryAsynchronousRace.as_view(), name='async_update_entry'),
+        path('withdraw', views.WithdrawEntryAsynchronousRace.as_view(), name='async_withdraw_entry'),
+
+        path('<str:entrant>/', include([
+            path('accept', views.AcceptEntryAsynchronousRace.as_view(), name='async_accept_entry'),
+            path('refuse', views.RefuseEntryAsynchronousRace.as_view(), name='async_refuse_entry'),
+        ])),
     ])),
 
     path('<str:category>/<str:race>', views.Race.as_view(), name='race'),

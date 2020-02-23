@@ -1,9 +1,10 @@
 $(function() {
+    var isAsyncRace = $('.race-form').hasClass('async-race');
+
     var $submit = $('.race-form button[type="submit"]');
     var $goal = $('#id_goal').closest('li');
 
     var $customGoal = $goal.next();
-    var $additional = $customGoal.nextAll().hide();
 
     var $selectedGoal = $goal.find(':checked');
     if ($selectedGoal.length > 0) {
@@ -19,15 +20,19 @@ $(function() {
         $customGoal.hide();
     }
 
-    $('<li class="toggle-additional">' +
-        '<span class="show"><i class="material-icons">expand_more</i> Show additional options</span>' +
-        '<span class="hide" style="display: none"><i class="material-icons">expand_less</i> Hide additional options</span>' +
-      '</li>').insertAfter($customGoal);
+    if (!isAsyncRace) {
+        var $additional = $customGoal.nextAll().hide();
 
-    $(document).on('click', '.race-form .toggle-additional', function() {
-        $additional.toggle();
-        $(this).children('.hide, .show').toggle();
-    });
+        $('<li class="toggle-additional">' +
+            '<span class="show"><i class="material-icons">expand_more</i> Show additional options</span>' +
+            '<span class="hide" style="display: none"><i class="material-icons">expand_less</i> Hide additional options</span>' +
+        '</li>').insertAfter($customGoal);
+
+        $(document).on('click', '.race-form .toggle-additional', function() {
+            $additional.toggle();
+            $(this).children('.hide, .show').toggle();
+        });
+    }
 
     if ($('.race-form').hasClass('race-edit-form')) {
         $('.race-form .toggle-additional').trigger('click');

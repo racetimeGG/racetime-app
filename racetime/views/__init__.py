@@ -1,3 +1,16 @@
+from .async_race import (
+    AsynchronousRace,
+    CreateAsynchronousRace,
+    UpdateAsynchronousRace,
+    CancelAsynchronousRace,
+    RecordAsynchronousRace,
+    UnrecordAsynchronousRace,
+    EnterAsynchronousRace,
+    UpdateEntryAsynchronousRace,
+    WithdrawEntryAsynchronousRace,
+    AcceptEntryAsynchronousRace,
+    RefuseEntryAsynchronousRace,
+)
 from .auth import (
     Login,
     Logout,
@@ -18,6 +31,7 @@ from .bot import (
 from .category import (
     Category,
     CategoryData,
+    CategoryAsync,
     CategoryLeaderboards,
     EditCategory,
     DeactivateCategory,
@@ -88,6 +102,18 @@ from .user import (
 )
 
 __all__ = [
+    # async_race
+    'AsynchronousRace',
+    'CreateAsynchronousRace',
+    'UpdateAsynchronousRace',
+    'CancelAsynchronousRace',
+    'RecordAsynchronousRace',
+    'UnrecordAsynchronousRace',
+    'EnterAsynchronousRace',
+    'UpdateEntryAsynchronousRace',
+    'WithdrawEntryAsynchronousRace',
+    'AcceptEntryAsynchronousRace',
+    'RefuseEntryAsynchronousRace',
     # auth
     'Login',
     'Logout',
@@ -105,6 +131,7 @@ __all__ = [
     # category
     'Category',
     'CategoryData',
+    'CategoryAsync',
     'CategoryLeaderboards',
     'EditCategory',
     'DeactivateCategory',

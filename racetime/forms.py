@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.db.models import Count
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils import timezone
 
 from . import models
 
@@ -118,6 +119,7 @@ class CategoryForm(forms.ModelForm):
             'short_name',
             'image',
             'info',
+            'async_enabled',
             'streaming_required',
             'slug_words',
             'active_goals',
@@ -334,6 +336,41 @@ class RaceSetInfoForm(RaceForm):
             'info',
         )
         model = models.Race
+
+
+class AsynchronousRaceForm(RaceForm):
+    class Meta:
+        fields = (
+            'goal',
+            'custom_goal',
+            'slug',
+            'info',
+            'ended_at',
+            'recordable',
+            'allow_comments',
+        )
+        model = models.AsynchronousRace
+
+    def __init__(self, category, can_moderate, *args, **kwargs):
+        super().__init__(category, can_moderate, *args, **kwargs)
+        self.fields['slug'].required = False
+
+    def clean_ended_at(self):
+        ended_at = self.cleaned_data.get('ended_at')
+        if ended_at < timezone.now():
+            raise ValidationError('The end date must be in the future.')
+        return ended_at
+
+
+class AsynchronousRaceEditForm(AsynchronousRaceForm):
+    class Meta:
+        fields = (
+            'info',
+            'ended_at',
+            'recordable',
+            'allow_comments',
+        )
+        model = models.AsynchronousRace
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):

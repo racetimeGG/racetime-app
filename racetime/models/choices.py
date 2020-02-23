@@ -59,3 +59,11 @@ class RaceStates(metaclass=ChoiceSet):
     )
     current = all[:4]
     past = all[4:]
+
+
+class AsynchronousEntrantStates(metaclass=ChoiceSet):
+    all = (
+        Choice('pending', 'Pending', 'Not yet verified by a moderator'),
+        Choice('accepted', 'Verified', 'Verified by a moderator'),
+        Choice('declined', 'Declined', 'Verification failed, entry invalidated'),
+    )
