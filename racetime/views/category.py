@@ -64,7 +64,7 @@ class Category(UserMixin, generic.DetailView):
     def past_races(self):
         return self.object.race_set.filter(state__in=[
             models.RaceStates.finished,
-        ]).order_by('-ended_at').all()[:100]
+        ]).order_by('-ended_at').all()
 
 
 class CategoryData(Category):
