@@ -100,6 +100,12 @@ $(function() {
 
                 return $('<li>').append($pop).appendTo(ul);
             };
+            if ($(this).hasClass('above')) {
+                $(this).autocomplete('option', 'position', {
+                    my: 'right top',
+                    at: 'right bottom'
+                });
+            }
         });
     };
     window.addAutocompleters.call(document.body);

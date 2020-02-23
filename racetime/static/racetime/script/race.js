@@ -222,6 +222,7 @@ Race.prototype.raceTick = function() {
                 $segment.html(data[segment]);
                 $segment.find('time').data('latency', latency);
                 window.localiseDates.call($segment[0]);
+                window.addAutocompleters.call($segment[0]);
                 $segment.find('.race-action-form').each(function() {
                     self.ajaxifyActionForm(this);
                 });

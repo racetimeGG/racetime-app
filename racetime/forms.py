@@ -63,31 +63,19 @@ class CommentForm(forms.ModelForm):
         model = models.Entrant
 
 
-class InviteForm(forms.ModelForm):
-    user = forms.CharField(
-        max_length=models.User._meta.get_field('name').max_length + 5,
-        widget=forms.TextInput(attrs={'placeholder': 'Invite user…'})
+class InviteForm(UserSelectForm, forms.ModelForm):
+    searcher = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'autocomplete-user above',
+            'data-source': reverse_lazy('autocomplete_user'),
+            'placeholder': 'Invite user…'
+        }),
     )
 
     class Meta:
         fields = ('user',)
         model = models.Entrant
-
-    def clean_user(self):
-        username = self.cleaned_data.get('user', '')
-        if '#' in username:
-            name, scrim = username.split('#')
-        else:
-            name = username
-            scrim = '0000'
-
-        try:
-            return models.User.objects.filter(
-                name=name,
-                discriminator=scrim,
-            ).exclude(email=models.User.SYSTEM_USER).get()
-        except models.User.DoesNotExist:
-            raise ValidationError('Could not find a user by that name.')
 
 
 class CategoryForm(forms.ModelForm):
