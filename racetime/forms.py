@@ -354,12 +354,6 @@ class RaceSetInfoForm(RaceForm):
         model = models.Race
 
 
-class CommentForm(forms.ModelForm):
-    class Meta:
-        fields = ('comment',)
-        model = models.Entrant
-
-
 class AuthenticationForm(auth_forms.AuthenticationForm):
     captcha = ReCaptchaField(
         label=False,
