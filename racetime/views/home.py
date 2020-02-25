@@ -10,7 +10,7 @@ class Home(UserMixin, generic.TemplateView):
 
     @property
     def show_recordable(self):
-        return self.user.is_superuser
+        return self.user.is_staff
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

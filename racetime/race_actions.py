@@ -255,17 +255,20 @@ class Message:
         message.save()
 
     def assert_can_chat(self, race, user):
+        can_moderate = race.category.can_moderate(user)
+        can_monitor = race.can_monitor(user)
+
         if (
-            not race.allow_midrace_chat
-            and not race.can_monitor(user)
+            not can_monitor
+            and not race.allow_midrace_chat
             and race.is_in_progress
         ):
             raise SafeException(
                 'You do not have permission to chat during the race.'
             )
         if (
-            not race.allow_non_entrant_chat
-            and not race.can_monitor(user)
+            not can_monitor
+            and not race.allow_non_entrant_chat
             and not race.in_race(user)
             and race.is_in_progress
         ):
@@ -274,24 +277,24 @@ class Message:
             )
 
         if (
-            race.is_done
+            not can_moderate
+            and race.is_done
             and (race.recorded or (
                 not race.recordable
                 and (race.ended_at or race.cancelled_at) <= timezone.now() - timedelta(hours=1)
             ))
-            and not user.is_superuser
         ):
             raise SafeException(
                 'This race chat is now closed. No new messages may be added.'
             )
 
         if (
-            len(models.Message.objects.filter(
+            not can_moderate
+            and len(models.Message.objects.filter(
                 user=user,
                 race=race,
                 posted_at__gte=timezone.now() - timedelta(seconds=5),
             )) > 10
-            and not user.is_superuser
         ):
             raise SafeException(
                 'You are chatting too much. Please wait a few seconds.'

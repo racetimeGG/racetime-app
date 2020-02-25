@@ -128,14 +128,14 @@ class Category(models.Model):
         }
 
     def can_edit(self, user):
-        return user.is_active and (user.is_superuser or user == self.owner)
+        return user.is_active and (user.is_staff or user == self.owner)
 
     def can_moderate(self, user):
         """
         Determine if the given user can moderate this category.
         """
         return user.is_active and (
-            user.is_superuser
+            user.is_staff
             or user == self.owner
             or user in self.moderators.all()
         )
