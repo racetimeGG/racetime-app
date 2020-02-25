@@ -10,12 +10,12 @@
     </div>
 {% endif %}
 <div class="race-actions">{% if available_actions %}
-    {% include 'racetime/race/actions.html' with race=race available_actions=available_actions %}
+    {% include 'racetime/race/actions.html' %}
 {% elif race.is_pending %}
     {% include 'racetime/race/actions_pending.html' %}
 {% endif %}</div>
 <div class="race-status">
-    {% include 'racetime/race/status.html' with race=race %}
+    {% include 'racetime/race/status.html' %}
 </div>
 <div class="race-chat">
     <div class="disconnected" title="If this message doesn't disappear after a while, try reloading the page.">

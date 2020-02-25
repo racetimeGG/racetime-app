@@ -37,13 +37,13 @@
 
 {% block main %}
     <div class="race-intro">
-        {% include 'racetime/race/intro.html' with race=race %}
+        {% include 'racetime/race/intro.html' %}
     </div>
     <div class="race-entrants">
-        {% include 'racetime/race/entrants.html' with race=race can_moderate=can_moderate can_monitor=can_monitor %}
+        {% include 'racetime/race/entrants.html' %}
     </div>
     <div class="race-monitor">{% if can_monitor %}
-        {% include 'racetime/race/monitor.html' with race=race can_moderate=can_moderate invite_form=invite_form %}
+        {% include 'racetime/race/monitor.html' %}
     {% endif %}</div>
 {% endblock %}
 
