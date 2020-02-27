@@ -122,6 +122,20 @@ a {
     text-decoration: none;
     align-items: center;
 }
+.user-pop::after {
+    background: no-repeat 0 0 / contain;
+    margin-left: 3px;
+    height: 16px;
+    width: 16px;
+}
+.user-pop.moderator::after {
+    background-image: url(../image/sword.png);
+    content: '\a0';
+}
+.user-pop.staff::after {
+    background-image: url(../image/star.png);
+    content: '\a0';
+}
 .user-pop > .avatar {
     background-image: radial-gradient(#1a1c20, #8c898c);
     background-position: center;

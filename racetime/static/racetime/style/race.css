@@ -149,11 +149,28 @@ aside, main {
     margin-right: 4px;
 }
 .race-chat > .messages > li > .name {
+    align-items: center;
     color: #b9b4b9;
+    display: inline-flex;
     margin-right: 4px;
+    vertical-align: top;
 }
 .race-chat > .messages > li.bot > .name {
     color: #a0ace8;
+}
+.race-chat > .messages > li > .name::before {
+    background: no-repeat 0 0 / contain;
+    margin-right: 2px;
+    height: 12px;
+    width: 12px;
+}
+.race-chat > .messages > li > .name.moderator::before {
+    background-image: url(../image/sword.png);
+    content: '\a0';
+}
+.race-chat > .messages > li > .name.staff::before {
+    background-image: url(../image/star.png);
+    content: '\a0';
 }
 .race-chat > .messages > li > .name::after {
     content: ':';
