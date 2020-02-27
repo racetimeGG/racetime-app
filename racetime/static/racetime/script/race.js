@@ -86,6 +86,7 @@ Race.prototype.createMessageItem = function(message) {
         $bot.insertAfter($li.children('.timestamp'));
     } else {
         var $user = $('<span class="name"></span>');
+        $user.addClass(message.user.flair);
         $user.text(message.user.name);
         $user.insertAfter($li.children('.timestamp'));
     }
