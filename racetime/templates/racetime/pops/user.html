@@ -1,6 +1,6 @@
 {% load racetime %}
 {% if user and user.active %}
-    <a class="user-pop {{ extra_class }} {% flair user category=category race=race %}" href="{% url 'view_profile' user=user.hashid %}">
+    <a class="user-pop {{ extra_class }} {% if not hide_flair %}{% flair user category=category race=race %}{% endif %}" href="{% url 'view_profile' user=user.hashid %}">
         {% if user.avatar and not hide_avatar %}
         <span class="avatar" style="background-image: url({{ user.avatar.url }})"></span>
         {% endif %}
