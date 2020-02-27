@@ -180,30 +180,34 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
 
     def form_valid(self, form):
         race = form.save()
-
+        messaged = False
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
             race.add_message(
                 '%(user)s set a new goal: %(goal)s.'
                 % {'user': self.user, 'goal': race.goal_str}
             )
+            messaged = True
         if 'info' in form.changed_data:
             race.add_message(
                 '%(user)s updated the race information.'
                 % {'user': self.user}
             )
+            messaged = True
         if 'streaming_required' in form.changed_data:
             if race.streaming_required:
                 race.add_message('Streaming is now required for this race.')
             else:
                 race.add_message('Streaming is now NOT required for this race.')
-
+            messaged = True
         if 'chat_message_delay' in form.changed_data:
             if race.chat_message_delay:
                 race.add_message('Chat delay is now %(seconds)d seconds.'
                                  % {'seconds': race.chat_message_delay.seconds})
             else:
                 race.add_message('Chat delay has been removed.')
-
+            messaged = True
+        if not messaged:
+            race.broadcast_data()
         return http.HttpResponseRedirect(race.get_absolute_url())
 
 
