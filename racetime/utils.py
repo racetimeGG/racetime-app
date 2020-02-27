@@ -297,40 +297,35 @@ def notice_exception(exception):
         receiver(exception)
 
 
-def timer_str(delta, deciseconds=True):
-    hours, remainder = divmod(delta.seconds, 3600)
+def _format_timer(delta, format_str):
+    if delta.total_seconds() < 0:
+        negative = True
+        delta = abs(delta)
+    else:
+        negative = False
+
+    hours, remainder = divmod(delta.total_seconds(), 3600)
     minutes, seconds = divmod(remainder, 60)
 
-    if deciseconds:
-        return '{:01}:{:02}:{:02}.{}'.format(
-            hours,
-            minutes,
-            seconds,
-            min(round(delta.microseconds / 100000), 9),
-        )
-    return '{:01}:{:02}:{:02}'.format(
-        hours,
-        minutes,
-        seconds,
+    return format_str.format(
+        '-' if negative else '',
+        int(hours),
+        int(minutes),
+        int(seconds),
+        min(round(delta.microseconds / 100000), 9),
     )
+
+
+def timer_str(delta, deciseconds=True):
+    if deciseconds:
+        return _format_timer(delta, '{}{:01}:{:02}:{:02}.{}')
+    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
 
 
 def timer_html(delta, deciseconds=True):
-    hours, remainder = divmod(delta.seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-
     if deciseconds:
-        return '{:01}:{:02}:{:02}<small>.{}</small>'.format(
-            hours,
-            minutes,
-            seconds,
-            min(round(delta.microseconds / 100000), 9),
-        )
-    return '{:01}:{:02}:{:02}'.format(
-        hours,
-        minutes,
-        seconds,
-    )
+        return _format_timer(delta, '{}{:01}:{:02}:{:02}<small>.{}</small>')
+    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
 
 
 def twitch_auth_url(request):

@@ -396,7 +396,7 @@ class Race(models.Model):
             if self.ended_at:
                 return self.ended_at - self.started_at
             return timezone.now() - self.started_at
-        return timedelta(0)
+        return -self.start_delay
 
     @property
     def timer_str(self):
