@@ -7,6 +7,9 @@
     border-radius: 10px;
     margin-top: 5px;
 }
+.audit-log > .empty {
+    padding: 5px;
+}
 .audit-log > li > .summary {
     display: flex;
 }
