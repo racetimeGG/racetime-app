@@ -48,6 +48,7 @@ urlpatterns = [
             path('mods/add', views.AddModerator.as_view(), name='category_mods_add'),
             path('mods/remove', views.RemoveModerator.as_view(), name='category_mods_remove'),
             path('mods/transfer', views.TransferOwner.as_view(), name='category_transfer_owner'),
+            path('log', views.CategoryAudit.as_view(), name='category_audit_log'),
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),

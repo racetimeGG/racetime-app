@@ -389,3 +389,17 @@ class TransferOwner(ModPageMixin, generic.FormView):
             return http.HttpResponseRedirect(self.success_url)
 
 
+class CategoryAudit(UserPassesTestMixin, UserMixin, generic.DetailView):
+    model = models.Category
+    slug_url_kwarg = 'category'
+    template_name_suffix = '_audit'
+
+    def get_context_data(self, **kwargs):
+        paginator = Paginator(self.object.auditlog_set.order_by('-date'), 50)
+        return {
+            **super().get_context_data(**kwargs),
+            'audit_log': paginator.get_page(self.request.GET.get('page')),
+        }
+
+    def test_func(self):
+        return self.get_object().can_edit(self.user)

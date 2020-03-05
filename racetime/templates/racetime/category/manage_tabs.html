@@ -14,4 +14,9 @@
             Manage bots
         </a>
     </li>
+    <li{% if current == 'category_audit_log' %} class="current"{% endif %}>
+        <a href="{% url 'category_audit_log' category=category.slug %}">
+            View audit log
+        </a>
+    </li>
 </ul>

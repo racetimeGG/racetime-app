@@ -25,6 +25,7 @@ from .category import (
     CategoryModerators,
     RemoveModerator,
     TransferOwner,
+    CategoryAudit,
 )
 from .home import Home
 from .race import (
@@ -104,6 +105,7 @@ __all__ = [
     'CategoryModerators',
     'RemoveModerator',
     'TransferOwner',
+    'CategoryAudit',
     # home
     'Home',
     # race

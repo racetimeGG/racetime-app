@@ -1,0 +1,82 @@
+.audit-log {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.audit-log > li {
+    border: 3px solid #1a1c20;
+    border-radius: 10px;
+    margin-top: 5px;
+}
+.audit-log > li > .summary {
+    display: flex;
+}
+.audit-log > li > .summary > .avatar {
+    background: radial-gradient(#1a1c20, #8c898c) no-repeat center / cover;
+    border-radius: 100%;
+    height: 32px;
+    margin: 5px;
+    flex: 0 0 32px;
+}
+.audit-log > li > .summary > .text {
+    display: flex;
+    flex: 1 0 auto;
+    flex-wrap: wrap;
+    padding: 3px 0;
+}
+.audit-log > li > .summary > .text > .action {
+    flex-grow: 1;
+    margin-left: 5px;
+}
+.audit-log > li > .summary > .text > time {
+    color: #8c898c;
+    flex: 1 0 100%;
+    font-size: 13px;
+    line-height: 1;
+    padding-top: 1px;
+}
+.audit-log > li > .summary > .hide-detail,
+.audit-log > li > .summary > .show-detail {
+    cursor: pointer;
+    flex: 0 0 42px;
+    line-height: 42px;
+    text-align: center;
+}
+.audit-log > li > .summary > .hide-detail {
+    display: none;
+}
+.audit-log > li.with-detail > .summary > .hide-detail {
+    display: initial;
+}
+.audit-log > li.with-detail > .summary > .show-detail {
+    display: none;
+}
+.audit-log > li > .details {
+    display: none;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+}
+.audit-log > li.with-detail > .details {
+    display: flex;
+}
+.audit-log > li > .details > dt,
+.audit-log > li > .details > dd {
+    border-top: 1px solid #1a1c20;
+    box-sizing: border-box;
+}
+.audit-log > li > .details > dt {
+    border-bottom: none;
+    flex: 0 0 150px;
+    font-size: inherit;
+    margin-bottom: 0;
+    padding: 5px 0;
+    text-align: right;
+}
+.audit-log > li > .details > dt::after {
+    content: "—";
+    padding: 0 5px;
+}
+.audit-log > li > .details > dd {
+    flex: 0 0 calc(100% - 150px);
+    margin-left: 0;
+    padding: 5px 0;
+}
