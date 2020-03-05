@@ -304,14 +304,6 @@ class Goal(models.Model):
         max_length=255,
         help_text='The win conditions for the race, e.g. "16 stars".',
     )
-    description = models.TextField(
-        null=True,
-        blank=True,
-        max_length=2000,
-        help_text=(
-            'Any additional information or rules that apply to this race goal.'
-        ),
-    )
     active = models.BooleanField(
         default=True,
         help_text='Allow new races to be created with this goal.'
