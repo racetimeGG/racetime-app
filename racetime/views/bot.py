@@ -115,6 +115,12 @@ class CreateBot(BotPageMixin, generic.CreateView):
             bot.application = self.create_application()
             bot.category = self.category
             bot.save()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=self.category,
+                bot=bot,
+                action='bot_add',
+            )
 
         return http.HttpResponseRedirect(self.success_url)
 
@@ -130,6 +136,12 @@ class DeactivateBot(BotPageMixin, generic.View):
                 bot.deactivated_at = timezone.now()
                 bot.save()
                 app.delete()
+                models.AuditLog.objects.create(
+                    actor=self.user,
+                    category=self.category,
+                    bot=bot,
+                    action='bot_deactivate',
+                )
 
             messages.success(
                 request,
@@ -157,6 +169,12 @@ class ReactivateBot(BotPageMixin, generic.View):
                 bot.active = True
                 bot.deactivated_at = None
                 bot.save()
+                models.AuditLog.objects.create(
+                    actor=self.user,
+                    category=self.category,
+                    bot=bot,
+                    action='bot_activate',
+                )
 
             messages.success(
                 request,

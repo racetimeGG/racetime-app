@@ -152,13 +152,50 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
 
     @atomic
     def form_valid(self, form):
-        self.object = form.save()
+        category = self.get_object()
+        self.object = form.save(commit=False)
+
+        audit = []
+        changed_fields = {
+            'name',
+            'short_name',
+            'image',
+            'info',
+            'slug_words',
+            'streaming_required',
+        } & set(form.changed_data)
+        for field in changed_fields:
+            print(getattr(category, field))
+            audit.append(models.AuditLog(
+                actor=self.user,
+                category=category,
+                action=f'{field}_change',
+                old_value=getattr(category, field),
+                new_value=getattr(self.object, field),
+            ))
+
+        self.object.save()
+        models.AuditLog.objects.bulk_create(audit)
+
+        messages.info(
+            self.request,
+            'Category details updated (%(fields)s).'
+            % {'fields': ', '.join(
+                [form[field].label.lower() for field in changed_fields]
+            )},
+        )
 
         active_goals = form.cleaned_data['active_goals']
         for goal in self.object.goal_set.all():
             if goal.active and goal not in active_goals:
                 goal.active = False
                 goal.save()
+                models.AuditLog.objects.create(
+                    actor=self.user,
+                    category=self.object,
+                    goal=goal,
+                    action='goal_deactivate',
+                )
                 messages.info(
                     self.request,
                     '"%(goal)s" can no longer be used for races.' % {'goal': goal.name},
@@ -166,16 +203,28 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
             elif not goal.active and goal in active_goals:
                 goal.active = True
                 goal.save()
+                models.AuditLog.objects.create(
+                    actor=self.user,
+                    category=self.object,
+                    goal=goal,
+                    action='goal_activate',
+                )
                 messages.info(
                     self.request,
                     '"%(goal)s" may now be used for races.' % {'goal': goal.name},
                 )
 
-        for goal in form.cleaned_data['add_new_goals']:
-            self.object.goal_set.create(name=goal)
+        for goal_name in form.cleaned_data['add_new_goals']:
+            goal = self.object.goal_set.create(name=goal_name)
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=self.object,
+                goal=goal,
+                action='goal_add',
+            )
             messages.info(
                 self.request,
-                'New category goal added: "%(goal)s"' % {'goal': goal},
+                'New category goal added: "%(goal)s"' % {'goal': goal_name},
             )
 
         return super().form_valid(form)
@@ -244,6 +293,12 @@ class AddModerator(ModPageMixin, generic.FormView):
             return http.HttpResponseRedirect(self.success_url)
 
         self.category.moderators.add(user)
+        models.AuditLog.objects.create(
+            actor=self.user,
+            category=self.category,
+            user=user,
+            action='moderator_add',
+        )
 
         messages.success(
             self.request,
@@ -273,6 +328,12 @@ class RemoveModerator(ModPageMixin, generic.FormView):
             return http.HttpResponseRedirect(self.success_url)
 
         self.category.moderators.remove(user)
+        models.AuditLog.objects.create(
+            actor=self.user,
+            category=self.category,
+            user=user,
+            action='moderator_remove',
+        )
 
         messages.success(
             self.request,
@@ -286,30 +347,45 @@ class RemoveModerator(ModPageMixin, generic.FormView):
 class TransferOwner(ModPageMixin, generic.FormView):
     form_class = forms.UserSelectForm
 
-    @property
-    def success_url(self):
-        return self.category.get_absolute_url()
-
-    @property
-    def error_url(self):
-        return super().success_url
-
     def form_invalid(self, form):
         messages.error(self.request, form.errors)
-        return http.HttpResponseRedirect(self.error_url)
+        return http.HttpResponseRedirect(self.success_url)
 
     def form_valid(self, form):
         user = form.cleaned_data.get('user')
+        old_owner = self.category.owner
 
-        category = self.category
-        category.owner = user
-        category.save()
+        with atomic():
+            category = self.category
+            category.owner = user
+            category.save()
+            if user in category.moderators.all():
+                self.category.moderators.remove(user)
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=self.category,
+                action='owner_change',
+                old_value=old_owner.id,
+                new_value=user.id,
+            )
 
-        messages.success(
-            self.request,
-            'Ownership of %(category)s has been transferred to %(user)s. You '
-            'are no longer the owner of this category.'
-            % {'category': category.name, 'user': user}
-        )
+        if old_owner == self.user:
+            messages.success(
+                self.request,
+                'Ownership of %(category)s has been transferred to %(user)s. You '
+                'are no longer the owner of this category.'
+                % {'category': category.name, 'user': user}
+            )
+            # User no longer has authority to view the moderators page, so
+            # bump them back to the category landing page instead.
+            return http.HttpResponseRedirect(self.category.get_absolute_url())
+        else:
+            messages.success(
+                self.request,
+                'Ownership of %(category)s has been transferred to %(user)s. '
+                '%(old_owner)s is no longer the owner of this category.'
+                % {'category': category.name, 'old_owner': old_owner, 'user': user}
+            )
+            return http.HttpResponseRedirect(self.success_url)
 
-        return http.HttpResponseRedirect(self.success_url)
+
