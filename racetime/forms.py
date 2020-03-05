@@ -224,12 +224,6 @@ class CategoryRequestForm(forms.ModelForm):
         return '\n'.join(goals)
 
 
-class GoalForm(forms.ModelForm):
-    class Meta:
-        fields = ('name', 'description')
-        model = models.Goal
-
-
 class GoalWidget(forms.RadioSelect):
     option_template_name = 'racetime/forms/goal_choice.html'
 
