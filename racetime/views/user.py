@@ -147,6 +147,9 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
                     discriminator=self.user.discriminator,
                 )
 
+            if form.changed_data:
+                messages.success(self.request, 'Your profile has been updated.')
+
         user.save()
 
         if (
