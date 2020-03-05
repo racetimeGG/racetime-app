@@ -1,5 +1,5 @@
 from .bot import Bot
-from .category import Category, CategoryRequest, Goal
+from .category import AuditLog, Category, CategoryRequest, Goal
 from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
@@ -9,6 +9,7 @@ __all__ = [
     # bot
     'Bot',
     # category
+    'AuditLog',
     'Category',
     'CategoryRequest',
     'Goal',

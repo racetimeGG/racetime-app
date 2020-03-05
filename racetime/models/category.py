@@ -1,6 +1,7 @@
 import json
 from functools import partial
 
+from django.apps import apps
 from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -332,3 +333,113 @@ class Goal(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AuditLog(models.Model):
+    """
+    The audit log records any changes made within a category.
+
+    Note: the `user` field, if set, indicates who was acted upon. For example,
+    when logging a 'moderator_add' action, `user` is the added moderator, and
+    `actor` is the person who added them.
+    """
+    actor = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        related_name='+',
+    )
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.CASCADE,
+    )
+    goal = models.ForeignKey(
+        'Goal',
+        on_delete=models.CASCADE,
+        related_name='+',
+        null=True,
+    )
+    bot = models.ForeignKey(
+        'Bot',
+        on_delete=models.CASCADE,
+        related_name='+',
+        null=True,
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+    )
+    date = models.DateTimeField(
+        auto_now_add=True,
+    )
+    action = models.CharField(
+        max_length=255,
+        db_index=True,
+        choices=(
+            ('activate', 'set category to active'),
+            ('deactivate', 'set category to inactive'),
+            ('name_change', 'updated category name'),
+            ('short_name_change', 'updated category short name'),
+            ('image_change', 'updated category image'),
+            ('info_change', 'updated category info'),
+            ('slug_words_change', 'updated category slug words'),
+            ('streaming_required_change', 'updated category streaming requirement'),
+            ('owner_change', 'transferred category ownership'),
+            ('moderator_add', 'added a moderator'),
+            ('moderator_remove', 'removed a moderator'),
+            ('bot_add', 'added a bot'),
+            ('bot_activate', 're-activated a bot'),
+            ('bot_deactivate', 'deactivated a bot'),
+            ('goal_add', 'added a new goal'),
+            ('goal_activate', 're-activated a goal'),
+            ('goal_deactivate', 'deactivated a goal'),
+        ),
+    )
+    old_value = models.TextField(
+        null=True,
+    )
+    new_value = models.TextField(
+        null=True,
+    )
+
+    @property
+    def action_display(self):
+        """
+        Return friendly text for the logged action.
+        """
+        try:
+            return [
+                choice[1] for choice in self._meta.get_field('action').choices
+                if choice[0] == self.action
+            ][0]
+        except IndexError:
+            return self.action
+
+    @cached_property
+    def old_value_display(self):
+        """
+        Format the old value field for display.
+        """
+        return self._value_display(self.old_value)
+
+    @cached_property
+    def new_value_display(self):
+        """
+        Format the new value field for display.
+        """
+        return self._value_display(self.new_value)
+
+    def _value_display(self, value):
+        """
+        Format a value field for display.
+        """
+        if self.action == 'owner_change':
+            User = apps.get_model('racetime', 'User')
+            try:
+                return User.objects.get(id=value)
+            except User.DoesNotExist:
+                pass
+        if self.action in ['info_change', 'slug_words_change']:
+            return None
+        return value
