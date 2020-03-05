@@ -22,7 +22,7 @@
     <ul class="mod-list">
         {% for user in moderators %}
             <li>
-                {% include 'racetime/pops/user.html' %}
+                {% include 'racetime/pops/user.html' with hide_pronouns=True %}
                 <form action="{% url 'category_mods_remove' category=category.slug %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="user" value="{{ user.hashid }}">

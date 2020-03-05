@@ -8,6 +8,9 @@
         {% if user.use_discriminator %}
         <span class="scrim">#{{ user.discriminator }}</span>
         {% endif %}
+        {% if user.pronouns and not hide_pronouns %}
+        <span class="pronouns">{{ user.pronouns_display }}</span>
+        {% endif %}
     </a>
 {% elif user and not user.active %}
     <span class="user-pop {{ extra_class }}">

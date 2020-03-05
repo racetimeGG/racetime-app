@@ -15,12 +15,12 @@
 <dl class="race-meta">
     <dt>Opened by</dt>
     <dd>
-        {% include 'racetime/pops/user.html' with user=race.opened_by extra_class='inline' %}
+        {% include 'racetime/pops/user.html' with user=race.opened_by extra_class='inline' hide_pronouns=True %}
     </dd>
     <dt>Race monitors</dt>
     <dd class="meta-user-list">
         {% for monitor in race.monitors.all %}
-            {% include 'racetime/pops/user.html' with user=monitor extra_class='inline' hide_avatar=True %}
+            {% include 'racetime/pops/user.html' with user=monitor extra_class='inline' hide_avatar=True hide_pronouns=True %}
         {% empty %}
             No-one
         {% endfor %}

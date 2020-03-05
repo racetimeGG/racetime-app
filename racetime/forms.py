@@ -360,7 +360,10 @@ class UserCreationForm(auth_forms.UserCreationForm):
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = models.User
-        fields = ('email', 'name', 'avatar', 'profile_bio')
+        fields = ('email', 'name', 'avatar', 'pronouns', 'profile_bio')
+        widgets = {
+            'pronouns': forms.RadioSelect,
+        }
 
     def clean_avatar(self):
         avatar = self.cleaned_data.get('avatar')

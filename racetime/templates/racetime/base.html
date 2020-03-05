@@ -34,7 +34,7 @@
                     {% endblock nocurrentrace %}
                     <div class="user-info">
                         {% if user.is_authenticated %}
-                        {% include 'racetime/pops/user.html' with hide_flair=True %}
+                        {% include 'racetime/pops/user.html' with hide_flair=True hide_pronouns=True %}
                         <a href="{% url 'edit_account' %}" class="btn flat-right">Settings</a>
                         <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}

@@ -100,6 +100,19 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text='Recommended size: 100x100. No larger than 100kb.',
     )
+    pronouns = models.CharField(
+        max_length=16,
+        null=True,
+        blank=True,
+        choices=(
+            ('', 'None'),
+            ('she/her', 'Feminine (she/her)'),
+            ('he/him', 'Masculine (he/him)'),
+            ('they/them', 'Neutral (they/them)'),
+        ),
+        verbose_name='Preferred pronouns',
+        help_text='Select which pronouns appear next to your name on the site.',
+    )
     profile_bio = models.TextField(
         null=True,
         blank=True,
@@ -173,6 +186,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email == self.SYSTEM_USER
 
     @property
+    def pronouns_display(self):
+        """
+        Format user's pronouns for display.
+
+        This just spaces text a bit more so it's more legible on the page.
+        """
+        if self.pronouns:
+            return ' / '.join(self.pronouns.split('/'))
+        return ''
+
+    @property
     def twitch_channel(self):
         if self.twitch_name:
             return f'https://www.twitch.tv/{self.twitch_name.lower()}'
@@ -192,6 +216,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'name': self.name,
             'discriminator': self.discriminator if self.use_discriminator else None,
             'avatar': self.avatar.url if self.avatar else None,
+            'pronouns': self.pronouns,
             'flair': self.flair(category=category, race=race),
             'twitch_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,

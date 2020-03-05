@@ -20,6 +20,10 @@
 .user-profile > .user-pop > .scrim {
     font-size: 26px;
 }
+.user-profile > .user-pop > .pronouns {
+    font-size: 14px;
+    line-height: 22px;
+}
 .user-profile > .twitch-channel {
     display: flex;
     margin-top: 10px;
@@ -57,6 +61,9 @@
 
 .entrant-row.highlight {
     background: #1a1c20;
+}
+.entrant-row.highlight .user-pop > .pronouns {
+    background: #212328;
 }
 
 .user-categories > li {
