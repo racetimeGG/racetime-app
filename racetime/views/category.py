@@ -180,6 +180,9 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
 
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse('edit_category', args=(self.object.slug,))
+
     def test_func(self):
         return self.get_object().can_edit(self.user)
 
