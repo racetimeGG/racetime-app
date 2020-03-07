@@ -4,6 +4,7 @@
 
 .race-info > .info,
 .race-meta,
+.entrant-row > .user > .user-pop > .pronouns,
 .entrant-row > .user > .stream,
 .entrant-row > .user > .comment,
 .entrant-row > .monitor-actions,
@@ -20,8 +21,20 @@
 .entrant-row:first-child {
     border-top: none;
 }
+.entrant-row > .user {
+    flex: 1 1 0;
+    overflow: hidden;
+    margin-right: 5px;
+}
+.entrant-row > .user > .user-pop > .avatar {
+    margin-right: 3px;
+}
+.entrant-row > .place {
+    flex-basis: 40px;
+}
 .entrant-row > .status-or-time {
     display: inherit;
+    white-space: nowrap;
 }
 
 .race-streams > ol {
