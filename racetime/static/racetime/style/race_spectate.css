@@ -16,6 +16,7 @@
 .race-info > .category > .name {
     font-size: 20px;
 }
+.race-entrants > ol > .no-entrants,
 .entrant-row:first-child {
     border-top: none;
 }
