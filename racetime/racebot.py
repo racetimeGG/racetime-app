@@ -223,8 +223,6 @@ class RaceBot:
             race__in=[race['object'] for race in self.races],
             user__twitch_id__isnull=False,
             state=models.EntrantStates.joined.value,
-            dq=False,
-            dnf=False,
         ).annotate(twitch_id=F('user__twitch_id')):
             if entrant.twitch_id not in entrants:
                 entrants[entrant.twitch_id] = []
