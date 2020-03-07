@@ -217,7 +217,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'discriminator': self.discriminator if self.use_discriminator else None,
             'avatar': self.avatar.url if self.avatar else None,
             'pronouns': self.pronouns,
-            'flair': self.flair(category=category, race=race),
+            'flair': self.flair(category=category),
             'twitch_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,
         }
@@ -233,12 +233,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.is_supporter:
             flairs.append('supporter')
         if race:
-            if race.can_monitor(self):
-                flairs.append('monitor')
             category = race.category
-        if category:
-            if category.can_moderate(self):
-                flairs.append('moderator')
+        if category and category.can_moderate(self):
+            flairs.append('moderator')
 
         return ' '.join(flairs)
 

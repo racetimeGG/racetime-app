@@ -87,6 +87,10 @@ class Category(models.Model):
         auto_now=True,
     )
 
+    @cached_property
+    def all_moderators(self):
+        return self.moderators.all()
+
     @property
     def json_data(self):
         """
@@ -138,7 +142,7 @@ class Category(models.Model):
         return user.is_active and (
             user.is_staff
             or user == self.owner
-            or user in self.moderators.all()
+            or user in self.all_moderators
         )
 
     def can_start_race(self, user):
