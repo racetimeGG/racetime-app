@@ -1,6 +1,6 @@
 <ol>
     {% for entrant in race.streaming_entrants %}
-        <li class="not-playing" data-embed-uri="https://player.twitch.tv/?channel={{ entrant.user.twitch_name.lower }}">
+        <li id="stream-{{ entrant.user.hashid }}" class="not-playing" data-embed-uri="https://player.twitch.tv/?channel={{ entrant.user.twitch_name.lower }}">
             <div class="meta">
                 <span class="visibility">
                     <i class="material-icons off">check_box_outline_blank</i>
@@ -11,7 +11,7 @@
             <div class="player"></div>
         </li>
     {% empty %}
-        <li class="no-entrants">
+        <li id="stream-none" class="no-entrants">
             No race entrants are currently streaming.
         </li>
     {% endfor %}

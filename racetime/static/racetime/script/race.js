@@ -220,13 +220,17 @@ Race.prototype.raceTick = function() {
             for (var segment in data) {
                 if (!data.hasOwnProperty(segment)) continue;
                 var $segment = $('.race-' + segment);
-                $segment.html(data[segment]);
-                $segment.find('time').data('latency', latency);
-                window.localiseDates.call($segment[0]);
-                window.addAutocompleters.call($segment[0]);
-                $segment.find('.race-action-form').each(function() {
-                    self.ajaxifyActionForm(this);
-                });
+                // (streams segment is handled in race_spectate.js)
+                if (segment !== 'streams') {
+                    $segment.html(data[segment]);
+                    $segment.find('time').data('latency', latency);
+                    window.localiseDates.call($segment[0]);
+                    window.addAutocompleters.call($segment[0]);
+                    $segment.find('.race-action-form').each(function () {
+                        self.ajaxifyActionForm(this);
+                    });
+                }
+                $segment.trigger('raceTick', data[segment]);
             }
             // This is kind of a fudge but replacing urlize is awful.
             $('.race-info .info a').each(function() {
