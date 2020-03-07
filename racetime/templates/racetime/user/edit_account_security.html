@@ -1,0 +1,23 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Account settings |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/user/tabs.html' with current='edit_account_security' %}
+    <h2>Account security</h2>
+    <div class="change-password">
+        <h3>Change your password</h3>
+        <p class="help">
+            You may change your password at any time. Make sure to pick
+            something secure, and avoid re-using a password that you've used
+            elsewhere.
+        </p>
+        <form class="change-password-form layout-form" method="post">
+            {% csrf_token %}
+            <ul>{{ form.as_ul }}</ul>
+            <button class="btn" type="submit" name="change_password">Change password</button>
+        </form>
+    </div>
+{% endblock %}

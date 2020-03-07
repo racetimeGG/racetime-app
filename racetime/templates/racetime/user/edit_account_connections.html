@@ -1,0 +1,58 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Account settings |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/user/tabs.html' with current='edit_account_connections' %}
+    <h2>Account connections</h2>
+    <div class="division">
+        <h3>Connect to Twitch</h3>
+        <p class="help">
+            To join races where streaming is required, you must have an active
+            <a href="https://www.twitch.tv" target="_blank" rel="nofollow">Twitch.tv</a>
+            account.
+        </p>
+        {% if user.twitch_name %}
+            <p>
+            Connected to <a href="{{ user.twitch_channel }}">{{ user.twitch_name }}</a>.
+            </p>
+            <p>
+                <a href="{{ twitch_url }}" class="btn" target="_blank">Re-connect your Twitch.tv account</a>
+            </p>
+        {% else %}
+            <p>
+                <a href="{{ twitch_url }}" class="btn" target="_blank">Connect your Twitch.tv account</a>
+            </p>
+        {% endif %}
+    </div>
+    <div class="division">
+        <h3>Applications</h3>
+        <p class="help">
+            Third-party applications that you have authorised to use your
+            account will be listed here.
+        </p>
+        <ul class="auth-token-list">
+            {% for authorized_token in authorized_tokens %}
+                <li>
+                    <span class="app">{{ authorized_token.application }}</span>
+                    <form action="{% url 'oauth2_delete' pk=authorized_token.pk %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn dangerous" type="submit" title="Revoke access for this application"><i class="material-icons">delete_forever</i></button>
+                    </form>
+                </li>
+                <ul class="scopes">
+                    {% for scope_name, scope_description in authorized_token.scopes.items %}
+                        <li>{{ scope_description }}</li>
+                    {% endfor %}
+                </ul>
+            {% empty %}
+                <li class="empty">
+                    You have not added any applications. If you do, they will
+                    appear here.
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.transaction import atomic
+from django.forms import model_to_dict
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
@@ -109,7 +110,67 @@ class CreateAccount(generic.CreateView):
 
 
 class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
+    form_class = forms.UserEditForm
     template_name = 'racetime/user/edit_account.html'
+
+    def post(self, request, *args, **kwargs):
+        original_data = model_to_dict(
+            self.user,
+            fields=['email', 'name', 'discriminator'],
+        )
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form, original_data)
+        else:
+            return self.form_invalid(form)
+
+    @atomic
+    def form_valid(self, form, original_data):
+        user = form.save(commit=False)
+
+        if 'name' in form.changed_data:
+            if user.active_race_entrant:
+                form.add_error(
+                    'name',
+                    'You may not change your name while participating in a race.'
+                )
+                return self.form_invalid(form)
+
+            # Will be reset on pre_save signal.
+            user.discriminator = None
+
+            messages.info(
+                self.request,
+                'Name changes may take up to 24 hours to propagate through '
+                'the whole website.'
+            )
+
+        if 'email' in form.changed_data or 'name' in form.changed_data:
+            # Log user changes.
+            models.UserLog.objects.create(
+                user=user,
+                email=original_data['email'],
+                name=original_data['name'],
+                discriminator=original_data['discriminator'],
+            )
+
+        if form.changed_data:
+            messages.success(self.request, 'Your profile has been updated.')
+
+        user.save()
+
+        return http.HttpResponseRedirect(reverse('edit_account'))
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            'instance': self.user,
+        }
+
+
+class EditAccountSecurity(LoginRequiredMixin, UserMixin, generic.FormView):
+    form_class = forms.PasswordChangeForm
+    template_name = 'racetime/user/edit_account_security.html'
 
     @method_decorator(sensitive_post_parameters())
     @method_decorator(csrf_protect)
@@ -118,72 +179,23 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
 
     @atomic
     def form_valid(self, form):
-        user = form.save(commit=False)
+        form.save()
 
-        if isinstance(form, forms.UserEditForm):
-            if 'name' in form.changed_data:
-                if self.user.active_race_entrant:
-                    form.add_error(
-                        'name',
-                        'You may not change your name while participating in a race.'
-                    )
-                    return self.form_invalid(form)
-
-                # Will be reset on pre_save signal.
-                user.discriminator = None
-
-                messages.info(
-                    self.request,
-                    'Name changes may take up to 24 hours to propagate through '
-                    'the whole website.'
-                )
-
-            if 'email' in form.changed_data or 'name' in form.changed_data:
-                # Log user changes.
-                models.UserLog.objects.create(
-                    user=self.user,
-                    email=self.user.email,
-                    name=self.user.name,
-                    discriminator=self.user.discriminator,
-                )
-
-            if form.changed_data:
-                messages.success(self.request, 'Your profile has been updated.')
-
-        user.save()
-
-        if (
-            isinstance(form, forms.PasswordChangeForm)
-            and 'new_password2' in form.changed_data
-        ):
+        if 'new_password2' in form.changed_data:
             update_session_auth_hash(self.request, form.user)
             messages.success(self.request, 'Your password has been changed.')
 
-        return http.HttpResponseRedirect(reverse('edit_account'))
+        return http.HttpResponseRedirect(reverse('edit_account_security'))
 
-    def get_form(self, form_class=None):
-        if form_class is None:
-            form_class = self.get_form_class()
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            'user': self.user,
+        }
 
-        form_kwargs = self.get_form_kwargs()
-        post_button = None
-        if form_class == forms.PasswordChangeForm:
-            form_kwargs['user'] = self.user
-            post_button = 'change_password'
-        if form_class == forms.UserEditForm:
-            form_kwargs['instance'] = self.user
-            post_button = 'update_account'
 
-        if self.request.method in ('POST', 'PUT') and post_button not in self.request.POST:
-            del form_kwargs['data']
-            del form_kwargs['files']
-
-        return form_class(**form_kwargs)
-
-    def get_form_class(self):
-        if 'change_password' in self.request.POST:
-            return forms.PasswordChangeForm
-        return forms.UserEditForm
+class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView):
+    template_name = 'racetime/user/edit_account_connections.html'
 
     def get_authorized_tokens(self):
         model = get_access_token_model()
@@ -192,19 +204,11 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        kwargs.update({
-            'account_form': self.get_form(forms.UserEditForm),
-            'password_form': self.get_form(forms.PasswordChangeForm),
-            'twitch_url': twitch_auth_url(self.request),
+        return {
+            **super().get_context_data(**kwargs),
             'authorized_tokens': self.get_authorized_tokens(),
-        })
-        if 'form' in kwargs:
-            if isinstance(kwargs['form'], forms.UserEditForm):
-                kwargs['account_form'] = kwargs['form']
-            if isinstance(kwargs['form'], forms.PasswordChangeForm):
-                kwargs['password_form'] = kwargs['form']
-
-        return kwargs
+            'twitch_url': twitch_auth_url(self.request),
+        }
 
 
 class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
@@ -250,7 +254,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
 
             user.save()
 
-        return http.HttpResponseRedirect(reverse('edit_account'))
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
 
 
 class OAuthUserInfo(ProtectedResourceView):

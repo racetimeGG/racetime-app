@@ -1,0 +1,17 @@
+<ul class="nav-tabs">
+    <li{% if current == 'edit_account' %} class="current"{% endif %}>
+        <a href="{% url 'edit_account' %}">
+            Profile &amp; settings
+        </a>
+    </li>
+    <li{% if current == 'edit_account_security' %} class="current"{% endif %}>
+        <a href="{% url 'edit_account_security' %}">
+            Change password
+        </a>
+    </li>
+    <li{% if current == 'edit_account_connections' %} class="current"{% endif %}>
+        <a href="{% url 'edit_account_connections' %}">
+            Twitch &amp; connections
+        </a>
+    </li>
+</ul>

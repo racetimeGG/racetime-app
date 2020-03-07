@@ -73,6 +73,8 @@ from .race_monitor_actions import (
 from .user import (
     CreateAccount,
     EditAccount,
+    EditAccountConnections,
+    EditAccountSecurity,
     OAuthDeleteToken,
     OAuthDone,
     OAuthUserInfo,
@@ -150,6 +152,8 @@ __all__ = [
     # user
     'CreateAccount',
     'EditAccount',
+    'EditAccountConnections',
+    'EditAccountSecurity',
     'OAuthDeleteToken',
     'OAuthDone',
     'OAuthUserInfo',

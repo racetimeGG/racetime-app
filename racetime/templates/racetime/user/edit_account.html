@@ -5,80 +5,18 @@
 {% endblock %}
 
 {% block main %}
+    {% include 'racetime/user/tabs.html' with current='edit_account' %}
     <h2>Account settings</h2>
     <div class="division">
         <h3>Update your account</h3>
         <p class="help">
-            Change your basic account settings here. Note that during a race,
-            name changes are forbidden.
+            Change your basic account and profile settings here. Note that
+            during a race, name changes are forbidden.
         </p>
         <form class="edit-account-form layout-form" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <ul>{{ account_form.as_ul }}</ul>
-            <button class="btn" type="submit" name="update_account">Update account</button>
-        </form>
-    </div>
-    <div class="division">
-        <h3>Connect to Twitch.tv</h3>
-        <p class="help">
-            To join races where streaming is required, you must have an active
-            Twitch.tv account.
-        </p>
-        {% if user.twitch_name %}
-            <p>
-            Connected to <a href="{{ user.twitch_channel }}">{{ user.twitch_name }}</a>.
-            </p>
-            <p>
-                <a href="{{ twitch_url }}" class="btn" target="_blank">Re-connect your Twitch.tv account</a>
-            </p>
-        {% else %}
-            <p>
-                <a href="{{ twitch_url }}" class="btn" target="_blank">Connect your Twitch.tv account</a>
-            </p>
-        {% endif %}
-    </div>
-    <div class="division">
-        <h3>Applications</h3>
-        <p class="help">
-            Third-party applications that you have authorised to use your
-            account will be listed here.
-        </p>
-        <ul class="auth-token-list">
-            {% for authorized_token in authorized_tokens %}
-                <li>
-                    <span class="app">{{ authorized_token.application }}</span>
-                    <form action="{% url 'oauth2_delete' pk=authorized_token.pk %}" method="post">
-                        {% csrf_token %}
-                        <button class="btn dangerous" type="submit" title="Revoke access for this application"><i class="material-icons">delete_forever</i></button>
-                    </form>
-                </li>
-                <ul class="scopes">
-                    {% for scope_name, scope_description in authorized_token.scopes.items %}
-                        <li>{{ scope_description }}</li>
-                    {% endfor %}
-                </ul>
-            {% empty %}
-                <li class="empty">
-                    You have not added any applications. If you do, they will
-                    appear here.
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-{% endblock %}
-{% block aside %}
-    <div class="change-password">
-        <h3>Change your password</h3>
-        <p class="help">
-            You may change your password at any time. Make sure to pick
-            something secure, and avoid re-using a password that you've used
-            elsewhere.
-        </p>
-        <form class="change-password-form layout-form" method="post">
-            {% csrf_token %}
-            <ul>{{ password_form.as_ul }}</ul>
-            <button class="btn" type="submit" name="change_password">Change password</button>
+            <ul>{{ form.as_ul }}</ul>
+            <button class="btn" type="submit">Update account</button>
         </form>
     </div>
 {% endblock %}
