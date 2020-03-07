@@ -213,6 +213,8 @@ class Race(models.Model):
                     'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
                     'place': entrant.place,
                     'place_ordinal': ordinal(entrant.place) if entrant.place else None,
+                    'score': entrant.display_score,
+                    'score_change': entrant.display_score_change,
                     'comment': entrant.comment,
                     'stream_live': entrant.stream_live,
                     'stream_override': entrant.stream_override,
