@@ -10,6 +10,7 @@
 .entrant-row > .monitor-actions,
 .entrant-row > .status,
 .entrant-row > .finish-time,
+.entrant-row > .score,
 .entrant-row > .score-change {
     display: none;
 }

@@ -731,12 +731,14 @@ header > .current-race > a .timer {
     flex: 0 0 80px;
     text-align: right;
 }
+.entrant-row > .score,
 .entrant-row > .score-change {
     align-items: center;
-    justify-content: flex-end;
+    color: #8c898c;
     display: flex;
     flex: 0 0 50px;
     font-size: 13px;
+    justify-content: flex-end;
 }
 .entrant-row > .score-change.positive {
     color: #a0e9a0;

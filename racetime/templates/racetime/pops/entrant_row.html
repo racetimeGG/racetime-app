@@ -131,5 +131,9 @@
                 {{ entrant.display_score_change|intcomma|slice:'1:' }}
             </span>
         {% endif %}
+    {% elif entrant.score %}
+        <span class="score" title="Leaderboard score for {{ race.goal_str }}">
+            {{ entrant.display_score|intcomma }}
+        </span>
     {% endif %}
 </li>
