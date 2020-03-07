@@ -372,7 +372,13 @@ class Race(models.Model):
                 output_field=models.PositiveSmallIntegerField(),
                 default=0,
             ),
-        ).order_by('state_sort', 'place', 'finish_time', '-score', 'user__name').all()
+        ).select_related('user').order_by(
+            'state_sort',
+            'place',
+            'finish_time',
+            '-score',
+            'user__name',
+        ).all()
 
     @property
     def streaming_entrants(self):
