@@ -688,6 +688,44 @@ class Race(models.Model):
         if not self.__remaining_entrants.exists():
             self.finish()
 
+    def get_score(self, user):
+        """
+        Returns the user's current leaderboard score for the goal/category of
+        this race.
+        """
+        if self.goal:
+            UserRanking = apps.get_model('racetime', 'UserRanking')
+            try:
+                return UserRanking.objects.get(
+                    user=user,
+                    category=self.category,
+                    goal=self.goal,
+                ).score
+            except UserRanking.DoesNotExist:
+                pass
+        return None
+
+    def update_entrant_scores(self):
+        """
+        Update the score field for all entrants. This needs to be done if
+        the goal changes.
+        """
+        if self.goal:
+            entrant_scores = {
+                values['id']: values['user__userranking__score']
+                for values in self.entrant_set.filter(
+                    user__userranking__category=self.category,
+                    user__userranking__goal=self.goal,
+                ).values('id', 'user__userranking__score')
+            }
+            entrants = []
+            for entrant in self.entrant_set.all():
+                entrant.score = entrant_scores.get(entrant.id)
+                entrants.append(entrant)
+            Entrant.objects.bulk_update(entrants, ['score'])
+        else:
+            self.entrant_set.update(score=None)
+
     def join(self, user):
         if self.can_join(user) and (self.state == RaceStates.open.value or (
             self.state == RaceStates.invitational.value
@@ -695,6 +733,7 @@ class Race(models.Model):
         )):
             self.entrant_set.create(
                 user=user,
+                score=self.get_score(user),
             )
             self.add_message('%(user)s joins the race.' % {'user': user})
         else:
@@ -705,6 +744,7 @@ class Race(models.Model):
             self.entrant_set.create(
                 user=user,
                 state=EntrantStates.requested.value,
+                score=self.get_score(user),
             )
             self.add_message('%(user)s requests to join the race.' % {'user': user})
         else:
@@ -715,6 +755,7 @@ class Race(models.Model):
             self.entrant_set.create(
                 user=user,
                 state=EntrantStates.invited.value,
+                score=self.get_score(user),
             )
             self.add_message(
                 '%(invited_by)s invites %(user)s to join the race.'
@@ -814,6 +855,9 @@ class Entrant(models.Model):
     place = models.PositiveSmallIntegerField(
         null=True,
     )
+    score = models.FloatField(
+        null=True,
+    )
     score_change = models.FloatField(
         null=True,
     )
@@ -845,6 +889,12 @@ class Entrant(models.Model):
     @property
     def can_remove_monitor(self):
         return self.race.can_remove_monitor(self.user)
+
+    @property
+    def display_score(self):
+        if self.score:
+            return round(self.score * 100)
+        return None
 
     @property
     def display_score_change(self):

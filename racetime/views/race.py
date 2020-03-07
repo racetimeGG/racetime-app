@@ -182,6 +182,7 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
         race = form.save()
         messaged = False
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
+            race.update_entrant_scores()
             race.add_message(
                 '%(user)s set a new goal: %(goal)s.'
                 % {'user': self.user, 'goal': race.goal_str}
