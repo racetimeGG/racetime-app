@@ -349,3 +349,6 @@ class UserLog(models.Model):
     discriminator = models.CharField(
         max_length=4,
     )
+    changed_password = models.BooleanField(
+        default=False,
+    )

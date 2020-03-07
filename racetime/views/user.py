@@ -152,6 +152,7 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
                 email=original_data['email'],
                 name=original_data['name'],
                 discriminator=original_data['discriminator'],
+                changed_password=False,
             )
 
         if form.changed_data:
@@ -183,6 +184,13 @@ class EditAccountSecurity(LoginRequiredMixin, UserMixin, generic.FormView):
 
         if 'new_password2' in form.changed_data:
             update_session_auth_hash(self.request, form.user)
+            models.UserLog.objects.create(
+                user=self.user,
+                email=self.user.email,
+                name=self.user.name,
+                discriminator=self.user.discriminator,
+                changed_password=True,
+            )
             messages.success(self.request, 'Your password has been changed.')
 
         return http.HttpResponseRedirect(reverse('edit_account_security'))
