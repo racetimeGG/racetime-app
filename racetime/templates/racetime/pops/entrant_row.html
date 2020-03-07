@@ -135,5 +135,7 @@
         <span class="score" title="Leaderboard score for {{ race.goal_str }}">
             {{ entrant.display_score|intcomma }}
         </span>
+    {% elif race.goal %}
+        <span class="score" title="Not ranked">n/a</span>
     {% endif %}
 </li>
