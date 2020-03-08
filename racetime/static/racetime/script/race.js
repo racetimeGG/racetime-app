@@ -193,7 +193,7 @@ Race.prototype.onSocketMessage = function(event) {
             break;
         case 'race.renders':
             window.globalLatency = new Date(data.date) - new Date();
-            this.handleRenders(data.renders);
+            this.handleRenders(data.renders, data.version);
             break;
         case 'chat.message':
             this.addMessage(data.message);
@@ -214,26 +214,29 @@ Race.prototype.open = function() {
     this.heartbeat();
 };
 
-Race.prototype.handleRenders = function(renders) {
+Race.prototype.handleRenders = function(renders, version) {
     var self = this;
     requestAnimationFrame(function() {
         for (var segment in renders) {
             if (!renders.hasOwnProperty(segment)) continue;
             var $segment = $('.race-' + segment);
+            if ($segment.data('version') > version) continue;
             switch (segment) {
                 case 'streams':
                     // streams segment is handled in race_spectate.js
+                    $segment.attr('data-version', version);
                     break;
                 case 'entrants_monitor':
                     $('<div />').html(renders[segment]).children().each(function() {
                         var $entrant = $('.race-entrants [data-entrant="'+ $(this).data('entrant') +'"]');
                         if ($entrant.length === 0) return true;
                         var $monitorActions = $entrant.children('.monitor-actions');
-                        if ($monitorActions.length) {
+                        if ($monitorActions.length && $monitorActions.attr('data-version') < version) {
                             $monitorActions.replaceWith(this);
                         } else {
                             $entrant.children('.user').after(this);
                         }
+                        $(this).attr('data-version', version);
                         $(this).find('.race-action-form').each(function() {
                             self.ajaxifyActionForm(this);
                         });
@@ -241,6 +244,7 @@ Race.prototype.handleRenders = function(renders) {
                     break;
                 default:
                     $segment.html(renders[segment]);
+                    $segment.attr('data-version', version);
                     window.localiseDates.call($segment[0]);
                     window.addAutocompleters.call($segment[0]);
                     $segment.find('.race-action-form').each(function() {
@@ -262,7 +266,7 @@ Race.prototype.raceTick = function() {
         if (xhr.getResponseHeader('X-Date-Exact')) {
             window.globalLatency = new Date(xhr.getResponseHeader('X-Date-Exact')) - new Date();
         }
-        self.handleRenders(data);
+        self.handleRenders(data.renders, data.version);
     });
 };
 

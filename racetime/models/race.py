@@ -11,7 +11,7 @@ from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -166,6 +166,9 @@ class Race(models.Model):
         null=True,
         db_index=True,
     )
+    version = models.PositiveSmallIntegerField(
+        default=1,
+    )
     rematch = models.ForeignKey(
         'Race',
         on_delete=models.SET_NULL,
@@ -189,6 +192,7 @@ class Race(models.Model):
     @property
     def as_dict(self):
         return {
+            'version': self.version,
             'name': str(self),
             'status': {
                 'value': self.state_info.value,
@@ -421,6 +425,18 @@ class Race(models.Model):
     def timer_html(self):
         return timer_html(self.timer)
 
+    def refresh(self):
+        """
+        Refresh this race object, fetching new data and clearing cached
+        property values.
+        """
+        self.refresh_from_db()
+        for attname in ['ordered_entrants']:
+            try:
+                delattr(self, attname)
+            except AttributeError:
+                pass
+
     def add_message(self, message, highlight=False):
         """
         Add a system-generated chat message for this race.
@@ -436,15 +452,25 @@ class Race(models.Model):
         self.broadcast_data()
 
     def broadcast_data(self):
+        self.refresh()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(self.slug, {
             'type': 'race.data',
             'race': self.as_dict,
+            'version': self.version,
         })
         async_to_sync(channel_layer.group_send)(self.slug, {
             'type': 'race.renders',
             'renders': self.get_renders_stateless(),
+            'version': self.version,
         })
+
+    def increment_version(self):
+        """
+        Increment the race version number, to track new changes.
+        """
+        self.version = F('version') + 1
+        self.save()
 
     def chat_history(self):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
@@ -458,7 +484,10 @@ class Race(models.Model):
         return json.dumps(self.as_dict, cls=DjangoJSONEncoder)
 
     def dump_json_renders(self):
-        return json.dumps(self.get_renders_stateless(), cls=DjangoJSONEncoder)
+        return json.dumps({
+            'renders': self.get_renders_stateless(),
+            'version': self.version,
+        }, cls=DjangoJSONEncoder)
 
     def get_renders_stateless(self):
         """
@@ -576,7 +605,10 @@ class Race(models.Model):
 
     def add_monitor(self, user, added_by):
         if self.can_add_monitor(user):
-            self.monitors.add(user)
+            with atomic():
+                self.increment_version()
+                self.monitors.add(user)
+
             self.add_message(
                 '%(added_by)s promoted %(user)s to race monitor.'
                 % {'added_by': added_by, 'user': user}
@@ -587,7 +619,9 @@ class Race(models.Model):
 
     def remove_monitor(self, user, removed_by):
         if self.can_remove_monitor(user):
-            self.monitors.remove(user)
+            with atomic():
+                self.increment_version()
+                self.monitors.remove(user)
             self.add_message(
                 '%(removed_by)s demoted %(user)s from race monitor.'
                 % {'removed_by': removed_by, 'user': user}
@@ -620,6 +654,7 @@ class Race(models.Model):
         with atomic():
             self.state = RaceStates.pending.value
             self.started_at = timezone.now() + self.start_delay
+            self.version = F('version') + 1
             self.save()
 
             self.entrant_set.filter(
@@ -650,6 +685,7 @@ class Race(models.Model):
             if self.started_at:
                 self.ended_at = self.cancelled_at
                 self.__dnf_remaining_entrants()
+            self.version = F('version') + 1
             self.save()
 
         if cancelled_by:
@@ -671,6 +707,7 @@ class Race(models.Model):
             if not self.entrant_set.filter(finish_time__isnull=False):
                 # Nobody finished, so race should not be recorded.
                 self.recordable = False
+            self.version = F('version') + 1
             self.save()
             self.__dnf_remaining_entrants()
 
@@ -683,6 +720,7 @@ class Race(models.Model):
         if self.recordable and not self.recorded:
             self.recorded = True
             self.recorded_by = recorded_by
+            self.version = F('version') + 1
             self.save()
 
             rate_race(self)
@@ -697,6 +735,7 @@ class Race(models.Model):
     def unrecord(self, unrecorded_by):
         if self.recordable and not self.recorded:
             self.recordable = False
+            self.version = F('version') + 1
             self.save()
             self.add_message(
                 'Race set to not recorded by %(unrecorded_by)s'
@@ -740,6 +779,7 @@ class Race(models.Model):
                 allow_non_entrant_chat=self.allow_non_entrant_chat,
                 chat_message_delay=self.chat_message_delay,
             )
+            self.version = F('version') + 1
             self.save()
             self.rematch.monitors.set(self.monitors.all())
 
@@ -807,32 +847,38 @@ class Race(models.Model):
             self.state == RaceStates.invitational.value
             and self.can_monitor(user)
         )):
-            self.entrant_set.create(
-                user=user,
-                score=self.get_score(user),
-            )
+            with atomic():
+                self.entrant_set.create(
+                    user=user,
+                    score=self.get_score(user),
+                )
+                self.increment_version()
             self.add_message('%(user)s joins the race.' % {'user': user})
         else:
             raise SafeException('You are not eligible to join this race.')
 
     def request_to_join(self, user):
         if self.can_join(user) and self.state == RaceStates.invitational.value:
-            self.entrant_set.create(
-                user=user,
-                state=EntrantStates.requested.value,
-                score=self.get_score(user),
-            )
+            with atomic():
+                self.entrant_set.create(
+                    user=user,
+                    state=EntrantStates.requested.value,
+                    score=self.get_score(user),
+                )
+                self.increment_version()
             self.add_message('%(user)s requests to join the race.' % {'user': user})
         else:
             raise SafeException('You are not eligible to join this race.')
 
     def invite(self, user, invited_by):
         if self.can_join(user) and self.is_preparing:
-            self.entrant_set.create(
-                user=user,
-                state=EntrantStates.invited.value,
-                score=self.get_score(user),
-            )
+            with atomic():
+                self.entrant_set.create(
+                    user=user,
+                    state=EntrantStates.invited.value,
+                    score=self.get_score(user),
+                )
+                self.increment_version()
             self.add_message(
                 '%(invited_by)s invites %(user)s to join the race.'
                 % {'invited_by': invited_by, 'user': user}
@@ -852,6 +898,8 @@ class Race(models.Model):
             entrant.place = place
             entrant.save()
             place += 1
+
+        self.increment_version()
 
     def get_absolute_url(self):
         return reverse('race', args=(self.category.slug, self.slug))
@@ -1014,7 +1062,9 @@ class Entrant(models.Model):
 
     def cancel_request(self):
         if self.state == EntrantStates.requested.value:
-            self.delete()
+            with atomic():
+                self.delete()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s withdraws a request to join.'
                 % {'user': self.user}
@@ -1024,8 +1074,10 @@ class Entrant(models.Model):
 
     def accept_invite(self):
         if self.state == EntrantStates.invited.value:
-            self.state = EntrantStates.joined.value
-            self.save()
+            with atomic():
+                self.state = EntrantStates.joined.value
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s accepts an invitation to join.'
                 % {'user': self.user}
@@ -1035,8 +1087,10 @@ class Entrant(models.Model):
 
     def decline_invite(self):
         if self.state == EntrantStates.invited.value:
-            self.state = EntrantStates.declined.value
-            self.save()
+            with atomic():
+                self.state = EntrantStates.declined.value
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s declines an invitation to join.'
                 % {'user': self.user}
@@ -1046,7 +1100,9 @@ class Entrant(models.Model):
 
     def leave(self):
         if self.state == EntrantStates.joined.value and self.race.is_preparing:
-            self.delete()
+            with atomic():
+                self.delete()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s quits the race.'
                 % {'user': self.user}
@@ -1061,16 +1117,20 @@ class Entrant(models.Model):
             and not self.ready
             and (not self.race.streaming_required or self.stream_live or self.stream_override)
         ):
-            self.ready = True
-            self.save()
+            with atomic():
+                self.ready = True
+                self.save()
+                self.race.increment_version()
             self.race.add_message('%(user)s is ready!' % {'user': self.user})
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def not_ready(self):
         if self.state == EntrantStates.joined.value and self.race.is_preparing and self.ready:
-            self.ready = False
-            self.save()
+            with atomic():
+                self.ready = False
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s is not ready.'
                 % {'user': self.user}
@@ -1091,7 +1151,9 @@ class Entrant(models.Model):
                 dq=False,
                 finish_time__isnull=False,
             )) + 1
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
                 % {'user': self.user, 'place': ordinal(self.place), 'time': self.finish_time_str}
@@ -1109,7 +1171,9 @@ class Entrant(models.Model):
                 and self.finish_time:
             self.finish_time = None
             self.place = None
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been undone from the race.'
                 % {'user': self.user}
@@ -1126,7 +1190,9 @@ class Entrant(models.Model):
                 and not self.dq \
                 and not self.finish_time:
             self.dnf = True
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has ##bad##forfeited## from the race.'
                 % {'user': self.user}
@@ -1143,7 +1209,9 @@ class Entrant(models.Model):
                 and not self.dq \
                 and not self.finish_time:
             self.dnf = False
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has un-forfeited from the race.'
                 % {'user': self.user}
@@ -1175,7 +1243,9 @@ class Entrant(models.Model):
     def add_comment(self, comment):
         if self.can_add_comment:
             self.comment = comment
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s added a comment: "%(comment)s"'
                 % {'user': self.user, 'comment': comment}
@@ -1190,7 +1260,9 @@ class Entrant(models.Model):
     def accept_request(self, accepted_by):
         if self.state == EntrantStates.requested.value:
             self.state = EntrantStates.joined.value
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(accepted_by)s accepts a request to join from %(user)s.'
                 % {'accepted_by': accepted_by, 'user': self.user}
@@ -1209,7 +1281,9 @@ class Entrant(models.Model):
     def force_unready(self, forced_by):
         if self.can_force_unready:
             self.ready = False
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(forced_by)s unreadies %(user)s.'
                 % {'forced_by': forced_by, 'user': self.user}
@@ -1223,7 +1297,9 @@ class Entrant(models.Model):
 
     def remove(self, removed_by):
         if self.can_remove:
-            self.delete()
+            with atomic():
+                self.delete()
+                self.race.increment_version()
             self.race.add_message(
                 '%(removed_by)s removes %(user)s from the race.'
                 % {'removed_by': removed_by, 'user': self.user}
@@ -1244,7 +1320,9 @@ class Entrant(models.Model):
     def disqualify(self, disqualified_by):
         if self.can_disqualify:
             self.dq = True
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been disqualified from the race by %(disqualified_by)s.'
                 % {'disqualified_by': disqualified_by, 'user': self.user}
@@ -1267,7 +1345,9 @@ class Entrant(models.Model):
     def undisqualify(self, undisqualified_by):
         if self.can_undisqualify:
             self.dq = False
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been un-disqualified from the race by %(undisqualified_by)s.'
                 % {'undisqualified_by': undisqualified_by, 'user': self.user}
@@ -1287,7 +1367,9 @@ class Entrant(models.Model):
     def override_stream(self, overridden_by):
         if self.can_override_stream:
             self.stream_override = True
-            self.save()
+            with atomic():
+                self.save()
+                self.race.increment_version()
             self.race.add_message(
                 '%(overridden_by)s sets a stream override for %(user)s.'
                 % {'overridden_by': overridden_by, 'user': self.user}

@@ -114,23 +114,33 @@ class RaceConsumer(AsyncWebsocketConsumer):
         Handler for race.data type event.
         """
         self.state['race_dict'] = event['race']
-        await self.deliver(event['type'], race=event['race'])
+        self.state['race_dict_version'] = event['version']
+        await self.deliver(event['type'], race=event['race'], version=event['version'])
 
     async def race_renders(self, event):
         """
         Handler for race.renders type event.
         """
         self.state['race_renders'] = event['renders']
-        await self.deliver(event['type'], renders=event['renders'])
+        self.state['race_renders_version'] = event['version']
+        await self.deliver(event['type'], renders=event['renders'], version=event['version'])
 
     async def send_race(self):
         """
         Send pre-loaded race data (assuming we have it).
         """
         if self.state.get('race_dict'):
-            await self.deliver('race.data', race=self.state.get('race_dict'))
+            await self.deliver(
+                'race.data',
+                race=self.state.get('race_dict'),
+                version=self.state.get('race_dict_version'),
+            )
         if self.state.get('race_renders'):
-            await self.deliver('race.renders', renders=self.state.get('race_renders'))
+            await self.deliver(
+                'race.renders',
+                renders=self.state.get('race_renders'),
+                version=self.state.get('race_renders_version'),
+            )
 
     async def send_chat_history(self):
         messages = await self.get_chat_history()
@@ -172,6 +182,8 @@ class RaceConsumer(AsyncWebsocketConsumer):
             self.state['race_dict'] = race.as_dict
             self.state['race_renders'] = race.get_renders_stateless()
             self.state['race_slug'] = race.slug
+            self.state['race_dict_version'] = race.version
+            self.state['race_renders_version'] = race.version
 
 
 class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):

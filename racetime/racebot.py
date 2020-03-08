@@ -138,6 +138,7 @@ class RaceBot:
         time_to_start = timezone.now() - race['object'].started_at
         if time_to_start >= timedelta(0):
             race['object'].state = models.RaceStates.in_progress.value
+            race['object'].version = F('version') + 1
             race['object'].save()
             race['object'].add_message(
                 'The race has begun! Good luck and have fun.',

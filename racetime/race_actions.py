@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 
@@ -353,6 +354,7 @@ class BotSetInfo:
             raise SafeException(form.errors)
 
         race.info = form.cleaned_data.get('info')
+        race.version = F('version') + 1
         race.save()
 
         race.add_message(

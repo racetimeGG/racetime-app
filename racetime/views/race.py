@@ -1,6 +1,8 @@
 from django import http
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.db.models import F
+from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
@@ -106,9 +108,10 @@ class RaceRenders(Race):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.user.is_authenticated:
-            resp = http.JsonResponse(
-                self.object.get_renders(self.user, self.request)
-            )
+            resp = http.JsonResponse({
+                'renders': self.object.get_renders(self.user, self.request),
+                'version': self.object.version,
+            })
         else:
             resp = http.HttpResponse(
                 content=self.object.json_renders,
@@ -181,10 +184,15 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
         return super().test_func() and self.get_object().is_preparing
 
     def form_valid(self, form):
-        race = form.save()
+        race = form.save(commit=False)
+        race.version = F('version') + 1
+        with atomic():
+            race.save()
+            if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
+                race.update_entrant_scores()
+
         messaged = False
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
-            race.update_entrant_scores()
             race.add_message(
                 '%(user)s set a new goal: %(goal)s.'
                 % {'user': self.user, 'goal': race.goal_str}
