@@ -1112,8 +1112,7 @@ class Entrant(models.Model):
     def decline_invite(self):
         if self.state == EntrantStates.invited.value:
             with atomic():
-                self.state = EntrantStates.declined.value
-                self.save()
+                self.delete()
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s declines an invitation to join.'
