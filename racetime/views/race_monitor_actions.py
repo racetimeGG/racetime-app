@@ -87,6 +87,11 @@ class UnrecordRace(ModeratorRaceAction):
         race.unrecord(unrecorded_by=user)
 
 
+class Rematch(ModeratorRaceAction):
+    def action(self, race, user, data):
+        race.make_rematch(user)
+
+
 class AcceptRequest(MonitorEntrantAction):
     def entrant_action(self, race, entrant, user, data):
         entrant.accept_request(accepted_by=user)

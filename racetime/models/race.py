@@ -166,6 +166,12 @@ class Race(models.Model):
         null=True,
         db_index=True,
     )
+    rematch = models.ForeignKey(
+        'Race',
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+    )
 
     # How long a race room can be open for with under 2 entrants.
     OPEN_TIME_LIMIT_LOWENTRANTS = timedelta(minutes=30)
@@ -698,6 +704,57 @@ class Race(models.Model):
             )
         else:
             raise SafeException('Race is not recordable or already recorded.')
+
+    @property
+    def can_rematch(self):
+        return (
+            not self.rematch
+            and self.is_done
+            and timezone.now() - self.ended_at < timedelta(hours=1)
+        )
+
+    def make_rematch(self, user):
+        if not self.can_rematch:
+            raise SafeException('Unable to comply, racing in progress.')
+        if not self.can_monitor(user):
+            raise SafeException(
+                'Only race monitors may create a rematch. Start a new race '
+                'room instead.'
+            )
+        if not self.category.can_start_race(user):
+            raise SafeException('You are not allowed to start a new race.')
+
+        with atomic():
+            self.rematch = Race.objects.create(
+                category=self.category,
+                goal=self.goal,
+                custom_goal=self.custom_goal,
+                slug=self.category.generate_race_slug(),
+                opened_by=user,
+                recordable=self.recordable,
+                start_delay=self.start_delay,
+                time_limit=self.time_limit,
+                streaming_required=self.streaming_required,
+                allow_comments=self.allow_comments,
+                allow_midrace_chat=self.allow_midrace_chat,
+                allow_non_entrant_chat=self.allow_non_entrant_chat,
+                chat_message_delay=self.chat_message_delay,
+            )
+            self.save()
+            self.rematch.monitors.set(self.monitors.all())
+
+        for entrant in self.entrant_set.select_related('user'):
+            if entrant.user != user:
+                self.rematch.invite(entrant.user, user)
+            else:
+                self.rematch.join(user)
+
+        self.add_message(
+            '%(user)s wants to rematch! Please visit the new race room to '
+            'accept your invitation: %(race)s'
+            % {'user': user, 'race': settings.RT_SITE_URI + self.rematch.get_absolute_url()},
+            highlight=True,
+        )
 
     def finish_if_none_remaining(self):
         """

@@ -42,4 +42,12 @@
             </form>
         </li>
     {% endif %}
+    {% if race.can_rematch %}
+        <li class="rematch confirm">
+            <form class="race-action-form" action="{% url 'rematch' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Rematch</button>
+            </form>
+        </li>
+    {% endif %}
 </ul>

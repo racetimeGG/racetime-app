@@ -333,7 +333,7 @@ $(function() {
         $(this).height($(this)[0].scrollHeight - 10);
     });
 
-    $(document).on('click', '.dangerous .btn', function() {
+    $(document).on('click', '.confirm .btn, .dangerous .btn', function() {
         return confirm($(this).text().trim() + ': are you sure you want to do that?');
     });
 });
