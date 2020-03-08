@@ -50,4 +50,25 @@
             </form>
         </li>
     {% endif %}
+    {% if race.is_preparing %}
+        <li class="state">
+            {% if race.state == 'open' %}
+                <form class="race-action-form" action="{% url 'make_invitational' race=race.slug category=race.category.slug %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">
+                        <i class="material-icons">check_box_outline_blank</i>
+                        <span>Invite only</span>
+                    </button>
+                </form>
+            {% else %}
+                <form class="race-action-form" action="{% url 'make_open' race=race.slug category=race.category.slug %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">
+                        <i class="material-icons">check_box</i>
+                        <span>Invite only</span>
+                    </button>
+                </form>
+            {% endif %}
+        </li>
+    {% endif %}
 </ul>

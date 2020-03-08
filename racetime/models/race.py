@@ -637,6 +637,30 @@ class Race(models.Model):
         except self.entrant_set.model.DoesNotExist:
             return None
 
+    def make_open(self, by):
+        if self.state != RaceStates.invitational.value:
+            raise SafeException('Race is not an invitational.')
+
+        self.state = RaceStates.open.value
+        self.version = F('version') + 1
+        self.save()
+
+        self.add_message(
+            '%(by)s sets the race to be open. Anyone may now join.' % {'by': by},
+        )
+
+    def make_invitational(self, by):
+        if self.state != RaceStates.open.value:
+            raise SafeException('Race is not open.')
+
+        self.state = RaceStates.invitational.value
+        self.version = F('version') + 1
+        self.save()
+
+        self.add_message(
+            '%(by)s sets the race to be invite only.' % {'by': by},
+        )
+
     @property
     def can_begin(self):
         return self.is_preparing and len(self.entrant_set.filter(

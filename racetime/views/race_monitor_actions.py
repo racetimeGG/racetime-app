@@ -42,6 +42,16 @@ class MonitorEntrantAction(CanMonitorRaceMixin, EntrantAction):
     pass
 
 
+class MakeOpen(MonitorRaceAction):
+    def action(self, race, user, data):
+        race.make_open(by=user)
+
+
+class MakeInvitational(MonitorRaceAction):
+    def action(self, race, user, data):
+        race.make_invitational(by=user)
+
+
 class BeginRace(MonitorRaceAction):
     def action(self, race, user, data):
         race.begin(begun_by=user)

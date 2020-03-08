@@ -56,6 +56,8 @@ from .race_actions import (
     AddComment,
 )
 from .race_monitor_actions import (
+    MakeOpen,
+    MakeInvitational,
     BeginRace,
     CancelRace,
     InviteToRace,
@@ -137,6 +139,8 @@ __all__ = [
     'Unforfeit',
     'AddComment',
     # race_monitor_actions
+    'MakeOpen',
+    'MakeInvitational',
     'BeginRace',
     'CancelRace',
     'InviteToRace',

@@ -81,6 +81,8 @@ urlpatterns = [
 
         path('monitor/', include([
             path('edit', views.EditRace.as_view(), name='edit_race'),
+            path('open', views.MakeOpen.as_view(), name='make_open'),
+            path('invitational', views.MakeInvitational.as_view(), name='make_invitational'),
             path('begin', views.BeginRace.as_view(), name='begin_race'),
             path('cancel', views.CancelRace.as_view(), name='cancel_race'),
             path('invite', views.InviteToRace.as_view(), name='invite_to_race'),

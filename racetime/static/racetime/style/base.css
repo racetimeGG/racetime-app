@@ -812,6 +812,17 @@ header > .current-race > a .timer {
 .race-monitor > ul > .invite > form button {
     margin-left: 5px;
 }
+.race-monitor > ul > .state > form > button {
+    align-items: center;
+    background: none;
+    border: none;
+    display: flex;
+    height: 33px;
+    padding: 0;
+}
+.race-monitor > ul > .state > form > button > span {
+    margin-left: 2px;
+}
 .btn.dangerous,
 .dangerous .btn {
     border-color: #f08080;
