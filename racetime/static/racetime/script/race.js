@@ -220,7 +220,7 @@ Race.prototype.handleRenders = function(renders, version) {
         for (var segment in renders) {
             if (!renders.hasOwnProperty(segment)) continue;
             var $segment = $('.race-' + segment);
-            if ($segment.data('version') > version) continue;
+            if ($segment.attr('data-version') >= version) continue;
             switch (segment) {
                 case 'streams':
                     // streams segment is handled in race_spectate.js
