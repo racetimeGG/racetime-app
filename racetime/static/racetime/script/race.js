@@ -231,8 +231,10 @@ Race.prototype.handleRenders = function(renders, version) {
                         var $entrant = $('.race-entrants [data-entrant="'+ $(this).data('entrant') +'"]');
                         if ($entrant.length === 0) return true;
                         var $monitorActions = $entrant.children('.monitor-actions');
-                        if ($monitorActions.length && $monitorActions.attr('data-version') < version) {
-                            $monitorActions.replaceWith(this);
+                        if ($monitorActions.length) {
+                            if ($monitorActions.attr('data-version') < version) {
+                                $monitorActions.replaceWith(this);
+                            }
                         } else {
                             $entrant.children('.user').after(this);
                         }
