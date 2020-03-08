@@ -1,6 +1,6 @@
 <ol>
     {% for entrant in race.ordered_entrants %}
-        {% include 'racetime/pops/entrant_row.html' %}
+        {% include 'racetime/pops/entrant_row.html' with index=forloop.counter0 %}
     {% empty %}
         <li class="no-entrants">
             No race entrants.

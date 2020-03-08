@@ -1,6 +1,6 @@
 {% load humanize %}
 {% load static %}
-<li class="entrant-row">
+<li class="entrant-row" data-entrant="{{ index }}">
     <span class="place">
         {{ entrant.place|ordinal|default:'—' }}
     </span>
@@ -9,7 +9,7 @@
         {% if not race.is_done and entrant.user.twitch_channel %}
             <span class="stream">
                 {% if entrant.stream_live %}
-                    <a href="{{ entrant.user.twitch_channel }}" target="_blank"" title="Stream online">
+                    <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream online">
                         <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
                     </a>
                 {% else %}
@@ -26,90 +26,6 @@
             </span>
         {% endif %}
     </span>
-    {% if can_monitor and entrant.user != user %}
-        <ul class="monitor-actions">
-            {% if entrant.can_accept_request %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'accept_request' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Accept invite">
-                            <i class="material-icons">person_add</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if entrant.can_force_unready %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'force_unready' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Force unready">
-                            <i class="material-icons">thumb_down</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if can_moderate and entrant.can_override_stream %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'override_stream' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Override stream requirement">
-                            <i class="material-icons">videocam_off</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if entrant.can_remove %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'remove' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Remove">
-                            <i class="material-icons">delete_forever</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if can_moderate and entrant.can_disqualify %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'disqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Disqualify">
-                            <i class="material-icons">flash_on</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if can_moderate and entrant.can_undisqualify %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'undisqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Un-disqualify">
-                            <i class="material-icons">flash_off</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if entrant.can_add_monitor %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'add_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Promote to race monitor">
-                            <i class="material-icons">work</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-            {% if entrant.can_remove_monitor %}
-                <li>
-                    <form method="post" class="race-action-form" action="{% url 'remove_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn" title="Demote from race monitor">
-                            <i class="material-icons">work_off</i>
-                        </button>
-                    </form>
-                </li>
-            {% endif %}
-        </ul>
-    {% endif %}
     <span class="status {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
         {{ entrant.summary.1 }}
     </span>

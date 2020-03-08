@@ -185,10 +185,15 @@ Race.prototype.onSocketMessage = function(event) {
 
     switch (data.type) {
         case 'race.data':
-            this.raceTick();
+            if (this.vars.user.id)
+                this.raceTick();
             if (this.vars.user.can_moderate)
                 break;
             this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
+            break;
+        case 'race.renders':
+            window.globalLatency = new Date(data.date) - new Date();
+            this.handleRenders(data.renders);
             break;
         case 'chat.message':
             this.addMessage(data.message);
@@ -209,34 +214,55 @@ Race.prototype.open = function() {
     this.heartbeat();
 };
 
+Race.prototype.handleRenders = function(renders) {
+    var self = this;
+    requestAnimationFrame(function() {
+        for (var segment in renders) {
+            if (!renders.hasOwnProperty(segment)) continue;
+            var $segment = $('.race-' + segment);
+            switch (segment) {
+                case 'streams':
+                    // streams segment is handled in race_spectate.js
+                    break;
+                case 'entrants_monitor':
+                    $('<div />').html(renders[segment]).children().each(function() {
+                        var $entrant = $('.race-entrants [data-entrant="'+ $(this).data('entrant') +'"]');
+                        if ($entrant.length === 0) return true;
+                        var $monitorActions = $entrant.children('.monitor-actions');
+                        if ($monitorActions.length) {
+                            $monitorActions.replaceWith(this);
+                        } else {
+                            $entrant.children('.user').after(this);
+                        }
+                        $(this).find('.race-action-form').each(function() {
+                            self.ajaxifyActionForm(this);
+                        });
+                    });
+                    break;
+                default:
+                    $segment.html(renders[segment]);
+                    window.localiseDates.call($segment[0]);
+                    window.addAutocompleters.call($segment[0]);
+                    $segment.find('.race-action-form').each(function() {
+                        self.ajaxifyActionForm(this);
+                    });
+            }
+            $segment.trigger('raceTick', renders[segment]);
+        }
+        // This is kind of a fudge but replacing urlize is awful.
+        $('.race-info .info a').each(function() {
+            $(this).attr('target', '_blank');
+        });
+    });
+};
+
 Race.prototype.raceTick = function() {
     var self = this;
     $.get(self.vars.urls.renders, function(data, status, xhr) {
-        var latency = 0;
         if (xhr.getResponseHeader('X-Date-Exact')) {
-            latency = new Date(xhr.getResponseHeader('X-Date-Exact')) - new Date();
+            window.globalLatency = new Date(xhr.getResponseHeader('X-Date-Exact')) - new Date();
         }
-        requestAnimationFrame(function() {
-            for (var segment in data) {
-                if (!data.hasOwnProperty(segment)) continue;
-                var $segment = $('.race-' + segment);
-                // (streams segment is handled in race_spectate.js)
-                if (segment !== 'streams') {
-                    $segment.html(data[segment]);
-                    $segment.find('time').data('latency', latency);
-                    window.localiseDates.call($segment[0]);
-                    window.addAutocompleters.call($segment[0]);
-                    $segment.find('.race-action-form').each(function () {
-                        self.ajaxifyActionForm(this);
-                    });
-                }
-                $segment.trigger('raceTick', data[segment]);
-            }
-            // This is kind of a fudge but replacing urlize is awful.
-            $('.race-info .info a').each(function() {
-                $(this).attr('target', '_blank');
-            });
-        });
+        self.handleRenders(data);
     });
 };
 

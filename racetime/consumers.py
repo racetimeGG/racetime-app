@@ -3,6 +3,7 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
 
 from . import race_actions
@@ -46,21 +47,19 @@ class OAuthConsumerMixin:
 class RaceConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.category_slug = None
-        self.race_dict = None
-        self.race_slug = None
+        self.state = {}
 
     async def connect(self):
         await self.load_race()
 
-        if self.race_slug:
-            await self.channel_layer.group_add(self.race_slug, self.channel_name)
+        if self.state.get('race_slug'):
+            await self.channel_layer.group_add(self.state.get('race_slug'), self.channel_name)
             await self.accept()
             await self.send_race()
 
     async def disconnect(self, close_code):
-        if self.race_slug:
-            await self.channel_layer.group_discard(self.race_slug, self.channel_name)
+        if self.state.get('race_slug'):
+            await self.channel_layer.group_discard(self.state.get('race_slug'), self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
@@ -88,6 +87,7 @@ class RaceConsumer(AsyncWebsocketConsumer):
     async def deliver(self, event_type, **kwargs):
         await self.send(text_data=json.dumps({
             'type': event_type,
+            'date': timezone.now().isoformat(),
             **kwargs,
         }, cls=DjangoJSONEncoder))
 
@@ -99,9 +99,6 @@ class RaceConsumer(AsyncWebsocketConsumer):
         Handler for chat.message type event.
         """
         await self.deliver(event['type'], message=event['message'])
-
-        if event['message']['is_system']:
-            await self.load_race()
 
     async def error(self, event):
         """
@@ -116,14 +113,24 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for race.data type event.
         """
+        self.state['race_dict'] = event['race']
         await self.deliver(event['type'], race=event['race'])
+
+    async def race_renders(self, event):
+        """
+        Handler for race.renders type event.
+        """
+        self.state['race_renders'] = event['renders']
+        await self.deliver(event['type'], renders=event['renders'])
 
     async def send_race(self):
         """
         Send pre-loaded race data (assuming we have it).
         """
-        if self.race_dict:
-            await self.deliver('race.data', race=self.race_dict)
+        if self.state.get('race_dict'):
+            await self.deliver('race.data', race=self.state.get('race_dict'))
+        if self.state.get('race_renders'):
+            await self.deliver('race.renders', renders=self.state.get('race_renders'))
 
     async def send_chat_history(self):
         messages = await self.get_chat_history()
@@ -134,18 +141,16 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Call a race action.
         """
-        if not self.race_slug:
+        if not self.state.get('race_slug'):
             return
         action = action_class()
-        race = Race.objects.get(slug=self.race_slug)
+        race = Race.objects.get(slug=self.state.get('race_slug'))
         action.action(race, user, data)
 
     @database_sync_to_async
     def get_chat_history(self):
         try:
-            race = Race.objects.get(
-                slug=self.race_slug
-            )
+            race = Race.objects.get(slug=self.state.get('race_slug'))
         except Race.DoesNotExist:
             return []
         else:
@@ -161,13 +166,12 @@ class RaceConsumer(AsyncWebsocketConsumer):
                 slug=self.scope['url_route']['kwargs']['race']
             )
         except Race.DoesNotExist:
-            self.category_slug = None
-            self.race_dict = None
-            self.race_slug = None
+            self.state = {}
         else:
-            self.category_slug = race.category.slug
-            self.race_dict = race.as_dict
-            self.race_slug = race.slug
+            self.state['category_slug'] = race.category.slug
+            self.state['race_dict'] = race.as_dict
+            self.state['race_renders'] = race.get_renders_stateless()
+            self.state['race_slug'] = race.slug
 
 
 class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
@@ -256,14 +260,14 @@ class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
         Returns the Bot object associated to the given OAuth2 application, if
         any.
         """
-        if not application or not self.category_slug:
+        if not application or not self.state.get('category_slug'):
             return None
 
         try:
             return Bot.objects.get(
                 application=application,
                 active=True,
-                category__slug=self.category_slug,
+                category__slug=self.state.get('category_slug'),
             )
         except Bot.DoesNotExist:
             return None

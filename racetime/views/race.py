@@ -22,12 +22,14 @@ class Race(UserMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         race = self.get_object()
+        can_moderate = race.category.can_moderate(self.user)
+        can_monitor = can_moderate or race.can_monitor(self.user)
         return {
             **super().get_context_data(**kwargs),
             'chat_form': self.get_chat_form(),
-            'available_actions': race.available_actions(self.user),
-            'can_moderate': race.category.can_moderate(self.user),
-            'can_monitor': race.can_monitor(self.user),
+            'available_actions': race.available_actions(self.user, can_monitor),
+            'can_moderate': can_moderate,
+            'can_monitor': can_monitor,
             'invite_form': self.get_invite_form(),
             'meta_image': (settings.RT_SITE_URI + race.category.image.url) if race.category.image else None,
             'js_vars': {
@@ -38,8 +40,8 @@ class Race(UserMixin, generic.DetailView):
                 },
                 'user': {
                     'id': self.user.hashid if self.user.is_authenticated else None,
-                    'can_moderate': race.category.can_moderate(self.user),
-                    'can_monitor': race.can_monitor(self.user),
+                    'can_moderate': can_moderate,
+                    'can_monitor': can_monitor,
                 },
             },
         }

@@ -16,6 +16,7 @@ from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 
 from .choices import EntrantStates, RaceStates
@@ -305,7 +306,7 @@ class Race(models.Model):
         """
         return ', '.join(str(user) for user in self.monitors.all())
 
-    @property
+    @cached_property
     def ordered_entrants(self):
         """
         All race entrants in appropriate order.
@@ -434,6 +435,10 @@ class Race(models.Model):
             'type': 'race.data',
             'race': self.as_dict,
         })
+        async_to_sync(channel_layer.group_send)(self.slug, {
+            'type': 'race.renders',
+            'renders': self.get_renders_stateless(),
+        })
 
     def chat_history(self):
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
@@ -447,39 +452,41 @@ class Race(models.Model):
         return json.dumps(self.as_dict, cls=DjangoJSONEncoder)
 
     def dump_json_renders(self):
-        return json.dumps(self.get_renders(), cls=DjangoJSONEncoder)
+        return json.dumps(self.get_renders_stateless(), cls=DjangoJSONEncoder)
 
-    def get_renders(self, user=None, request=None):
-        if not user or not user.is_active:
-            return {
-                'actions': '',
-                'entrants': render_to_string('racetime/race/entrants.html', {'race': self}, request),
-                'intro': render_to_string('racetime/race/intro.html', {'race': self}, request),
-                'monitor': '',
-                'status': render_to_string('racetime/race/status.html', {'race': self}, request),
-                'streams': render_to_string('racetime/race/streams.html', {'race': self}, request),
-            }
+    def get_renders_stateless(self):
+        """
+        Return stateless HTML renders of various parts of the race screen.
 
-        available_actions = self.available_actions(user)
+        These chunks are ones that appear the same for every visitor, logged in
+        or not.
+        """
+        return {
+            'entrants': render_to_string('racetime/race/entrants.html', {'race': self}),
+            'intro': render_to_string('racetime/race/intro.html', {'race': self}),
+            'status': render_to_string('racetime/race/status.html', {'race': self}),
+            'streams': render_to_string('racetime/race/streams.html', {'race': self}),
+        }
+
+    def get_renders(self, user, request):
+        """
+        Return HTML renders of all important parts of the race screen.
+
+        These chunks include some that are context-sensitive to the given user.
+        """
         can_moderate = self.category.can_moderate(user)
         can_monitor = self.can_monitor(user)
+        available_actions = self.available_actions(user, can_monitor)
 
         renders = {
             'actions': '',
-            'entrants': render_to_string('racetime/race/entrants.html', {
-                'can_moderate': can_moderate,
-                'can_monitor': can_monitor,
-                'race': self,
-            }, request),
-            'intro': render_to_string('racetime/race/intro.html', {'race': self}, request),
+            'entrants_monitor': '',
             'monitor': '',
-            'status': render_to_string('racetime/race/status.html', {'race': self}, request),
-            'streams': render_to_string('racetime/race/streams.html', {'race': self}, request),
         }
 
         if available_actions:
             renders['actions'] = render_to_string('racetime/race/actions.html', {
-                'available_actions': self.available_actions(user),
+                'available_actions': available_actions,
                 'race': self,
             }, request)
         elif self.is_pending:
@@ -487,15 +494,20 @@ class Race(models.Model):
 
         if can_monitor:
             from ..forms import InviteForm
-            renders['monitor'] = render_to_string('racetime/race/monitor.html', {
-                'can_moderate': self.category.can_moderate(user),
+            renders['entrants_monitor'] = render_to_string('racetime/race/entrants_monitor.html', {
+                'can_moderate': can_moderate,
+                'can_monitor': can_monitor,
                 'race': self,
+            }, request)
+            renders['monitor'] = render_to_string('racetime/race/monitor.html', {
+                'can_moderate': can_moderate,
                 'invite_form': InviteForm(),
+                'race': self,
             }, request)
 
         return renders
 
-    def available_actions(self, user):
+    def available_actions(self, user, can_monitor):
         if not user.is_authenticated:
             return []
 
@@ -524,12 +536,11 @@ class Race(models.Model):
                         actions.append(('done', 'Done', '') if not entrant.finish_time else ('undone', 'Undo finish', 'dangerous'))
                     if not entrant.dq and not entrant.finish_time:
                         actions.append(('forfeit', 'Forfeit', 'dangerous') if not entrant.dnf else ('unforfeit', 'Undo forfeit', ''))
-        else:
-            if self.can_join(user):
-                if self.state == RaceStates.open.value:
-                    actions.append(('join', 'Join', ''))
-                elif self.state == RaceStates.invitational.value:
-                    actions.append(('join', 'Join', '') if self.can_monitor(user) else ('request_invite', 'Request to join', ''))
+        elif self.is_preparing and self.can_join(user):
+            if self.state == RaceStates.open.value:
+                actions.append(('join', 'Join', ''))
+            elif self.state == RaceStates.invitational.value:
+                actions.append(('join', 'Join', '') if can_monitor else ('request_invite', 'Request to join', ''))
         return actions
 
     def can_join(self, user):
@@ -593,7 +604,6 @@ class Race(models.Model):
             ready=True
         )) >= 2
 
-    @atomic
     def begin(self, begun_by=None):
         """
         Begin the race, triggering the countdown.
@@ -601,13 +611,14 @@ class Race(models.Model):
         if not self.can_begin:
             raise SafeException('Race cannot be started yet.')
 
-        self.state = RaceStates.pending.value
-        self.started_at = timezone.now() + self.start_delay
-        self.save()
+        with atomic():
+            self.state = RaceStates.pending.value
+            self.started_at = timezone.now() + self.start_delay
+            self.save()
 
-        self.entrant_set.filter(
-            ~Q(state=EntrantStates.joined.value) | Q(ready=False)
-        ).delete()
+            self.entrant_set.filter(
+                ~Q(state=EntrantStates.joined.value) | Q(ready=False)
+            ).delete()
 
         if begun_by:
             self.add_message(
@@ -616,7 +627,6 @@ class Race(models.Model):
                 highlight=True,
             )
 
-    @atomic
     def cancel(self, cancelled_by=None):
         """
         Cancel the race.
@@ -627,13 +637,14 @@ class Race(models.Model):
                 % {'state': self.state}
             )
 
-        self.state = RaceStates.cancelled.value
-        self.recordable = False
-        self.cancelled_at = timezone.now()
-        if self.started_at:
-            self.ended_at = self.cancelled_at
-            self.__dnf_remaining_entrants()
-        self.save()
+        with atomic():
+            self.state = RaceStates.cancelled.value
+            self.recordable = False
+            self.cancelled_at = timezone.now()
+            if self.started_at:
+                self.ended_at = self.cancelled_at
+                self.__dnf_remaining_entrants()
+            self.save()
 
         if cancelled_by:
             self.add_message(
@@ -641,7 +652,6 @@ class Race(models.Model):
                 % {'cancelled_by': cancelled_by},
             )
 
-    @atomic
     def finish(self):
         """
         Finish the race.
@@ -649,19 +659,20 @@ class Race(models.Model):
         if not self.is_in_progress:
             raise SafeException('Cannot finish a race that has not been started.')
 
-        self.state = RaceStates.finished.value
-        self.ended_at = timezone.now()
-        if not self.entrant_set.filter(finish_time__isnull=False):
-            # Nobody finished, so race should not be recorded.
-            self.recordable = False
-        self.save()
-        self.__dnf_remaining_entrants()
+        with atomic():
+            self.state = RaceStates.finished.value
+            self.ended_at = timezone.now()
+            if not self.entrant_set.filter(finish_time__isnull=False):
+                # Nobody finished, so race should not be recorded.
+                self.recordable = False
+            self.save()
+            self.__dnf_remaining_entrants()
+
         self.add_message(
             'Race finished in %(timer)s' % {'timer': self.timer_str},
             highlight=True,
         )
 
-    @atomic
     def record(self, recorded_by):
         if self.recordable and not self.recorded:
             self.recorded = True

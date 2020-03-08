@@ -165,7 +165,6 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
             'streaming_required',
         } & set(form.changed_data)
         for field in changed_fields:
-            print(getattr(category, field))
             audit.append(models.AuditLog(
                 actor=self.user,
                 category=category,

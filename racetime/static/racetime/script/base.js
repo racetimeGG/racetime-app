@@ -7,14 +7,14 @@ $(function() {
         }
     };
 
+    window.globalLatency = 0;
+
     var autotick = function() {
         $('time.autotick').each(function() {
             $(this).attr('datetime');
 
             var timer = Date.now() - new Date($(this).attr('datetime'));
-            if ($(this).data('latency')) {
-                timer += $(this).data('latency');
-            }
+            timer += window.globalLatency;
             var negative = timer < 0;
 
             if (negative && timer >= -100) {
@@ -46,24 +46,24 @@ $(function() {
 
     window.localiseDates = function() {
         $(this).find('time.datetime').each(function () {
-            var date = new Date($(this).attr('datetime'));
-            if ($(this).data('latency')) {
-                date = new Date(date.getTime() + $(this).data('latency'));
-            }
+            var date = new Date(
+                new Date($(this).attr('datetime')).getTime()
+                + window.globalLatency
+            );
             $(this).html(date.toLocaleString(getNavigatorLanguage()));
         });
         $(this).find('time.onlydate').each(function () {
-            var date = new Date($(this).attr('datetime'));
-            if ($(this).data('latency')) {
-                date = new Date(date.getTime() + $(this).data('latency'));
-            }
+            var date = new Date(
+                new Date($(this).attr('datetime')).getTime()
+                + window.globalLatency
+            );
             $(this).html(date.toLocaleDateString(getNavigatorLanguage()));
         });
         $(this).find('time.onlytime').each(function () {
-            var date = new Date($(this).attr('datetime'));
-            if ($(this).data('latency')) {
-                date = new Date(date.getTime() + $(this).data('latency'));
-            }
+            var date = new Date(
+                new Date($(this).attr('datetime')).getTime()
+                + window.globalLatency
+            );
             $(this).html(date.toLocaleTimeString(getNavigatorLanguage()));
         });
     };
