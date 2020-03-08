@@ -1329,7 +1329,8 @@ class Entrant(models.Model):
             )
             if self.finish_time:
                 self.race.recalculate_places()
-            self.race.finish_if_none_remaining()
+            if self.race.is_in_progress:
+                self.race.finish_if_none_remaining()
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
