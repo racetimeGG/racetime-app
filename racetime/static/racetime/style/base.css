@@ -812,6 +812,9 @@ header > .current-race > a .timer {
 .race-monitor > ul > .invite > form button {
     margin-left: 5px;
 }
+.race-monitor > ul > .state {
+    margin-left: 8px;
+}
 .race-monitor > ul > .state > form > button {
     align-items: center;
     background: none;
