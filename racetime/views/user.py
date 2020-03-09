@@ -72,6 +72,7 @@ class ViewProfile(generic.DetailView):
 
     def get_favourite_categories(self):
         queryset = models.Category.objects.filter(
+            race__state=models.RaceStates.finished,
             race__entrant__user=self.get_object(),
         )
         queryset = queryset.annotate(times_entered=Count('race__entrant'))
