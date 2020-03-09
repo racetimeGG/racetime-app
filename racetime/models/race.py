@@ -773,7 +773,7 @@ class Race(models.Model):
         return (
             not self.rematch
             and self.is_done
-            and timezone.now() - self.ended_at < timedelta(hours=1)
+            and timezone.now() - (self.ended_at or self.cancelled_at) < timedelta(hours=1)
         )
 
     def make_rematch(self, user):
@@ -1259,7 +1259,10 @@ class Entrant(models.Model):
                 and not self.comment
                 and self.race.allow_comments
                 and not self.race.recorded
-                and (self.race.recordable or timezone.now() - self.race.ended_at < timedelta(hours=1))
+                and (
+                    self.race.recordable
+                    or timezone.now() - (self.race.ended_at or self.race.cancelled_at) < timedelta(hours=1)
+                )
             )
         return False
 
