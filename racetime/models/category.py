@@ -116,13 +116,6 @@ class Category(models.Model):
         """
         return 10
 
-    @property
-    def moderator_list(self):
-        """
-        Return a comma-separated string listing all moderators.
-        """
-        return ', '.join(str(user) for user in self.moderators.all())
-
     def api_dict_summary(self):
         return {
             'name': self.name,
