@@ -42,6 +42,8 @@ urlpatterns = [
         path('data', views.CategoryData.as_view(), name='category_data'),
         path('manage/', include([
             path('edit', views.EditCategory.as_view(), name='edit_category'),
+            path('deactivate', views.DeactivateCategory.as_view(), name='category_deactivate'),
+            path('reactivate', views.ReactivateCategory.as_view(), name='category_reactivate'),
             path('bots', views.BotList.as_view(), name='category_bots'),
             path('bots/new', views.CreateBot.as_view(), name='new_category_bot'),
             path('bots/<str:bot>/deactivate', views.DeactivateBot.as_view(), name='deactivate_category_bot'),

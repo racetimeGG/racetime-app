@@ -15,4 +15,31 @@
         <ul>{{ form.as_ul }}</ul>
         <button class="btn" type="submit">Submit</button>
     </form>
+    {% if user.is_staff %}
+        {% if category.active %}
+        <h3 class="dangerous">
+            Deactivate category
+        </h3>
+        <p class="help">
+            This will make the category inactive, removing it from public view.
+            Make sure you're really really sure you really want to do this. Really.
+        </p>
+        <form class="layout-form dangerous" action="{% url 'category_deactivate' category=category.slug %}" method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">Deactivate category</button>
+        </form>
+        {% else %}
+            <h3 class="dangerous">
+                Reactivate category
+            </h3>
+            <p class="help">
+                This will make the category active, bringing it back into
+                public view.
+            </p>
+            <form class="layout-form dangerous" action="{% url 'category_reactivate' category=category.slug %}" method="post">
+                {% csrf_token %}
+                <button class="btn" type="submit">Reactivate category</button>
+            </form>
+        {% endif %}
+    {% endif %}
 {% endblock %}

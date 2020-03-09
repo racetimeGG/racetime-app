@@ -235,7 +235,60 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
         return self.get_object().can_edit(self.user)
 
 
-class ModPageMixin(UserPassesTestMixin, UserMixin):
+class AdministrateCategory(UserPassesTestMixin, UserMixin, generic.View):
+    action = NotImplemented
+
+    @cached_property
+    def category(self):
+        slug = self.kwargs.get('category')
+        return get_object_or_404(models.Category, slug=slug)
+
+    def post(self, request, *args, **kwargs):
+        category = self.category
+        self.action(category)
+        return http.HttpResponseRedirect(reverse('edit_category', args=(category.slug,)))
+
+    def test_func(self):
+        return self.user.is_active and self.user.is_staff
+
+
+class DeactivateCategory(AdministrateCategory):
+    def action(self, category):
+        if not category.active:
+            return
+        with atomic():
+            category.active = False
+            category.save()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=category,
+                action='deactivate',
+            )
+        messages.info(
+            self.request,
+            'Category deactivated. It is now hidden.',
+        )
+
+
+class ReactivateCategory(AdministrateCategory):
+    def action(self, category):
+        if category.active:
+            return
+        with atomic():
+            category.active = True
+            category.save()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=category,
+                action='activate',
+            )
+        messages.info(
+            self.request,
+            'Category re-activated. It is now publicly available again.',
+        )
+
+
+class ManageCategory(UserPassesTestMixin, UserMixin):
     kwargs = NotImplemented
 
     @cached_property
@@ -243,6 +296,17 @@ class ModPageMixin(UserPassesTestMixin, UserMixin):
         slug = self.kwargs.get('category')
         return get_object_or_404(models.Category, slug=slug)
 
+    def test_func(self):
+        """
+        Active categories can be edited. Inactive categories are only available
+        to staff.
+        """
+        if self.category.active:
+            return self.category.can_edit(self.user)
+        return self.user.is_active and self.user.is_staff
+
+
+class ModPageMixin(ManageCategory):
     @property
     def moderators(self):
         return self.category.moderators.filter(active=True).order_by('name')
@@ -250,9 +314,6 @@ class ModPageMixin(UserPassesTestMixin, UserMixin):
     @property
     def success_url(self):
         return reverse('category_mods', args=(self.category.slug,))
-
-    def test_func(self):
-        return self.category.can_edit(self.user)
 
 
 class CategoryModerators(ModPageMixin, generic.TemplateView):
@@ -388,7 +449,7 @@ class TransferOwner(ModPageMixin, generic.FormView):
             return http.HttpResponseRedirect(self.success_url)
 
 
-class CategoryAudit(UserPassesTestMixin, UserMixin, generic.DetailView):
+class CategoryAudit(ManageCategory, generic.DetailView):
     model = models.Category
     slug_url_kwarg = 'category'
     template_name_suffix = '_audit'
@@ -399,6 +460,3 @@ class CategoryAudit(UserPassesTestMixin, UserMixin, generic.DetailView):
             **super().get_context_data(**kwargs),
             'audit_log': paginator.get_page(self.request.GET.get('page')),
         }
-
-    def test_func(self):
-        return self.get_object().can_edit(self.user)
