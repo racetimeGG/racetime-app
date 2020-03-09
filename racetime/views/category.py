@@ -236,6 +236,12 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
 
 
 class AdministrateCategory(UserPassesTestMixin, UserMixin, generic.View):
+    """
+    Abstract view. Perform an administrative action on a category, then return
+    to the edit page.
+
+    By default, only available to staff.
+    """
     action = NotImplemented
 
     @cached_property
@@ -243,16 +249,23 @@ class AdministrateCategory(UserPassesTestMixin, UserMixin, generic.View):
         slug = self.kwargs.get('category')
         return get_object_or_404(models.Category, slug=slug)
 
+    @property
+    def success_url(self):
+        return reverse('edit_category', args=(self.category.slug,))
+
     def post(self, request, *args, **kwargs):
         category = self.category
         self.action(category)
-        return http.HttpResponseRedirect(reverse('edit_category', args=(category.slug,)))
+        return http.HttpResponseRedirect(self.success_url)
 
     def test_func(self):
         return self.user.is_active and self.user.is_staff
 
 
 class DeactivateCategory(AdministrateCategory):
+    """
+    Deactivate the category, removing it from public view.
+    """
     def action(self, category):
         if not category.active:
             return
@@ -271,6 +284,9 @@ class DeactivateCategory(AdministrateCategory):
 
 
 class ReactivateCategory(AdministrateCategory):
+    """
+    Reactivate the category, returning it to public view.
+    """
     def action(self, category):
         if category.active:
             return
@@ -297,13 +313,7 @@ class ManageCategory(UserPassesTestMixin, UserMixin):
         return get_object_or_404(models.Category, slug=slug)
 
     def test_func(self):
-        """
-        Active categories can be edited. Inactive categories are only available
-        to staff.
-        """
-        if self.category.active:
-            return self.category.can_edit(self.user)
-        return self.user.is_active and self.user.is_staff
+        return self.category.can_edit(self.user)
 
 
 class ModPageMixin(ManageCategory):
@@ -323,6 +333,7 @@ class CategoryModerators(ModPageMixin, generic.TemplateView):
         return {
             **super().get_context_data(**kwargs),
             'add_form': forms.UserSelectForm(),
+            'can_transfer': self.category.can_transfer(self.user),
             'category': self.category,
             'moderators': self.moderators,
         }
@@ -447,6 +458,9 @@ class TransferOwner(ModPageMixin, generic.FormView):
                 % {'category': category.name, 'old_owner': old_owner, 'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
+
+    def test_func(self):
+        return self.category.can_transfer(self.user)
 
 
 class CategoryAudit(ManageCategory, generic.DetailView):

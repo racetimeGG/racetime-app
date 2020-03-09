@@ -44,18 +44,20 @@
         {% include 'racetime/forms/user_select.html' %}
         <button class="btn" type="submit">Add moderator</button>
     </form>
-    <h3 class="dangerous">Transfer ownership</h3>
-    <p class="help">
-        Start typing in a name to transfer ownership of this category to
-        another user. That user will become the category owner.
-    </p>
-    <p class="help">
-        <strong>This action cannot be undone!</strong> You will lose the ability to
-        manage this category, and all related permissions.
-    </p>
-    <form class="add-moderator-form layout-form dangerous" action="{% url 'category_transfer_owner' category=category.slug %}" method="post">
-        {% csrf_token %}
-        {% include 'racetime/forms/user_select.html' %}
-        <button class="btn" type="submit">Transfer owner</button>
-    </form>
+    {% if can_transfer %}
+        <h3 class="dangerous">Transfer ownership</h3>
+        <p class="help">
+            Start typing in a name to transfer ownership of this category to
+            another user. That user will become the category owner.
+        </p>
+        <p class="help">
+            <strong>This action cannot be undone!</strong> You will lose the ability to
+            manage this category, and all related permissions.
+        </p>
+        <form class="add-moderator-form layout-form dangerous" action="{% url 'category_transfer_owner' category=category.slug %}" method="post">
+            {% csrf_token %}
+            {% include 'racetime/forms/user_select.html' %}
+            <button class="btn" type="submit">Transfer owner</button>
+        </form>
+    {% endif %}
 {% endblock %}

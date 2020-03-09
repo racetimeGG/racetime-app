@@ -133,7 +133,17 @@ class Category(models.Model):
         }
 
     def can_edit(self, user):
-        return user.is_active and (user.is_staff or user == self.owner)
+        """
+        Active categories can be edited by the owner. Inactive categories are
+        only available to staff.
+        """
+        return user.is_active and (
+            user.is_staff
+            or (self.active and user == self.owner)
+        )
+
+    def can_transfer(self, user):
+        return self.can_edit(user)
 
     def can_moderate(self, user):
         """
