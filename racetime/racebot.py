@@ -268,6 +268,7 @@ class RaceBot:
                     ['stream_live'],
                 )
                 for race in races_to_reload:
+                    race.increment_version()
                     race.broadcast_data()
 
                 self.logger.info(
