@@ -450,3 +450,6 @@ class AuditLog(models.Model):
         if self.action in ['info_change', 'slug_words_change']:
             return None
         return value
+
+    def __str__(self):
+        return str(self.user) + ' ' + self.action_display
