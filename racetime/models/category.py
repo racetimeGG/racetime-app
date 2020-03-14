@@ -452,4 +452,4 @@ class AuditLog(models.Model):
         return value
 
     def __str__(self):
-        return str(self.user) + ' ' + self.action_display
+        return str(self.actor) + ' ' + self.action_display
