@@ -85,6 +85,7 @@ class CategoryForm(forms.ModelForm):
             'Select which goals may be used in races. There must be at least '
             'one active goal available.'
         ),
+        widget=forms.CheckboxSelectMultiple,
     )
     add_new_goals = forms.CharField(
         required=False,

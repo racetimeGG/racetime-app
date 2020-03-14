@@ -316,6 +316,13 @@ class Race(models.Model):
         """
         return ', '.join(str(user) for user in self.monitors.all())
 
+    @property
+    def num_unready(self):
+        return len(self.entrant_set.filter(
+            state=EntrantStates.joined.value,
+            ready=False,
+        ))
+
     @cached_property
     def ordered_entrants(self):
         """
@@ -1144,7 +1151,10 @@ class Entrant(models.Model):
                 self.ready = True
                 self.save()
                 self.race.increment_version()
-            self.race.add_message('%(user)s is ready!' % {'user': self.user})
+            self.race.add_message(
+                '%(user)s is ready! (%(remaining)d remaining)'
+                % {'user': self.user, 'remaining': self.race.num_unready}
+            )
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
@@ -1155,8 +1165,8 @@ class Entrant(models.Model):
                 self.save()
                 self.race.increment_version()
             self.race.add_message(
-                '%(user)s is not ready.'
-                % {'user': self.user}
+                '%(user)s is not ready. (%(remaining)d remaining)'
+                % {'user': self.user, 'remaining': self.race.num_unready}
             )
         else:
             raise SafeException('Possible sync error. Refresh to continue.')

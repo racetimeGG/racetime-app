@@ -150,10 +150,7 @@ class RaceBot:
         """
         If all entrants in the race are ready, begin the race countdown.
         """
-        if not race['object'].entrant_set.filter(
-            state=models.EntrantStates.joined.value,
-            ready=False,
-        ).exists():
+        if race['object'].num_unready == 0:
             race['object'].begin()
             race['object'].add_message(
                 'Everyone is ready. The race will begin in %(delta)d seconds!'
