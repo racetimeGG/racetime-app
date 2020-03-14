@@ -164,25 +164,26 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
             'slug_words',
             'streaming_required',
         } & set(form.changed_data)
-        for field in changed_fields:
-            audit.append(models.AuditLog(
-                actor=self.user,
-                category=category,
-                action=f'{field}_change',
-                old_value=getattr(category, field),
-                new_value=getattr(self.object, field),
-            ))
+        if changed_fields:
+            for field in changed_fields:
+                audit.append(models.AuditLog(
+                    actor=self.user,
+                    category=category,
+                    action=f'{field}_change',
+                    old_value=getattr(category, field),
+                    new_value=getattr(self.object, field),
+                ))
 
-        self.object.save()
-        models.AuditLog.objects.bulk_create(audit)
+            self.object.save()
+            models.AuditLog.objects.bulk_create(audit)
 
-        messages.info(
-            self.request,
-            'Category details updated (%(fields)s).'
-            % {'fields': ', '.join(
-                [form[field].label.lower() for field in changed_fields]
-            )},
-        )
+            messages.info(
+                self.request,
+                'Category details updated (%(fields)s).'
+                % {'fields': ', '.join(
+                    [form[field].label.lower() for field in changed_fields]
+                )},
+            )
 
         active_goals = form.cleaned_data['active_goals']
         for goal in self.object.goal_set.all():
