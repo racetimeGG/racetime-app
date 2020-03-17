@@ -210,6 +210,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Return model data as a dict for an API response.
         """
+        if race:
+            category = race.category
+        if category:
+            can_moderate = category.can_moderate(self)
+        else:
+            can_moderate = False
+
         return {
             'id': self.hashid,
             'full_name': str(self),
@@ -217,12 +224,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             'discriminator': self.discriminator if self.use_discriminator else None,
             'avatar': self.avatar.url if self.avatar else None,
             'pronouns': self.pronouns,
-            'flair': self.flair(category=category),
+            'flair': self.flair(can_moderate),
             'twitch_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,
+            'can_moderate': can_moderate,
         }
 
-    def flair(self, category=None, race=None):
+    def flair(self, can_moderate=False):
         """
         Return the user's flair as a space-separated string,
         e.g. "staff moderator".
@@ -232,9 +240,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             flairs.append('staff')
         if self.is_supporter:
             flairs.append('supporter')
-        if race:
-            category = race.category
-        if category and category.can_moderate(self):
+        if can_moderate:
             flairs.append('moderator')
 
         return ' '.join(flairs)
