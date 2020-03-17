@@ -1,4 +1,6 @@
+import random
 import re
+import string
 from datetime import timedelta
 
 from django.conf import settings
@@ -198,6 +200,47 @@ class ShowLog:
         )
 
 
+class Random:
+    commands = ['random']
+    shortcuts = {
+        'bingo': '######',
+        'sm64': '#####',
+        'file': '??',
+    }
+    MAX_LENGTH = 16
+
+    def action(self, race, user, data):
+        comment = data.get('comment', '').strip()
+        if comment in self.shortcuts:
+            pattern = self.shortcuts[comment]
+        else:
+            pattern = comment
+
+        if pattern and re.match('.*[#*?]', pattern):
+            if len(pattern) > self.MAX_LENGTH:
+                raise SafeException(
+                    'Pattern too long. It should be at most %d characters.'
+                    % self.MAX_LENGTH
+                )
+            else:
+                result = re.sub('#', lambda *args: random.choice(string.digits), pattern)
+                result = re.sub('\\*', lambda *args: random.choice(string.ascii_letters), result)
+                result = re.sub('\\?', lambda *args: random.choice(string.ascii_letters + string.digits), result)
+                models.Message.objects.create(
+                    user=user,
+                    race=race,
+                    message='.random %s' % comment,
+                )
+                race.add_message(
+                    'Random string result: ##bot##%(result)s##'
+                    % {'result': result}
+                )
+        else:
+            raise SafeException(
+                'Usage: .random #*? (use # for a digit, * for a letter, ? for either)'
+            )
+
+
 commands = {
     command: action
     for action in [
@@ -218,6 +261,7 @@ commands = {
         AddComment,
         ShowGoal,
         ShowLog,
+        Random,
     ] for command in action.commands
 }
 
@@ -242,12 +286,14 @@ class Message:
 
                 try:
                     return race_action.action(race, user, {'comment': msg})
-                except SafeException:
-                    raise SafeException(
-                        f'You cannot .{command} at this time (is your stream live yet?).'
-                        if command == 'ready' and race.streaming_required else
-                        f'You cannot .{command} at this time (try reloading if you get stuck).'
-                    )
+                except SafeException as ex:
+                    if str(ex) == 'Possible sync error. Refresh to continue.':
+                        raise SafeException(
+                            f'You cannot .{command} at this time (is your stream live yet?).'
+                            if command == 'ready' and race.streaming_required else
+                            f'You cannot .{command} at this time (try reloading if you get stuck).'
+                        )
+                    raise
 
         self.assert_can_chat(race, user)
 
