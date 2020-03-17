@@ -33,6 +33,10 @@
     <form class="race-form layout-form" method="post">
         {% csrf_token %}
         <ul>{{ form.as_ul }}</ul>
-        <button class="btn" type="submit">Submit</button>
+        {% if race %}
+            <button class="btn" type="submit">Update race</button>
+        {% else %}
+            <button class="btn" type="submit">Start race</button>
+        {% endif %}
     </form>
 {% endblock %}
