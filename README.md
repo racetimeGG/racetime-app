@@ -1,6 +1,6 @@
 # racetime.gg
 
-[![Discord](https://discordapp.com/api/guilds/660452709044060171/embed.png?style=shield)](https://discord.gg/65cvHG3)
+[![Discord](https://discordapp.com/api/guilds/660452709044060171/embed.png?style=shield)](https://discord.racetime.gg)
 
 This is the main code repository for [racetime.gg](https://racetime.gg), a
 website for organising races online, with a focus on video games and speedruns.
@@ -103,7 +103,7 @@ will fail to execute.
 The [Wiki](https://github.com/deains/racetime-app/wiki) pages have some
 information that may prove useful to you. We also have a Discord server where
 you can discuss the site and ongoing developments, make suggestions and get
-involved: [join the Discord server here](https://discord.gg/65cvHG3).
+involved: [join the Discord server here](https://discord.racetime.gg).
 
 ## Contributing
 
