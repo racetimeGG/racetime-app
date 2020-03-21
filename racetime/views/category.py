@@ -319,10 +319,6 @@ class ManageCategory(UserPassesTestMixin, UserMixin):
 
 class ModPageMixin(ManageCategory):
     @property
-    def moderators(self):
-        return self.category.moderators.filter(active=True).order_by('name')
-
-    @property
     def success_url(self):
         return reverse('category_mods', args=(self.category.slug,))
 
@@ -336,7 +332,7 @@ class CategoryModerators(ModPageMixin, generic.TemplateView):
             'add_form': forms.UserSelectForm(),
             'can_transfer': self.category.can_transfer(self.user),
             'category': self.category,
-            'moderators': self.moderators,
+            'moderators': self.category.all_moderators,
         }
 
 
@@ -350,14 +346,14 @@ class AddModerator(ModPageMixin, generic.FormView):
     def form_valid(self, form):
         user = form.cleaned_data.get('user')
 
-        if user == self.category.owner or user in self.moderators:
+        if user == self.category.owner or user in self.category.all_moderators:
             messages.error(
                 self.request,
                 '%(user)s is already a moderator.'
                 % {'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
-        if len(self.moderators) >= self.category.max_moderators:
+        if len(self.category.all_moderators) >= self.category.max_moderators:
             messages.error(
                 self.request,
                 'You cannot add any more moderators to this category.'
@@ -391,7 +387,7 @@ class RemoveModerator(ModPageMixin, generic.FormView):
     def form_valid(self, form):
         user = form.cleaned_data.get('user')
 
-        if user not in self.moderators:
+        if user not in self.category.all_moderators:
             messages.error(
                 self.request,
                 '%(user)s is not a moderator for this category.'

@@ -512,6 +512,9 @@ header > .current-race > a .timer {
 .meta-user-list > a::after,
 .meta-user-list > span::after {
     content: ", ";
+    height: auto;
+    margin-left: 0;
+    width: auto;
 }
 .meta-user-list > a:last-child::after,
 .meta-user-list > span:last-child::after {

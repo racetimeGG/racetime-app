@@ -18,7 +18,7 @@
         </dd>
         <dt>Moderators</dt>
         <dd class="meta-user-list">
-            {% for moderator in category.moderators.all %}
+            {% for moderator in category.all_moderators %}
                 {% include 'racetime/pops/user.html' with user=moderator extra_class='inline' hide_avatar=True hide_flair=True hide_pronouns=True %}
             {% empty %}
                 No-one

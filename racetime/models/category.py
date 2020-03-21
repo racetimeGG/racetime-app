@@ -89,7 +89,11 @@ class Category(models.Model):
 
     @cached_property
     def all_moderators(self):
-        return [m.id for m in self.moderators.all()]
+        return self.moderators.filter(active=True).order_by('name')
+
+    @cached_property
+    def all_moderator_ids(self):
+        return [m.id for m in self.all_moderators]
 
     @property
     def json_data(self):
@@ -145,7 +149,7 @@ class Category(models.Model):
         return user.is_active and (
             user.is_staff
             or user.id == self.owner.id
-            or user.id in self.all_moderators
+            or user.id in self.all_moderator_ids
         )
 
     def can_start_race(self, user):
@@ -158,7 +162,10 @@ class Category(models.Model):
             'info': self.info,
             'streaming_required': self.streaming_required,
             'owner': self.owner.api_dict_summary(category=self),
-            'moderators': [user.api_dict_summary(category=self) for user in self.moderators.all()],
+            'moderators': [
+                user.api_dict_summary(category=self)
+                for user in self.all_moderators
+            ],
             'current_races': [
                 {
                     'name': str(race),
