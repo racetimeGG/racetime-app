@@ -29,6 +29,10 @@ $(function() {
         $(this).children('.hide, .show').toggle();
     });
 
+    if ($('.race-form').hasClass('race-edit-form')) {
+        $('.race-form .toggle-additional').trigger('click');
+    }
+
     $(document).on('change', '.race-form [name="goal"]', function() {
         if ($(this).val() === '') {
             $submit.prop('disabled', true);
