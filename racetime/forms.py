@@ -300,7 +300,7 @@ class RaceCreationForm(RaceForm):
             'allow_comments',
             'allow_midrace_chat',
             'allow_non_entrant_chat',
-            'chat_message_delay',
+            #'chat_message_delay',
         )
         model = models.Race
 
@@ -318,7 +318,7 @@ class RaceEditForm(RaceForm):
             'allow_comments',
             'allow_midrace_chat',
             'allow_non_entrant_chat',
-            'chat_message_delay',
+            #'chat_message_delay',
         )
         model = models.Race
 
