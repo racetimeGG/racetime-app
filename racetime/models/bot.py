@@ -6,6 +6,14 @@ from ..utils import get_hashids
 
 
 class Bot(models.Model):
+    """
+    A category bot.
+
+    Bots are associated to an OAuth2 application, which provides credentials
+    allowing an external program to authenticate against the site. When authed,
+    the program may perform certain actions on races within the bot's category,
+    such as posting chat messages and changing race information.
+    """
     application = models.ForeignKey(
         oauth2_settings.APPLICATION_MODEL,
         on_delete=models.PROTECT,

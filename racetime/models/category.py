@@ -18,6 +18,19 @@ from ..utils import SafeException, generate_race_slug
 
 
 class Category(models.Model):
+    """
+    A category of races.
+
+    Categories form the backbone of the site's structure. Each category has a
+    number of goals, each goal has its own leaderboard plus any number of races
+    being run.
+
+    A category has a single owner who acts as the local admin of that category.
+    The owner may appoint moderators who have additional powers for races.
+
+    All category, goal, moderator and other changes are logged in the AuditLog
+    model.
+    """
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -89,16 +102,25 @@ class Category(models.Model):
 
     @cached_property
     def all_moderators(self):
+        """
+        Return an ordered QuerySet of active users who have moderator powers in
+        this category.
+        """
         return self.moderators.filter(active=True).order_by('name')
 
     @cached_property
     def all_moderator_ids(self):
+        """
+        Return a list of user IDs of active users who have moderator powers in
+        this category.
+        """
         return [m.id for m in self.all_moderators]
 
     @property
     def json_data(self):
         """
-        Return current race data as a JSON string.
+        Return category data as a JSON string. Data will be cached according to
+        settings.
         """
         return cache.get_or_set(
             self.slug + '/data',
@@ -109,6 +131,8 @@ class Category(models.Model):
     @property
     def max_bots(self):
         """
+        Sets the limit for the number of active bots this category may use.
+
         This is a fixed quantity for now. May vary in the future.
         """
         return 3
@@ -116,11 +140,20 @@ class Category(models.Model):
     @property
     def max_moderators(self):
         """
+        Sets the limits for the number of active moderators this category may
+        use.
+
         This is a fixed quantity for now. May vary in the future.
         """
         return 10
 
     def api_dict_summary(self):
+        """
+        Return a summary dict of this category's data.
+
+        This is used when another models' data dict needs to include category
+        data, e.g. race data showing which category the race is in.
+        """
         return {
             'name': self.name,
             'short_name': self.short_name,
@@ -131,6 +164,11 @@ class Category(models.Model):
 
     def can_edit(self, user):
         """
+        Determine if the given user has permissions to edit this category.
+
+        Edit permission allows the user to change category details, add/remove
+        moderators, manage bots and see the audit log.
+
         Active categories can be edited by the owner. Inactive categories are
         only available to staff.
         """
@@ -140,6 +178,12 @@ class Category(models.Model):
         )
 
     def can_transfer(self, user):
+        """
+        Returns True if the given user may transfer ownership of this category
+        to another user.
+
+        At present, this is identical to can_edit().
+        """
         return self.can_edit(user)
 
     def can_moderate(self, user):
@@ -153,9 +197,18 @@ class Category(models.Model):
         )
 
     def can_start_race(self, user):
+        """
+        Determine if the given user may create a new race room in this
+        category.
+
+        Users must be active and not banned to start races.
+        """
         return self.active and user.is_active and not user.is_banned_from_category(self)
 
     def dump_json_data(self):
+        """
+        Return category data as a JSON string.
+        """
         value = json.dumps({
             **self.api_dict_summary(),
             'image': self.image.url if self.image else None,
@@ -196,14 +249,20 @@ class Category(models.Model):
         return value
 
     def get_absolute_url(self):
+        """
+        Returns the URL of this category's landing page.
+        """
         return reverse('category', args=(self.slug,))
 
     def get_data_url(self):
+        """
+        Returns the URL of this category's data endpoint.
+        """
         return reverse('category_data', args=(self.slug,))
 
     def generate_race_slug(self):
         """
-        Generate an unused, unique race slug for races in this category.
+        Generate an unused, unique race slug for a new race in this category.
         """
         if self.slug_words:
             generator = partial(generate_race_slug, self.slug_words.split('\n'))
@@ -229,6 +288,15 @@ class Category(models.Model):
 
 
 class CategoryRequest(models.Model):
+    """
+    Represents a user request to add a new category.
+
+    There's currently no UI for handling category requests. You need to use the
+    console, e.g.
+        r = CategoryRequest.objects.last()
+        print(model_to_dict(r))
+        r.accept()
+    """
     name = models.CharField(
         max_length=255,
         unique=True,
@@ -268,6 +336,12 @@ class CategoryRequest(models.Model):
 
     @atomic
     def accept(self):
+        """
+        Accept the category request, creating a new category based off of it.
+
+        Will also email the user who put in the request informing them that
+        their category is now live.
+        """
         category = Category.objects.create(
             name=self.name,
             short_name=self.short_name,
@@ -306,11 +380,25 @@ class CategoryRequest(models.Model):
         )
 
     def reject(self):
+        """
+        Reject the category request.
+        """
         self.reviewed_at = timezone.now()
         self.save()
 
 
 class Goal(models.Model):
+    """
+    A goal within a category.
+
+    Each category goal like any% or 70 Stars will have its own leaderboard,
+    allowing category owners to have some control over the ratings system.
+
+    A goal that is inactive cannot be used to start new races with. However,
+    any previous race under that goal will remain visible on the site.
+
+    Each category must always have at least one active goal.
+    """
     category = models.ForeignKey(
         'Category',
         on_delete=models.CASCADE,

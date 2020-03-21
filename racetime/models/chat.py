@@ -6,6 +6,17 @@ from ..utils import get_hashids
 
 
 class Message(models.Model):
+    """
+    A single chat message in a race room.
+
+    A message may come from a user, a bot, or from the "system" - the latter
+    meaning it's a status message like "Mario joins the race". As such, each
+    message object will either have a user, a bot, or both fields will be None
+    in which case it's a system message.
+
+    Messages are automatically broadcast to the race's WebSocket consumers when
+    saved (see signals.py).
+    """
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
@@ -48,6 +59,9 @@ class Message(models.Model):
 
     @property
     def as_dict(self):
+        """
+        Return all message data as a dict.
+        """
         return {
             'id': self.hashid,
             'user': (
@@ -66,20 +80,32 @@ class Message(models.Model):
 
     @property
     def delay(self):
+        """
+        Return the message delay in seconds, or 0 if the message is immediate.
+        """
         if self.is_bot or self.is_system or self.race.can_monitor(self.user):
             return 0
         return self.race.chat_message_delay.seconds
 
     @property
     def hashid(self):
+        """
+        Return encoded hashid representing this message.
+        """
         return get_hashids(self.__class__).encode(self.id)
 
     @property
     def is_bot(self):
+        """
+        Determine if this message was sent by a category bot.
+        """
         return self.bot is not None
 
     @property
     def is_system(self):
+        """
+        Determine if this is a system message.
+        """
         return (
             (self.user is None and self.bot is None)
             or (self.user and self.user.is_system)

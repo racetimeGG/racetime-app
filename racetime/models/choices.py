@@ -1,4 +1,8 @@
 class Choice:
+    """
+    Base choice set. This sets up some syntactic sugar to make it a bit easier
+    to handle raw values, labels and helpful descriptions as a grouping.
+    """
     def __init__(self, value, verbose_value, help_text=None):
         self.value = value
         self.verbose_value = verbose_value
@@ -14,6 +18,10 @@ class Choice:
 
 
 class ChoiceSet(type):
+    """
+    Metaclass for the choice set, used to make it easier to get all choices at
+    once.
+    """
     @property
     def choices(cls):
         return tuple((choice.value, choice.verbose_value) for choice in cls.all)
@@ -26,6 +34,9 @@ class ChoiceSet(type):
 
 
 class EntrantStates(metaclass=ChoiceSet):
+    """
+    Possible states for a race entrant.
+    """
     all = (
         Choice('requested', 'Requesting to join', 'User wishes to enter the race'),
         Choice('invited', 'Invited to join', 'User has been invited to join this race'),
@@ -35,6 +46,9 @@ class EntrantStates(metaclass=ChoiceSet):
 
 
 class RaceStates(metaclass=ChoiceSet):
+    """
+    Possible states for a race.
+    """
     all = (
         Choice('open', 'Open', 'Anyone may join this race'),
         Choice('invitational', 'Invitational', 'Only invitees may join this race'),

@@ -25,6 +25,9 @@ from ..utils import SafeException, timer_html, timer_str
 
 
 class Race(models.Model):
+    """
+    A race. These are kinda important.
+    """
     category = models.ForeignKey(
         'Category',
         on_delete=models.CASCADE,
@@ -191,6 +194,9 @@ class Race(models.Model):
 
     @property
     def as_dict(self):
+        """
+        Return race data as a dict.
+        """
         return {
             'version': self.version,
             'name': str(self),
@@ -251,12 +257,20 @@ class Race(models.Model):
 
     @property
     def entrants_count(self):
+        """
+        Count the number of entrants who have joined this race (not including
+        invitees).
+        """
         return len(self.entrant_set.filter(
             state=EntrantStates.joined.value,
         ))
 
     @property
     def entrants_count_inactive(self):
+        """
+        Count the number of entrants who have joined this race and have either
+        forfeited or been disqualified.
+        """
         return len(self.entrant_set.filter(
             state=EntrantStates.joined.value,
         ).exclude(
@@ -273,18 +287,30 @@ class Race(models.Model):
 
     @property
     def is_preparing(self):
+        """
+        Determine if the race is in a preparation state (open or invitational).
+        """
         return self.state in [RaceStates.open.value, RaceStates.invitational.value]
 
     @property
     def is_pending(self):
+        """
+        Determine if the race is in pending (countdown) state.
+        """
         return self.state == RaceStates.pending.value
 
     @property
     def is_in_progress(self):
+        """
+        Determine if the race is in progress.
+        """
         return self.state == RaceStates.in_progress.value
 
     @property
     def is_done(self):
+        """
+        Determine if the race has been completed (finished or cancelled).
+        """
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
 
     @property
@@ -318,6 +344,9 @@ class Race(models.Model):
 
     @property
     def num_unready(self):
+        """
+        Count the number of entrants who have joined but not readied up.
+        """
         return len(self.entrant_set.filter(
             state=EntrantStates.joined.value,
             ready=False,
@@ -326,7 +355,7 @@ class Race(models.Model):
     @cached_property
     def ordered_entrants(self):
         """
-        All race entrants in appropriate order.
+        Returns a QuerySet of all race entrants sorted in appropriate order.
 
         Entrants are sorted as follows:
             1. Finished (by place/finish time)
@@ -337,6 +366,9 @@ class Race(models.Model):
             6. Did not finish
             7. Disqualified
             8. Declined invite
+
+        Except for finishers, entrants in each of the above groupings are
+        sorted by score (if applicable) and then by name.
         """
         return self.entrant_set.annotate(
             state_sort=models.Case(
@@ -400,6 +432,10 @@ class Race(models.Model):
 
     @property
     def streaming_entrants(self):
+        """
+        Return the sorted set of entrants (see ordered_entrants) who are
+        currently live on stream.
+        """
         return self.ordered_entrants.filter(
             dnf=False,
             dq=False,
@@ -408,6 +444,10 @@ class Race(models.Model):
 
     @property
     def state_info(self):
+        """
+        Return race state information as a tuple of value, description and help
+        text.
+        """
         return getattr(RaceStates, self.state)
 
     @property
@@ -415,8 +455,6 @@ class Race(models.Model):
         """
         Return a timedelta for how long the race has been going on for, if
         it has already started.
-
-        The returned timedelta is accurate to the nearest second.
         """
         if self.started_at:
             if self.ended_at:
@@ -426,10 +464,16 @@ class Race(models.Model):
 
     @property
     def timer_str(self):
+        """
+        Return the race's current timer as a string.
+        """
         return timer_str(self.timer)
 
     @property
     def timer_html(self):
+        """
+        Return the race's current timer as a HTML string.
+        """
         return timer_html(self.timer)
 
     def refresh(self):
@@ -459,6 +503,10 @@ class Race(models.Model):
         self.broadcast_data()
 
     def broadcast_data(self):
+        """
+        Broadcast the race's current data and stateless renders to connected
+        WebSocket consumers.
+        """
         self.refresh()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(self.slug, {
@@ -480,6 +528,9 @@ class Race(models.Model):
         self.save()
 
     def chat_history(self):
+        """
+        Return the last 100 chat messages sent to this race room.
+        """
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
         messages = messages.select_related('user')
         return OrderedDict(
@@ -488,9 +539,16 @@ class Race(models.Model):
         )
 
     def dump_json_data(self):
+        """
+        Return race data as a JSON string.
+        """
         return json.dumps(self.as_dict, cls=DjangoJSONEncoder)
 
     def dump_json_renders(self):
+        """
+        Return race data as a JSON string. Data will be cached according to
+        settings
+        """
         return json.dumps({
             'renders': self.get_renders_stateless(),
             'version': self.version,
@@ -550,6 +608,13 @@ class Race(models.Model):
         return renders
 
     def available_actions(self, user, can_monitor):
+        """
+        Return a list of actions the user can currently take.
+
+        Each action is given as a tuple of value, label, descriptor. The
+        descriptor is used to indicate if the action is considered "dangerous",
+        requiring the user to confirm they really want to do that.
+        """
         if not user.is_authenticated:
             return []
 
@@ -608,9 +673,15 @@ class Race(models.Model):
         )
 
     def can_add_monitor(self, user):
+        """
+        Determine if the user can be added as a monitor to this race.
+        """
         return not self.is_done and not self.can_monitor(user)
 
     def add_monitor(self, user, added_by):
+        """
+        Promote a user to race monitor.
+        """
         if self.can_add_monitor(user):
             with atomic():
                 self.increment_version()
@@ -622,9 +693,15 @@ class Race(models.Model):
             )
 
     def can_remove_monitor(self, user):
+        """
+        Determine if the user can be removed as a monitor to this race.
+        """
         return not self.is_done and user in self.monitors.all()
 
     def remove_monitor(self, user, removed_by):
+        """
+        Demote a user from race monitor.
+        """
         if self.can_remove_monitor(user):
             with atomic():
                 self.increment_version()
@@ -645,6 +722,11 @@ class Race(models.Model):
             return None
 
     def make_open(self, by):
+        """
+        Change this race from invitational state to open.
+
+        Raises SafeException if race is in any other state.
+        """
         if self.state != RaceStates.invitational.value:
             raise SafeException('Race is not an invitational.')
 
@@ -657,6 +739,11 @@ class Race(models.Model):
         )
 
     def make_invitational(self, by):
+        """
+        Change this race from open state to invitational.
+
+        Raises SafeException if race is in any other state.
+        """
         if self.state != RaceStates.open.value:
             raise SafeException('Race is not open.')
 
@@ -670,6 +757,12 @@ class Race(models.Model):
 
     @property
     def can_begin(self):
+        """
+        Determine if the race should enter the pending/countdown phase.
+
+        A race can begin once all entrants who have joined the race are ready,
+        and there are at least 2 active race entrants.
+        """
         return self.is_preparing and len(self.entrant_set.filter(
             state=EntrantStates.joined.value,
             ready=True
@@ -748,6 +841,10 @@ class Race(models.Model):
         )
 
     def record(self, recorded_by):
+        """
+        Record the race, finalising the scores and updating the category
+        leaderboards.
+        """
         if self.recordable and not self.recorded:
             self.recorded = True
             self.recorded_by = recorded_by
@@ -764,6 +861,10 @@ class Race(models.Model):
             raise SafeException('Race is not recordable or already recorded.')
 
     def unrecord(self, unrecorded_by):
+        """
+        Mark a finished race as not recordable, meaning its result will not
+        count towards the leaderboards.
+        """
         if self.recordable and not self.recorded:
             self.recordable = False
             self.version = F('version') + 1
@@ -777,6 +878,11 @@ class Race(models.Model):
 
     @property
     def can_rematch(self):
+        """
+        Determine if a rematch race room can be created.
+
+        A rematch is available up to 1 hour after a race finishes.
+        """
         return (
             not self.rematch
             and self.is_done
@@ -784,6 +890,9 @@ class Race(models.Model):
         )
 
     def make_rematch(self, user):
+        """
+        Create a new race room as a rematch of this race.
+        """
         if not self.can_rematch:
             raise SafeException('Unable to comply, racing in progress.')
         if not self.can_monitor(user):
@@ -874,6 +983,9 @@ class Race(models.Model):
             self.entrant_set.update(score=None)
 
     def join(self, user):
+        """
+        Enter the given user into this race.
+        """
         if self.can_join(user) and (self.state == RaceStates.open.value or (
             self.state == RaceStates.invitational.value
             and self.can_monitor(user)
@@ -889,6 +1001,12 @@ class Race(models.Model):
             raise SafeException('You are not eligible to join this race.')
 
     def request_to_join(self, user):
+        """
+        Add a request for the given user to join this race.
+
+        Only valid for invitational rooms. Monitors can choose to accept or
+        reject join requests.
+        """
         if self.can_join(user) and self.state == RaceStates.invitational.value:
             with atomic():
                 self.entrant_set.create(
@@ -902,6 +1020,9 @@ class Race(models.Model):
             raise SafeException('You are not eligible to join this race.')
 
     def invite(self, user, invited_by):
+        """
+        Invite a user to join the race.
+        """
         if self.can_join(user) and self.is_preparing:
             with atomic():
                 self.entrant_set.create(
@@ -919,6 +1040,12 @@ class Race(models.Model):
 
     @atomic
     def recalculate_places(self):
+        """
+        Update the place rankings on all entrants who have finished racing.
+
+        This is used when rankings are disrupted, e.g. by a user undoing their
+        finish time or being DQed.
+        """
         place = 1
 
         for entrant in self.entrant_set.filter(
@@ -933,21 +1060,39 @@ class Race(models.Model):
         self.increment_version()
 
     def get_absolute_url(self):
+        """
+        Return the URL of this race room.
+        """
         return reverse('race', args=(self.category.slug, self.slug))
 
     def get_data_url(self):
+        """
+        Return the main data endpoint for this race.
+        """
         return reverse('race_data', args=(self.category.slug, self.slug))
 
     def get_renders_url(self):
+        """
+        Return the renders data endpoint for this race.
+        """
         return reverse('race_renders', args=(self.category.slug, self.slug))
 
     def get_ws_url(self):
+        """
+        Return the standard WebSocket URL for this race.
+        """
         return reverse('race_websocket', args=(self.slug,), urlconf='racetime.routing')
 
     def get_ws_oauth_url(self):
+        """
+        Return the OAuth2 WebSocket URL for this race.
+        """
         return reverse('oauth2_race_websocket', args=(self.slug,), urlconf='racetime.routing')
 
     def get_ws_bot_url(self):
+        """
+        Return the bot WebSocket URL for this race.
+        """
         return reverse('oauth2_bot_websocket', args=(self.slug,), urlconf='racetime.routing')
 
     def __str__(self):
@@ -1039,30 +1184,50 @@ class Entrant(models.Model):
 
     @property
     def can_add_monitor(self):
+        """
+        Determine if this entrant can be promoted to race monitor.
+        """
         return self.race.can_add_monitor(self.user)
 
     @property
     def can_remove_monitor(self):
+        """
+        Determine if this entrant can be demoted from race monitor.
+        """
         return self.race.can_remove_monitor(self.user)
 
     @property
     def display_score(self):
+        """
+        Return user's current leaderboard score as a formatted number, or None
+        if there is no score.
+        """
         if self.score:
             return round(self.score * 100)
         return None
 
     @property
     def display_score_change(self):
+        """
+        Return a formatted number indicating how much the user's score changed
+        from its original value as a result of this race.
+        """
         if self.score_change:
             return round(self.score_change * 100)
         return None
 
     @property
     def finish_time_html(self):
+        """
+        Return the entrant's finish time as a HTML string.
+        """
         return timer_html(self.finish_time, False) if self.finish_time else None
 
     @property
     def finish_time_str(self):
+        """
+        Return the entrant's finish time as a string.
+        """
         return timer_str(self.finish_time, False) if self.finish_time else None
 
     @property
@@ -1092,6 +1257,9 @@ class Entrant(models.Model):
         return 'not_ready', 'Not ready', 'Not ready to begin yet.'
 
     def cancel_request(self):
+        """
+        Withdraw this entry if it is in join request state.
+        """
         if self.state == EntrantStates.requested.value:
             with atomic():
                 self.delete()
@@ -1104,6 +1272,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def accept_invite(self):
+        """
+        Accept this entry if it is in invited state.
+        """
         if self.state == EntrantStates.invited.value:
             with atomic():
                 self.state = EntrantStates.joined.value
@@ -1117,6 +1288,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def decline_invite(self):
+        """
+        Withdraw this entry if it is in invited state.
+        """
         if self.state == EntrantStates.invited.value:
             with atomic():
                 self.delete()
@@ -1129,6 +1303,10 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def leave(self):
+        """
+        Withdraw this entry if it is in joined state (and the race has not yet
+        begun).
+        """
         if self.state == EntrantStates.joined.value and self.race.is_preparing:
             with atomic():
                 self.delete()
@@ -1141,6 +1319,12 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def is_ready(self):
+        """
+        Update entrant to be ready.
+
+        Once readied up, entrants have comitted to race. The race will start
+        when all its entrants are ready.
+        """
         if (
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
@@ -1159,6 +1343,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def not_ready(self):
+        """
+        Update entrant to be not ready.
+        """
         if self.state == EntrantStates.joined.value and self.race.is_preparing and self.ready:
             with atomic():
                 self.ready = False
@@ -1172,6 +1359,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def done(self):
+        """
+        Entrant has completed the race. GG.
+        """
         if self.state == EntrantStates.joined.value \
                 and self.race.is_in_progress \
                 and self.ready \
@@ -1196,6 +1386,10 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def undone(self):
+        """
+        Undo the entrant's previous finish time and placing, putting them back
+        in the race.
+        """
         if self.state == EntrantStates.joined.value \
                 and self.race.is_in_progress \
                 and self.ready \
@@ -1216,6 +1410,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def forfeit(self):
+        """
+        Forfeit the race entry, indicating the user will not finish the race.
+        """
         if self.state == EntrantStates.joined.value \
                 and self.race.is_in_progress \
                 and self.ready \
@@ -1235,6 +1432,9 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def unforfeit(self):
+        """
+        Undo the previous race forfeit, putting the entrant back in the race.
+        """
         if self.state == EntrantStates.joined.value \
                 and self.race.is_in_progress \
                 and self.ready \
@@ -1254,6 +1454,9 @@ class Entrant(models.Model):
 
     @property
     def can_add_comment(self):
+        """
+        Determine if the user can submit a comment.
+        """
         if self.race.state == RaceStates.in_progress.value:
             return (
                 self.state == EntrantStates.joined.value
@@ -1277,6 +1480,9 @@ class Entrant(models.Model):
         return False
 
     def add_comment(self, comment):
+        """
+        Submit a comment to this entry.
+        """
         if self.can_add_comment:
             self.comment = comment
             with atomic():
@@ -1291,9 +1497,16 @@ class Entrant(models.Model):
 
     @property
     def can_accept_request(self):
+        """
+        Determine if this entry is a join request that can be accepted by a
+        monitor.
+        """
         return self.state == EntrantStates.requested.value
 
     def accept_request(self, accepted_by):
+        """
+        Accept a join request.
+        """
         if self.state == EntrantStates.requested.value:
             self.state = EntrantStates.joined.value
             with atomic():
@@ -1308,6 +1521,9 @@ class Entrant(models.Model):
 
     @property
     def can_force_unready(self):
+        """
+        Determine if the entrant can be unreadied.
+        """
         return (
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
@@ -1315,6 +1531,9 @@ class Entrant(models.Model):
         )
 
     def force_unready(self, forced_by):
+        """
+        Mark the entrant as not ready.
+        """
         if self.can_force_unready:
             self.ready = False
             with atomic():
@@ -1329,9 +1548,16 @@ class Entrant(models.Model):
 
     @property
     def can_remove(self):
+        """
+        Determine if the entrant can be removed from this race by a monitor.
+        :return:
+        """
         return self.state != EntrantStates.declined.value and self.race.is_preparing
 
     def remove(self, removed_by):
+        """
+        Remove the entrant from the race.
+        """
         if self.can_remove:
             with atomic():
                 self.delete()
@@ -1345,6 +1571,9 @@ class Entrant(models.Model):
 
     @property
     def can_disqualify(self):
+        """
+        Determine if the entrant can be disqualified.
+        """
         return (
             self.state == EntrantStates.joined.value
             and not self.race.is_preparing
@@ -1354,6 +1583,9 @@ class Entrant(models.Model):
         )
 
     def disqualify(self, disqualified_by):
+        """
+        Disqualify the entrant from the race, forcing them to forfeit.
+        """
         if self.can_disqualify:
             self.dq = True
             with atomic():
@@ -1372,6 +1604,9 @@ class Entrant(models.Model):
 
     @property
     def can_undisqualify(self):
+        """
+        Determine if the entrant can be un-disqualified.
+        """
         return (
             self.state == EntrantStates.joined.value
             and not self.race.is_preparing
@@ -1380,6 +1615,10 @@ class Entrant(models.Model):
         )
 
     def undisqualify(self, undisqualified_by):
+        """
+        Undo a previous disqualification, either putting the entrant back into
+        the race or reinstating their original finish time.
+        """
         if self.can_undisqualify:
             self.dq = False
             with atomic():
@@ -1394,6 +1633,10 @@ class Entrant(models.Model):
 
     @property
     def can_override_stream(self):
+        """
+        Determine if the streaming requirement can be overridden for this
+        entrant.
+        """
         return (
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
@@ -1402,6 +1645,9 @@ class Entrant(models.Model):
         )
 
     def override_stream(self, overridden_by):
+        """
+        Override the streaming requirement for this race entrant.
+        """
         if self.can_override_stream:
             self.stream_override = True
             with atomic():

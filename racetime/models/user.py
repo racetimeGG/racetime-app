@@ -14,10 +14,28 @@ from ..utils import get_hashids, timer_html
 
 
 class UserManager(BaseUserManager):
+    """
+    Default manager for the User model.
+
+    Django requires some additional manager methods - specifically create_user
+    and create_superuser to allow the User model to be used for logins.
+    """
     def create_user(self, email, password=None, **extra_fields):
+        """
+        Create a new user.
+
+        Supply the user's password as plain text, it will be hashed/encrypted
+        by the manager.
+        """
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create a new superuser.
+
+        Supply the user's password as plain text, it will be hashed/encrypted
+        by the manager.
+        """
         extra_fields.setdefault('discriminator', '0000')
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -30,11 +48,17 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
     def filter_active(self):
+        """
+        Filter users to active accounts, excluding the system user.
+        """
         return self.filter(active=True).exclude(
             email=User.SYSTEM_USER,
         )
 
     def get_by_hashid(self, hashid):
+        """
+        Find a user by the given encoded hashid.
+        """
         try:
             user_id, = get_hashids(User).decode(hashid)
         except ValueError:
@@ -42,6 +66,9 @@ class UserManager(BaseUserManager):
         return self.get(id=user_id)
 
     def get_system_user(self):
+        """
+        Find the (now defunct) system user account.
+        """
         return self.get(email=User.SYSTEM_USER)
 
     def _create_user(self, email, password, **extra_fields):
@@ -53,6 +80,13 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    """
+    A racetime.gg user account.
+
+    The user's discriminator (scrim) is automatically set to a random
+    4-character numeric string if left empty. The special value '0000'
+    indicates the scrim should not be used for that user.
+    """
     email = models.EmailField(
         max_length=255,
         unique=True,
@@ -167,21 +201,29 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def hashid(self):
+        """
+        Return encoded hashid representing this user.
+        """
         return get_hashids(self.__class__).encode(self.id)
 
     @property
     def is_active(self):
+        """
+        Determine if the user can interact with the site.
+        """
         return self.active and not self.is_banned
 
     @cached_property
     def is_banned(self):
+        """
+        Determine if the user has an active site-wide ban.
+        """
         return self.ban_set.filter(category__isnull=True).exists()
 
     @property
     def is_system(self):
         """
-        Returns true if this user object is the system user. The system user is
-        used for special chat messages in races.
+        Returns true if this user object is the (now defunct) system user.
         """
         return self.email == self.SYSTEM_USER
 
@@ -198,12 +240,19 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def twitch_channel(self):
+        """
+        Return the full URI of the user's Twitch channel, or none if they have
+        no connected account.
+        """
         if self.twitch_name:
             return f'https://www.twitch.tv/{self.twitch_name.lower()}'
         return None
 
     @property
     def use_discriminator(self):
+        """
+        Determine if the user's discriminator should be displayed.
+        """
         return self.discriminator != '0000'
 
     def api_dict_summary(self, category=None, race=None):
@@ -246,17 +295,36 @@ class User(AbstractBaseUser, PermissionsMixin):
         return ' '.join(flairs)
 
     def is_banned_from_category(self, category):
+        """
+        Determine if this user is banned from the given category.
+        """
         return self.ban_set.filter(
             Q(category__isnull=True) | Q(category=category)
         ).exists()
 
     def get_full_name(self):
+        """
+        Return user's name, e.g. "Luigi#1234".
+
+        This method exists for Django's benefit. It's easier to just use
+        str(user).
+        """
         return str(self)
 
     def get_short_name(self):
+        """
+        Return user's name, e.g. "Luigi#1234".
+
+        This method exists for Django's benefit. It's easier to just use
+        str(user).
+        """
         return str(self)
 
     def twitch_access_token(self, request):
+        """
+        Obtain an Oauth2 token from Twitch's API using this user's
+        authentication code.
+        """
         resp = requests.post('https://id.twitch.tv/oauth2/token', data={
             'client_id': settings.TWITCH_CLIENT_ID,
             'client_secret': settings.TWITCH_CLIENT_SECRET,
@@ -273,6 +341,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class UserRanking(models.Model):
+    """
+    A ranking entry in a category goal's leaderboard for a particular race
+    goal.
+
+    Rankings are recalculated whenever a race gets recorded. All race
+    participants will have their score and confidence updated according to the
+    ranking algorithm.
+    """
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
@@ -298,14 +374,24 @@ class UserRanking(models.Model):
 
     @property
     def best_time_html(self):
+        """
+        Return the user's best finish time as a formatted HTML string.
+        """
         return timer_html(self.best_time, False) if self.best_time else None
 
     @property
     def display_score(self):
+        """
+        Return the user's current score as a formatted number.
+        """
         return round(self.score * 100)
 
     @cached_property
     def times_raced(self):
+        """
+        Return the number of times the user has entered a recorded race for
+        this category and goal.
+        """
         Entrant = apps.get_model('racetime', 'Entrant')
         return len(Entrant.objects.filter(
             user=self.user,
@@ -317,6 +403,12 @@ class UserRanking(models.Model):
 
 
 class Ban(models.Model):
+    """
+    A user ban. There are many like it but this one is theirs.
+
+    A ban may be site-wide or category-specific. In the case of the former,
+    the category will be set to None.
+    """
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
@@ -336,6 +428,16 @@ class Ban(models.Model):
 
 
 class UserLog(models.Model):
+    """
+    A log entry of a user profile change.
+
+    This model records changes to the email, password, name and scrim fields.
+    With the exception of password, the old value will be stored in this log
+    table, allowing name changes to be traced back in case a user tries to
+    obscure their identity.
+
+    UserLog may only be seen by admins.
+    """
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
