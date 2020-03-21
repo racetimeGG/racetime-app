@@ -1628,6 +1628,8 @@ class Entrant(models.Model):
                 '%(user)s has been un-disqualified from the race by %(undisqualified_by)s.'
                 % {'undisqualified_by': undisqualified_by, 'user': self.user}
             )
+            if self.finish_time:
+                self.race.recalculate_places()
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
