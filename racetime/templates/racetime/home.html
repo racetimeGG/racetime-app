@@ -10,6 +10,23 @@
         started.
     </p>
     {% endif %}
+    <ul class="home-sort">
+        <li class="label">Sort by:</li>
+        <li>
+            {% if sort == 'default' %}
+                <span>Most popular</span>
+            {% else %}
+                <a href="{% url 'home' %}">Most popular</a>
+            {% endif %}
+        </li>
+        <li>
+            {% if sort == 'name' %}
+                <span>Name A-Z</span>
+            {% else %}
+                <a href="{% url 'home' %}?sort=name">Name A-Z</a>
+            {% endif %}
+        </li>
+    </ul>
     <h3 style="margin-top: 0">Race categories</h3>
     <ol class="home-categories">
         {% for category in categories %}

@@ -13,14 +13,20 @@ class Home(UserMixin, generic.TemplateView):
         return self.user.is_staff
 
     def get_context_data(self, **kwargs):
+        if self.request.GET.get('sort') == 'name':
+            sort = 'name'
+        else:
+            sort = 'default'
+
         context = super().get_context_data(**kwargs)
         context.update({
             'show_recordable': self.show_recordable,
-            'categories': self.categories(),
+            'categories': self.categories(sort),
+            'sort': sort,
         })
         return context
 
-    def categories(self):
+    def categories(self, sort):
         queryset = Category.objects.filter(active=True)
         queryset = queryset.annotate(
             current_race_count=Count(
@@ -43,9 +49,15 @@ class Home(UserMixin, generic.TemplateView):
                     ),
                 )
             )
-        queryset = queryset.order_by(
-            '-current_race_count',
-            '-finished_race_count',
-            'name',
-        )
+        if sort == 'name':
+            queryset = queryset.order_by(
+                '-current_race_count',
+                'name',
+            )
+        else:
+            queryset = queryset.order_by(
+                '-current_race_count',
+                '-finished_race_count',
+                'name',
+            )
         return queryset.all()

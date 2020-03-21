@@ -367,6 +367,28 @@ header > .current-race > a .timer {
     margin-bottom: 0;
 }
 
+.home-sort {
+    color: #8c898c;
+    display: flex;
+    float: right;
+    font-size: 13px;
+    line-height: 22px;
+    margin-bottom: 6px;
+}
+.home-sort > li::after {
+    content: "|\a0";
+}
+.home-sort > li:last-child::after {
+    content: none;
+}
+.home-sort > .label::after {
+    content: "\a0";
+}
+.home-sort > li > span {
+    color: #ddd8dd;
+    font-weight: bold;
+}
+
 .home-categories {
     display: flex;
     flex-wrap: wrap;
