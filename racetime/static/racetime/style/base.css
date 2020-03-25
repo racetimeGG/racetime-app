@@ -314,6 +314,12 @@ header > .current-race > a .timer {
 .container > .messages {
     padding: 30px 0 0;
 }
+.container > .messages .success {
+    color: #beebd1;
+}
+.container > .messages .error {
+    color: #f08080;
+}
 
 .container > .content {
     display: flex;
