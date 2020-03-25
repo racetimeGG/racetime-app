@@ -1,5 +1,18 @@
 {% extends 'racetime/base.html' %}
+{% load static %}
 
+{% block css %}
+    <style>
+    .twitch-channel {
+        display: inline-flex;
+        vertical-align: middle;
+    }
+    .twitch-channel > img {
+        height: 22px;
+        margin-right: 5px;
+    }
+    </style>
+{% endblock %}
 {% block title %}
     Account settings |
 {% endblock %}
@@ -16,11 +29,26 @@
         </p>
         {% if user.twitch_name %}
             <p>
-            Connected to <a href="{{ user.twitch_channel }}">{{ user.twitch_name }}</a>.
+                Connected to
+                <a class="twitch-channel" href="{{ user.twitch_channel }}" target="_blank">
+                    <img src="{% static 'racetime/image/twitch.svg' %}" alt="">
+                    {{ user.twitch_name }}
+                </a>
             </p>
-            <p>
-                <a href="{{ twitch_url }}" class="btn" target="_blank">Re-connect your Twitch.tv account</a>
-            </p>
+            {% if not user.active_race_entrant %}
+                <p>
+                    <a href="{{ twitch_url }}" class="btn" target="_blank">Connect to different Twitch account</a>
+                </p>
+                <form action="{% url 'twitch_disconnect' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn dangerous">Disconnect account</button>
+                </form>
+            {% else %}
+                <p class="help">
+                    You cannot change your Twitch account while actively
+                    participating in a race.
+                </p>
+            {% endif %}
         {% else %}
             <p>
                 <a href="{{ twitch_url }}" class="btn" target="_blank">Connect your Twitch.tv account</a>

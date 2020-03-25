@@ -84,6 +84,7 @@ from .user import (
     OAuthDone,
     OAuthUserInfo,
     TwitchAuth,
+    TwitchDisconnect,
     ViewProfile,
 )
 
@@ -168,5 +169,6 @@ __all__ = [
     'OAuthDone',
     'OAuthUserInfo',
     'TwitchAuth',
+    'TwitchDisconnect',
     'ViewProfile',
 ]

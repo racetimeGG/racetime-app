@@ -228,40 +228,80 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
         return super().dispatch(*args, **kwargs)
 
     def get(self, request):
-        code = request.GET.get('code')
-        if code:
-            user = self.user
-            user.twitch_code = code
+        if self.user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot change your Twitch account whilst entered '
+                'in an active race.'
+            )
+        else:
+            code = request.GET.get('code')
+            if code:
+                user = self.user
+                user.twitch_code = code
 
-            try:
-                token = user.twitch_access_token(request)
-                resp = requests.get('https://api.twitch.tv/helix/users', headers={
-                    'Authorization': f'Bearer {token}',
-                })
-                if resp.status_code != 200:
-                    raise requests.RequestException
-            except requests.RequestException as ex:
-                notice_exception(ex)
-                messages.error(
-                    request,
-                    'Something went wrong with the Twitch API. Please try '
-                    'again later',
-                )
-            else:
                 try:
-                    data = resp.json().get('data').pop()
-                except:
-                    data = {}
-                user.twitch_id = data.get('id')
-                user.twitch_name = data.get('display_name')
+                    token = user.twitch_access_token(request)
+                    resp = requests.get('https://api.twitch.tv/helix/users', headers={
+                        'Authorization': f'Bearer {token}',
+                    })
+                    if resp.status_code != 200:
+                        raise requests.RequestException
+                except requests.RequestException as ex:
+                    notice_exception(ex)
+                    messages.error(
+                        request,
+                        'Something went wrong with the Twitch API. Please try '
+                        'again later',
+                    )
+                else:
+                    try:
+                        data = resp.json().get('data').pop()
+                    except:
+                        data = {}
 
-                messages.success(
-                    self.request,
-                    'Thanks, you have successfully authorised your Twitch.tv '
-                    'account. You can now join races that requires streaming.',
-                )
+                    if models.User.objects.filter(
+                        twitch_id=data.get('id'),
+                    ).exclude(id=user.id).exists():
+                        messages.error(
+                            request,
+                            'Your Twitch account is already connected to another '
+                            'racetime.gg user account.',
+                        )
+                    else:
+                        user.twitch_id = data.get('id')
+                        user.twitch_name = data.get('display_name')
+                        user.save()
 
+                        messages.success(
+                            self.request,
+                            'Thanks, you have successfully authorised your Twitch.tv '
+                            'account. You can now join races that requires streaming.',
+                        )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
+    def post(self, request):
+        user = self.user
+
+        if user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot disconnect your Twitch account whilst '
+                'entered in an active race.'
+            )
+        else:
+            user.twitch_code = None
+            user.twitch_id = None
+            user.twitch_name = None
             user.save()
+
+            messages.success(
+                self.request,
+                'Your Twitch.tv account is no longer connected.'
+            )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))
 
