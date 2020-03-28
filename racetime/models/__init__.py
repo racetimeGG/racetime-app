@@ -1,3 +1,4 @@
+from .admin import Bulletin
 from .bot import Bot
 from .category import AuditLog, Category, CategoryRequest, Goal
 from .chat import Message
@@ -6,6 +7,8 @@ from .race import Entrant, Race
 from .user import Ban, User, UserLog, UserRanking
 
 __all__ = [
+    # admin
+    'Bulletin',
     # bot
     'Bot',
     # category

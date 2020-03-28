@@ -294,6 +294,48 @@ header > .current-race > a .timer {
     text-align: right;
 }
 
+.bulletin {
+    align-items: center;
+    display: flex;
+    padding-top: 10px;
+    justify-content: center;
+}
+.bulletin.hidden {
+    display: none;
+}
+.bulletin > .message {
+    background: linear-gradient(to bottom, #25272c 0, #36393f 100%);
+    border: 1px solid #ddd8dd;
+    border-radius: 3px;
+    font-size: 18px;
+    padding: 10px 30px;
+}
+.bulletin > .message > time {
+    color: #8c898c;
+    font-weight: bold;
+}
+.bulletin > .message > time::after {
+    content: " – ";
+}
+.bulletin.highlight > .message {
+    border-color: #26dd9a;
+}
+.bulletin.highlight > .message > span,
+.bulletin > .message > span .highlight {
+    color: #beebd1;
+}
+.bulletin.dangerous > .message {
+    border-color: #f08080;
+}
+.bulletin.dangerous > .message > span,
+.bulletin > .message > span .dangerous {
+    color: #f08080;
+}
+.bulletin > .close {
+    cursor: pointer;
+    padding: 10px;
+}
+
 .messages > ul {
     background: #212328;
     border: 5px solid #1a1c20;

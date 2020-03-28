@@ -140,4 +140,15 @@ $(function() {
             });
         }, 400);
     });
+
+    $('.bulletin').each(function() {
+        if (!localStorage.getItem('bulletin.' + $(this).attr('id'))) {
+            $(this).removeClass('hidden');
+        }
+    });
+    $(document).on('click', '.bulletin .action-close', function(e) {
+        var $bulletin = $(this).closest('.bulletin');
+        localStorage.setItem('bulletin.' + $bulletin.attr('id'), '1');
+        $bulletin.addClass('hidden');
+    });
 });
