@@ -910,7 +910,7 @@ class Race(models.Model):
                 custom_goal=self.custom_goal,
                 slug=self.category.generate_race_slug(),
                 opened_by=user,
-                recordable=self.recordable,
+                recordable=not self.custom_goal,
                 start_delay=self.start_delay,
                 time_limit=self.time_limit,
                 streaming_required=self.streaming_required,
