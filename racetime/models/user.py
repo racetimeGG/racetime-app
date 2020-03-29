@@ -490,7 +490,7 @@ class UserAction(models.Model):
         null=True,
     )
     user_agent = models.CharField(
-        max_length=1024,
+        max_length=512,
         db_index=True,
         null=True,
     )

@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('date', models.DateTimeField(auto_now_add=True, db_index=True)),
                 ('action', models.CharField(db_index=True, max_length=255)),
                 ('ip_address', models.GenericIPAddressField(db_index=True, null=True)),
-                ('user_agent', models.CharField(db_index=True, max_length=1024, null=True)),
+                ('user_agent', models.CharField(db_index=True, max_length=512, null=True)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
