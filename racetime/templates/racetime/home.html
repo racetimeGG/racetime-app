@@ -33,6 +33,15 @@
                     <a href="{% url 'home' %}?sort=name">Name A-Z</a>
                 {% endif %}
             </li>
+            {% if show_recordable %}
+                <li>
+                    {% if sort == 'recordable' %}
+                        <span>Recordable</span>
+                    {% else %}
+                        <a href="{% url 'home' %}?sort=recordable">Recordable</a>
+                    {% endif %}
+                </li>
+            {% endif %}
         </ul>
     </div>
     <h3 style="margin-top: 0">Race categories</h3>

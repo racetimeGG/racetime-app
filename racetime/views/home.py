@@ -1,4 +1,5 @@
 from django.db.models import Count, Q
+from django.utils.functional import cached_property
 from django.views import generic
 
 from .base import UserMixin
@@ -8,13 +9,16 @@ from ..models import Category, RaceStates
 class Home(UserMixin, generic.TemplateView):
     template_name = 'racetime/home.html'
 
-    @property
+    @cached_property
     def show_recordable(self):
         return self.user.is_staff
 
     def get_context_data(self, **kwargs):
-        if self.request.GET.get('sort') == 'name':
+        req_sort = self.request.GET.get('sort')
+        if req_sort == 'name':
             sort = 'name'
+        elif req_sort == 'recordable' and self.show_recordable:
+            sort = 'recordable'
         else:
             sort = 'default'
 
@@ -52,6 +56,11 @@ class Home(UserMixin, generic.TemplateView):
         if sort == 'name':
             queryset = queryset.order_by(
                 '-current_race_count',
+                'name',
+            )
+        elif sort == 'recordable':
+            queryset = queryset.order_by(
+                '-recordable_race_count',
                 'name',
             )
         else:
