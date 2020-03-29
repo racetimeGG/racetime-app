@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from .choices import EntrantStates, RaceStates
-from ..utils import get_hashids, timer_html
+from ..utils import determine_ip, get_hashids, timer_html
 
 
 class UserManager(BaseUserManager):
@@ -320,6 +320,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         return str(self)
 
+    def log_action(self, action, request):
+        """
+        Add an entry to the user action log.
+        """
+        self.useraction_set.create(
+            action=action,
+            ip_address=determine_ip(request),
+            user_agent=request.headers.get('user-agent'),
+        )
+
     def twitch_access_token(self, request):
         """
         Obtain an Oauth2 token from Twitch's API using this user's
@@ -456,4 +466,31 @@ class UserLog(models.Model):
     )
     changed_password = models.BooleanField(
         default=False,
+    )
+
+
+class UserAction(models.Model):
+    """
+    A log of user actions, such as logins and password changes.
+    """
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+    )
+    date = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+    )
+    action = models.CharField(
+        max_length=255,
+        db_index=True,
+    )
+    ip_address = models.GenericIPAddressField(
+        db_index=True,
+        null=True,
+    )
+    user_agent = models.CharField(
+        max_length=1024,
+        db_index=True,
+        null=True,
     )

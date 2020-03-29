@@ -78,6 +78,7 @@ CHANNEL_LAYERS = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
+REAL_IP_HEADER = None
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases

@@ -93,6 +93,7 @@ class CreateAccount(generic.CreateView):
 
     def form_valid(self, form):
         user = form.save()
+        user.log_action('create_account', self.request)
         login(self.request, user, backend='django.contrib.auth.backends.ModelBackend')
 
         context = {
@@ -160,6 +161,7 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
             messages.success(self.request, 'Your profile has been updated.')
 
         user.save()
+        user.log_action('edit_account', self.request)
 
         return http.HttpResponseRedirect(reverse('edit_account'))
 
@@ -185,6 +187,7 @@ class EditAccountSecurity(LoginRequiredMixin, UserMixin, generic.FormView):
 
         if 'new_password2' in form.changed_data:
             update_session_auth_hash(self.request, form.user)
+            self.user.log_action('change_password', self.request)
             models.UserLog.objects.create(
                 user=self.user,
                 email=self.user.email,
@@ -272,6 +275,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                         user.twitch_id = data.get('id')
                         user.twitch_name = data.get('display_name')
                         user.save()
+                        user.log_action('twitch_auth', self.request)
 
                         messages.success(
                             self.request,
@@ -297,6 +301,7 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
             user.twitch_id = None
             user.twitch_name = None
             user.save()
+            user.log_action('twitch_disconnect', self.request)
 
             messages.success(
                 self.request,

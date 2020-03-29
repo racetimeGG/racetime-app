@@ -12,6 +12,7 @@ from hashids import Hashids
 __all__ = [
     'RedisChannelLayer',
     'SafeException',
+    'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
     'get_hashids',
@@ -250,6 +251,12 @@ class SafeException(Exception):
     Used to indicate an exception whose message is safe to display to end-users.
     """
     pass
+
+
+def determine_ip(request):
+    if settings.REAL_IP_HEADER:
+        return request.headers.get(settings.REAL_IP_HEADER)
+    return request.META.get('REMOTE_ADDR')
 
 
 def exception_to_msglist(ex):

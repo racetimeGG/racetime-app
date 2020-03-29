@@ -9,6 +9,11 @@ from .. import forms
 class Login(base.LoginView):
     form_class = forms.AuthenticationForm
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        form.get_user().log_action('login', self.request)
+        return response
+
 
 class Logout(base.LogoutView):
     get = base.LogoutView.http_method_not_allowed
@@ -41,7 +46,11 @@ class PasswordResetDoneView(base.PasswordResetDoneView):
 
 
 class PasswordResetConfirmView(base.PasswordResetConfirmView):
-    pass
+    def form_valid(self, form):
+        user = form.save()
+        del self.request.session[base.INTERNAL_RESET_SESSION_TOKEN]
+        user.log_action('password_reset', self.request)
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class PasswordResetCompleteView(base.PasswordResetCompleteView):
