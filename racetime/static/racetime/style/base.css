@@ -415,24 +415,31 @@ header > .current-race > a .timer {
     margin-bottom: 0;
 }
 
-.home-sort {
-    color: #8c898c;
+.home-search {
+    align-items: center;
     display: flex;
     float: right;
+}
+.home-search > .home-filter {
+    line-height: 1;
+    margin-right: 10px;
+}
+.home-search > .home-sort {
+    color: #8c898c;
+    display: flex;
     font-size: 13px;
     line-height: 22px;
-    margin-bottom: 6px;
 }
-.home-sort > li::after {
+.home-search > .home-sort > li::after {
     content: "|\a0";
 }
-.home-sort > li:last-child::after {
+.home-search > .home-sort > li:last-child::after {
     content: none;
 }
-.home-sort > .label::after {
+.home-search > .home-sort > .label::after {
     content: "\a0";
 }
-.home-sort > li > span {
+.home-search > .home-sort > li > span {
     color: #ddd8dd;
     font-weight: bold;
 }
