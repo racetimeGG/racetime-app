@@ -5,6 +5,7 @@ from django.utils import timezone
 
 class AppConfig(BaseAppConfig):
     name = 'racetime'
+    verbose_name = 'racetime'
 
     def ready(self):
         from . import signals  # noqa
