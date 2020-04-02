@@ -97,6 +97,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     date_joined = models.DateTimeField(
         auto_now_add=True,
+        editable=False,
     )
     active = models.BooleanField(
         default=True,
@@ -157,21 +158,27 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     is_staff = models.BooleanField(
         default=False,
-        editable=False,
+        help_text=(
+            'Grants the user full permission to manage categories on the site.'
+        ),
     )
     is_supporter = models.BooleanField(
         default=False,
+        help_text='Currently does nothing.',
     )
     twitch_code = models.CharField(
         max_length=30,
         null=True,
+        editable=False,
     )
     twitch_id = models.PositiveIntegerField(
         null=True,
+        editable=False,
     )
     twitch_name = models.CharField(
         max_length=25,
         null=True,
+        editable=False,
     )
 
     objects = UserManager()
@@ -302,6 +309,9 @@ class User(AbstractBaseUser, PermissionsMixin):
             Q(category__isnull=True) | Q(category=category)
         ).exists()
 
+    def get_absolute_url(self):
+        return reverse('view_profile', args=(self.hashid,))
+
     def get_full_name(self):
         """
         Return user's name, e.g. "Luigi#1234".
@@ -427,8 +437,15 @@ class Ban(models.Model):
         'Category',
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
+        help_text='If left blank, ban will be site-wide.',
     )
-    notes = models.TextField()
+    notes = models.TextField(
+        blank=True,
+        help_text=(
+            'Describe why this ban was issued. Only visible to administrators.'
+        ),
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
     )

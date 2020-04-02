@@ -15,6 +15,7 @@ class Bulletin(models.Model):
     class_names = models.CharField(
         max_length=255,
         blank=True,
+        help_text='Space-separated CSS class names, e.g. "highlight".'
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -28,3 +29,6 @@ class Bulletin(models.Model):
     @property
     def hashid(self):
         return get_hashids(self.__class__).encode(self.id)
+
+    def __str__(self):
+        return self.visible_from.strftime('%Y-%m-%d') + ' – ' + self.message[:50]

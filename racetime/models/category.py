@@ -100,6 +100,9 @@ class Category(models.Model):
         auto_now=True,
     )
 
+    class Meta:
+        verbose_name_plural = 'Categories'
+
     @cached_property
     def all_moderators(self):
         """
@@ -324,14 +327,17 @@ class CategoryRequest(models.Model):
     requested_by = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
+        help_text='This user will own the category once accepted.',
     )
     reviewed_at = models.DateTimeField(
         null=True,
+        blank=True,
     )
     accepted_as = models.ForeignKey(
         'Category',
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
     )
 
     @atomic
@@ -379,12 +385,20 @@ class CategoryRequest(models.Model):
             recipient_list=[self.requested_by.email],
         )
 
+    def get_absolute_url(self):
+        if self.accepted_as:
+            return self.accepted_as.get_absolute_url()
+        return ''
+
     def reject(self):
         """
         Reject the category request.
         """
         self.reviewed_at = timezone.now()
         self.save()
+
+    def __str__(self):
+        return self.name
 
 
 class Goal(models.Model):
