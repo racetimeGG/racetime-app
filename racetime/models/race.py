@@ -1247,7 +1247,7 @@ class Entrant(models.Model):
         if self.dnf:
             return 'dnf', 'DNF', 'Did not finish the race.'
         if self.dq:
-            return 'dq', 'DQ', 'Disqualified by a race monitor.'
+            return 'dq', 'DQ', 'Disqualified by a category moderator.'
         if self.finish_time:
             return 'done', 'Finished', 'Finished the race.'
         if self.race.state == RaceStates.in_progress.value:
