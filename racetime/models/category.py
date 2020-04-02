@@ -340,7 +340,6 @@ class CategoryRequest(models.Model):
         blank=True,
     )
 
-    @atomic
     def accept(self):
         """
         Accept the category request, creating a new category based off of it.
@@ -348,18 +347,19 @@ class CategoryRequest(models.Model):
         Will also email the user who put in the request informing them that
         their category is now live.
         """
-        category = Category.objects.create(
-            name=self.name,
-            short_name=self.short_name,
-            slug=self.slug,
-            owner=self.requested_by,
-        )
-        for goal in set(self.goals.split('\n')):
-            category.goal_set.create(name=goal)
+        with atomic():
+            category = Category.objects.create(
+                name=self.name,
+                short_name=self.short_name,
+                slug=self.slug,
+                owner=self.requested_by,
+            )
+            for goal in set(self.goals.split('\n')):
+                category.goal_set.create(name=goal)
 
-        self.reviewed_at = timezone.now()
-        self.accepted_as = category
-        self.save()
+            self.reviewed_at = timezone.now()
+            self.accepted_as = category
+            self.save()
 
         context = {
             'category': category,
