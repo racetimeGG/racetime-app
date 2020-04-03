@@ -34,7 +34,7 @@ class BotPageMixin(UserPassesTestMixin, UserMixin):
         return reverse('category_bots', args=(self.category.slug,))
 
     @staticmethod
-    def create_application():
+    def create_application(bot):
         """
         Create a new OAuth2 application object.
         """
@@ -42,6 +42,7 @@ class BotPageMixin(UserPassesTestMixin, UserMixin):
         return model.objects.create(
             client_type=model.CLIENT_CONFIDENTIAL,
             authorization_grant_type=model.GRANT_CLIENT_CREDENTIALS,
+            name='%s (%s)' % (bot.name, bot.category.short_name),
         )
 
     def active_bots(self):
@@ -112,8 +113,8 @@ class CreateBot(BotPageMixin, generic.CreateView):
             return http.HttpResponseRedirect(self.success_url)
 
         with atomic():
-            bot.application = self.create_application()
             bot.category = self.category
+            bot.application = self.create_application(bot)
             bot.save()
             models.AuditLog.objects.create(
                 actor=self.user,
@@ -165,7 +166,7 @@ class ReactivateBot(BotPageMixin, generic.View):
         bot = self.get_bot()
         if not bot.active:
             with atomic():
-                bot.application = self.create_application()
+                bot.application = self.create_application(bot)
                 bot.active = True
                 bot.deactivated_at = None
                 bot.save()
