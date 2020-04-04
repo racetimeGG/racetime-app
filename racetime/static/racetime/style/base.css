@@ -582,6 +582,7 @@ header > .current-race > a .timer {
 }
 .meta-user-list {
     font-size: 13px;
+    white-space: normal;
 }
 .meta-user-list .user-pop > .scrim {
     line-height: inherit;
