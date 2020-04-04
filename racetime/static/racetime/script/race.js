@@ -105,11 +105,9 @@ Race.prototype.createMessageItem = function(message, server_date) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
-    var ms_since_posted = server_date - posted_date;
     //If the posted date is after the server date, assume the message posted at server time
-    ms_since_posted = ms_since_posted < 0 ? 0 : ms_since_posted;
-
-    remaining_delay = (message.delay * 1000) - ms_since_posted;
+    var ms_since_posted = Math.max(0, server_date - posted_date);
+    var remaining_delay = (message.delay * 1000) - ms_since_posted;
 
     if (remaining_delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
         $li.hide();
