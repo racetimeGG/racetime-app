@@ -16,6 +16,7 @@ __all__ = [
     'exception_to_msglist',
     'generate_race_slug',
     'get_hashids',
+    'notice_exception',
     'timer_html',
     'timer_str',
     'twitch_auth_url',
@@ -396,15 +397,15 @@ def _format_timer(delta, format_str):
     )
 
 
-def timer_str(delta, deciseconds=True):
-    if deciseconds:
-        return _format_timer(delta, '{}{:01}:{:02}:{:02}.{}')
-    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
-
-
 def timer_html(delta, deciseconds=True):
     if deciseconds:
         return _format_timer(delta, '{}{:01}:{:02}:{:02}<small>.{}</small>')
+    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
+
+
+def timer_str(delta, deciseconds=True):
+    if deciseconds:
+        return _format_timer(delta, '{}{:01}:{:02}:{:02}.{}')
     return _format_timer(delta, '{}{:01}:{:02}:{:02}')
 
 
