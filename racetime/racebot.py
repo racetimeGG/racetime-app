@@ -18,6 +18,8 @@ class RaceBot:
     pid = None
     last_adoption = None
     last_twitch_refresh = None
+    twitch_token = None
+    twitch_token_refresh = None
     races = []
     queryset = models.Race.objects.filter(
         state__in=[
@@ -32,6 +34,13 @@ class RaceBot:
         self.pid = process_id
 
     def handle(self):
+        if (
+            not self.twitch_token
+            or not self.twitch_token_refresh
+            or self.twitch_token_refresh < timezone.now()
+        ):
+            self.update_twitch_token()
+
         for race in self.races:
             if timezone.now() - race['last_refresh'] > timedelta(milliseconds=100):
                 race['last_refresh'] = timezone.now()
@@ -211,6 +220,25 @@ class RaceBot:
             race['limit_warning_posted'] = True
             self.logger.info('[Race] Race time limit warning for %(race)s.' % {'race': race['object']})
 
+    def update_twitch_token(self):
+        try:
+            resp = requests.post('https://id.twitch.tv/oauth2/token', {
+                'client_id': settings.TWITCH_CLIENT_ID,
+                'client_secret': settings.TWITCH_CLIENT_SECRET,
+                'grant_type': 'client_credentials',
+            })
+            if resp.status_code != 200:
+                raise requests.RequestException
+        except requests.RequestException as ex:
+            notice_exception(ex)
+            self.logger.error('[Twitch] Could not fetch access token!')
+            self.logger.error(str(ex))
+        else:
+            data = resp.json()
+            self.twitch_token = data.get('access_token')
+            self.twitch_token_refresh = timezone.now() + timedelta(seconds=data.get('expires_in', 86400) - 3600)
+            self.logger.debug('[Twitch] OAuth2 token obtained (expires %s).' % self.twitch_token_refresh)
+
     def update_live_status(self):
         if not self.races:
             self.logger.debug('[Twitch] No races to check.')
@@ -243,7 +271,10 @@ class RaceBot:
                 resp = requests.get('https://api.twitch.tv/helix/streams', params={
                     'first': 100,
                     'user_id': chunk,
-                }, headers={'Client-ID': settings.TWITCH_CLIENT_ID})
+                }, headers={
+                    'Authorization': 'Bearer ' + self.twitch_token,
+                    'Client-ID': settings.TWITCH_CLIENT_ID,
+                })
                 if resp.status_code != 200:
                     raise requests.RequestException
             except requests.RequestException as ex:
