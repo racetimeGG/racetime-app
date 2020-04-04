@@ -492,11 +492,7 @@ class Race(models.Model):
         """
         Add a system-generated chat message for this race.
         """
-        User = apps.get_model('racetime', 'User')
-        system_user = User.objects.get_system_user()
-
         self.message_set.create(
-            user=system_user,
             message=message,
             highlight=highlight,
         )
