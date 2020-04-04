@@ -231,12 +231,22 @@ class GoalWidget(forms.RadioSelect):
     option_template_name = 'racetime/forms/goal_choice.html'
 
 
-class HourDurationWidget(forms.NumberInput):
-    template_name = 'racetime/forms/hour_duration.html'
+class DurationWidget(forms.NumberInput):
+    template_name = 'racetime/forms/duration.html'
+
+    def __init__(self, unit_name, *args, **kwargs):
+        self.unit_name = unit_name
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['unit_name'] = self.unit_name
+        return context
 
 
-class HourDurationField(forms.IntegerField):
-    widget = HourDurationWidget
+class SecondsDurationField(forms.IntegerField):
+    unit = 1
+    widget = DurationWidget(unit_name='seconds')
 
     def __init__(self, *, max_value=None, min_value=None, **kwargs):
         self.max_value, self.min_value = max_value, min_value
@@ -245,23 +255,28 @@ class HourDurationField(forms.IntegerField):
 
         if max_value is not None:
             self.validators.append(
-                validators.MaxValueValidator(timedelta(hours=max_value))
+                validators.MaxValueValidator(timedelta(seconds=max_value * self.unit))
             )
         if min_value is not None:
             self.validators.append(
-                validators.MinValueValidator(timedelta(hours=min_value))
+                validators.MinValueValidator(timedelta(seconds=min_value * self.unit))
             )
 
     def prepare_value(self, value):
         if isinstance(value, timedelta):
-            return int(value.total_seconds() / 3600)
+            return int(value.total_seconds() / self.unit)
         return value
 
     def to_python(self, value):
         value = super().to_python(value)
         if isinstance(value, int):
-            return timedelta(hours=value)
+            return timedelta(seconds=value * self.unit)
         return value
+
+
+class HoursDurationField(SecondsDurationField):
+    unit = 3600
+    widget = DurationWidget(unit_name='hours')
 
 
 class RaceForm(forms.ModelForm):
@@ -276,11 +291,23 @@ class RaceForm(forms.ModelForm):
         required=False,
         widget=GoalWidget,
     )
-    time_limit = HourDurationField(
+    start_delay = SecondsDurationField(
+        initial=15,
+        min_value=10,
+        max_value=60,
+        help_text=models.Race._meta.get_field('start_delay').help_text,
+    )
+    time_limit = HoursDurationField(
         initial=24,
         min_value=1,
         max_value=24,
         help_text=models.Race._meta.get_field('time_limit').help_text,
+    )
+    chat_message_delay = SecondsDurationField(
+        initial=0,
+        min_value=0,
+        max_value=90,
+        help_text=models.Race._meta.get_field('chat_message_delay').help_text,
     )
 
     def __init__(self, category, can_moderate, *args, **kwargs):
