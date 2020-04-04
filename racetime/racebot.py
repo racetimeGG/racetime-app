@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import timedelta
+from math import ceil
 from time import sleep
 
 import requests
@@ -222,55 +223,61 @@ class RaceBot:
             user__twitch_id__isnull=False,
             state=models.EntrantStates.joined.value,
         ).annotate(twitch_id=F('user__twitch_id')):
-            if entrant.twitch_id not in entrants:
-                entrants[entrant.twitch_id] = []
-            entrants[entrant.twitch_id].append(entrant)
+            entrants[entrant.twitch_id] = entrant
 
         if not entrants:
             self.logger.debug('[Twitch] No entrants to check.')
             return
 
-        try:
-            resp = requests.get('https://api.twitch.tv/helix/streams', params={
-                'first': 100,
-                'user_id': entrants.keys(),
-            }, headers={'Client-ID': settings.TWITCH_CLIENT_ID})
-            if resp.status_code != 200:
-                raise requests.RequestException
-        except requests.RequestException as ex:
-            notice_exception(ex)
-            self.logger.error('[Twitch] API error occurred!')
-            self.logger.error(str(ex))
-        else:
-            live_users = [
-                int(stream.get('user_id'))
-                for stream in resp.json().get('data', [])
-                if stream.get('user_id')
-            ]
+        entrants_to_update = []
+        races_to_reload = []
 
-            entrants_to_update = []
-            races_to_reload = []
-            for twitch_id, entrants in entrants.items():
-                entrant_is_live = twitch_id in live_users
-                for entrant in entrants:
-                    if entrant.stream_live != entrant_is_live:
+        all_twitch_ids = list(entrants.keys())
+        entrant_chunks = [
+            all_twitch_ids[n:n+100]
+            for n in range(0, ceil(len(all_twitch_ids) / 100) * 100, 100)
+        ]
+
+        for chunk in entrant_chunks:
+            try:
+                resp = requests.get('https://api.twitch.tv/helix/streams', params={
+                    'first': 100,
+                    'user_id': chunk,
+                }, headers={'Client-ID': settings.TWITCH_CLIENT_ID})
+                if resp.status_code != 200:
+                    raise requests.RequestException
+            except requests.RequestException as ex:
+                notice_exception(ex)
+                self.logger.error('[Twitch] API error occurred!')
+                self.logger.error(str(ex))
+            else:
+                live_users = [
+                    int(stream.get('user_id'))
+                    for stream in resp.json().get('data', [])
+                    if stream.get('user_id')
+                ]
+
+                for twitch_id in chunk:
+                    entrant = entrants.get(twitch_id)
+                    entrant_is_live = twitch_id in live_users
+                    if entrant and entrant.stream_live != entrant_is_live:
                         entrant.stream_live = entrant_is_live
                         entrants_to_update.append(entrant)
                         if entrant.race not in races_to_reload:
                             races_to_reload.append(entrant.race)
 
-            if entrants_to_update:
-                models.Entrant.objects.bulk_update(
-                    entrants_to_update,
-                    ['stream_live'],
-                )
-                for race in races_to_reload:
-                    race.increment_version()
-                    race.broadcast_data()
+        if entrants_to_update:
+            models.Entrant.objects.bulk_update(
+                entrants_to_update,
+                ['stream_live'],
+            )
+            for race in races_to_reload:
+                race.increment_version()
+                race.broadcast_data()
 
-                self.logger.info(
-                    '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
-                    % {'entrants': len(entrants_to_update), 'races': len(races_to_reload)}
-                )
-            else:
-                self.logger.debug('[Twitch] All stream info is up-to-date.')
+            self.logger.info(
+                '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
+                % {'entrants': len(entrants_to_update), 'races': len(races_to_reload)}
+            )
+        else:
+            self.logger.debug('[Twitch] All stream info is up-to-date.')
