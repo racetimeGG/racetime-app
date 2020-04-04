@@ -1017,6 +1017,7 @@ footer > ul > li:first-child::before {
 }
 
 .layout-form > ul > li > .errorlist,
+.layout-form > ul > li > .input,
 .layout-form > ul > li > input,
 .layout-form > ul > li > select,
 .layout-form > ul > li > textarea,

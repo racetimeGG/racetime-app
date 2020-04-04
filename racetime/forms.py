@@ -1,10 +1,12 @@
 import re
+from datetime import timedelta
 
 from bs4 import BeautifulSoup
 from captcha.fields import ReCaptchaField
 from captcha.widgets import ReCaptchaV2Checkbox
 from django import forms
 from django.contrib.auth import forms as auth_forms
+from django.core import validators
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Count
@@ -229,6 +231,39 @@ class GoalWidget(forms.RadioSelect):
     option_template_name = 'racetime/forms/goal_choice.html'
 
 
+class HourDurationWidget(forms.NumberInput):
+    template_name = 'racetime/forms/hour_duration.html'
+
+
+class HourDurationField(forms.IntegerField):
+    widget = HourDurationWidget
+
+    def __init__(self, *, max_value=None, min_value=None, **kwargs):
+        self.max_value, self.min_value = max_value, min_value
+        # Skip calling IntegerField init() because it sets the wrong validators.
+        super(forms.IntegerField, self).__init__(**kwargs)
+
+        if max_value is not None:
+            self.validators.append(
+                validators.MaxValueValidator(timedelta(hours=max_value))
+            )
+        if min_value is not None:
+            self.validators.append(
+                validators.MinValueValidator(timedelta(hours=min_value))
+            )
+
+    def prepare_value(self, value):
+        if isinstance(value, timedelta):
+            return int(value.total_seconds() / 3600)
+        return value
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if isinstance(value, int):
+            return timedelta(hours=value)
+        return value
+
+
 class RaceForm(forms.ModelForm):
     goal = forms.ModelChoiceField(
         empty_label='Custom',
@@ -240,6 +275,12 @@ class RaceForm(forms.ModelForm):
         ).order_by('-num_races', 'name'),
         required=False,
         widget=GoalWidget,
+    )
+    time_limit = HourDurationField(
+        initial=24,
+        min_value=1,
+        max_value=24,
+        help_text=models.Race._meta.get_field('time_limit').help_text,
     )
 
     def __init__(self, category, can_moderate, *args, **kwargs):
