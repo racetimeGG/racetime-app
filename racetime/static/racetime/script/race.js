@@ -9,9 +9,10 @@ function Race() {
 
     try {
         this.vars = JSON.parse($('#race-vars').text());
+        var server_date = new Date(this.vars.server_time_utc);
         for (var i in this.vars.chat_history) {
             if (!this.vars.chat_history.hasOwnProperty(i)) continue;
-            this.addMessage(this.vars.chat_history[i]);
+            this.addMessage(this.vars.chat_history[i], server_date);
         }
         this.open();
     } catch (e) {
@@ -43,7 +44,7 @@ Race.prototype.ajaxifyActionForm = function(form) {
     });
 };
 
-Race.prototype.addMessage = function(message) {
+Race.prototype.addMessage = function(message, server_date) {
     var self = this;
 
     if (self.messageIDs.indexOf(message.id) !== -1) {
@@ -52,7 +53,7 @@ Race.prototype.addMessage = function(message) {
 
     var $messages = $('.race-chat .messages');
     if ($messages.length) {
-        $messages.append(self.createMessageItem(message));
+        $messages.append(self.createMessageItem(message, server_date));
         $messages[0].scrollTop = $messages[0].scrollHeight;
     }
 
@@ -66,9 +67,9 @@ Race.prototype.addMessage = function(message) {
     }
 };
 
-Race.prototype.createMessageItem = function(message) {
-    var date = new Date(message.posted_at);
-    var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
+Race.prototype.createMessageItem = function(message, server_date) {
+    var posted_date = new Date(message.posted_at);
+    var timestamp = ('00' + posted_date.getHours()).slice(-2) + ':' + ('00' + posted_date.getMinutes()).slice(-2);
 
     var $li = $(
         '<li>'
@@ -104,18 +105,20 @@ Race.prototype.createMessageItem = function(message) {
         return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
     }));
 
-    /*
-    Disabled for now. See #22
-    var delay = new Date(date.getTime() + message.delay * 1000).getTime() - Date.now();
-    if (delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
+    var ms_since_posted = server_date - posted_date;
+    //If the posted date is after the server date, assume the message posted at server time
+    ms_since_posted = ms_since_posted < 0 ? 0 : ms_since_posted;
+
+    remaining_delay = (message.delay * 1000) - ms_since_posted;
+
+    if (remaining_delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
         $li.hide();
         setTimeout(function() {
             $li.show();
             var $messages = $('.race-chat .messages');
             $messages[0].scrollTop = $messages[0].scrollHeight
-        }, delay);
+        }, remaining_delay);
     }
-    */
 
     return $li;
 };
@@ -183,6 +186,7 @@ Race.prototype.onSocketMessage = function(event) {
 
     this.heartbeat();
 
+    var server_date = new Date(data.date);
     switch (data.type) {
         case 'race.data':
             if (this.vars.user.id)
@@ -192,11 +196,11 @@ Race.prototype.onSocketMessage = function(event) {
             this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
             break;
         case 'race.renders':
-            window.globalLatency = new Date(data.date) - new Date();
+            window.globalLatency = server_date - Date.now();
             this.handleRenders(data.renders, data.version);
             break;
         case 'chat.message':
-            this.addMessage(data.message);
+            this.addMessage(data.message, server_date);
             break;
     }
 };
