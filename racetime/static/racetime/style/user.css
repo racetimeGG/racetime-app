@@ -65,6 +65,11 @@
 .entrant-row.highlight .user-pop > .pronouns {
     background: #212328;
 }
+.entrant-row.highlight > .user > .comment.open {
+    background-color: #212328;
+    border-color: #1a1c20;
+    margin: -3px;
+}
 
 .user-categories > li {
     border-top: 1px solid #1a1c20;

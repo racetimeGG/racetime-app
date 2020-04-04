@@ -152,6 +152,19 @@ $(function() {
         $bulletin.addClass('hidden');
     });
 
+    $(document).on('mouseenter', '.entrant-row > .user > .comment', function() {
+        var props = $(this).offset();
+        props.position = 'absolute';
+        $(this).css(props).addClass('open');
+    });
+    $(document).on('mouseleave', '.entrant-row > .user > .comment', function() {
+        $(this).removeClass('open').css({
+            'left': '',
+            'position': '',
+            'top': ''
+        });
+    });
+
     $('.category-info form.favourite').each(function() {
         $(this).ajaxForm({
             beforeSubmit: function(data, $form) {

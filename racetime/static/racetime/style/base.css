@@ -797,17 +797,22 @@ header > .current-race > a .timer {
 }
 .entrant-row > .user > .stream > a > img {
     height: 22px;
+    position: relative;
+        top: 1px;
     vertical-align: top;
 }
 .entrant-row > .user > .comment {
+    border-radius: 6px;
     cursor: default;
     display: flex;
-    margin-left: 5px;
+    max-width: 33vw;
     padding: 0 5px;
+    z-index: 100;
 }
-.entrant-row > .user > .comment:hover {
+.entrant-row > .user > .comment.open {
     background: #18191d;
-    border-radius: 6px;
+    border: 3px solid #17181b;
+    margin: -3px;
 }
 .entrant-row > .user > .comment > i {
     margin-top: 2px;
@@ -819,7 +824,7 @@ header > .current-race > a .timer {
     word-break: break-word;
     z-index: 1;
 }
-.entrant-row > .user > .comment:hover > .text {
+.entrant-row > .user > .comment.open > .text {
     display: block;
     opacity: 1;
 }
