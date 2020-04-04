@@ -151,4 +151,18 @@ $(function() {
         localStorage.setItem('bulletin.' + $bulletin.attr('id'), '1');
         $bulletin.addClass('hidden');
     });
+
+    $('.category-info form.favourite').each(function() {
+        $(this).ajaxForm({
+            beforeSubmit: function(data, $form) {
+                $form.parent().children('.undo').removeClass('undo');
+                $form.addClass('undo');
+            },
+            error: function(xhr, _1, _2, $form) {
+                $form.parent().children(':not(.undo)').addClass('undo');
+                $form.removeClass('undo');
+                alert('Something went wrong (code ' + xhr.status + '). Sorry about that.');
+            }
+        });
+    });
 });

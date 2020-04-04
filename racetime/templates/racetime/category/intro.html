@@ -9,6 +9,16 @@
         <span class="title">
             <h2 class="name">{{ category.name }}</h2>
             <span class="short-name">{{ category.short_name }}</span>
+            {% if user.is_authenticated %}
+                <form class="favourite {% if not is_favourite %}undo{% endif %}" method="post" action="{% url 'unstar' category=category.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" title="Remove from favourites"><i class="material-icons">star</i></button>
+                </form>
+                <form class="favourite {% if is_favourite %}undo{% endif %}" method="post" action="{% url 'star' category=category.slug %}">
+                    {% csrf_token %}
+                    <button type="submit" title="Add to favourites"><i class="material-icons">star_border</i></button>
+                </form>
+            {% endif %}
         </span>
     </div>
     <dl class="category-meta">

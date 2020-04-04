@@ -180,6 +180,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         editable=False,
     )
+    favourite_categories = models.ManyToManyField(
+        to='Category',
+        related_name='+',
+        limit_choices_to={'active': True},
+    )
 
     objects = UserManager()
 

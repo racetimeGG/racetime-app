@@ -32,6 +32,10 @@ class Category(UserMixin, generic.DetailView):
             'can_moderate': self.object.can_moderate(self.user),
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
+            'is_favourite': (
+                self.user.is_authenticated
+                and self.object in self.user.favourite_categories.all()
+            ),
             'past_races': paginator.get_page(self.request.GET.get('page')),
             'meta_image': (settings.RT_SITE_URI + self.object.image.url) if self.object.image else None,
         }
@@ -143,6 +147,24 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
             )
 
         return http.HttpResponseRedirect(reverse('home'))
+
+
+class FavouriteCategory(LoginRequiredMixin, Category):
+    get = None
+
+    def post(self, request, **kwargs):
+        self.object = self.get_object()
+        self.user.favourite_categories.add(self.object)
+        return http.HttpResponse()
+
+
+class UnfavouriteCategory(LoginRequiredMixin, Category):
+    get = None
+
+    def post(self, request, **kwargs):
+        self.object = self.get_object()
+        self.user.favourite_categories.remove(self.object)
+        return http.HttpResponse()
 
 
 class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):

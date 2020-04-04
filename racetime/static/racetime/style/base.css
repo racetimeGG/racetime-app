@@ -547,8 +547,16 @@ header > .current-race > a .timer {
 .category-info > .permalink {
     font-size: 13px;
 }
+.category-info > .title {
+    line-height: 41px;
+}
 .category-info > .title > .name {
     display: inline;
+}
+.category-info > .title > .short-name,
+.category-info > .title > .favourite {
+    display: inline-block;
+    vertical-align: top;
 }
 .category-info > .title > .short-name {
     color: #8c898c;
@@ -558,6 +566,19 @@ header > .current-race > a .timer {
 }
 .category-info > .title > .short-name::after {
     content: ')';
+}
+.category-info > .title > .favourite.undo {
+    display: none;
+}
+.category-info > .title > .favourite > button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    height: 24px;
+    line-height: 24px;
+    padding: 0;
+    vertical-align: middle;
+    width: 24px;
 }
 
 .category-info {

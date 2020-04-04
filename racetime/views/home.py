@@ -22,16 +22,27 @@ class Home(UserMixin, generic.TemplateView):
         else:
             sort = 'default'
 
+        categories = Category.objects.all()
+        if self.user.is_authenticated:
+            favourites = self.user.favourite_categories.all()
+            categories = categories.exclude(id__in=[f.id for f in favourites])
+        else:
+            favourites = None
+
         context = super().get_context_data(**kwargs)
         context.update({
             'show_recordable': self.show_recordable,
-            'categories': self.categories(sort),
+            'categories': self.prep_categories(categories, sort),
+            'favourites': self.prep_categories(favourites, sort) if favourites else None,
             'sort': sort,
         })
         return context
 
-    def categories(self, sort):
-        queryset = Category.objects.filter(active=True)
+    def prep_categories(self, queryset, sort):
+        """
+        Prepare QuerySet of categories for display on the home page.
+        """
+        queryset = queryset.filter(active=True)
         queryset = queryset.annotate(
             current_race_count=Count(
                 expression='race__id',

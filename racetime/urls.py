@@ -57,6 +57,8 @@ urlpatterns = [
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),
+        path('star', views.FavouriteCategory.as_view(), name='star'),
+        path('unstar', views.UnfavouriteCategory.as_view(), name='unstar'),
     ])),
 
     path('<str:category>/<str:race>', views.Race.as_view(), name='race'),

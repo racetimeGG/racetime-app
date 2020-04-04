@@ -1,0 +1,30 @@
+<li data-search="{{ category.name|lower }} {{ category.short_name|lower }}">
+    <a href="{{ category.get_absolute_url }}">
+        {% if category.image %}
+            <span class="image" style="background-image: url({{ category.image.url }})"></span>
+        {% else %}
+            <span class="image no-image">
+                <span class="short-name">{{ category.short_name }}</span>
+            </span>
+        {% endif %}
+        <span class="name">{{ category.name }}</span>
+        {% if show_recordable and category.recordable_race_count %}
+            <span class="recordable-races">
+                {{ category.recordable_race_count }} recordable
+                race{{ category.recordable_race_count|pluralize }}
+            </span>
+        {% endif %}
+        {% if category.current_race_count %}
+            <span class="active-races">
+                {{ category.current_race_count }} active
+                race{{ category.current_race_count|pluralize }}
+            </span>
+        {% endif %}
+        {% if category.finished_race_count %}
+            <span class="finished-races">
+                {{ category.finished_race_count }} completed
+                race{{ category.finished_race_count|pluralize }}
+            </span>
+        {% endif %}
+    </a>
+</li>
