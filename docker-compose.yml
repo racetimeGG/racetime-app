@@ -17,6 +17,8 @@ services:
     build:
       context: .
       target: racebot
+    environment:
+      - WAITFOR=racetime.db:3306 racetime.web:8000
     restart: on-failure
     volumes:
       - ".:/opt/racetime"
@@ -27,7 +29,6 @@ services:
       - MYSQL_ROOT_PASSWORD=racetime
       - MYSQL_USER=racetime
       - MYSQL_PASSWORD=racetime
-      - WAITFOR=racetime.db:3306 racetime.web:8000
     image: mariadb:10.4
     volumes:
       - db-data:/var/lib/mysql
