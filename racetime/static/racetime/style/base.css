@@ -807,12 +807,12 @@ header > .current-race > a .timer {
     display: flex;
     max-width: 33vw;
     padding: 0 5px;
-    z-index: 100;
 }
 .entrant-row > .user > .comment.open {
     background: #18191d;
     border: 3px solid #17181b;
     margin: -3px;
+    z-index: 100;
 }
 .entrant-row > .user > .comment > i {
     margin-top: 2px;
