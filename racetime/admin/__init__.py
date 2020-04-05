@@ -13,6 +13,11 @@ class BanAdmin(options.ModelAdmin):
     actions = [
         'delete_selected',
     ]
+    list_display = (
+        '__str__',
+        'category',
+        'notes',
+    )
 
 
 class BulletinAdmin(options.ModelAdmin):
