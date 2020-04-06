@@ -395,7 +395,7 @@ class BotMessage(Message):
 
 class BotSetInfo:
     def action(self, race, bot, data):
-        form = RaceSetInfoForm(race.category, False, data=data)
+        form = RaceSetInfoForm(data=data)
         if not form.is_valid():
             raise SafeException(form.errors)
 
