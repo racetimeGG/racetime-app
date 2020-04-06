@@ -369,7 +369,7 @@ class RaceCreationForm(RaceForm):
         }
 
 
-class RaceEditForm(RaceForm):
+class RaceEditForm(forms.ModelForm):
     class Meta:
         fields = (
             'goal',
