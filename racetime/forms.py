@@ -369,7 +369,7 @@ class RaceCreationForm(RaceForm):
         }
 
 
-class RaceEditForm(forms.ModelForm):
+class RaceEditForm(RaceForm):
     class Meta:
         fields = (
             'goal',
@@ -390,7 +390,7 @@ class RaceEditForm(forms.ModelForm):
         }
 
 
-class RaceSetInfoForm(RaceForm):
+class RaceSetInfoForm(forms.ModelForm):
     """
     Race form that only sets the info field, used by chat bots.
     """
