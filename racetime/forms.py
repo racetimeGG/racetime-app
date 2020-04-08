@@ -428,10 +428,22 @@ class UserCreationForm(auth_forms.UserCreationForm):
 class UserEditForm(forms.ModelForm):
     class Meta:
         model = models.User
-        fields = ('email', 'name', 'avatar', 'pronouns', 'profile_bio')
+        fields = (
+            'email',
+            'name',
+            'avatar',
+            'pronouns',
+            'profile_bio',
+            'custom_profile_slug',
+        )
         widgets = {
             'pronouns': forms.RadioSelect,
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.is_staff and not self.instance.is_supporter:
+            del self.fields['custom_profile_slug']
 
     def clean_avatar(self):
         avatar = self.cleaned_data.get('avatar')
@@ -446,6 +458,19 @@ class UserEditForm(forms.ModelForm):
                 'corrupted.'
             )
         return avatar
+
+    def clean_custom_profile_slug(self):
+        """
+        Validate that the custom slug does not clash with any existing profile.
+        """
+        slug = self.cleaned_data.get('custom_profile_slug')
+        try:
+            models.User.objects.get_by_hashid(slug)
+        except models.User.DoesNotExist:
+            pass
+        else:
+            raise ValidationError('User with this Custom profile URL already exists.')
+        return slug
 
 
 class PasswordChangeForm(auth_forms.PasswordChangeForm):

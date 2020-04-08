@@ -156,6 +156,23 @@ class User(AbstractBaseUser, PermissionsMixin):
             'server, stream schedule, or anything else you like.'
         ),
     )
+    custom_profile_slug = models.SlugField(
+        max_length=25,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[
+            MinLengthValidator(3),
+        ],
+        verbose_name='Custom profile URL',
+        help_text=(
+            'If set, this will allow you to have a custom URL for your user '
+            'profile, like https://racetime.gg/user/supermario64. You may '
+            'only use letters, numbers, hyphens and underscores. This is a '
+            'staff/supporter feature. If you lose your status, your profile '
+            'will revert back to its regular URL.'
+        ),
+    )
     is_staff = models.BooleanField(
         default=False,
         help_text=(
@@ -217,6 +234,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         Return encoded hashid representing this user.
         """
         return get_hashids(self.__class__).encode(self.id)
+
+    @property
+    def has_custom_url(self):
+        """
+        Determine if this user has an active custom profile URL.
+        """
+        return self.custom_profile_slug and (self.is_staff or self.is_supporter)
 
     @property
     def is_active(self):
@@ -315,6 +339,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         ).exists()
 
     def get_absolute_url(self):
+        if self.has_custom_url:
+            return reverse('view_profile', args=(self.custom_profile_slug,))
         return reverse('view_profile', args=(self.hashid,))
 
     def get_full_name(self):

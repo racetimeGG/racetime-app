@@ -31,6 +31,14 @@ class ViewProfile(generic.DetailView):
     context_object_name = 'profile'
     model = models.User
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        using_custom_url = self.kwargs.get('user') == self.object.custom_profile_slug
+        if bool(self.object.has_custom_url) != bool(using_custom_url):
+            return http.HttpResponseRedirect(self.object.get_absolute_url())
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         entrances = self.get_entrances()
         paginator = Paginator(entrances, 10)
@@ -52,9 +60,12 @@ class ViewProfile(generic.DetailView):
     def get_object(self, queryset=None):
         hashid = self.kwargs.get('user')
         try:
-            obj = models.User.objects.get_by_hashid(hashid)
-        except queryset.model.DoesNotExist:
-            raise http.Http404
+            obj = models.User.objects.get(custom_profile_slug=hashid)
+        except models.User.DoesNotExist:
+            try:
+                obj = models.User.objects.get_by_hashid(hashid)
+            except models.User.DoesNotExist:
+                raise http.Http404
 
         if not obj.active or obj.is_system:
             raise http.Http404
