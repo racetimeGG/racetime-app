@@ -14,7 +14,7 @@ class BanAdmin(options.ModelAdmin):
         'delete_selected',
     ]
     list_display = (
-        '__str__',
+        'user',
         'category',
         'notes',
     )
