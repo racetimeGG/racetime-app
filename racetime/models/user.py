@@ -201,6 +201,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         to='Category',
         related_name='+',
         limit_choices_to={'active': True},
+        blank=True,
     )
 
     objects = UserManager()
