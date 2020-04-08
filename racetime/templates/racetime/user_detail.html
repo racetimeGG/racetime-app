@@ -22,6 +22,14 @@
     <h3>View user profile</h3>
     <div class="user-profile">
         {% include 'racetime/pops/user.html' with user=profile %}
+        {% if profile.is_supporter %}
+            <div class="supporter-badge" title="{{ profile.name }} is one of our generous site supporters!">
+                <div>
+                    <i class="material-icons">star</i>
+                    <span>{{ site_info.title }} supporter</span>
+                </div>
+            </div>
+        {% endif %}
         {% if profile.twitch_channel %}
             <a class="twitch-channel" href="{{ profile.twitch_channel }}" target="_blank">
                 <img src="{% static 'racetime/image/twitch.svg' %}" alt="">

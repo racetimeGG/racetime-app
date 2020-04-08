@@ -156,6 +156,13 @@ aside, main {
     margin-right: 4px;
     vertical-align: top;
 }
+.race-chat > .messages > li > .name.supporter {
+    background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
 .race-chat > .messages > li.bot > .name {
     color: #a0ace8;
 }
@@ -169,9 +176,15 @@ aside, main {
     background-image: url(../image/sword.svg);
     content: '\a0';
 }
+.race-chat > .messages > li > .name.supporter.moderator::before {
+    background-image: url(../image/gold_sword.svg);
+}
 .race-chat > .messages > li > .name.staff::before {
     background-image: url(../image/star.svg);
     content: '\a0';
+}
+.race-chat > .messages > li > .name.supporter.staff::before {
+    background-image: url(../image/gold_star.svg);
 }
 .race-chat > .messages > li > .name::after {
     content: ':';

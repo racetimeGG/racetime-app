@@ -133,9 +133,15 @@ a {
     background-image: url(../image/sword.svg);
     content: '\a0';
 }
+.user-pop.supporter.moderator::after {
+    background-image: url(../image/gold_sword.svg);
+}
 .user-pop.staff::after {
     background-image: url(../image/star.svg);
     content: '\a0';
+}
+.user-pop.supporter.staff::after {
+    background-image: url(../image/gold_star.svg);
 }
 .user-pop > .avatar {
     background-image: radial-gradient(#1a1c20, #8c898c);
@@ -149,6 +155,13 @@ a {
 }
 .user-pop > .name {
     white-space: nowrap;
+}
+.user-pop.supporter > .name {
+    background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
 }
 .user-pop > .scrim {
     color: #8c898c;

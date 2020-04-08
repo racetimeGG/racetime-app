@@ -24,6 +24,32 @@
     font-size: 14px;
     line-height: 22px;
 }
+.user-profile > .supporter-badge {
+    background: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    background-clip: padding-box;
+    border-radius: 5px;
+    cursor: default;
+    margin-top: 10px;
+}
+.user-profile > .supporter-badge > div {
+    align-items: center;
+    border-radius: inherit;
+    background: #1a1c20;
+    display: flex;
+    margin: 1px;
+    padding: 3px 5px;
+}
+.user-profile > .supporter-badge > div > .material-icons,
+.user-profile > .supporter-badge > div > span {
+    background: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+.user-profile > .supporter-badge > div > .material-icons {
+    margin-right: 3px;
+}
 .user-profile > .twitch-channel {
     display: flex;
     margin-top: 10px;
