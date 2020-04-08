@@ -317,6 +317,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'full_name': str(self),
             'name': self.name,
             'discriminator': self.discriminator if self.use_discriminator else None,
+            'url': self.get_absolute_url(),
             'avatar': self.avatar.url if self.avatar else None,
             'pronouns': self.pronouns,
             'flair': self.flair(can_moderate),
