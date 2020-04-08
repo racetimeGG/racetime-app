@@ -130,11 +130,11 @@ a {
     width: 16px;
 }
 .user-pop.moderator::after {
-    background-image: url(../image/sword.png);
+    background-image: url(../image/sword.svg);
     content: '\a0';
 }
 .user-pop.staff::after {
-    background-image: url(../image/star.png);
+    background-image: url(../image/star.svg);
     content: '\a0';
 }
 .user-pop > .avatar {

@@ -166,11 +166,11 @@ aside, main {
     width: 12px;
 }
 .race-chat > .messages > li > .name.moderator::before {
-    background-image: url(../image/sword.png);
+    background-image: url(../image/sword.svg);
     content: '\a0';
 }
 .race-chat > .messages > li > .name.staff::before {
-    background-image: url(../image/star.png);
+    background-image: url(../image/star.svg);
     content: '\a0';
 }
 .race-chat > .messages > li > .name::after {
