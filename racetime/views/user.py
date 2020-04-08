@@ -2,7 +2,7 @@ import requests
 from django import http
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash, login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -14,7 +14,7 @@ from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.decorators import method_decorator, decorator_from_middleware
+from django.utils.decorators import decorator_from_middleware, method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -126,6 +126,13 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
         else:
             return self.form_invalid(form)
 
+    @staticmethod
+    def can_hide_scrim(user):
+        return (
+            (user.is_staff or user.is_supporter)
+            and not models.User.objects.filter(name=user.name).exclude(id=user.id).exists()
+        )
+
     @atomic
     def form_valid(self, form, original_data):
         user = form.save(commit=False)
@@ -138,14 +145,21 @@ class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):
                 )
                 return self.form_invalid(form)
 
-            # Will be reset on pre_save signal.
-            user.discriminator = None
+            if self.can_hide_scrim(user):
+                # User may use a scrim-less name.
+                user.discriminator = '0000'
+            else:
+                # Scrim will be reset on pre_save signal.
+                user.discriminator = None
 
             messages.info(
                 self.request,
                 'Name changes may take up to 24 hours to propagate through '
                 'the whole website.'
             )
+        elif user.discriminator != '0000' and not user.active_race_entrant and self.can_hide_scrim(user):
+            # Remove scrim from user's current name.
+            user.discriminator = '0000'
 
         if 'email' in form.changed_data or 'name' in form.changed_data:
             # Log user changes.
