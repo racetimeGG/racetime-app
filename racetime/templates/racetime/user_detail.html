@@ -9,6 +9,14 @@
 {% block title %}
     {{ profile }} |
 {% endblock %}
+{% block meta %}
+    <meta property="og:title" content="View profile: {{ profile }}">
+    <meta name="description" content="Race history, statistics and information about this user.">
+    <meta property="og:description" content="Race history, statistics and information about this user.">
+    {% if profile.avatar %}
+        <meta property="og:image" content="{{ profile.avatar.url }}">
+    {% endif %}
+{% endblock %}
 
 {% block main %}
     <h3>View user profile</h3>
