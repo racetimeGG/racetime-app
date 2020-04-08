@@ -434,6 +434,7 @@ class UserEditForm(forms.ModelForm):
             'avatar',
             'pronouns',
             'profile_bio',
+            'show_supporter',
             'custom_profile_slug',
         )
         widgets = {
@@ -442,6 +443,8 @@ class UserEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not self.instance.is_supporter:
+            del self.fields['show_supporter']
         if not self.instance.is_staff and not self.instance.is_supporter:
             del self.fields['custom_profile_slug']
 

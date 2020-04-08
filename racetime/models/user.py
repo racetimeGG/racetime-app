@@ -181,7 +181,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     is_supporter = models.BooleanField(
         default=False,
-        help_text='Currently does nothing.',
+        help_text='User has supporter status, indicating they\'re awesome.',
+    )
+    show_supporter = models.BooleanField(
+        default=True,
+        verbose_name='Use supporter style',
+        help_text=(
+            'Display your name in a special colour to indicate your support. '
+            'Turn this off if you would rather stick with the standard name '
+            'colour.'
+        ),
     )
     twitch_code = models.CharField(
         max_length=30,
@@ -324,7 +333,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         flairs = []
         if self.is_staff:
             flairs.append('staff')
-        if self.is_supporter:
+        if self.is_supporter and self.show_supporter:
             flairs.append('supporter')
         if can_moderate:
             flairs.append('moderator')
