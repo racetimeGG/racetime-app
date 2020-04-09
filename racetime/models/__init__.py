@@ -4,7 +4,13 @@ from .category import AuditLog, Category, CategoryRequest, Goal
 from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
-from .user import Ban, User, UserLog, UserRanking
+from .user import (
+    Ban,
+    User,
+    UserAction,
+    UserLog,
+    UserRanking,
+)
 
 __all__ = [
     # admin
@@ -27,6 +33,7 @@ __all__ = [
     # user
     'Ban',
     'User',
+    'UserAction',
     'UserLog',
     'UserRanking',
 ]
