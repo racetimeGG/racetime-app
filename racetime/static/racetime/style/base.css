@@ -1044,6 +1044,9 @@ footer > ul > li::before {
 footer > ul > li:first-child::before {
     content: none
 }
+.go-gold {
+    color: #e6c762;
+}
 
 .layout-form > ul > li {
     display: flex;

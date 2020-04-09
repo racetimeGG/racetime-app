@@ -85,9 +85,9 @@
             {% block footer %}
                 <footer>
                     <ul>
-                        {% for name, url in site_info.footer_links %}
+                        {% for name, url, cls in site_info.footer_links %}
                         <li>
-                            <a href="{{ url }}" target="_blank">{{ name }}</a>
+                            <a class="{{ cls }}" href="{{ url }}" target="_blank">{{ name }}</a>
                         </li>
                         {% endfor %}
                     </ul>
