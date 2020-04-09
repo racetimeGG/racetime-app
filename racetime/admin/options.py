@@ -12,6 +12,23 @@ class GoalInline(admin.TabularInline):
     model = models.Goal
 
 
+class UserLogInline(admin.TabularInline):
+    can_delete = False
+    extra = 0
+    model = models.UserLog
+    readonly_fields = (
+        'user',
+        'changed_at',
+        'email',
+        'name',
+        'discriminator',
+        'changed_password',
+    )
+
+    def has_add_permission(self, *args, **kwargs):
+        return False
+
+
 class ModelAdmin(admin.ModelAdmin):
     def view_on_site(self, obj=None):
         if obj and hasattr(obj, 'get_absolute_url'):

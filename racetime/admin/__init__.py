@@ -1,10 +1,10 @@
 from datetime import date
 
 from django.conf import settings
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import F
 
-from . import actions, forms, options
+from . import forms, options
 from .. import models
 
 
@@ -28,10 +28,7 @@ class BulletinAdmin(options.ModelAdmin):
 
 
 class CategoryRequestAdmin(options.ModelAdmin):
-    actions = [
-        actions.accept_category_request,
-        actions.reject_category_request,
-    ]
+    actions = ['accept', 'reject']
     list_display = (
         '__str__',
         'reviewed_at',
@@ -43,6 +40,16 @@ class CategoryRequestAdmin(options.ModelAdmin):
         'reviewed_at',
         'accepted_as',
     )
+
+    def accept(self, request, queryset):
+        for obj in queryset:
+            obj.accept()
+    accept.short_description = 'Accept category request'
+
+    def reject(self, request, queryset):
+        for obj in queryset:
+            obj.reject()
+    reject.short_description = 'Reject category request'
 
     def has_add_permission(self, *args, **kwargs):
         return False
@@ -127,7 +134,8 @@ class SupporterScheduleAdmin(options.ModelAdmin):
 
 class UserAdmin(options.ModelAdmin):
     actions = [
-        actions.disconnect_twitch_account,
+        'disconnect_twitch_account',
+        'purge_from_leaderboards',
     ]
     exclude = (
         'password',
@@ -136,6 +144,9 @@ class UserAdmin(options.ModelAdmin):
         'user_permissions',
         'email',
     )
+    inlines = [
+        options.UserLogInline,
+    ]
     readonly_fields = (
         'hashid',
         'last_login',
@@ -152,11 +163,49 @@ class UserAdmin(options.ModelAdmin):
         '__str__',
         'active',
         'is_supporter',
-        'is_banned',
         'last_login',
+        'twitch_name',
     )
-    search_fields = ('name',)
+    search_fields = (
+        'name',
+        'twitch_name',
+    )
     ordering = ('name', 'date_joined')
+
+    def disconnect_twitch_account(self, request, queryset):
+        for user in queryset:
+            if user.active_race_entrant:
+                self.message_user(
+                    request,
+                    '%(user)s is currently racing, cannot change their Twitch account.'
+                    % {'user': user},
+                    messages.ERROR,
+                )
+            elif user.twitch_channel:
+                twitch_name = user.twitch_name
+                self.log_change(
+                    request,
+                    user,
+                    'Disconnected %s (ID: %d)' % (user.twitch_name, user.twitch_id),
+                )
+                user.twitch_code = None
+                user.twitch_id = None
+                user.twitch_name = None
+                user.save()
+                self.message_user(
+                    request,
+                    'Disconnected %(twitch)s from %(user)s' % {
+                        'twitch': twitch_name,
+                        'user': user,
+                    },
+                    messages.SUCCESS,
+                )
+            else:
+                self.message_user(
+                    request,
+                    '%(user)s has no Twitch account.' % {'user': user},
+                    messages.INFO,
+                )
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(is_superuser=False)
@@ -166,6 +215,29 @@ class UserAdmin(options.ModelAdmin):
 
     def has_delete_permission(self, *args, **kwargs):
         return False
+
+    def purge_from_leaderboards(self, request, queryset):
+        for user in queryset:
+            rankings = user.userranking_set.all()
+            for ranking in rankings:
+                self.log_deletion(request, ranking, ':'.join([
+                    str(user),
+                    ranking.category.short_name,
+                    ranking.goal.name,
+                    str(ranking.score),
+                    str(ranking.confidence),
+                    str(ranking.best_time),
+                ]))
+                self.message_user(
+                    request,
+                    'Purged %(user)s from %(category)s - %(goal)s' % {
+                        'user': user,
+                        'category': ranking.category,
+                        'goal': ranking.goal,
+                    },
+                    messages.SUCCESS,
+                )
+            rankings.delete()
 
 
 admin.site.disable_action('delete_selected')
