@@ -6,6 +6,7 @@ from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
 from .user import (
     Ban,
+    SupporterSchedule,
     User,
     UserAction,
     UserLog,
@@ -32,6 +33,7 @@ __all__ = [
     'Race',
     # user
     'Ban',
+    'SupporterSchedule',
     'User',
     'UserAction',
     'UserLog',

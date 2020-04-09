@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.conf import settings
 from django.contrib import admin
 from django.db.models import F
@@ -89,6 +91,40 @@ class RaceAdmin(options.ModelAdmin):
         obj.broadcast_data()
 
 
+class SupporterScheduleAdmin(options.ModelAdmin):
+    autocomplete_fields = (
+        'user',
+    )
+    actions = [
+        'delete_selected',
+    ]
+    list_display = (
+        'user',
+        'start_date',
+        'end_date',
+        'reason',
+    )
+    search_fields = (
+        'user__name',
+    )
+
+    def delete_model(self, request, obj):
+        obj.delete()
+        self.update_supporter_status(obj.user)
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.update_supporter_status(obj.user)
+
+    @staticmethod
+    def update_supporter_status(user):
+        user.is_supporter = user.supporterschedule_set.filter(
+            start_date__lte=date.today(),
+            end_date__gte=date.today(),
+        ).exists()
+        user.save()
+
+
 class UserAdmin(options.ModelAdmin):
     actions = [
         actions.disconnect_twitch_account,
@@ -104,6 +140,7 @@ class UserAdmin(options.ModelAdmin):
         'hashid',
         'last_login',
         'date_joined',
+        'is_supporter',
         'twitch_channel',
     )
     list_filter = (
@@ -114,6 +151,7 @@ class UserAdmin(options.ModelAdmin):
     list_display = (
         '__str__',
         'active',
+        'is_supporter',
         'is_banned',
         'last_login',
     )
@@ -135,6 +173,7 @@ admin.site.register(models.Ban, BanAdmin)
 admin.site.register(models.Bulletin, BulletinAdmin)
 admin.site.register(models.CategoryRequest, CategoryRequestAdmin)
 admin.site.register(models.Race, RaceAdmin)
+admin.site.register(models.SupporterSchedule, SupporterScheduleAdmin)
 admin.site.register(models.User, UserAdmin)
 admin.site.site_url = settings.RT_SITE_URI
 admin.site.site_title = '%(site)s admin' % {'site': settings.RT_SITE_INFO['title']}
