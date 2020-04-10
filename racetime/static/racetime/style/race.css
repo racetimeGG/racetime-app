@@ -266,3 +266,33 @@ aside, main {
 .race-stream-control > ul > li .material-icons {
     line-height: 32px;
 }
+
+@media only screen and (max-width: 600px) {
+    .container > .content > main {
+        flex: 0 1 auto;
+    }
+    .container > .content > aside {
+        flex: 1 1 auto;
+    }
+
+    .race-info > .category > .name,
+    .race-info > .category > .short-name,
+    .race-meta,
+    .race-stream-control,
+    .race-entrants,
+    .race-monitor,
+    .race-status > .state > .help,
+    .race-chat > form > .popout {
+        display: none;
+    }
+
+    .race-info {
+        padding-bottom: 0;
+    }
+    .race-status > .timer {
+        font-size: 40px;
+    }
+    .race-status > .state > .value {
+        font-size: 15px;
+    }
+}

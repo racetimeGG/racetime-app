@@ -126,3 +126,11 @@
     color: #8c898c;
     font-size: 15px;
 }
+
+@media only screen and (max-width: 600px) {
+    .entrant-row > .user > .user-pop > .pronouns,
+    .entrant-row > .user > .comment,
+    .entrant-row > .status {
+        display: none;
+    }
+}

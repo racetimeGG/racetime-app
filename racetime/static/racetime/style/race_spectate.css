@@ -131,3 +131,14 @@
 .streamctl-close .container > .content > aside {
     display: none;
 }
+
+@media only screen and (max-width: 600px) {
+    .container > .content > aside,
+    .race-stream-control > ul > .streamctl {
+        display: none;
+    }
+
+    .race-streams > ol > li {
+        flex-basis: 100%;
+    }
+}
