@@ -58,7 +58,6 @@
     {{ race.slug }} |
 {% endblock %}
 {% block meta %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta property="og:title" content="{{ race.category.name }} ~ {{ race.goal_str }} ({{ race.state_info.verbose_value }})">
     {% if race.is_preparing %}
         <meta name="description" content="Race room open, {% if race.state == 'open' %}anyone may join this race{% else %}by invitation only{% endif %}.">
