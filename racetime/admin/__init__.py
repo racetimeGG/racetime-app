@@ -3,6 +3,7 @@ from datetime import date
 from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import F
+from django.urls import set_urlconf
 
 from . import forms, options
 from .. import models
@@ -42,8 +43,11 @@ class CategoryRequestAdmin(options.ModelAdmin):
     )
 
     def accept(self, request, queryset):
+        # Need to set this so that accept() can generate a URL for the email.
+        set_urlconf('racetime.urls')
         for obj in queryset:
             obj.accept()
+        set_urlconf(None)
     accept.short_description = 'Accept category request'
 
     def reject(self, request, queryset):
