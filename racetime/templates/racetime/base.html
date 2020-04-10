@@ -36,16 +36,16 @@
                     {% endblock nocurrentrace %}
                     <div class="user-info">
                         {% if user.is_authenticated %}
-                        {% include 'racetime/pops/user.html' with hide_pronouns=True %}
-                        <a href="{% url 'edit_account' %}" class="btn flat-right">Settings</a>
-                        <form action="{% url 'logout' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        <button type="submit" class="btn flat-left">Log out</button>
-                        </form>
-                        {% else %}
-                        <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-right">Log in</a>
-                        <a href="{% url 'create_account' %}?next={{ request.get_full_path|urlencode }}" class="btn flat-left">Create account</a>
+                            {% include 'racetime/pops/user.html' with hide_pronouns=True %}
+                            <a href="{% url 'edit_account' %}" class="btn settings">Settings</a>
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn logout">Log out</button>
+                            </form>
+                            {% else %}
+                            <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn login">Log in</a>
+                            <a href="{% url 'create_account' %}?next={{ request.get_full_path|urlencode }}" class="btn register">Create account</a>
                         {% endif %}
                     </div>
                 </header>
