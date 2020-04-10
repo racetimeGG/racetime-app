@@ -1331,3 +1331,105 @@ footer > ul > li:first-child::before {
     color: #beebd1;
     margin: 0;
 }
+
+@media only screen and (max-width: 600px) {
+    header {
+        height: 34px;
+        padding: 0;
+    }
+    header > .title > h1 {
+        font-size: 30px;
+        padding: 1px 5px;
+    }
+    header > .title > h1 > a > .dot {
+        transform: rotate(45deg) translate(-6px, -1.5px);
+    }
+    header > .user-info {
+        padding: 2px;
+    }
+    header > .user-info > .user-pop {
+    }
+    header > .user-info > .user-pop > .avatar {
+        height: 22px;
+        width: 22px;
+    }
+    header > .user-info .logout::after,
+    header > .user-info .settings::after {
+          font-family: 'Material Icons';
+          font-size: 18px;
+          line-height: 1;
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
+          -moz-osx-font-smoothing: grayscale;
+          font-feature-settings: 'liga';
+    }
+    header > .user-info .logout,
+    header > .user-info .settings {
+        font-size: 0;
+        padding: 2px;
+    }
+    header > .user-info .login,
+    header > .user-info .register {
+        padding: 3px;
+        font-size: 13px;
+    }
+    header > .user-info .logout::after {
+        content: "exit_to_app";
+    }
+    header > .user-info .settings::after {
+        content: "settings";
+    }
+    .container {
+        padding: 0 5px;
+    }
+    .container > .content {
+        flex-direction: column;
+        padding: 5px 0;
+    }
+    .container > .content > main,
+    .container > .content > aside {
+        border: none;
+        border-radius: 3px;
+        padding: 5px;
+    }
+    .container > .content > main {
+        margin-right: 0;
+    }
+    footer {
+        display: flex;
+        flex-direction: column;
+        padding: 10px 5px;
+    }
+    footer > ul {
+        align-self: center;
+    }
+    footer > span {
+        align-self: flex-end;
+        text-align: right;
+        margin-top: 3px;
+    }
+
+    .nav-tabs {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    .nav-tabs > li > a,
+    .nav-tabs > li > span {
+        padding: 3px;
+    }
+    .home-search {
+        align-items: flex-end;
+        flex-direction: column;
+        float: none;
+    }
+    .home-search > .home-filter {
+        margin-right: 0;
+    }
+    .home-categories > li {
+        flex-basis: 50%;
+        font-size: 14px;
+    }
+    .home-categories > li > a > .no-image {
+        box-shadow: inset 0 0 10px #8c898c;
+    }
+}
