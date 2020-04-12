@@ -33,6 +33,7 @@
         <ol>
             {% for race in current_races %}
                 <li>
+                    <span class="slug">{{ race.slug }}</span>
                     {% include 'racetime/pops/race_row.html' %}
                     <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
                         <i class="material-icons">videocam</i>
@@ -52,8 +53,9 @@
         <ol>
             {% for race in past_races %}
                 <li>
-                    <time class="datetime" datetime="{{ race.started_at.isoformat }}">
-                        {{ race.opened_at }}
+                    <span class="slug">{{ race.slug }}</span>
+                    <time class="datetime" datetime="{{ race.started_at.isoformat }}" title="Date/time race started at">
+                        {{ race.started_at }}
                     </time>
                     {% include 'racetime/pops/race_row.html' %}
                 </li>

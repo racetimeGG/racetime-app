@@ -661,15 +661,20 @@ header > .current-race > a .timer {
     display: flex;
     flex-wrap: wrap;
 }
-.race-list.current > ol > li {
-    flex-wrap: nowrap;
-}
+.race-list > ol > li > .slug,
 .race-list > ol > li > time {
     box-sizing: border-box;
     color: #8c898c;
-    flex: 1 0 100%;
+    cursor: default;
+    flex: 1 0 50%;
     font-size: 13px;
-    padding: 5px 10px 0;
+    padding: 5px 10px 2px;
+}
+.race-list.current > ol > li > .slug {
+    flex-basis: 100%;
+}
+.race-list > ol > li > time {
+    text-align: right;
 }
 .race-list > ol > li > .race {
     border: 5px solid #1a1c20;
@@ -678,11 +683,8 @@ header > .current-race > a .timer {
     flex: 1 1 auto;
     flex-direction: column;
     text-decoration: none;
-    margin: 5px;
+    margin: 0 5px 5px;
     padding: 5px;
-}
-.race-list > ol > li > time + .race {
-    margin-top: 0;
 }
 .race-list > ol > li > .race > .main {
     display: flex;
@@ -731,7 +733,7 @@ header > .current-race > a .timer {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin: 5px 5px 5px 0;
+    margin: 0 5px 5px 0;
     padding: 5px;
     text-align: center;
     text-decoration: none;

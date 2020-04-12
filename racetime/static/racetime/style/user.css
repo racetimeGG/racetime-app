@@ -69,7 +69,7 @@
 .race-list > ol > li > .race {
     border-bottom: 0;
     border-radius: 10px 10px 0 0;
-    margin: 10px 0 0;
+    margin: 0;
 }
 
 .race-entrants {
