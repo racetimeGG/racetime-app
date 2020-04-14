@@ -65,4 +65,4 @@ def rate_race(race):
     with atomic():
         for group, user_rating, entrant in zip(rated, users, entrants):
             rating = group[0]
-            user_rating.set_rating(rating, entrant.finish_time)
+            user_rating.set_rating(rating, entrant.finish_time if entrant.place else None)
