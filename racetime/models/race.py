@@ -1584,6 +1584,7 @@ class Entrant(models.Model):
         """
         if self.can_disqualify:
             self.dq = True
+            self.place = None
             with atomic():
                 self.save()
                 self.race.increment_version()
