@@ -18,12 +18,10 @@
                 {{ ranking.display_score|intcomma }}
             </span>
             <span class="extra">
-                {% if ranking.best_time %}
-                    <span class="best-time" title="Best recorded finish time">
-                        <i class="material-icons">star</i>
-                        {{ ranking.best_time_html }}
-                    </span>
-                {% endif %}
+                <span class="best-time" title="Best recorded finish time">
+                    <i class="material-icons">star</i>
+                    {{ ranking.best_time_html }}
+                </span>
                 <span class="races" title="Races entered">
                     {{ ranking.times_raced|intcomma }} race{{ ranking.times_raced|pluralize }}
                 </span>

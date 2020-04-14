@@ -104,6 +104,7 @@ class CategoryLeaderboards(Category):
             rankings = models.UserRanking.objects.filter(
                 category=category,
                 goal=goal,
+                best_time__isnull=False,
             ).order_by('-score')[:1000]
             yield goal, rankings
 
