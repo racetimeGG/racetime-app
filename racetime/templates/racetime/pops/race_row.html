@@ -5,7 +5,9 @@
                 {% if nocontext %}
                     {{ race.category.short_name }}
                 {% endif %}
-                {{ race.goal|default:race.custom_goal }}
+                {% if not nocontext %}
+                    {{ race.goal|default:race.custom_goal }}
+                {% endif %}
             </span>
             <span class="state">
                 {{ race.state_info.verbose_value }}
