@@ -29,6 +29,9 @@ textarea {
     min-height: 66px;
     resize: vertical;
 }
+:focus {
+    outline-color: #1da674;
+}
 
 h1, h2 {
     font-family: 'Roboto Slab', serif;
@@ -1352,8 +1355,6 @@ footer > ul > li:first-child::before {
     header > .user-info {
         padding: 2px;
     }
-    header > .user-info > .user-pop {
-    }
     header > .user-info > .user-pop > .avatar {
         height: 22px;
         width: 22px;
@@ -1446,7 +1447,7 @@ footer > ul > li:first-child::before {
         margin-right: 0;
     }
     .home-categories > li {
-        flex-basis: 50%;
+        flex-basis: 33.33%;
         font-size: 14px;
     }
     .home-categories > li > a > .no-image {
