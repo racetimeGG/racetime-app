@@ -68,6 +68,13 @@ class Category(models.Model):
             'Moderators may override this for individual races.'
         ),
     )
+    allow_stream_override = models.BooleanField(
+        default=False,
+        help_text=(
+            'Allow race monitors to change the streaming requirements for '
+            'their race room. By default, only moderators can change this.'
+        ),
+    )
     active = models.BooleanField(
         default=True,
         help_text='Allow new races to be created in this category.'
@@ -501,6 +508,7 @@ class AuditLog(models.Model):
             ('info_change', 'updated category info'),
             ('slug_words_change', 'updated category slug words'),
             ('streaming_required_change', 'updated category streaming requirement'),
+            ('allow_stream_override_change', 'updated category stream override'),
             ('owner_change', 'transferred category ownership'),
             ('moderator_add', 'added a moderator'),
             ('moderator_remove', 'removed a moderator'),

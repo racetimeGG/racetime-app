@@ -116,6 +116,14 @@ class OverrideStream(ModeratorEntrantAction):
     def entrant_action(self, race, entrant, user, data):
         entrant.override_stream(overridden_by=user)
 
+    def test_func(self):
+        if not self.user.is_authenticated:
+            return False
+        race = self.get_object()
+        if race.category.allow_stream_override:
+            return race.can_monitor(self.user)
+        return race.category.can_moderate(self.user)
+
 
 class Remove(MonitorEntrantAction):
     def entrant_action(self, race, entrant, user, data):

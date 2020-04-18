@@ -19,7 +19,7 @@
             </form>
         </li>
     {% endif %}
-    {% if can_moderate and entrant.can_override_stream %}
+    {% if race.category.allow_stream_override or can_moderate %}{% if entrant.can_override_stream %}
         <li>
             <form method="post" class="race-action-form" action="{% url 'override_stream' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
@@ -28,7 +28,7 @@
                 </button>
             </form>
         </li>
-    {% endif %}
+    {% endif %}{% endif %}
     {% if entrant.can_remove %}
         <li>
             <form method="post" class="race-action-form" action="{% url 'remove' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">

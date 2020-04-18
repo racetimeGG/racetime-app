@@ -186,6 +186,7 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
             'info',
             'slug_words',
             'streaming_required',
+            'allow_stream_override',
         } & set(form.changed_data)
         if changed_fields:
             for field in changed_fields:

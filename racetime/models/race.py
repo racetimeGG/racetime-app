@@ -122,8 +122,7 @@ class Race(models.Model):
     streaming_required = models.BooleanField(
         default=True,
         help_text=(
-            'Override the streaming rules for this category. Only moderators '
-            'can change this.'
+            'Override the streaming rules for this category.'
         ),
     )
     allow_comments = models.BooleanField(

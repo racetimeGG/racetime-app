@@ -121,6 +121,7 @@ class CategoryForm(forms.ModelForm):
             'image',
             'info',
             'streaming_required',
+            'allow_stream_override',
             'slug_words',
             'active_goals',
             'add_new_goals',
@@ -320,8 +321,11 @@ class RaceForm(forms.ModelForm):
             )
         if 'streaming_required' in self.fields:
             self.fields['streaming_required'].initial = category.streaming_required
-            if not can_moderate:
+            if not category.allow_stream_override and not can_moderate:
                 self.fields['streaming_required'].disabled = True
+                self.fields['streaming_required'].help_text += (
+                    ' Only moderators can change this.'
+                )
 
     def clean(self):
         cleaned_data = super().clean()
