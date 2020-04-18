@@ -1373,8 +1373,7 @@ footer > ul > li:first-child::before {
         font-size: 0;
         padding: 2px;
     }
-    header > .user-info .login,
-    header > .user-info .register {
+    header > .user-info .login-or-register {
         padding: 3px;
         font-size: 13px;
     }

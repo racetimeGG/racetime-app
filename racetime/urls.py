@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('account', views.EditAccount.as_view(), name='edit_account'),
     path('account/', include([
+        path('auth', views.LoginRegister.as_view(), name='login_or_register'),
         path('connections', views.EditAccountConnections.as_view(), name='edit_account_connections'),
         path('security', views.EditAccountSecurity.as_view(), name='edit_account_security'),
         path('login', views.Login.as_view(), name='login'),

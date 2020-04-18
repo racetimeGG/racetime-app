@@ -409,6 +409,10 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
         widget=ReCaptchaV2Checkbox(attrs={'data-theme': 'dark'})
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.pop('autofocus')
+
 
 class UserCreationForm(auth_forms.UserCreationForm):
     captcha = ReCaptchaField(

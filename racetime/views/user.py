@@ -15,6 +15,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import decorator_from_middleware, method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -91,6 +92,17 @@ class ViewProfile(generic.DetailView):
         return queryset[:3]
 
 
+class LoginRegister(generic.TemplateView):
+    template_name = 'racetime/user/login_register.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'createaccount_form': forms.UserCreationForm(auto_id='createaccount_id_%s'),
+            'login_form': forms.AuthenticationForm(self.request, auto_id='login_id_%s'),
+        }
+
+
 class CreateAccount(generic.CreateView):
     form_class = forms.UserCreationForm
     template_name = 'racetime/user/create_account.html'
@@ -99,7 +111,7 @@ class CreateAccount(generic.CreateView):
     @method_decorator(sensitive_post_parameters())
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return http.HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
+            return http.HttpResponseRedirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -119,7 +131,27 @@ class CreateAccount(generic.CreateView):
             recipient_list=[user.email],
         )
 
-        return http.HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
+        return http.HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.get_redirect_url() or resolve_url(settings.LOGIN_REDIRECT_URL)
+
+    def get_redirect_url(self):
+        """
+        Return the user-originating redirect URL if it's safe.
+
+        Mugged from Django's LoginView down a dark alley.
+        """
+        redirect_to = self.request.POST.get(
+            'next',
+            self.request.GET.get('next', '')
+        )
+        url_is_safe = url_has_allowed_host_and_scheme(
+            url=redirect_to,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        )
+        return redirect_to if url_is_safe else ''
 
 
 class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):

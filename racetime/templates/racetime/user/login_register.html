@@ -1,0 +1,54 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/login_register.css' %}">
+{% endblock %}
+{% block js %}
+    <script src="{% static 'racetime/script/login_register.js' %}"></script>
+{% endblock %}
+{% block title %}
+    Log in / Create an account |
+{% endblock %}
+{% block meta %}
+    <meta name="robots" content="noindex,follow">
+{% endblock %}
+
+{% block content %}
+    <main class="create-account">
+        <label class="attract" for="createaccount_id_email"><span>Start new</span></label>
+        <h2>Create an account</h2>
+        <p class="help">
+            If this is your first time, create yourself an account to get
+            started with {{ site_info.title }}
+            (<a href="/about/faq" target="_blank">learn more</a>)
+        </p>
+        <div class="create-account">
+            <form class="create-account-form layout-form" method="post" action="{% url 'create_account' %}?{{ request.GET.urlencode }}">
+                {% csrf_token %}
+                <ul>{{ createaccount_form.as_ul }}</ul>
+                <button class="btn" type="submit">Create account</button>
+            </form>
+        </div>
+    </main>
+    <main class="login">
+        <label class="attract" for="login_id_username"><span>Continue</span></label>
+        <h2>Log in</h2>
+        <p class="help">
+            If you have an account with us already, just enter your login
+            details to continue.
+        </p>
+        <div class="login">
+            <form class="login-form layout-form" method="post" action="{% url 'login' %}?{{ request.GET.urlencode }}">
+                {% csrf_token %}
+                <ul>{{ login_form.as_ul }}</ul>
+                <span class="submit-row">
+                    <button class="btn" type="submit">Log in</button>
+                    <a href="{% url 'password_reset' %}" class="password-reset-link">
+                        Forgot your password?
+                    </a>
+                </span>
+            </form>
+        </div>
+    </main>
+{% endblock %}

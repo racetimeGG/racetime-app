@@ -44,8 +44,7 @@
                                 <button type="submit" class="btn logout">Log out</button>
                             </form>
                             {% else %}
-                            <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" class="btn login">Log in</a>
-                            <a href="{% url 'create_account' %}?next={{ request.get_full_path|urlencode }}" class="btn register">Create account</a>
+                            <a href="{% url 'login_or_register' %}?next={{ login_next|urlencode }}" class="btn login-or-register">Log in / Create account</a>
                         {% endif %}
                     </div>
                 </header>
@@ -76,11 +75,10 @@
                 </div>
                 {% endif %}
                 <div class="content">
-                    <main>
-                        {% block main %}
-                        {% endblock %}
-                    </main>
-                    <aside>{% block aside %}{% endblock %}</aside>
+                    {% block content %}
+                        <main>{% block main %}{% endblock %}</main>
+                        <aside>{% block aside %}{% endblock %}</aside>
+                    {% endblock %}
                 </div>
             </div>
             {% block footer %}

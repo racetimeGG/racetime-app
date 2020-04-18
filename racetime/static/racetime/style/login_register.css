@@ -1,0 +1,78 @@
+.container > .content {
+    justify-content: center;
+}
+.container > .content > main {
+    flex: 0 1 30vw;
+    margin-right: 2vw;
+}
+.container > .content > main > .attract {
+    background: linear-gradient(to bottom, #1e1f24 0, #191a1e 100%);
+    border-radius: 10px;
+    display: block;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    padding: 10px 0;
+    position: relative;
+    transition: all 0.2s;
+}
+.container > .content > main > .attract > span {
+    background-image: linear-gradient(to bottom, #eee 40%, #ddd8dd 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+}
+.container > .content > main > .attract::before {
+    animation: point 1.5s linear infinite;
+    background: url(../image/fingerpoint.svg) 0 0 / cover;
+    display: block;
+    height: 41px;
+    pointer-events: none;
+    width: 48px;
+    position: absolute;
+        top: 17px;
+        left: -7px;
+}
+.container > .content > .focus > .attract {
+    box-shadow: inset 0 0 10px #26dd9a;
+}
+.container > .content > .focus > .attract::before {
+    content: "\a0";
+}
+
+@keyframes point {
+    50% {
+        left: -7px;
+    }
+    75% {
+        left: -16px;
+    }
+    100% {
+        left: -7px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .container > .content > main {
+        border-radius: 10px;
+    }
+    .container > .content > main:not(.focus) {
+        background: none;
+    }
+    .container > .content > main > .attract {
+        border: solid #26dd9a;
+        border-width: 1px 0 0 1px;
+        cursor: pointer;
+    }
+    .container > .content > .focus > .attract {
+        border-color: transparent;
+    }
+    .container > .content > main > .attract ~ :not(.help) {
+        display: none;
+    }
+    .container > .content > .focus > .attract ~ :not(.help) {
+        display: initial;
+    }
+}
