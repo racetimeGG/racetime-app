@@ -46,11 +46,15 @@
         <ol>
             {% for profile_entrant in entrances %}
                 <li>
-                    <span class="slug">{{ profile_entrant.race.slug }}</span>
-                    <time class="datetime" datetime="{{ profile_entrant.race.started_at.isoformat }}" title="Date/time race started at">
-                        {{ profile_entrant.race.started_at }}
-                    </time>
-                    {% include 'racetime/pops/race_row.html' with race=profile_entrant.race nocontext=True %}
+                    <span class="race-detail">
+                        <span class="slug">{{ profile_entrant.race.slug }}</span>
+                        <time class="datetime" datetime="{{ profile_entrant.race.started_at.isoformat }}" title="Date/time race started at">
+                            {{ profile_entrant.race.started_at }}
+                        </time>
+                    </span>
+                    <span class="race-row">
+                        {% include 'racetime/pops/race_row.html' with race=profile_entrant.race nocontext=True %}
+                    </span>
                     <ol class="race-entrants">
                         {% for entrant in profile_entrant.race.ordered_entrants %}
                             <li class="entrant-row {% if entrant == profile_entrant %}highlight{% endif %}">

@@ -66,10 +66,12 @@
     word-break: break-word;
 }
 
-.race-list > ol > li > .race {
+.race-list > ol > li > .race-row {
+    margin: 10px 0 0;
+}
+.race-list > ol > li > .race-row > .race {
     border-bottom: 0;
     border-radius: 10px 10px 0 0;
-    margin: 0;
 }
 
 .race-entrants {

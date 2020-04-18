@@ -33,12 +33,16 @@
         <ol>
             {% for race in current_races %}
                 <li>
-                    <span class="slug">{{ race.slug }}</span>
-                    {% include 'racetime/pops/race_row.html' %}
-                    <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
-                        <i class="material-icons">videocam</i>
-                        <span>Watch live</span>
-                    </a>
+                    <span class="race-detail">
+                        <span class="slug">{{ race.slug }}</span>
+                    </span>
+                    <span class="race-row">
+                        {% include 'racetime/pops/race_row.html' %}
+                        <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
+                            <i class="material-icons">videocam</i>
+                            <span>Watch live</span>
+                        </a>
+                    </span>
                 </li>
             {% empty %}
                 <li>
@@ -53,11 +57,15 @@
         <ol>
             {% for race in past_races %}
                 <li>
-                    <span class="slug">{{ race.slug }}</span>
-                    <time class="datetime" datetime="{{ race.started_at.isoformat }}" title="Date/time race started at">
-                        {{ race.started_at }}
-                    </time>
-                    {% include 'racetime/pops/race_row.html' %}
+                    <span class="race-detail">
+                        <span class="slug">{{ race.slug }}</span>
+                        <time class="datetime" datetime="{{ race.started_at.isoformat }}" title="Date/time race started at">
+                            {{ race.started_at }}
+                        </time>
+                    </span>
+                    <span class="race-row">
+                        {% include 'racetime/pops/race_row.html' %}
+                    </span>
                 </li>
             {% empty %}
                 <li>

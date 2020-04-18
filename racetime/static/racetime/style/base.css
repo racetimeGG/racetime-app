@@ -660,92 +660,88 @@ header > .current-race > a .timer {
     font-size: 22px;
 }
 
-.race-list > ol > li {
-    display: flex;
-    flex-wrap: wrap;
-}
-.race-list > ol > li > .slug,
-.race-list > ol > li > time {
+.race-list > ol > li > .race-detail {
     box-sizing: border-box;
     color: #8c898c;
-    cursor: default;
-    flex: 1 0 50%;
+    display: flex;
+    flex: 1 0 100%;
     font-size: 13px;
-    padding: 5px 10px 2px;
+    justify-content: space-between;
+    padding: 5px 10px 0;
 }
-.race-list.current > ol > li > .slug {
-    flex-basis: 100%;
+.race-list > ol > li > .race-row {
+    display: flex;
+    margin: 5px;
 }
-.race-list > ol > li > time {
-    text-align: right;
-}
-.race-list > ol > li > .race {
+.race-list > ol > li > .race-row > .race {
     border: 5px solid #1a1c20;
     border-radius: 10px;
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     text-decoration: none;
-    margin: 0 5px 5px;
     padding: 5px;
 }
-.race-list > ol > li > .race > .main {
+.race-list > ol > li > .race-detail + .race-row {
+    margin-top: 0;
+}
+.race-list > ol > li > .race-row > .race > .main {
     display: flex;
 }
-.race-list > ol > li > .race > .main > span {
+.race-list > ol > li > .race-row > .race > .main > span {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
 }
-.race-list > ol > li > .race > .main > .right {
+.race-list > ol > li > .race-row > .race > .main > .right {
     text-align: right;
 }
 
-.race-list > ol > li > .race .goal,
-.race-list > ol > li > .race .timer {
+.race-list > ol > li > .race-row > .race .goal,
+.race-list > ol > li > .race-row > .race .timer {
     font-size: 20px;
     font-weight: bold;
 }
-.race-list > ol > li > .race .goal {
+.race-list > ol > li > .race-row > .race .goal {
     height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
 
 
-.race-list > ol > li > .race .state > .recorded {
+.race-list > ol > li > .race-row > .race .state > .recorded {
     display: inline-flex;
     font-size: 14px;
 }
-.race-list > ol > li > .race .state > .recorded::before {
+.race-list > ol > li > .race-row > .race .state > .recorded::before {
     content: '(';
 }
-.race-list > ol > li > .race .state > .recorded::after {
+.race-list > ol > li > .race-row > .race .state > .recorded::after {
     content: ')';
 }
-.race-list > ol > li > .race > .info {
+.race-list > ol > li > .race-row > .race > .info {
     color: #8c898c;
     font-size: 13px;
     height: 1.375em;
     overflow: hidden;
     word-break: break-word;
 }
-.race-list > ol > li > .watch-live {
+.race-list > ol > li > .race-row > .watch-live {
     border: 5px solid #1a1c20;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin: 0 5px 5px 0;
+    margin-left: 5px;
     padding: 5px;
     text-align: center;
     text-decoration: none;
     white-space: nowrap;
 }
-.race-list > ol > li > .watch-live > .material-icons {
+.race-list > ol > li > .race-row > .watch-live > .material-icons {
     font-size: 27.5px;
 }
-.race-list > ol > li > .watch-live > span {
+.race-list > ol > li > .race-row > .watch-live > span {
     font-weight: bold;
 }
 
