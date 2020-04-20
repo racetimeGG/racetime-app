@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "jquery-form": "^4.2.2",
     "jquery-ui-dist": "^1.12.1"
   }
