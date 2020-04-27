@@ -57,6 +57,7 @@ urlpatterns = [
             path('log', views.CategoryAudit.as_view(), name='category_audit_log'),
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
+        path('leaderboards/data', views.CategoryLeaderboardsData.as_view(), name='leaderboards_data'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),
         path('star', views.FavouriteCategory.as_view(), name='star'),
         path('unstar', views.UnfavouriteCategory.as_view(), name='unstar'),

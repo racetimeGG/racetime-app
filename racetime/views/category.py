@@ -1,9 +1,13 @@
+import json
+
 from django import http
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models as db_models
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
@@ -107,6 +111,35 @@ class CategoryLeaderboards(Category):
                 best_time__isnull=False,
             ).order_by('-score')[:1000]
             yield goal, rankings
+
+
+class CategoryLeaderboardsData(CategoryLeaderboards):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        resp = http.HttpResponse(
+            content=json.dumps({
+                'leaderboards': list(self.leaderboards()),
+            }, cls=DjangoJSONEncoder),
+            content_type='application/json',
+        )
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+    def leaderboards(self):
+        for goal, rankings in super().leaderboards():
+            yield {
+                'goal': goal.name,
+                'num_ranked': len(rankings),
+                'rankings': [
+                    {
+                        'user': ranking.user.api_dict_summary(category=self.object),
+                        'place': place,
+                        'place_ordinal': ordinal(place),
+                        'score': ranking.display_score,
+                        'best_time': ranking.best_time,
+                    } for place, ranking in enumerate(rankings, start=1)
+                ],
+            }
 
 
 class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
