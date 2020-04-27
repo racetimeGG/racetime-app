@@ -278,6 +278,7 @@ class Message:
 
         if message.message[0] == '.':
             command, msg = (message.message[1:] + ' ').split(' ', 1)
+            command = command.lower()
             if command in commands:
                 race_action = commands[command]()
 
