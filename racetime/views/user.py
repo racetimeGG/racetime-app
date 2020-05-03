@@ -336,7 +336,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
 
                         messages.success(
                             self.request,
-                            'Thanks, you have successfully authorised your Twitch.tv '
+                            'Thanks, you have successfully authorized your Twitch.tv '
                             'account. You can now join races that requires streaming.',
                         )
 

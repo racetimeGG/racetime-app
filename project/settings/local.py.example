@@ -1,4 +1,4 @@
-# Twitch.tv client authorisation
+# Twitch.tv client authorization
 
 # Create a Twitch application here: https://dev.twitch.tv/console/apps/create
 # You must add http://localhost:8000/account/twitch_auth as a redirect URL.

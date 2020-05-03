@@ -3,21 +3,21 @@
 {% block body_class %}dialog{% endblock %}
 
 {% block title %}
-    Authorisation result |
+    Authorization result |
 {% endblock %}
 
 {% block nocurrentrace %}{% endblock nocurrentrace %}
 
 {% block main %}
     {% if error == 'access_denied' %}
-        <h2>Authorisation cancelled</h2>
+        <h2>Authorization cancelled</h2>
         <p>
-            Authorisation process was cancelled.
+            Authorization process was cancelled.
         </p>
     {% else %}
-        <h2>Authorisation successful</h2>
+        <h2>Authorization successful</h2>
         <p>
-            You have successfully authorised this app to connect to racetime.gg
+            You have successfully authorized this app to connect to racetime.gg
             with your user credentials.
         </p>
         <p>

@@ -218,7 +218,7 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
             )
         elif not state.user:
             await self.whoops(
-                'Permission denied, you may need to re-authorise this '
+                'Permission denied, you may need to re-authorize this '
                 'application.'
             )
         else:
