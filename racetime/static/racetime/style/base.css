@@ -328,7 +328,7 @@ header > .current-race > a .timer {
     padding: 10px 30px;
 }
 .bulletin > .message > time {
-    color: #8c898c;
+    color: #aaa;
     font-weight: bold;
 }
 .bulletin > .message > time::after {
@@ -1026,7 +1026,7 @@ dd {
 footer {
     display: flex;
     justify-content: space-between;
-    color: #8c898c;
+    color: #999699;
     font-size: 13px;
     padding-bottom: 20px;
     padding-top: 20px;
