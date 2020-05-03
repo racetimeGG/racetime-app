@@ -63,6 +63,9 @@ class CategoryRequestAdmin(options.ModelAdmin):
 
 
 class RaceAdmin(options.ModelAdmin):
+    autocomplete_fields = (
+        'monitors',
+    )
     form = forms.RaceForm
     exclude = (
         'started_at',
@@ -83,7 +86,6 @@ class RaceAdmin(options.ModelAdmin):
         'slug',
         'state',
         'opened_by',
-        'monitors',
         'recorded',
         'recorded_by',
         'version',
