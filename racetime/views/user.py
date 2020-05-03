@@ -304,6 +304,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                     token = user.twitch_access_token(request)
                     resp = requests.get('https://api.twitch.tv/helix/users', headers={
                         'Authorization': f'Bearer {token}',
+                        'Client-ID': settings.TWITCH_CLIENT_ID,
                     })
                     if resp.status_code != 200:
                         raise requests.RequestException
