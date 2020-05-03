@@ -1278,7 +1278,9 @@ footer > ul > li:first-child::before {
     margin-bottom: 10px;
 }
 .nav-tabs > li {
+    align-items: stretch;
     border-left: 2px solid #1a1c20;
+    display: flex;
     flex: 1 1 0;
 }
 .nav-tabs > li:first-child {
@@ -1286,7 +1288,10 @@ footer > ul > li:first-child::before {
 }
 .nav-tabs > li > a,
 .nav-tabs > li > span {
-    display: block;
+    align-items: center;
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
     padding: 5px;
 }
 .nav-tabs > li > a {
@@ -1432,6 +1437,17 @@ footer > ul > li:first-child::before {
     .pagination > .step-links .text,
     .pagination > .step-links > .current > .page {
         display: none;
+    }
+
+    .bulletin {
+        padding-top: 5px;
+    }
+    .bulletin > .message {
+        font-size: 16px;
+        padding: 5px 15px;
+    }
+    .bulletin > .close {
+        padding: 5px;
     }
 
     .home-search {
