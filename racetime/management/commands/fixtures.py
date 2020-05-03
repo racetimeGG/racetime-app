@@ -21,6 +21,7 @@ category_names = [
     ('Super Mario 64', 'SM64', 'sm64'),
     ('Super Mario Sunshine', 'SMS', 'sms'),
     ('Super Metroid', 'SM', 'sm'),
+    ('Miscellane­ous (unlisted)', 'Misc', 'misc'),
 ]
 goal_names = [
     'any%',
