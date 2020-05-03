@@ -1,8 +1,17 @@
+from contextlib import contextmanager
+
 from django.conf import settings
 from django.contrib import admin
 from django.urls import set_urlconf
 
 from .. import models
+
+
+@contextmanager
+def frontend_urlconf():
+    set_urlconf('racetime.urls')
+    yield
+    set_urlconf(None)
 
 
 class GoalInline(admin.TabularInline):
@@ -32,7 +41,6 @@ class UserLogInline(admin.TabularInline):
 class ModelAdmin(admin.ModelAdmin):
     def view_on_site(self, obj=None):
         if obj and hasattr(obj, 'get_absolute_url'):
-            set_urlconf('racetime.urls')
-            url = settings.RT_SITE_URI + obj.get_absolute_url()
-            set_urlconf(None)
+            with frontend_urlconf():
+                url = settings.RT_SITE_URI + obj.get_absolute_url()
             return url

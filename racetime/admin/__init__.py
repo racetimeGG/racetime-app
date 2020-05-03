@@ -99,7 +99,13 @@ class RaceAdmin(options.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.version = F('version') + 1
         obj.save()
-        obj.broadcast_data()
+        if not obj.recorded and (
+            'goal' in form.changed_data
+            or 'custom_goal' in form.changed_data
+        ):
+            obj.update_entrant_scores()
+        with options.frontend_urlconf():
+            obj.broadcast_data()
 
 
 class SupporterScheduleAdmin(options.ModelAdmin):
