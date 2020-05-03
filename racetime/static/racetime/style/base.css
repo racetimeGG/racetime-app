@@ -1360,6 +1360,11 @@ footer > ul > li:first-child::before {
         height: 22px;
         width: 22px;
     }
+    header > .user-info > .user-pop > .name {
+        max-width: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
     header > .user-info .logout::after,
     header > .user-info .settings::after {
           font-family: 'Material Icons';

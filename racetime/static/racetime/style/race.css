@@ -267,7 +267,33 @@ aside, main {
     line-height: 32px;
 }
 
+.race-nav {
+    background: #1e1f24;
+    display: none;
+}
+.race-nav > ul {
+    display: flex;
+    justify-content: space-around;
+}
+.race-nav > ul > li {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 5px 0;
+}
+.race-nav > ul > .active {
+    color: #beebd1;
+}
+.race-nav > ul > li > .title {
+    font-size: 11px;
+}
+
 @media only screen and (max-width: 600px) {
+    .container > .content {
+        margin: 0;
+    }
     .container > .content > main {
         flex: 0 1 auto;
     }
@@ -275,8 +301,9 @@ aside, main {
         flex: 1 1 auto;
     }
 
-    .race-info > .category > .name,
-    .race-info > .category > .short-name,
+    .race-info > .category,
+    .race-info > .goal,
+    .race-info > .info,
     .race-meta,
     .race-stream-control,
     .race-entrants,
@@ -286,13 +313,93 @@ aside, main {
         display: none;
     }
 
+    .race-nav-info .container > .content > main,
+    .race-nav-entrants .container > .content > main {
+        flex: 1 1 100%;
+    }
+
+    .race-nav-info .race-info > .category,
+    .race-nav-info .race-info > .goal,
+    .race-nav-info .race-info > .info,
+    .race-nav-info .race-meta,
+    .race-nav-entrants .race-entrants,
+    .race-nav-entrants .race-monitor {
+        display: initial;
+    }
+
+    .race-nav-info .race-chat,
+    .race-nav-entrants .race-chat {
+        display: none;
+    }
+
+    .race-intro {
+        display: block;
+    }
     .race-info {
         padding-bottom: 0;
+    }
+    .race-info > .category > .name {
+        font-size: 24px;
+    }
+    .race-meta {
+        margin: 0;
+        padding-top: 10px;
+    }
+    .race-entrants {
+        margin-top: 10px;
+    }
+    .race-monitor {
+        margin-top: 0;
+    }
+    .race-monitor > ul {
+        flex-wrap: wrap;
+    }
+    .race-monitor > ul > li {
+        margin-top: 10px;
+    }
+    .race-monitor > ul > .invite {
+        flex-basis: 100%;
+    }
+    .race-monitor > ul > .invite > form > ul {
+        width: 100%;
+    }
+    .race-monitor > ul > .invite > form input {
+        box-sizing: border-box;
+        width: 100%;
+    }
+    .race-monitor > ul > .invite + li {
+        margin-left: 0;
     }
     .race-status > .timer {
         font-size: 40px;
     }
     .race-status > .state > .value {
         font-size: 15px;
+    }
+
+    .entrant-row {
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+    .entrant-row > .user {
+        flex-basis: calc(100% - 50px);
+    }
+    .entrant-row > .user > .user-pop > .pronouns,
+    .entrant-row > .status,
+    .entrant-row > .finish-time {
+        display: none;
+    }
+    .entrant-row > .status-or-time {
+        display: initial;
+        font-size: 13px;
+    }
+
+    .race-nav {
+        display: block;
+    }
+
+    footer {
+        display: none;
     }
 }

@@ -344,4 +344,11 @@ $(function() {
     $(document).on('click', '.confirm .btn, .dangerous .btn', function() {
         return confirm($(this).text().trim() + ': are you sure you want to do that?');
     });
+
+    $(document).on('click', '.race-nav > ul > li', function() {
+        $('body').removeClass(function(index, className) {
+            return (className.match(/(^|\s)race-nav-\S+/g) || []).join(' ');
+        }).addClass('race-nav-' + $(this).data('nav'));
+        $(this).addClass('active').siblings().removeClass('active');
+    });
 });

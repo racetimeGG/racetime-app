@@ -50,3 +50,21 @@
 {% block aside %}
     {% include 'racetime/race/aside.html' with popout=True %}
 {% endblock %}
+{% block prefooter %}
+    <div class="race-nav">
+        <ul>
+            <li data-nav="info">
+                <i class="material-icons">info</i>
+                <span class="title">Info</span>
+            </li>
+            <li data-nav="entrants">
+                <i class="material-icons">list_alt</i>
+                <span class="title">Entrants</span>
+            </li>
+            <li class="active" data-nav="chat">
+                <i class="material-icons">chat</i>
+                <span class="title">Chat</span>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
