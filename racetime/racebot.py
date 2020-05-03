@@ -282,33 +282,47 @@ class RaceBot:
                 self.logger.error('[Twitch] API error occurred!')
                 self.logger.error(str(ex))
             else:
-                live_users = [
-                    int(stream.get('user_id'))
-                    for stream in resp.json().get('data', [])
-                    if stream.get('user_id')
-                ]
+                live_users = []
+                twitch_names = {}
+                for stream in resp.json().get('data', []):
+                    if stream.get('user_id'):
+                        user_id = int(stream['user_id'])
+                        live_users.append(user_id)
+                        if stream.get('user_name'):
+                            twitch_names[user_id] = stream['user_name']
 
                 for twitch_id in chunk:
                     entrant = entrants.get(twitch_id)
                     entrant_is_live = twitch_id in live_users
-                    if entrant and entrant.stream_live != entrant_is_live:
-                        entrant.stream_live = entrant_is_live
-                        entrants_to_update.append(entrant)
-                        if entrant.race not in races_to_reload:
-                            races_to_reload.append(entrant.race)
+                    if entrant:
+                        user = entrant.user
+                        if entrant.stream_live != entrant_is_live:
+                            entrant.stream_live = entrant_is_live
+                            entrants_to_update.append(entrant)
+                            if entrant.race not in races_to_reload:
+                                races_to_reload.append(entrant.race)
+                        if twitch_id in twitch_names and user.twitch_name != twitch_names[twitch_id]:
+                            user.twitch_name = twitch_names[twitch_id]
+                            user.save()
+                            if entrant.race not in races_to_reload:
+                                races_to_reload.append(entrant.race)
+                            self.logger.info(
+                                '[Twitch] Updated %(user)s twitch channel name to %(twitch_name)s'
+                                % {'user': user, 'twitch_name': user.twitch_name}
+                            )
 
         if entrants_to_update:
             models.Entrant.objects.bulk_update(
                 entrants_to_update,
                 ['stream_live'],
             )
-            for race in races_to_reload:
-                race.increment_version()
-                race.broadcast_data()
-
             self.logger.info(
                 '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
                 % {'entrants': len(entrants_to_update), 'races': len(races_to_reload)}
             )
         else:
             self.logger.debug('[Twitch] All stream info is up-to-date.')
+
+        for race in races_to_reload:
+            race.increment_version()
+            race.broadcast_data()
