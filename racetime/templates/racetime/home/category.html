@@ -1,3 +1,4 @@
+{% load humanize %}
 <li data-slug="{{ category.slug }}" data-search="{{ category.name|lower }} {{ category.short_name|lower }}">
     <a href="{{ category.get_absolute_url }}">
         {% if category.image %}
@@ -22,8 +23,8 @@
         {% endif %}
         {% if category.finished_race_count %}
             <span class="finished-races">
-                {{ category.finished_race_count }} completed
-                race{{ category.finished_race_count|pluralize }}
+                Raced {{ category.finished_race_count|intcomma }}
+                time{{ category.finished_race_count|pluralize }}
             </span>
         {% endif %}
     </a>
