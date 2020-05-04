@@ -13,6 +13,7 @@ body {
 .container > .content {
     align-items: stretch;
     flex: 1 1 0;
+    margin: 0;
 }
 
 aside, main {
