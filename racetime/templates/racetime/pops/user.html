@@ -1,6 +1,10 @@
 {% load racetime %}
 {% if user and user.active %}
+    {% if no_link %}
+    <span class="user-pop {{ extra_class }} {% if not hide_flair %}{% flair user category=category race=race %}{% endif %}">
+    {% else %}
     <a class="user-pop {{ extra_class }} {% if not hide_flair %}{% flair user category=category race=race %}{% endif %}" href="{{ user.get_absolute_url }}">
+    {% endif %}
         {% if user.avatar and not hide_avatar %}
         <span class="avatar" style="background-image: url({{ user.avatar.url }})"></span>
         {% endif %}
@@ -11,7 +15,11 @@
         {% if user.pronouns and not hide_pronouns %}
         <span class="pronouns">{{ user.pronouns_display }}</span>
         {% endif %}
+    {% if not no_link %}
     </a>
+    {% else %}
+    </span>
+    {% endif %}
 {% elif user and not user.active %}
     <span class="user-pop {{ extra_class }}">
         <span class="name">(Inactive/Deleted user)</span>

@@ -48,6 +48,7 @@ class ViewProfile(generic.DetailView):
             **super().get_context_data(**kwargs),
             'categories': self.get_favourite_categories(),
             'entrances': paginator.get_page(self.request.GET.get('page')),
+            'mod_categories': self.object.mod_categories.order_by('name').all(),
             'stats': {
                 'joined': len(entrances),
                 'first': len(entrances.filter(place=1)),

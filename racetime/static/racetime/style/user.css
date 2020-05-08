@@ -11,7 +11,10 @@
 .user-profile > .user-pop {
     color: #eee;
     font-size: 32px;
-    margin-top: 5px;
+    margin: 5px 0;
+}
+.user-profile > .user-pop::after {
+    content: none;
 }
 .user-profile > .user-pop > .avatar {
     width: 64px;
@@ -24,12 +27,31 @@
     font-size: 14px;
     line-height: 22px;
 }
+.user-profile > .role-badge {
+    align-items: center;
+    background: #1a1c20;
+    border-radius: 4px;
+    color: #1da674;
+    cursor: default;
+    display: flex;
+    margin-top: 5px;
+    line-height: 18px;
+    padding: 5px;
+}
+.user-profile > .role-badge > img {
+    height: 18px;
+    margin-right: 5px;
+    width: 18px;
+}
+.user-profile > .role-badge a {
+    color: #beebd1;
+}
 .user-profile > .supporter-badge {
     background: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
     background-clip: padding-box;
     border-radius: 5px;
     cursor: default;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 .user-profile > .supporter-badge > div {
     align-items: center;
@@ -37,7 +59,7 @@
     background: #1a1c20;
     display: flex;
     margin: 1px;
-    padding: 3px 5px;
+    padding: 1px 5px;
 }
 .user-profile > .supporter-badge > div > .material-icons,
 .user-profile > .supporter-badge > div > span {
@@ -51,8 +73,12 @@
     margin-right: 3px;
 }
 .user-profile > .twitch-channel {
+    background: #1a1c20;
+    border-radius: 4px;
+    color: #e0ccff;
     display: flex;
-    margin-top: 10px;
+    margin-top: 5px;
+    padding: 3px 5px;
 }
 
 .user-profile > .twitch-channel > img {

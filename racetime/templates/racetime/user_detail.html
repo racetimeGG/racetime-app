@@ -11,8 +11,8 @@
 {% endblock %}
 {% block meta %}
     <meta property="og:title" content="View profile: {{ profile }}">
-    <meta name="description" content="Race history, statistics and information about this user.">
-    <meta property="og:description" content="Race history, statistics and information about this user.">
+    <meta name="description" content="Member for {{ profile.date_joined|timesince }}. {{ stats.joined }} race{{ stats.first|pluralize }} entered.">
+    <meta property="og:description" content="Member for {{ profile.date_joined|timesince }}. {{ stats.joined }} race{{ stats.first|pluralize }} entered.">
     {% if profile.avatar %}
         <meta property="og:image" content="{{ profile.avatar.url }}">
     {% endif %}
@@ -21,7 +21,19 @@
 {% block main %}
     <h3>View user profile</h3>
     <div class="user-profile">
-        {% include 'racetime/pops/user.html' with user=profile %}
+        {% include 'racetime/pops/user.html' with user=profile no_link=True %}
+        {% if profile.is_staff %}
+            <div class="role-badge staff-badge">
+                <img src="{% static 'racetime/image/star.svg' %}" alt="">
+                <span>{{ site_info.title }} staff</span>
+            </div>
+        {% endif %}
+        {% for category in mod_categories %}
+            <div class="role-badge moderator-badge">
+                <img src="{% static 'racetime/image/sword.svg' %}" alt="">
+                <span><a href="{% url 'category' category=category.slug %}">{{ category.name }}</a> moderator</span>
+            </div>
+        {% endfor %}
         {% if profile.is_supporter %}
             <div class="supporter-badge" title="{{ profile.name }} is one of our generous site supporters!">
                 <div>
