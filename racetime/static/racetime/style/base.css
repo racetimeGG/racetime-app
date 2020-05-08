@@ -41,7 +41,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h2 {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: normal;
 }
 
@@ -565,7 +565,7 @@ header > .current-race > a .timer {
     font-size: 13px;
 }
 .category-info > .title {
-    line-height: 41px;
+    line-height: 35px;
 }
 .category-info > .title > .name {
     display: inline;
@@ -761,7 +761,7 @@ header > .current-race > a .timer {
 
 .race-info > .category > .name {
     font-family: 'Roboto Slab', sans-serif;
-    font-size: 30px;
+    font-size: 28px;
 }
 .race-info > .category > .short-name {
     color: #8c898c;

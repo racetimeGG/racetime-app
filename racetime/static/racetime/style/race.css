@@ -5,6 +5,7 @@ body {
 }
 
 .container {
+    align-items: center;
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
@@ -292,6 +293,9 @@ aside, main {
 }
 
 @media only screen and (max-width: 600px) {
+    .container {
+        align-items: stretch;
+    }
     .container > .content {
         margin: 0;
     }
