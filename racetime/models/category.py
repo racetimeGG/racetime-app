@@ -170,6 +170,7 @@ class Category(models.Model):
             'slug': self.slug,
             'url': self.get_absolute_url(),
             'data_url': self.get_data_url(),
+            'image': self.image.url if self.image else None,
         }
 
     def can_edit(self, user):
@@ -221,7 +222,6 @@ class Category(models.Model):
         """
         value = json.dumps({
             **self.api_dict_summary(),
-            'image': self.image.url if self.image else None,
             'info': self.info,
             'streaming_required': self.streaming_required,
             'owner': self.owner.api_dict_summary(category=self),
