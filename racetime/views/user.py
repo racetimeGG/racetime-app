@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.transaction import atomic
 from django.forms import model_to_dict
 from django.shortcuts import resolve_url
@@ -48,7 +48,7 @@ class ViewProfile(generic.DetailView):
             **super().get_context_data(**kwargs),
             'categories': self.get_favourite_categories(),
             'entrances': paginator.get_page(self.request.GET.get('page')),
-            'mod_categories': self.object.mod_categories.order_by('name').all(),
+            'mod_categories': self.get_mod_categories(),
             'stats': {
                 'joined': len(entrances),
                 'first': len(entrances.filter(place=1)),
@@ -91,6 +91,19 @@ class ViewProfile(generic.DetailView):
         queryset = queryset.annotate(times_entered=Count('race__entrant'))
         queryset = queryset.order_by('-times_entered')
         return queryset[:3]
+
+    def get_mod_categories(self):
+        """
+        Return a QuerySet of categories the profile user owns or moderates.
+        Returns an empty list for staff users (since they mod every category).
+        """
+        if self.object.is_staff:
+            return []
+        queryset = models.Category.objects.filter(active=True).order_by('name')
+        queryset = queryset.filter(
+            Q(owner=self.object) | Q(moderators=self.object)
+        )
+        return queryset
 
 
 class LoginRegister(generic.TemplateView):
