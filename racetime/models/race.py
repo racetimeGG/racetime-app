@@ -137,7 +137,7 @@ class Race(models.Model):
         ),
     )
     allow_non_entrant_chat = models.BooleanField(
-        default=False,
+        default=True,
         help_text=(
             'Allow users who are not entered in the race to chat while the '
             'race is in progress (anyone may use chat before and after the race).'
