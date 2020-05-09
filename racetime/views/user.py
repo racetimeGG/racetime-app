@@ -103,7 +103,7 @@ class ViewProfile(generic.DetailView):
         queryset = queryset.filter(
             Q(owner=self.object) | Q(moderators=self.object)
         )
-        return queryset
+        return queryset.distinct()
 
 
 class LoginRegister(generic.TemplateView):
