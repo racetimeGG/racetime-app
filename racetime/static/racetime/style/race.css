@@ -27,6 +27,11 @@ body {
     }
 }
 
+aside, main {
+    display: flex;
+    flex-direction: column;
+}
+
 .race-entrants::-webkit-scrollbar,
 .race-chat > .messages::-webkit-scrollbar {
     width: 7px;
