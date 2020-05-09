@@ -147,16 +147,16 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
     model = models.CategoryRequest
 
     def form_valid(self, form):
-        if models.CategoryRequest.objects.filter(
-            requested_by=self.user,
-            reviewed_at__isnull=True,
-        ):
-            form.add_error(
-                None,
-                'You already have a category request open. You may not submit '
-                'another until that request is reviewed.',
-            )
-            return self.form_invalid(form)
+        #if models.CategoryRequest.objects.filter(
+        #    requested_by=self.user,
+        #    reviewed_at__isnull=True,
+        #):
+        #    form.add_error(
+        #        None,
+        #        'You already have a category request open. You may not submit '
+        #        'another until that request is reviewed.',
+        #    )
+        #    return self.form_invalid(form)
 
         self.object = form.save(commit=False)
         self.object.requested_by = self.user
