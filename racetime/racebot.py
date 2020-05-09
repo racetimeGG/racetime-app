@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import timedelta
+from itertools import chain
 from math import ceil
 from time import sleep
 
@@ -146,6 +147,14 @@ class RaceBot:
 
     def check_countdown(self, race):
         time_to_start = timezone.now() - race['object'].started_at
+        for s in chain([10], range(5, 0, -1)):
+            scp = str(s) + '_countdown_posted'
+            if time_to_start >= timedelta(seconds=-s) and scp not in race:
+                race['object'].add_message(
+                    str(s) + '...',
+                    highlight=True,
+                )
+                race[scp] = True
         if time_to_start >= timedelta(0):
             race['object'].state = models.RaceStates.in_progress.value
             race['object'].version = F('version') + 1
