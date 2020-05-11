@@ -20,7 +20,7 @@
             <meta property="og:description" content="{{ site_info.meta_description }}">
         {% endblock %}
     </head>
-    <body class="{% block body_class %}{% endblock %}">
+    <body class="{% block body_class %}{% endblock %} {% if user.is_authenticated and not user.detailed_timer %}timer-no-deciseconds{% endif %}">
         {% block body %}
             {% block header %}
                 <header>

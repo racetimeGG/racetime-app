@@ -192,6 +192,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             'colour.'
         ),
     )
+    detailed_timer = models.BooleanField(
+        default=True,
+        help_text=(
+            'Show tenths of a second on the race timer. You can also click on '
+            'the race timer to switch between detailed and simple mode.'
+        ),
+    )
     twitch_code = models.CharField(
         max_length=30,
         null=True,

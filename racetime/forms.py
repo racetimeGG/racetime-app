@@ -444,6 +444,7 @@ class UserEditForm(forms.ModelForm):
             'profile_bio',
             'show_supporter',
             'custom_profile_slug',
+            'detailed_timer',
         )
         widgets = {
             'pronouns': forms.RadioSelect,

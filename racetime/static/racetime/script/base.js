@@ -9,40 +9,49 @@ $(function() {
 
     window.globalLatency = 0;
 
+    var updateTimer = function() {
+        $(this).attr('datetime');
+
+        var timer = Date.now() - new Date($(this).attr('datetime'));
+        timer += window.globalLatency;
+        var negative = timer < 0;
+
+        if (negative && timer >= -100) {
+            $(this).closest('.race-status').addClass('go');
+        }
+
+        timer = Math.abs(timer);
+        var hours = (timer - (timer % 3600000)) / 3600000;
+        timer -= hours * 3600000;
+        var mins = (timer - (timer % 60000)) / 60000;
+        timer -= mins * 60000;
+        var secs = (timer - (timer % 1000)) / 1000;
+        timer -= secs * 1000;
+        var ds = (timer - (timer % 100)) / 100;
+
+        if ($('body').hasClass('timer-no-deciseconds') && ds > 0) {
+            // Always round up to the nearest second if deciseconds are hidden
+            secs += 1;
+        }
+
+        $(this).html(
+            (negative ? '-' : '')
+            + hours
+            + ':' + ('00' + mins).slice(-2)
+            + ':' + ('00' + secs).slice(-2)
+            + '<small>.' + ('' + ds) + '</small>'
+        );
+    };
     var autotick = function() {
-        $('time.autotick').each(function() {
-            $(this).attr('datetime');
-
-            var timer = Date.now() - new Date($(this).attr('datetime'));
-            timer += window.globalLatency;
-            var negative = timer < 0;
-
-            if (negative && timer >= -100) {
-                $(this).closest('.race-status').addClass('go');
-            }
-
-            timer = Math.abs(timer);
-            var hours = (timer - (timer % 3600000)) / 3600000;
-            timer -= hours * 3600000;
-            var mins = (timer - (timer % 60000)) / 60000;
-            timer -= mins * 60000;
-            var secs = (timer - (timer % 1000)) / 1000;
-            timer -= secs * 1000;
-            var ds = (timer - (timer % 100)) / 100;
-
-            $(this).html(
-                (negative ? '-' : '')
-                + hours
-                + ':' + ('00' + mins).slice(-2)
-                + ':' + ('00' + secs).slice(-2)
-                + '<small>.' + ('' + ds) + '</small>'
-            );
-        });
-
+        $('time.autotick').each(updateTimer);
         requestAnimationFrame(autotick);
     };
 
     autotick();
+
+    $(document).on('click', '.timer', function() {
+        $('body').toggleClass('timer-no-deciseconds');
+    });
 
     window.localiseDates = function() {
         $(this).find('time.datetime').each(function () {
