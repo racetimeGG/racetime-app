@@ -5,7 +5,9 @@
             <span class="image" style="background-image: url({{ category.image.url }})"></span>
         {% else %}
             <span class="image no-image">
-                <span class="short-name">{{ category.short_name }}</span>
+                <span class="short-name {% if category.short_name|length > 5 %}small{% endif %}">
+                    {{ category.short_name }}
+                </span>
             </span>
         {% endif %}
         <span class="name">{{ category.name }}</span>
