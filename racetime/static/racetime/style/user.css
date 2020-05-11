@@ -156,6 +156,11 @@
 }
 
 @media only screen and (max-width: 600px) {
+    .user-profile > .user-pop {
+        flex-wrap: wrap;
+        font-size: 24px;
+    }
+
     .entrant-row > .user > .user-pop > .pronouns,
     .entrant-row > .user > .comment,
     .entrant-row > .status {

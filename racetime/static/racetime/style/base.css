@@ -806,6 +806,7 @@ header > .current-race > a .timer {
 .entrant-row > .user {
     display: flex;
     flex-grow: 1;
+    overflow: hidden;
 }
 .entrant-row > .user > .user-pop {
     height: 22px;
