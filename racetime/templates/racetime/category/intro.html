@@ -8,7 +8,9 @@
         </ol>
         <span class="title">
             <h2 class="name">{{ category.name }}</h2>
-            <span class="short-name">{{ category.short_name }}</span>
+            {% if category.short_name != category.name %}
+                <span class="short-name">{{ category.short_name }}</span>
+            {% endif %}
             {% if user.is_authenticated %}
                 <form class="favourite {% if not is_favourite %}undo{% endif %}" method="post" action="{% url 'unstar' category=category.slug %}">
                     {% csrf_token %}
