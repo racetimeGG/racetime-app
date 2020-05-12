@@ -21,6 +21,12 @@ $(function() {
         }
 
         timer = Math.abs(timer);
+
+        if ($('body').hasClass('timer-no-deciseconds')) {
+            // Always round up to the nearest second if deciseconds are hidden
+            timer = timer + 1000 - (timer % 100);
+        }
+
         var hours = (timer - (timer % 3600000)) / 3600000;
         timer -= hours * 3600000;
         var mins = (timer - (timer % 60000)) / 60000;
@@ -28,11 +34,6 @@ $(function() {
         var secs = (timer - (timer % 1000)) / 1000;
         timer -= secs * 1000;
         var ds = (timer - (timer % 100)) / 100;
-
-        if ($('body').hasClass('timer-no-deciseconds') && ds > 0) {
-            // Always round up to the nearest second if deciseconds are hidden
-            secs += 1;
-        }
 
         $(this).html(
             (negative ? '-' : '')
