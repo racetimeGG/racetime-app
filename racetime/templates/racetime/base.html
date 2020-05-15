@@ -84,14 +84,26 @@
             {% block prefooter %}{% endblock %}
             {% block footer %}
                 <footer>
-                    <ul>
-                        {% for name, url, cls in site_info.footer_links %}
-                        <li>
-                            <a class="{{ cls }}" href="{{ url }}" target="_blank">{{ name }}</a>
-                        </li>
+                    <div class="links">
+                        {% for group in site_info.footer_links %}
+                            <ul>
+                                {% for item in group %}
+                                    <li>
+                                        <a class="{{ item.class }}" href="{{ item.link }}" target="_blank">
+                                            {% if item.icon %}
+                                                <i class="material-icons">{{ item.icon }}</i>
+                                            {% endif %}
+                                            {% if item.img %}
+                                                <img src="{% static item.img %}" alt="">
+                                            {% endif %}
+                                            <span>{{ item.text }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% endfor %}
-                    </ul>
-                    <span>
+                    </div>
+                    <span class="tagline">
                         {{ site_info.footer_text }}
                     </span>
                 </footer>

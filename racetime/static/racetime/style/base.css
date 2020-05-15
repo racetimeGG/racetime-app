@@ -1040,22 +1040,42 @@ footer {
     justify-content: space-between;
     color: #999699;
     font-size: 13px;
-    padding-bottom: 20px;
-    padding-top: 20px;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }
-
-footer > ul {
+footer > .links {
     display: flex;
 }
-footer > ul > li {
+footer > .links > ul {
+    display: flex;
+    flex-direction: column;
+    margin-right: 40px;
+}
+footer > .links > ul > li {
     display: flex;
 }
-footer > ul > li::before {
-    content: '|';
-    padding: 0 5px;
+footer > .links > ul > li > a {
+    align-items: center;
+    display: flex;
+    padding: 5px;
+    text-decoration: none;
 }
-footer > ul > li:first-child::before {
-    content: none
+footer > .links > ul > li > a > .material-icons,
+footer > .links > ul > li > a > img {
+    margin-right: 5px;
+}
+footer > .links > ul > li > a > .material-icons {
+    font-size: 18px;
+}
+footer > .links > ul > li > a > img {
+    height: 18px;
+    width: 18px;
+}
+footer > .links > ul > li > a > span {
+    text-decoration: underline;
+}
+footer > .tagline {
+    padding: 5px 0;
 }
 .go-gold {
     color: #e6c762;
@@ -1419,14 +1439,14 @@ footer > ul > li:first-child::before {
         margin-right: 0;
     }
     footer {
-        display: flex;
         flex-direction: column;
         padding: 10px 5px;
     }
-    footer > ul {
-        align-self: center;
+    footer > .links > ul {
+        flex-grow: 1;
+        margin-right: 0;
     }
-    footer > span {
+    footer > .tagline {
         align-self: flex-end;
         text-align: right;
         margin-top: 3px;

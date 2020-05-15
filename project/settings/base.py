@@ -196,10 +196,12 @@ RT_SITE_INFO = {
     'meta_site_name': 'racetime.dev',
     'meta_description': 'racetime development environment',
     'footer_text': 'Development environment. Last restart: ' + datetime.now().isoformat(),
-    'footer_links': [
-        ('Discord', 'https://discord.racetime.gg', ''),
-        ('GitHub', 'https://github.com/deains/racetime-app', ''),
-    ],
+    'footer_links': (
+        (
+            {'text': 'Discord', 'link': 'https://discord.racetime.gg', 'img': 'racetime/image/social/discord.svg'},
+            {'text': 'GitHub', 'link': 'https://github.com/deains/racetime-app', 'img': 'racetime/image/social/github.svg'},
+        ),
+    ),
     'extra_scripts': [],
 }
 
