@@ -100,7 +100,7 @@ will fail to execute.
 
 ## Further information
 
-The [Wiki](https://github.com/deains/racetime-app/wiki) pages have some
+The [Wiki](https://github.com/racetimeGG/racetime-app/wiki) pages have some
 information that may prove useful to you. We also have a Discord server where
 you can discuss the site and ongoing developments, make suggestions and get
 involved: [join the Discord server here](https://discord.racetime.gg).

@@ -199,7 +199,7 @@ RT_SITE_INFO = {
     'footer_links': (
         (
             {'text': 'Discord', 'link': 'https://discord.racetime.gg', 'img': 'racetime/image/social/discord.svg'},
-            {'text': 'GitHub', 'link': 'https://github.com/deains/racetime-app', 'img': 'racetime/image/social/github.svg'},
+            {'text': 'GitHub', 'link': 'https://github.com/racetimeGG/racetime-app', 'img': 'racetime/image/social/github.svg'},
         ),
     ),
     'extra_scripts': [],
