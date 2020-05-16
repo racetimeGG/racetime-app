@@ -51,6 +51,9 @@ $(function() {
     autotick();
 
     $(document).on('click', '.timer', function() {
+        if ($(this).closest('a').length) {
+            return true;
+        }
         $('body').toggleClass('timer-no-deciseconds');
     });
 

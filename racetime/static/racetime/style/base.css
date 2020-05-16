@@ -373,6 +373,9 @@ header > .current-race > a .timer {
 .timer {
     cursor: default;
 }
+a .timer {
+    cursor: inherit;
+}
 .timer-no-deciseconds .timer > small {
     display: none;
 }
