@@ -1414,6 +1414,12 @@ class Entrant(models.Model):
                 and not self.dnf \
                 and not self.dq \
                 and not self.finish_time:
+            if timezone.now() - self.race.started_at < timedelta(minutes=1):
+                raise SafeException(
+                    'You cannot forfeit this early. If you are using an '
+                    'auto-splitter, you should configure it to not auto-reset '
+                    'the timer when starting a run.'
+                )
             self.dnf = True
             with atomic():
                 self.save()
