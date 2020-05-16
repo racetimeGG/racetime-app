@@ -30,5 +30,7 @@ class Command(BaseCommand):
             recordable=True,
             recorded=True,
         ).order_by('opened_at'):
+            race.update_entrant_ratings()
             rate_race(race)
+            race.increment_version()
             self.stdout.write('Recorded race %s.' % race)
