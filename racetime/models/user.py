@@ -432,43 +432,36 @@ class UserRanking(models.Model):
     )
     score = models.FloatField(
         default=0.0,
-        db_index=True,
     )
     confidence = models.FloatField(
         default=0.0,
     )
+    rating = models.PositiveSmallIntegerField(
+        default=0,
+        db_index=True,
+    )
     best_time = models.DurationField(
         null=True,
+        db_index=True,
+    )
+    times_raced = models.PositiveSmallIntegerField(
+        default=0,
+        db_index=True,
     )
 
     @property
+    def calculated_rating(self):
+        """
+        Return the user's calculated rating, using their current score and
+        confidence values.
+        """
+        return round((self.score - (2 * self.confidence)) * 100)
+
     def best_time_html(self):
         """
         Return the user's best finish time as a formatted HTML string.
         """
         return timer_html(self.best_time, False) if self.best_time else None
-
-    @property
-    def display_score(self):
-        """
-        Return the user's current score as a formatted number.
-        """
-        return round(self.score * 100)
-
-    @cached_property
-    def times_raced(self):
-        """
-        Return the number of times the user has entered a recorded race for
-        this category and goal.
-        """
-        Entrant = apps.get_model('racetime', 'Entrant')
-        return len(Entrant.objects.filter(
-            user=self.user,
-            race__category=self.category,
-            race__goal=self.goal,
-            race__state=RaceStates.finished,
-            race__recorded=True,
-        ))
 
 
 class SupporterSchedule(models.Model):

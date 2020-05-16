@@ -190,7 +190,7 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
         with atomic():
             race.save()
             if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
-                race.update_entrant_scores()
+                race.update_entrant_ratings()
 
         messaged = False
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:

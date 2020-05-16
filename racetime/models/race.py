@@ -229,8 +229,8 @@ class Race(models.Model):
                     'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
                     'place': entrant.place,
                     'place_ordinal': ordinal(entrant.place) if entrant.place else None,
-                    'score': entrant.display_score,
-                    'score_change': entrant.display_score_change,
+                    'score': entrant.rating,
+                    'score_change': entrant.rating_change,
                     'comment': entrant.comment,
                     'stream_live': entrant.stream_live,
                     'stream_override': entrant.stream_override,
@@ -367,7 +367,7 @@ class Race(models.Model):
             8. Declined invite
 
         Except for finishers, entrants in each of the above groupings are
-        sorted by score (if applicable) and then by name.
+        sorted by rating (if applicable) and then by name.
         """
         return self.entrant_set.annotate(
             state_sort=models.Case(
@@ -425,7 +425,7 @@ class Race(models.Model):
             'state_sort',
             'place',
             'finish_time',
-            '-score',
+            '-rating',
             'user__name',
         ).all()
 
@@ -837,7 +837,7 @@ class Race(models.Model):
 
     def record(self, recorded_by):
         """
-        Record the race, finalising the scores and updating the category
+        Record the race, finalising the ratings and updating the category
         leaderboards.
         """
         if self.recordable and not self.recorded:
@@ -939,9 +939,9 @@ class Race(models.Model):
         if not self.__remaining_entrants.exists():
             self.finish()
 
-    def get_score(self, user):
+    def get_rating(self, user):
         """
-        Returns the user's current leaderboard score for the goal/category of
+        Returns the user's current leaderboard rating for the goal/category of
         this race.
         """
         if self.goal:
@@ -951,31 +951,31 @@ class Race(models.Model):
                     user=user,
                     category=self.category,
                     goal=self.goal,
-                ).score
+                ).rating
             except UserRanking.DoesNotExist:
                 pass
         return None
 
-    def update_entrant_scores(self):
+    def update_entrant_ratings(self):
         """
-        Update the score field for all entrants. This needs to be done if
-        the goal changes.
+        Update the rating field for all entrants. This needs to be done if the
+        goal changes.
         """
         if self.goal:
-            entrant_scores = {
-                values['id']: values['user__userranking__score']
+            entrant_ratings = {
+                values['id']: values['user__userranking__rating']
                 for values in self.entrant_set.filter(
                     user__userranking__category=self.category,
                     user__userranking__goal=self.goal,
-                ).values('id', 'user__userranking__score')
+                ).values('id', 'user__userranking__rating')
             }
             entrants = []
             for entrant in self.entrant_set.all():
-                entrant.score = entrant_scores.get(entrant.id)
+                entrant.rating = entrant_ratings.get(entrant.id)
                 entrants.append(entrant)
-            Entrant.objects.bulk_update(entrants, ['score'])
+            Entrant.objects.bulk_update(entrants, ['rating'])
         else:
-            self.entrant_set.update(score=None)
+            self.entrant_set.update(rating=None)
 
     def join(self, user):
         """
@@ -988,7 +988,7 @@ class Race(models.Model):
             with atomic():
                 self.entrant_set.create(
                     user=user,
-                    score=self.get_score(user),
+                    rating=self.get_rating(user),
                 )
                 self.increment_version()
             self.add_message('%(user)s joins the race.' % {'user': user})
@@ -1007,7 +1007,7 @@ class Race(models.Model):
                 self.entrant_set.create(
                     user=user,
                     state=EntrantStates.requested.value,
-                    score=self.get_score(user),
+                    rating=self.get_rating(user),
                 )
                 self.increment_version()
             self.add_message('%(user)s requests to join the race.' % {'user': user})
@@ -1023,7 +1023,7 @@ class Race(models.Model):
                 self.entrant_set.create(
                     user=user,
                     state=EntrantStates.invited.value,
-                    score=self.get_score(user),
+                    rating=self.get_rating(user),
                 )
                 self.increment_version()
             self.add_message(
@@ -1150,10 +1150,10 @@ class Entrant(models.Model):
     place = models.PositiveSmallIntegerField(
         null=True,
     )
-    score = models.FloatField(
+    rating = models.PositiveSmallIntegerField(
         null=True,
     )
-    score_change = models.FloatField(
+    rating_change = models.SmallIntegerField(
         null=True,
     )
     comment = models.TextField(
@@ -1190,26 +1190,6 @@ class Entrant(models.Model):
         Determine if this entrant can be demoted from race monitor.
         """
         return self.race.can_remove_monitor(self.user)
-
-    @property
-    def display_score(self):
-        """
-        Return user's current leaderboard score as a formatted number, or None
-        if there is no score.
-        """
-        if self.score:
-            return round(self.score * 100)
-        return None
-
-    @property
-    def display_score_change(self):
-        """
-        Return a formatted number indicating how much the user's score changed
-        from its original value as a result of this race.
-        """
-        if self.score_change:
-            return round(self.score_change * 100)
-        return None
 
     @property
     def finish_time_html(self):

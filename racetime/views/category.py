@@ -109,7 +109,7 @@ class CategoryLeaderboards(Category):
                 category=category,
                 goal=goal,
                 best_time__isnull=False,
-            ).order_by('-score')[:1000]
+            ).select_related('user').order_by('-rating')[:1000]
             yield goal, rankings
 
 
@@ -135,8 +135,9 @@ class CategoryLeaderboardsData(CategoryLeaderboards):
                         'user': ranking.user.api_dict_summary(category=self.object),
                         'place': place,
                         'place_ordinal': ordinal(place),
-                        'score': ranking.display_score,
+                        'score': ranking.rating,
                         'best_time': ranking.best_time,
+                        'times_raced': ranking.times_raced,
                     } for place, ranking in enumerate(rankings, start=1)
                 ],
             }

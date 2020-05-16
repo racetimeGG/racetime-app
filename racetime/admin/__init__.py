@@ -105,7 +105,7 @@ class RaceAdmin(options.ModelAdmin):
             'goal' in form.changed_data
             or 'custom_goal' in form.changed_data
         ):
-            obj.update_entrant_scores()
+            obj.update_entrant_ratings()
         with options.frontend_urlconf():
             obj.broadcast_data()
 

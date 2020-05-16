@@ -25,12 +25,13 @@ class UserRating:
                 score=self.rating.mu,
                 confidence=self.rating.sigma,
             )
+            self.ranking.rating = self.ranking.calculated_rating
 
     def save(self):
         self.ranking.save()
 
     def set_rating(self, rating, finish_time):
-        score_change = rating.mu - self.rating.mu
+        original_rating = self.ranking.rating
 
         if finish_time and (
             not self.ranking.best_time
@@ -39,9 +40,11 @@ class UserRating:
             self.ranking.best_time = finish_time
         self.ranking.score = rating.mu
         self.ranking.confidence = rating.sigma
+        self.ranking.rating = self.ranking.calculated_rating
+        self.ranking.times_raced += 1
         self.ranking.save()
 
-        self.entrant.score_change = score_change
+        self.entrant.rating_change = self.ranking.calculated_rating - original_rating
         self.entrant.save()
 
         self.rating = rating

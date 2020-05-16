@@ -37,19 +37,19 @@
             {{ entrant.summary.1 }}
         {% endif %}
     </span>
-    {% if entrant.score_change %}
-        {% if entrant.score_change > 0 %}
+    {% if entrant.rating_change %}
+        {% if entrant.rating_change >= 0 %}
             <span class="score-change positive">
-                {{ entrant.display_score_change|intcomma }}
+                {{ entrant.rating_change|intcomma }}
             </span>
         {% else %}
             <span class="score-change negative">
-                {{ entrant.display_score_change|intcomma|slice:'1:' }}
+                {{ entrant.rating_change|intcomma|slice:'1:' }}
             </span>
         {% endif %}
-    {% elif entrant.score %}
+    {% elif entrant.rating %}
         <span class="score" title="Leaderboard score for {{ race.goal_str }}">
-            {{ entrant.display_score|intcomma }}
+            {{ entrant.rating|intcomma }}
         </span>
     {% elif race.goal %}
         <span class="score" title="Not ranked">n/a</span>
