@@ -472,6 +472,7 @@ a .timer {
 }
 
 .home-categories {
+    clear: both;
     display: flex;
     flex-wrap: wrap;
 }
