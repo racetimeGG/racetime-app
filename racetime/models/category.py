@@ -243,6 +243,7 @@ class Category(models.Model):
                         'name': race.goal_str,
                         'custom': not race.goal,
                     },
+                    'info': race.info,
                     'entrants_count': race.entrants_count,
                     'entrants_count_inactive': race.entrants_count_inactive,
                     'opened_at': race.opened_at,
