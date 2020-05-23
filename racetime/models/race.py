@@ -112,7 +112,7 @@ class Race(models.Model):
         default=timedelta(hours=24),
         validators=[
             MinValueValidator(timedelta(hours=1)),
-            MaxValueValidator(timedelta(hours=24)),
+            MaxValueValidator(timedelta(hours=72)),
         ],
         help_text=(
             'The maximum time limit for any race entrant. Entrants who have '

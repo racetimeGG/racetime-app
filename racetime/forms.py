@@ -301,7 +301,7 @@ class RaceForm(forms.ModelForm):
     time_limit = HoursDurationField(
         initial=24,
         min_value=1,
-        max_value=24,
+        max_value=72,
         help_text=models.Race._meta.get_field('time_limit').help_text,
     )
     chat_message_delay = SecondsDurationField(
