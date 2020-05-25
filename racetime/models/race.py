@@ -632,7 +632,10 @@ class Race(models.Model):
                         actions.append(('unready', 'Not ready', ''))
                     actions.append(('leave', 'Quit', ''))
                 if entrant.can_add_comment:
-                    actions.append(('add_comment', 'Add comment', ''))
+                    if entrant.comment:
+                        actions.append(('add_comment', 'Change comment', ''))
+                    else:
+                        actions.append(('add_comment', 'Add comment', ''))
                 if self.is_in_progress:
                     if not entrant.dq and not entrant.dnf:
                         actions.append(('done', 'Done', '') if not entrant.finish_time else ('undone', 'Undo finish', 'dangerous'))
@@ -1443,14 +1446,12 @@ class Entrant(models.Model):
                 self.state == EntrantStates.joined.value
                 and (self.finish_time or self.dnf)
                 and not self.dq
-                and not self.comment
                 and self.race.allow_comments
             )
         if self.race.state == RaceStates.finished.value:
             return (
                 self.state == EntrantStates.joined.value
                 and not self.dq
-                and not self.comment
                 and self.race.allow_comments
                 and not self.race.recorded
                 and (
@@ -1465,14 +1466,21 @@ class Entrant(models.Model):
         Submit a comment to this entry.
         """
         if self.can_add_comment:
+            previous_comment = self.comment
             self.comment = comment
             with atomic():
                 self.save()
                 self.race.increment_version()
-            self.race.add_message(
-                '%(user)s added a comment: "%(comment)s"'
+            if previous_comment:
+                self.race.add_message(
+                '%(user)s changed the comment to: "%(comment)s"'
                 % {'user': self.user, 'comment': comment}
-            )
+                )
+            else:
+                self.race.add_message(
+                    '%(user)s added a comment: "%(comment)s"'
+                    % {'user': self.user, 'comment': comment}
+                )
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
