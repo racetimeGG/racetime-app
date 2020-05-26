@@ -1,7 +1,8 @@
-*.css   text    eol=lf
-*.html  text    eol=lf
-*.js    text    eol=lf
-*.json  text    eol=lf
-*.py    text    eol=lf
-*.md    text    eol=lf
-*.txt   text    eol=lf
+*.css     text    eol=lf
+*.html    text    eol=lf
+*.js      text    eol=lf
+*.json    text    eol=lf
+*.py      text    eol=lf
+*.md      text    eol=lf
+*.txt     text    eol=lf
+.docker/* text    eol=lf
