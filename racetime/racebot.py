@@ -153,6 +153,7 @@ class RaceBot:
                 race['object'].add_message(
                     str(s) + '...',
                     highlight=True,
+                    broadcast=False,
                 )
                 race[scp] = True
         if time_to_start >= timedelta(0):

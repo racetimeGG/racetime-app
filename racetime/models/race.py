@@ -488,7 +488,7 @@ class Race(models.Model):
             except AttributeError:
                 pass
 
-    def add_message(self, message, highlight=False):
+    def add_message(self, message, highlight=False, broadcast=True):
         """
         Add a system-generated chat message for this race.
         """
@@ -496,7 +496,8 @@ class Race(models.Model):
             message=message,
             highlight=highlight,
         )
-        self.broadcast_data()
+        if broadcast:
+            self.broadcast_data()
 
     def broadcast_data(self):
         """
