@@ -124,6 +124,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'node_modules', 'jquery', 'dist'),
     os.path.join(BASE_DIR, 'node_modules', 'jquery-form', 'dist'),
     os.path.join(BASE_DIR, 'node_modules', 'jquery-ui-dist'),
+    os.path.join(BASE_DIR, 'node_modules', 'js-cookie', 'src'),
 ]
 STATIC_URL = '/static/'
 
