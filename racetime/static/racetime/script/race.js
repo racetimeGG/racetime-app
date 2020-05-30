@@ -52,6 +52,11 @@ Race.prototype.ajaxifyActionForm = function(form) {
 Race.prototype.addMessage = function(message, server_date) {
     var self = this;
 
+    // Temporary fix: skip countdown messages intended for LiveSplit
+    if (message.is_system && message.message.match(/^\d+…$/)) {
+        return true;
+    }
+
     if (self.messageIDs.indexOf(message.id) !== -1) {
         return true;
     }
