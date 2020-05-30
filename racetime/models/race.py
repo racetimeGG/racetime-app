@@ -199,6 +199,7 @@ class Race(models.Model):
         return {
             'version': self.version,
             'name': str(self),
+            'slug': self.slug,
             'status': {
                 'value': self.state_info.value,
                 'verbose_value': self.state_info.verbose_value,
