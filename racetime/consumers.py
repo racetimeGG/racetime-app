@@ -3,12 +3,13 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
+from django.template.loader import render_to_string
 from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
 
 from . import race_actions
 from .models import Bot, Race
-from .utils import SafeException, exception_to_msglist
+from .utils import SafeException, exception_to_msglist, get_action_button
 
 
 class OAuthConsumerMixin:
@@ -109,21 +110,38 @@ class RaceConsumer(AsyncWebsocketConsumer):
     async def pong(self):
         await self.deliver('pong')
 
-    async def race_data(self, event):
+    async def race_update(self, event):
         """
-        Handler for race.data type event.
+        Handler for race.update type event.
         """
-        self.state['race_dict'] = event['race']
-        self.state['race_dict_version'] = event['version']
-        await self.deliver(event['type'], race=event['race'], version=event['version'])
+        user_id = self.scope.get('user').hashid if self.scope.get('user').is_authenticated else None
+        if user_id:
+            entrant = next(filter(
+                lambda e: e.get('user', {}).get('id') == user_id,
+                event['race'].get('entrants'),
+            ), None)
+            if entrant:
+                if event['race']['status']['value'] == 'pending':
+                    event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
+                elif entrant.get('actions'):
+                    event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
+                        'available_actions': [
+                            get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
+                            for action in entrant.get('actions')
+                        ],
+                        'race': self,
+                    })
+            elif event['race']['status']['value'] not in ['open', 'invitational']:
+                event['renders']['actions'] = ''
+        else:
+            event['renders']['actions'] = ''
 
-    async def race_renders(self, event):
-        """
-        Handler for race.renders type event.
-        """
+        self.state['race_dict'] = event['race']
         self.state['race_renders'] = event['renders']
-        self.state['race_renders_version'] = event['version']
-        await self.deliver(event['type'], renders=event['renders'], version=event['version'])
+        self.state['race_version'] = event['version']
+
+        await self.deliver('race.data', race=event['race'], version=event['version'])
+        await self.deliver('race.renders', renders=event['renders'], version=event['version'])
 
     async def send_race(self):
         """
@@ -133,13 +151,13 @@ class RaceConsumer(AsyncWebsocketConsumer):
             await self.deliver(
                 'race.data',
                 race=self.state.get('race_dict'),
-                version=self.state.get('race_dict_version'),
+                version=self.state.get('race_version'),
             )
         if self.state.get('race_renders'):
             await self.deliver(
                 'race.renders',
                 renders=self.state.get('race_renders'),
-                version=self.state.get('race_renders_version'),
+                version=self.state.get('race_version'),
             )
 
     async def send_chat_history(self):
@@ -182,8 +200,7 @@ class RaceConsumer(AsyncWebsocketConsumer):
             self.state['race_dict'] = race.as_dict
             self.state['race_renders'] = race.get_renders_stateless()
             self.state['race_slug'] = race.slug
-            self.state['race_dict_version'] = race.version
-            self.state['race_renders_version'] = race.version
+            self.state['race_version'] = race.version
 
 
 class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):

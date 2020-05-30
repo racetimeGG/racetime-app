@@ -21,7 +21,7 @@ from django.utils.safestring import mark_safe
 
 from .choices import EntrantStates, RaceStates
 from ..rating import rate_race
-from ..utils import SafeException, timer_html, timer_str
+from ..utils import SafeException, get_action_button, timer_html, timer_str
 
 
 class Race(models.Model):
@@ -235,6 +235,7 @@ class Race(models.Model):
                     'comment': entrant.comment,
                     'stream_live': entrant.stream_live,
                     'stream_override': entrant.stream_override,
+                    'actions': entrant.available_actions,
                 }
                 for entrant in self.ordered_entrants
             ],
@@ -507,12 +508,8 @@ class Race(models.Model):
         self.refresh()
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(self.slug, {
-            'type': 'race.data',
+            'type': 'race.update',
             'race': self.as_dict,
-            'version': self.version,
-        })
-        async_to_sync(channel_layer.group_send)(self.slug, {
-            'type': 'race.renders',
             'renders': self.get_renders_stateless(),
             'version': self.version,
         })
@@ -583,7 +580,10 @@ class Race(models.Model):
 
         if available_actions:
             renders['actions'] = render_to_string('racetime/race/actions.html', {
-                'available_actions': available_actions,
+                'available_actions': [
+                    get_action_button(action, self.slug, self.category.slug)
+                    for action in available_actions
+                ],
                 'race': self,
             }, request)
         elif self.is_pending:
@@ -615,40 +615,17 @@ class Race(models.Model):
         if not user.is_authenticated:
             return []
 
-        actions = []
         entrant = self.in_race(user)
         if entrant:
-            if entrant.state == EntrantStates.requested.value:
-                actions.append(('cancel_invite', 'Withdraw join request', ''))
-            elif entrant.state == EntrantStates.invited.value:
-                actions.append(('accept_invite', 'Accept invite', ''))
-                actions.append(('decline_invite', 'Decline invite', ''))
-            elif entrant.state == EntrantStates.joined.value:
-                if self.is_preparing:
-                    if not entrant.ready:
-                        if not self.streaming_required or entrant.stream_live or entrant.stream_override:
-                            actions.append(('ready', 'Ready', ''))
-                        else:
-                            actions.append(('not_live', 'Not live', ''))
-                    else:
-                        actions.append(('unready', 'Not ready', ''))
-                    actions.append(('leave', 'Quit', ''))
-                if entrant.can_add_comment:
-                    if entrant.comment:
-                        actions.append(('add_comment', 'Change comment', ''))
-                    else:
-                        actions.append(('add_comment', 'Add comment', ''))
-                if self.is_in_progress:
-                    if not entrant.dq and not entrant.dnf:
-                        actions.append(('done', 'Done', '') if not entrant.finish_time else ('undone', 'Undo finish', 'dangerous'))
-                    if not entrant.dq and not entrant.finish_time:
-                        actions.append(('forfeit', 'Forfeit', 'dangerous') if not entrant.dnf else ('unforfeit', 'Undo forfeit', ''))
+            return entrant.available_actions
         elif self.is_preparing and self.can_join(user):
+            actions = []
             if self.state == RaceStates.open.value:
-                actions.append(('join', 'Join', ''))
+                actions.append('join')
             elif self.state == RaceStates.invitational.value:
-                actions.append(('join', 'Join', '') if can_monitor else ('request_invite', 'Request to join', ''))
-        return actions
+                actions.append('join' if can_monitor else 'request_invite')
+            return actions
+        return []
 
     def can_join(self, user):
         """
@@ -1235,6 +1212,36 @@ class Entrant(models.Model):
         if self.ready:
             return 'ready', 'Ready', 'Ready to begin the race.'
         return 'not_ready', 'Not ready', 'Not ready to begin yet.'
+
+    @property
+    def available_actions(self):
+        actions = []
+        if self.state == EntrantStates.requested.value:
+            actions.append('cancel_invite')
+        elif self.state == EntrantStates.invited.value:
+            actions.append('accept_invite')
+            actions.append('decline_invite')
+        elif self.state == EntrantStates.joined.value:
+            if self.race.is_preparing:
+                if not self.ready:
+                    if not self.race.streaming_required or self.stream_live or self.stream_override:
+                        actions.append('ready')
+                    else:
+                        actions.append('not_live')
+                else:
+                    actions.append('unready')
+                actions.append('leave')
+            if self.can_add_comment:
+                if self.comment:
+                    actions.append('change_comment')
+                else:
+                    actions.append('add_comment')
+            if self.race.is_in_progress:
+                if not self.dq and not self.dnf:
+                    actions.append('done' if not self.finish_time else 'undone')
+                if not self.dq and not self.finish_time:
+                    actions.append('forfeit' if not self.dnf else 'unforfeit')
+        return actions
 
     def cancel_request(self):
         """

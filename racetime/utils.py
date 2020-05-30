@@ -15,6 +15,7 @@ __all__ = [
     'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
+    'get_action_button',
     'get_hashids',
     'notice_exception',
     'timer_html',
@@ -354,6 +355,31 @@ def generate_race_slug(custom_nouns=None):
         random.choice(custom_nouns if custom_nouns else slug_nouns),
         '%04d' % random.randint(1, 9999),
     ])
+
+
+def get_action_button(action, race_slug, category_slug):
+    race_action_buttons = {
+        'join': {'label': 'Join', 'class': ''},
+        'request_invite': {'label': 'Request to join', 'class': ''},
+        'cancel_invite': {'label': 'Withdraw join request', 'class': ''},
+        'accept_invite': {'label': 'Accept invite', 'class': ''},
+        'decline_invite': {'label': 'Decline invite', 'class': ''},
+        'ready': {'label': 'Ready', 'class': ''},
+        'not_live': {'label': 'Not live', 'class': ''},
+        'unready': {'label': 'Not ready', 'class': ''},
+        'leave': {'label': 'Quit', 'class': ''},
+        'add_comment': {'label': 'Add comment', 'class': ''},
+        'change_comment': {'label': 'Change comment', 'class': ''},
+        'done': {'label': 'Done', 'class': ''},
+        'undone': {'label': 'Undo finish', 'class': 'dangerous'},
+        'forfeit': {'label': 'Forfeit', 'class': 'dangerous'},
+        'unforfeit': {'label': 'Undo forfeit', 'class': ''},
+    }
+    button = race_action_buttons.get(action)
+    if not button:
+        raise KeyError
+    url = reverse(action, kwargs={'category': category_slug, 'race': race_slug})
+    return action, url, button.get('label'), button.get('class')
 
 
 def get_hashids(cls):

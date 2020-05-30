@@ -25,6 +25,11 @@ function Race() {
 }
 
 Race.prototype.ajaxifyActionForm = function(form) {
+    if ($(form).find('[name="csrfmiddlewaretoken"]').length === 0) {
+        $('<input type="hidden" name="csrfmiddlewaretoken">')
+            .attr('value', Cookies.get('csrftoken'))
+            .appendTo(form);
+    }
     var self = this;
     $(form).ajaxForm({
         clearForm: true,
@@ -187,15 +192,16 @@ Race.prototype.onSocketMessage = function(event) {
     var server_date = new Date(data.date);
     switch (data.type) {
         case 'race.data':
-            if (this.vars.user.id)
-                this.raceTick();
-            if (this.vars.user.can_moderate)
-                break;
-            this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
+            if (!this.vars.user.can_moderate) {
+                this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
+            }
             break;
         case 'race.renders':
             window.globalLatency = server_date - Date.now();
             this.handleRenders(data.renders, data.version);
+            if (this.vars.user.can_moderate || this.vars.user.can_monitor || !('actions' in data.renders)) {
+                this.raceTick();
+            }
             break;
         case 'chat.message':
             this.addMessage(data.message, server_date);

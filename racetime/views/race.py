@@ -9,7 +9,7 @@ from django.views import generic
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
-from ..utils import twitch_auth_url
+from ..utils import get_action_button, twitch_auth_url
 
 
 class Race(UserMixin, generic.DetailView):
@@ -29,7 +29,10 @@ class Race(UserMixin, generic.DetailView):
         return {
             **super().get_context_data(**kwargs),
             'chat_form': self.get_chat_form(),
-            'available_actions': race.available_actions(self.user, can_monitor),
+            'available_actions': [
+                get_action_button(action, race.slug, race.category.slug)
+                for action in race.available_actions(self.user, can_monitor)
+            ],
             'can_moderate': can_moderate,
             'can_monitor': can_monitor,
             'invite_form': self.get_invite_form(),
