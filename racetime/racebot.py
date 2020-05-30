@@ -151,7 +151,7 @@ class RaceBot:
             scp = str(s) + '_countdown_posted'
             if time_to_start >= timedelta(seconds=-s) and scp not in race:
                 race['object'].add_message(
-                    str(s) + '...',
+                    str(s) + '…',
                     highlight=True,
                     broadcast=False,
                 )
