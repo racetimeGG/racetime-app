@@ -37,7 +37,7 @@ Race.prototype.ajaxifyActionForm = function(form) {
             $('.race-action-form button').prop('disabled', true);
         },
         beforeSerialize: function($form) {
-            if ($form.hasClass('add_comment')) {
+            if ($form.hasClass('add_comment') || $form.hasClass('change_comment')) {
                 var comment = prompt('Enter a comment:');
                 if (!comment) return false;
                 var $input = $('<input type="hidden" name="comment">');

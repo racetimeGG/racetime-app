@@ -85,6 +85,7 @@ urlpatterns = [
         path('forfeit', views.Forfeit.as_view(), name='forfeit'),
         path('unforfeit', views.Unforfeit.as_view(), name='unforfeit'),
         path('add_comment', views.AddComment.as_view(), name='add_comment'),
+        path('add_comment', views.AddComment.as_view(), name='change_comment'),
 
         path('monitor/', include([
             path('edit', views.EditRace.as_view(), name='edit_race'),
