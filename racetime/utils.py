@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
-from django.urls import reverse
+from django.urls import reverse, NoReverseMatch
 from django.utils.module_loading import import_string
 from hashids import Hashids
 
@@ -378,7 +378,10 @@ def get_action_button(action, race_slug, category_slug):
     button = race_action_buttons.get(action)
     if not button:
         raise KeyError
-    url = reverse(action, kwargs={'category': category_slug, 'race': race_slug})
+    try:
+        url = reverse(action, kwargs={'category': category_slug, 'race': race_slug})
+    except NoReverseMatch:
+        url = None
     return action, url, button.get('label'), button.get('class')
 
 
