@@ -114,27 +114,27 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for race.update type event.
         """
-        user_id = self.scope.get('user').hashid if self.scope.get('user').is_authenticated else None
-        if user_id:
-            entrant = next(filter(
-                lambda e: e.get('user', {}).get('id') == user_id,
-                event['race'].get('entrants'),
-            ), None)
-            if entrant:
-                if event['race']['status']['value'] == 'pending':
-                    event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
-                elif entrant.get('actions'):
-                    event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
-                        'available_actions': [
-                            get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
-                            for action in entrant.get('actions')
-                        ],
-                        'race': self,
-                    })
-            elif event['race']['status']['value'] not in ['open', 'invitational']:
-                event['renders']['actions'] = ''
-        else:
-            event['renders']['actions'] = ''
+        #user_id = self.scope.get('user').hashid if self.scope.get('user').is_authenticated else None
+        #if user_id:
+        #    entrant = next(filter(
+        #        lambda e: e.get('user', {}).get('id') == user_id,
+        #        event['race'].get('entrants'),
+        #    ), None)
+        #    if entrant:
+        #        if event['race']['status']['value'] == 'pending':
+        #            event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
+        #        elif entrant.get('actions'):
+        #            event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
+        #                'available_actions': [
+        #                    get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
+        #                    for action in entrant.get('actions')
+        #                ],
+        #                'race': self,
+        #            })
+        #    elif event['race']['status']['value'] not in ['open', 'invitational']:
+        #        event['renders']['actions'] = ''
+        #else:
+        #    event['renders']['actions'] = ''
 
         self.state['race_dict'] = event['race']
         self.state['race_renders'] = event['renders']
