@@ -301,33 +301,36 @@ class Category(models.Model):
 class CategoryRequest(models.Model):
     """
     Represents a user request to add a new category.
-
-    There's currently no UI for handling category requests. You need to use the
-    console, e.g.
-        r = CategoryRequest.objects.last()
-        print(model_to_dict(r))
-        r.accept()
     """
     name = models.CharField(
         max_length=255,
-        unique=True,
-        help_text='The full name of this category, e.g. "Super Mario 64".',
+        help_text=(
+            'The full name of this category, e.g. "Super Mario 64" or '
+            '"Multiple Sonic Games".'
+        ),
     )
     short_name = models.CharField(
         max_length=16,
-        unique=True,
-        help_text='An abbreviation or other short identifier, e.g. "SM64".',
+        help_text=(
+            'An abbreviation or other short identifier, e.g. "SM64". Try to '
+            'keep this under 8 characters.'
+        ),
     )
     slug = models.CharField(
         max_length=255,
-        unique=True,
         help_text=(
             'A unique identifier for this category used in the URL, '
-            'e.g. "tetris-99".'
+            'e.g. "tetris-99". If in doubt, just put the game name in '
+            'lowercase without spaces.'
         ),
     )
     goals = models.TextField(
-        help_text='One goal per line. A category must have at least one goal.',
+        help_text=(
+            'Add goals, one per line, that people can race against. Goal '
+            'names should be short, clear and simple, e.g. "Any%", "16 stars", '
+            'or simply "Beat the game". You can add more goals later, but your '
+            'category must have at least one goal to start with.'
+        ),
     )
     requested_at = models.DateTimeField(
         auto_now_add=True,

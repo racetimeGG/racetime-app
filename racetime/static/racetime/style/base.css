@@ -66,6 +66,31 @@ a {
     color: #ddd8dd;
 }
 
+table {
+    border-spacing: 0;
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+table td, table th {
+    border: solid #1a1c20;
+    border-width: 1px 0 0 1px;
+    padding: 10px;
+}
+table tr:first-child td,
+table tr:first-child th {
+    border-top: none;
+}
+table td:first-child,
+table th:first-child {
+    border-left: none;
+}
+table th {
+    color: #8c898c;
+    font-weight: normal;
+    text-align: left;
+}
+
 .btn, .btn:visited {
     background-color: #0c0f14;
     border: solid #26dd9a;

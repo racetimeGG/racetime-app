@@ -216,6 +216,15 @@ class CategoryRequestForm(forms.ModelForm):
         )
         model = models.CategoryRequest
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        category = models.Category.objects.filter(name=name).first()
+        if category:
+            raise ValidationError(
+                'A category with this name already exists on the site.'
+            )
+        return name
+
     def clean_goals(self):
         goals = self.cleaned_data.get('goals')
         goals = set(goal.strip() for goal in goals.split('\n') if goal.strip())

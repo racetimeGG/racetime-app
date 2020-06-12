@@ -147,6 +147,17 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
     form_class = forms.CategoryRequestForm
     model = models.CategoryRequest
 
+    def get_requests(self):
+        return self.model.objects.filter(
+            requested_by=self.user,
+        ).order_by('requested_at')
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'requests': self.get_requests(),
+        }
+
     def form_valid(self, form):
         #if models.CategoryRequest.objects.filter(
         #    requested_by=self.user,
@@ -181,7 +192,7 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
                 recipient_list=[user.email],
             )
 
-        return http.HttpResponseRedirect(reverse('home'))
+        return http.HttpResponseRedirect(reverse('request_category'))
 
 
 class FavouriteCategory(LoginRequiredMixin, Category):

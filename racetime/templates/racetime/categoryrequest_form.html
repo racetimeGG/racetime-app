@@ -6,11 +6,44 @@
 
 {% block main %}
     <h2>Request new category</h2>
-    <p class="help">
+    <p>
         Submit a request to site staff to add a new category. Your request will
         be reviewed and if successful, the new category will be created with
         yourself as its owner.
     </p>
+    <p>
+        You can check back on this page at any time to see the status of your
+        requests. We will also email you if your requested category gets
+        accepted onto the site.
+    </p>
+    <h3>Your requests</h3>
+    <table>
+        <tr>
+            <th>Category</th>
+            <th>Status</th>
+        </tr>
+        {% for request in requests %}
+        <tr>
+            <td>{{ request.name }} ({{ request.short_name }})</td>
+            <td>
+                {% if request.accepted_as %}
+                    Accepted as
+                    <a href="{% url 'category' category=request.accepted_as.slug %}">{{ request.accepted_as }}</a>
+                {% elif request.reviewed_at %}
+                    Rejected by site staff. The category may already exist on
+                    the site, or else it was deemed unsuitable. Please contact
+                    staff if you have further questions.
+                {% else %}
+                    Pending review. Check back soon.
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">You have not requested any categories yet.</td>
+        {% endfor %}
+    </table>
+    <h3>Add a request</h3>
     <form class="category-request-form layout-form" method="post">
         {% csrf_token %}
         <ul>{{ form.as_ul }}</ul>
