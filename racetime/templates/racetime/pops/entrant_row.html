@@ -54,4 +54,7 @@
     {% elif race.goal %}
         <span class="score" title="Not ranked">n/a</span>
     {% endif %}
+    {% if can_monitor %}
+        <div class="monitor-actions"></div>
+    {% endif %}
 </li>

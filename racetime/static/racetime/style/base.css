@@ -931,27 +931,80 @@ a .timer {
 }
 .entrant-row > .monitor-actions {
     display: flex;
+    flex-direction: row-reverse;
+    margin-left: 5px;
+    position: relative;
+    text-align: right;
+    white-space: nowrap;
 }
-.entrant-row > .monitor-actions > li {
-    margin-right: 5px;
-}
-.entrant-row > .monitor-actions > li > form > .btn {
+.entrant-row > .monitor-actions.open {
     background: #17181b;
+    border-radius: 3px;
+    margin: -3px -3px -3px 2px;
+    padding: 3px;
+}
+.entrant-row > .monitor-actions::before {
+    content: 'menu';
+    font-family: 'Material Icons';
+    font-size: 22px;
+    line-height: 1;
+    padding: 0 3px;
+    transition: color 0.2s;
+    -moz-font-feature-settings: 'liga';
+    -moz-osx-font-smoothing: grayscale;
+}
+.entrant-row > .monitor-actions.empty::before {
+    color: #8c898c;
+}
+.entrant-row > .monitor-actions.open::before {
+    position: relative;
+    z-index: 101;
+}
+.entrant-row > .monitor-actions > ul {
+    background: #17181b;
+    border-radius: 3px;
+    display: none;
+    z-index: 100;
+}
+.entrant-row > .monitor-actions.open > ul {
+    display: block;
+    padding: 3px 34px 3px 3px;
+    position: absolute;
+        top: 0;
+        right: 0;
+}
+.entrant-row > .monitor-actions > ul:empty::before {
+    content: 'No actions available';
+    color: #8c898c;
+    font-style: italic;
+}
+.entrant-row > .monitor-actions > ul > li {
+    margin-top: 5px;
+}
+.entrant-row > .monitor-actions > ul > li:first-child {
+    margin-top: 0;
+}
+.entrant-row > .monitor-actions > ul > li > form > .btn {
+    align-items: center;
+    justify-content: flex-end;
+    background: none;
     border: none;
     cursor: pointer;
-    height: 22px;
+    display: flex;
+    height: 26px;
     line-height: 22px;
-    padding: 0;
+    margin-left: auto;
+    padding: 2px 5px;
     vertical-align: top;
-    width: 22px;
 }
-.entrant-row > .monitor-actions > li > form > .btn:hover {
+.entrant-row > .monitor-actions > ul > li > form > .btn:hover {
     background-color: #3b4b47;
     color: white;
 }
-.entrant-row > .monitor-actions > li > form > .btn > .material-icons {
+.entrant-row > .monitor-actions > ul > li > form > .btn > .material-icons {
     height: 22px;
     line-height: 22px;
+    margin-left: 5px;
 }
 .race-entrants > .count {
     border-top: 1px solid #08090a;

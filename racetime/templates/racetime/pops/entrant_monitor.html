@@ -1,9 +1,10 @@
-<ul class="monitor-actions" data-entrant="{{ index }}">
+<ul data-entrant="{{ index }}">{% spaceless %}
     {% if entrant.can_accept_request %}
         <li>
             <form method="post" class="race-action-form" action="{% url 'accept_request' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Accept invite">
+                <button type="submit" class="btn">
+                    <span>Accept invite</span>
                     <i class="material-icons">person_add</i>
                 </button>
             </form>
@@ -13,7 +14,8 @@
         <li>
             <form method="post" class="race-action-form" action="{% url 'force_unready' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Force unready">
+                <button type="submit" class="btn">
+                    <span>Force unready</span>
                     <i class="material-icons">thumb_down</i>
                 </button>
             </form>
@@ -23,7 +25,8 @@
         <li>
             <form method="post" class="race-action-form" action="{% url 'override_stream' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Override stream requirement">
+                <button type="submit" class="btn">
+                    <span>Override stream requirement</span>
                     <i class="material-icons">videocam_off</i>
                 </button>
             </form>
@@ -33,27 +36,30 @@
         <li>
             <form method="post" class="race-action-form" action="{% url 'remove' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Remove">
+                <button type="submit" class="btn">
+                    <span>Remove</span>
                     <i class="material-icons">delete_forever</i>
                 </button>
             </form>
         </li>
     {% endif %}
-    {% if can_moderate and entrant.can_disqualify %}
+    {% if can_moderate and entrant.can_disqualify and entrant.user != user %}
         <li>
             <form method="post" class="race-action-form" action="{% url 'disqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Disqualify">
+                <button type="submit" class="btn">
+                    <span>Disqualify</span>
                     <i class="material-icons">flash_on</i>
                 </button>
             </form>
         </li>
     {% endif %}
-    {% if can_moderate and entrant.can_undisqualify %}
+    {% if can_moderate and entrant.can_undisqualify and entrant.user != user %}
         <li>
             <form method="post" class="race-action-form" action="{% url 'undisqualify' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Un-disqualify">
+                <button type="submit" class="btn">
+                    <span>Un-disqualify</span>
                     <i class="material-icons">flash_off</i>
                 </button>
             </form>
@@ -63,7 +69,8 @@
         <li>
             <form method="post" class="race-action-form" action="{% url 'add_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Promote to race monitor">
+                <button type="submit" class="btn">
+                    <span>Promote to race monitor</span>
                     <i class="material-icons">work</i>
                 </button>
             </form>
@@ -73,10 +80,11 @@
         <li>
             <form method="post" class="race-action-form" action="{% url 'remove_monitor' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="btn" title="Demote from race monitor">
+                <button type="submit" class="btn">
+                    <span>Demote from race monitor</span>
                     <i class="material-icons">work_off</i>
                 </button>
             </form>
         </li>
     {% endif %}
-</ul>
+{% endspaceless %}</ul>

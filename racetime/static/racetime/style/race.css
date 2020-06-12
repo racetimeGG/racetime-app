@@ -409,6 +409,9 @@ aside, main {
         display: initial;
         font-size: 13px;
     }
+    .entrant-row > .monitor-actions::before {
+        font-size: 17px;
+    }
 
     .race-nav {
         display: block;

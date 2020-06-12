@@ -244,17 +244,21 @@ Race.prototype.handleRenders = function(renders, version) {
                         var $entrant = $('.race-entrants [data-entrant="'+ $(this).data('entrant') +'"]');
                         if ($entrant.length === 0) return true;
                         var $monitorActions = $entrant.children('.monitor-actions');
-                        if ($monitorActions.length) {
-                            if ($monitorActions.attr('data-version') < version) {
-                                $monitorActions.replaceWith(this);
-                            }
-                        } else {
-                            $entrant.children('.user').after(this);
+                        if ($monitorActions.length === 0) {
+                            $monitorActions = $('<div class="monitor-actions empty" data-version="0"></div>').appendTo($entrant);
                         }
-                        $(this).attr('data-version', version);
-                        $(this).find('.race-action-form').each(function() {
-                            self.ajaxifyActionForm(this);
-                        });
+                        if ($monitorActions.attr('data-version') < version) {
+                            $monitorActions.empty().append(this);
+                            if ($(this).children().length === 0) {
+                                $monitorActions.addClass('empty');
+                            } else {
+                                $monitorActions.removeClass('empty');
+                            }
+                            $monitorActions.attr('data-version', version);
+                            $(this).find('.race-action-form').each(function() {
+                                self.ajaxifyActionForm(this);
+                            });
+                        }
                     });
                     break;
                 default:
@@ -265,6 +269,11 @@ Race.prototype.handleRenders = function(renders, version) {
                     $segment.find('.race-action-form').each(function() {
                         self.ajaxifyActionForm(this);
                     });
+                    if (segment === 'entrants' && self.vars.user.can_monitor) {
+                        $segment.find('.entrant-row').each(function() {
+                            $(this).append('<div class="monitor-actions empty" data-version="0"></div>');
+                        });
+                    }
             }
             $segment.trigger('raceTick', renders[segment]);
         }

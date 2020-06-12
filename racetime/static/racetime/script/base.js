@@ -165,6 +165,20 @@ $(function() {
         $bulletin.addClass('hidden');
     });
 
+    $(document).on('click', '.entrant-row > .monitor-actions', function(event) {
+        if (event.target !== this) {
+            return true;
+        }
+        $('.entrant-row > .monitor-actions').not(this).removeClass('open');
+        $(this).toggleClass('open');
+    });
+    $(document).on('click', 'body', function(event) {
+        if ($(event.target).closest('.entrant-row > .monitor-actions').length) {
+            return true;
+        }
+        $('.entrant-row > .monitor-actions').removeClass('open');
+    });
+
     $(document).on('mouseenter', '.entrant-row > .user > .comment', function() {
         var props = $(this).offset();
         props.position = 'absolute';
