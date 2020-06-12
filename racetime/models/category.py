@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from .choices import RaceStates
-from ..utils import SafeException, generate_race_slug
+from ..utils import SafeException, generate_race_slug, get_hashids
 
 
 class Category(models.Model):
@@ -146,6 +146,15 @@ class Category(models.Model):
         This is a fixed quantity for now. May vary in the future.
         """
         return 3
+
+    @property
+    def max_goals(self):
+        """
+        Sets the limit for the number of active goals this category may use.
+
+        This is a fixed quantity for now. May vary in the future.
+        """
+        return 10
 
     @property
     def max_moderators(self):
@@ -458,6 +467,14 @@ class Goal(models.Model):
             recorded=True,
         ))
 
+    @cached_property
+    def total_races(self):
+        return len(self.race_set.all())
+
+    @property
+    def hashid(self):
+        return get_hashids(self.__class__).encode(self.id)
+
     def __str__(self):
         return self.name
 
@@ -522,6 +539,7 @@ class AuditLog(models.Model):
             ('goal_add', 'added a new goal'),
             ('goal_activate', 're-activated a goal'),
             ('goal_deactivate', 'deactivated a goal'),
+            ('goal_rename', 'renamed a goal'),
         ),
     )
     old_value = models.TextField(

@@ -81,23 +81,6 @@ class InviteForm(UserSelectForm, forms.ModelForm):
 
 
 class CategoryForm(forms.ModelForm):
-    active_goals = forms.ModelMultipleChoiceField(
-        queryset=models.Goal.objects.get_queryset(),
-        help_text=(
-            'Select which goals may be used in races. There must be at least '
-            'one active goal available.'
-        ),
-        widget=forms.CheckboxSelectMultiple,
-    )
-    add_new_goals = forms.CharField(
-        required=False,
-        widget=forms.Textarea,
-        help_text=(
-            'Add new goals for this category, one per line. Goals must always '
-            'be uniquely named.'
-        ),
-    )
-
     ALLOWED_TAGS = {
         'a': ('href', 'title'),
         'b': (),
@@ -123,19 +106,8 @@ class CategoryForm(forms.ModelForm):
             'streaming_required',
             'allow_stream_override',
             'slug_words',
-            'active_goals',
-            'add_new_goals',
         )
         model = models.Category
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['active_goals'].queryset = self.fields['active_goals'].queryset.filter(
-            category=self.instance,
-        )
-        self.fields['active_goals'].initial = self.fields['active_goals'].queryset.filter(
-            active=True,
-        )
 
     def is_bad_tag(self, el):
         if el.name.lower() not in self.ALLOWED_TAGS.keys():
@@ -145,15 +117,6 @@ class CategoryForm(forms.ModelForm):
         if el.name.lower() == 'a' and el.attrs.get('href', '').startswith('javascript:'):
             return True
         return False
-
-    def clean_add_new_goals(self):
-        add_new_goals = self.cleaned_data.get('add_new_goals')
-        goals = set(goal.strip() for goal in add_new_goals.split('\n'))
-        goals = set(
-            goal for goal in goals
-            if goal and not self.instance.goal_set.filter(name=goal).exists()
-        )
-        return goals
 
     def clean_info(self):
         info = self.cleaned_data.get('info')
@@ -235,6 +198,12 @@ class CategoryRequestForm(forms.ModelForm):
             )
 
         return '\n'.join(goals)
+
+
+class GoalForm(forms.ModelForm):
+    class Meta:
+        fields = ('name',)
+        model = models.Goal
 
 
 class GoalWidget(forms.RadioSelect):

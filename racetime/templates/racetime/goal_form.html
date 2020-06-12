@@ -1,0 +1,25 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Edit goal | {{ category.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/manage_tabs.html' with current='category_goals' %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+    </ol>
+    <h2>Edit goal</h2>
+    <p>
+        Use this form to rename this goal. Make sure the goal remains
+        consistent, for example changing "NMG" to "No major glitches" is fine,
+        but changing "Any%" to "All dungeons" would likely be an inconsistency.
+        If this happens, you should instead deactivate the old goal and create
+        a new one.
+    </p>
+    <form class="goal-form layout-form" method="post">
+        {% csrf_token %}
+        <ul>{{ form.as_ul }}</ul>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+{% endblock %}

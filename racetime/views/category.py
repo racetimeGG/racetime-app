@@ -254,48 +254,6 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
                 )},
             )
 
-        active_goals = form.cleaned_data['active_goals']
-        for goal in self.object.goal_set.all():
-            if goal.active and goal not in active_goals:
-                goal.active = False
-                goal.save()
-                models.AuditLog.objects.create(
-                    actor=self.user,
-                    category=self.object,
-                    goal=goal,
-                    action='goal_deactivate',
-                )
-                messages.info(
-                    self.request,
-                    '"%(goal)s" can no longer be used for races.' % {'goal': goal.name},
-                )
-            elif not goal.active and goal in active_goals:
-                goal.active = True
-                goal.save()
-                models.AuditLog.objects.create(
-                    actor=self.user,
-                    category=self.object,
-                    goal=goal,
-                    action='goal_activate',
-                )
-                messages.info(
-                    self.request,
-                    '"%(goal)s" may now be used for races.' % {'goal': goal.name},
-                )
-
-        for goal_name in form.cleaned_data['add_new_goals']:
-            goal = self.object.goal_set.create(name=goal_name)
-            models.AuditLog.objects.create(
-                actor=self.user,
-                category=self.object,
-                goal=goal,
-                action='goal_add',
-            )
-            messages.info(
-                self.request,
-                'New category goal added: "%(goal)s"' % {'goal': goal_name},
-            )
-
         return super().form_valid(form)
 
     def get_success_url(self):

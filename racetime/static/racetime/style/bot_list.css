@@ -33,6 +33,12 @@
     margin-left: 0;
     padding: 5px;
 }
+.bot-list > li > dl > dd > .actions {
+    display: flex;
+}
+.bot-list > li > dl > dd > .actions > * {
+    margin-left: 5px;
+}
 .bot-list > li > dl > .name {
     align-items: center;
     display: flex;

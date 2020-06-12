@@ -32,6 +32,13 @@ from .category import (
     TransferOwner,
     CategoryAudit,
 )
+from .goal import (
+    GoalList,
+    CreateGoal,
+    EditGoal,
+    DeactivateGoal,
+    ReactivateGoal,
+)
 from .home import Home
 from .race import (
     CreateRace,
@@ -123,6 +130,12 @@ __all__ = [
     'RemoveModerator',
     'TransferOwner',
     'CategoryAudit',
+    # goal
+    'GoalList',
+    'CreateGoal',
+    'EditGoal',
+    'DeactivateGoal',
+    'ReactivateGoal',
     # home
     'Home',
     # race

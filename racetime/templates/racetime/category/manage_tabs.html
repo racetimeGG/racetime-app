@@ -4,6 +4,11 @@
             Edit category
         </a>
     </li>
+    <li{% if current == 'category_goals' %} class="current"{% endif %}>
+        <a href="{% url 'category_goals' category=category.slug %}">
+            Manage goals
+        </a>
+    </li>
     <li{% if current == 'category_mods' %} class="current"{% endif %}>
         <a href="{% url 'category_mods' category=category.slug %}">
             Moderators &amp; ownership
