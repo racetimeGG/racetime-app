@@ -182,7 +182,7 @@ class AddComment:
 
 
 class ShowGoal:
-    commands = ['goal']
+    commands = ['goal', 'info']
 
     def action(self, race, user, data):
         race.add_message('Goal: ' + race.goal_str)
