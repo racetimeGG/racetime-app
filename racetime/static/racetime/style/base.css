@@ -288,7 +288,7 @@ header > .title > h1 > a > .dot::after {
     height: 8px;
     width: 8px;
     position: absolute;
-        bottom: -3px;
+        bottom: 0;
         left: 3px;
     transform: rotate(-45deg);
 }
