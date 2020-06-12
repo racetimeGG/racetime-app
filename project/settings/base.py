@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'channels',
     'corsheaders',
     'django.forms',
+    'django_admin_listfilter_dropdown',
     'oauth2_provider',
 ]
 
