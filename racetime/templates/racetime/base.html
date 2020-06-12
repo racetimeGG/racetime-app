@@ -28,7 +28,7 @@
                     <div class="title">
                         <h1><a href="/">
                             <img src="{% static 'racetime/image/logo.svg' %}" alt="">
-                            {{ site_info.header_text|safe }}
+                            <span>{{ site_info.header_text|safe }}</span>
                         </a></h1>
                     </div>
                     {% block nocurrentrace %}

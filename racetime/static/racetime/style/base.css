@@ -276,13 +276,13 @@ header > .title > h1 > a > img {
     height: 45px;
     vertical-align: top;
 }
-header > .title > h1 > a > .dot {
+header > .title > h1 > a > span > .dot {
     display: inline-block;
     font-size: 0;
     position: relative;
     width: 14px;
 }
-header > .title > h1 > a > .dot::after {
+header > .title > h1 > a > span > .dot::after {
     background: linear-gradient(to bottom, #becccc 0%, #eee 50%, #becccc 100%);
     content: "\a0";
     height: 8px;
@@ -1419,24 +1419,29 @@ footer > .tagline {
         padding: 0;
     }
     header > .title > h1 {
-        font-size: 30px;
         padding: 1px 5px;
+        position: static;
     }
-    header > .title > h1 > a > .dot {
-        transform: rotate(45deg) translate(-6px, -1.5px);
+    header > .title > h1 > a,
+    header > .title > h1 > a > img {
+        display: block;
+        height: 32px;
+    }
+    header > .title > h1 > a > span {
+        display: none;
     }
     header > .current-race {
         display: none;
     }
     header > .user-info {
-        padding: 2px;
+        padding: 0 5px;
     }
     header > .user-info > .user-pop > .avatar {
         height: 22px;
         width: 22px;
     }
     header > .user-info > .user-pop > .name {
-        max-width: 60px;
+        max-width: 140px;
         overflow: hidden;
         text-overflow: ellipsis;
     }
