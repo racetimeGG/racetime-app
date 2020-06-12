@@ -10,6 +10,12 @@
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
     </ol>
     <h2>Edit category</h2>
+    <p>
+        With the form below, you can change basic details about this category,
+        such as its cover image, info, and stream settings. For more details
+        on how category management works, please refer to our
+        <a href="https://github.com/racetimeGG/racetime-app/wiki/Category-management-and-moderation" target="_blank">management guide</a> on the wiki.
+    </p>
     <form class="category-form layout-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <ul>{{ form.as_ul }}</ul>
