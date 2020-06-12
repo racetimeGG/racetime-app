@@ -229,7 +229,7 @@ class Race(models.Model):
                     'finish_time': entrant.finish_time,
                     'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
                     'place': entrant.place,
-                    'place_ordinal': ordinal(entrant.place) if entrant.place else None,
+                    'place_ordinal': entrant.place_ordinal,
                     'score': entrant.rating,
                     'score_change': entrant.rating_change,
                     'comment': entrant.comment,
@@ -1188,6 +1188,10 @@ class Entrant(models.Model):
         return timer_str(self.finish_time, False) if self.finish_time else None
 
     @property
+    def place_ordinal(self):
+        return ordinal(self.place) if self.place else None
+
+    @property
     def summary(self):
         """
         Return a triplet summarising the entrant's current race status.
@@ -1366,7 +1370,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
-                % {'user': self.user, 'place': ordinal(self.place), 'time': self.finish_time_str}
+                % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str}
             )
             self.race.finish_if_none_remaining()
         else:
