@@ -42,6 +42,7 @@ urlpatterns = [
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
+        path('races/data', views.CategoryRaceData.as_view(), name='category_race_list_data'),
         path('manage/', include([
             path('edit', views.EditCategory.as_view(), name='edit_category'),
             path('deactivate', views.DeactivateCategory.as_view(), name='category_deactivate'),

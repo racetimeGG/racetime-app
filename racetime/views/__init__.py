@@ -18,6 +18,7 @@ from .bot import (
 from .category import (
     Category,
     CategoryData,
+    CategoryRaceData,
     CategoryLeaderboards,
     CategoryLeaderboardsData,
     FavouriteCategory,

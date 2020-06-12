@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.mail import send_mail
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models as db_models
 from django.db.transaction import atomic
@@ -82,6 +82,25 @@ class CategoryData(Category):
             content=self.object.json_data,
             content_type='application/json',
         )
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+
+class CategoryRaceData(Category):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        paginator = Paginator(self.past_races(), 10)
+        try:
+            page = paginator.page(self.request.GET.get('page', 1))
+        except PageNotAnInteger:
+            return http.HttpResponseBadRequest()
+        except EmptyPage:
+            page = []
+        resp = http.JsonResponse({
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'races': [race.api_dict_summary for race in page],
+        })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
 
