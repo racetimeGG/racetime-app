@@ -168,7 +168,7 @@ aside, main {
     margin-right: 4px;
     vertical-align: top;
 }
-.race-chat > .messages > li > .name.supporter {
+.race-chat > .messages > li > .name.supporter > span {
     background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
     -webkit-background-clip: text;
     background-clip: text;

@@ -98,7 +98,7 @@ Race.prototype.createMessageItem = function(message, server_date) {
     } else {
         var $user = $('<span class="name"></span>');
         $user.addClass(message.user.flair);
-        $user.text(message.user.name);
+        $('<span />').text(message.user.name).appendTo($user);
         $user.insertAfter($li.children('.timestamp'));
     }
     if (message.highlight) {
