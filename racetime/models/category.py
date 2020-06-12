@@ -239,26 +239,7 @@ class Category(models.Model):
                 for user in self.all_moderators
             ],
             'current_races': [
-                {
-                    'name': str(race),
-                    'status': {
-                        'value': race.state_info.value,
-                        'verbose_value': race.state_info.verbose_value,
-                        'help_text': race.state_info.help_text,
-                    },
-                    'url': race.get_absolute_url(),
-                    'data_url': race.get_data_url(),
-                    'goal': {
-                        'name': race.goal_str,
-                        'custom': not race.goal,
-                    },
-                    'info': race.info,
-                    'entrants_count': race.entrants_count,
-                    'entrants_count_inactive': race.entrants_count_inactive,
-                    'opened_at': race.opened_at,
-                    'started_at': race.started_at,
-                    'time_limit': race.time_limit,
-                }
+                race.api_dict_summary
                 for race in self.race_set.exclude(state__in=[
                     RaceStates.finished,
                     RaceStates.cancelled,

@@ -192,6 +192,35 @@ class Race(models.Model):
         ]
 
     @property
+    def api_dict_summary(self):
+        summary = {
+            'name': str(self),
+            'status': {
+                'value': self.state_info.value,
+                'verbose_value': self.state_info.verbose_value,
+                'help_text': self.state_info.help_text,
+            },
+            'url': self.get_absolute_url(),
+            'data_url': self.get_data_url(),
+            'goal': {
+                'name': self.goal_str,
+                'custom': not self.goal,
+            },
+            'info': self.info,
+            'entrants_count': self.entrants_count,
+            'entrants_count_inactive': self.entrants_count_inactive,
+            'opened_at': self.opened_at,
+            'started_at': self.started_at,
+            'time_limit': self.time_limit,
+        }
+        if self.is_done:
+            summary['ended_at'] = self.ended_at
+            summary['cancelled_at'] = self.cancelled_at
+            summary['recordable'] = self.recordable
+            summary['recorded'] = self.recorded
+        return summary
+
+    @property
     def as_dict(self):
         """
         Return race data as a dict.
