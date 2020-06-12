@@ -1645,6 +1645,7 @@ class Entrant(models.Model):
         return (
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
+            and self.race.streaming_required
             and not self.stream_live
             and not self.stream_override
         )
