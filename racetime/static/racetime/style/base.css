@@ -240,18 +240,32 @@ header > .title > h1 > a:visited {
     text-decoration: none;
     position: relative;
 }
-header > .title > h1 > a,
-header > .title > h1 > a > .dot {
+header > .title > h1 > a {
     background-image: linear-gradient(to bottom, #becccc 0%, #eee 50%, #becccc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-fill-color: transparent;
 }
+header > .title > h1 > a > img {
+    height: 45px;
+    vertical-align: top;
+}
 header > .title > h1 > a > .dot {
     display: inline-block;
-    transform: rotate(45deg) translate(-9px, -2px);
-    transform-origin: 0 bottom;
+    font-size: 0;
+    position: relative;
+    width: 14px;
+}
+header > .title > h1 > a > .dot::after {
+    background: linear-gradient(to bottom, #becccc 0%, #eee 50%, #becccc 100%);
+    content: "\a0";
+    height: 8px;
+    width: 8px;
+    position: absolute;
+        bottom: -3px;
+        left: 3px;
+    transform: rotate(-45deg);
 }
 header > .user-info {
     display: flex;

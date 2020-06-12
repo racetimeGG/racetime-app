@@ -10,6 +10,7 @@
         {% block css %}{% endblock %}
 
         {% block site_head %}{% endblock %}
+        <link rel="icon" href="{% static 'racetime/image/favicon.svg' %}" type="image/svg+xml">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#26dd9a">
         <meta property="og:type" content="website">
@@ -25,7 +26,10 @@
             {% block header %}
                 <header>
                     <div class="title">
-                        <h1><a href="/">{{ site_info.header_text|safe }}</a></h1>
+                        <h1><a href="/">
+                            <img src="{% static 'racetime/image/logo.svg' %}" alt="">
+                            {{ site_info.header_text|safe }}
+                        </a></h1>
                     </div>
                     {% block nocurrentrace %}
                         {% if user.is_authenticated and user.active_race_entrant %}
