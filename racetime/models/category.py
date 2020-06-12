@@ -38,7 +38,7 @@ class Category(models.Model):
     )
     short_name = models.CharField(
         max_length=16,
-        unique=True,
+        db_index=True,
         help_text='An abbreviation or other short identifier, e.g. "SM64".',
     )
     slug = models.CharField(
