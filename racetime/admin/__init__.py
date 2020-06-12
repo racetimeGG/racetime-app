@@ -2,8 +2,8 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib import admin, messages
-from django.db.models import F
 from django.urls import set_urlconf
+from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from . import forms, options
 from .. import models
@@ -46,13 +46,33 @@ class CategoryRequestAdmin(options.ModelAdmin):
         # Need to set this so that accept() can generate a URL for the email.
         set_urlconf('racetime.urls')
         for obj in queryset:
-            obj.accept()
+            if obj.accepted_as:
+                messages.error(request, '%s was already accepted.' % obj)
+            elif models.Category.objects.filter(name=obj.name).exists():
+                messages.error(
+                    request,
+                    'Cannot accept %s, a category with the same name already exists.'
+                    % obj
+                )
+            elif models.Category.objects.filter(slug=obj.slug).exists():
+                messages.error(
+                    request,
+                    'Cannot accept %s, a category with the same slug already exists.'
+                    % obj
+                )
+            else:
+                obj.accept()
+                messages.success(request, '%s accepted and added to site.' % obj)
         set_urlconf(None)
     accept.short_description = 'Accept category request'
 
     def reject(self, request, queryset):
         for obj in queryset:
-            obj.reject()
+            if obj.reviewed_at:
+                messages.error(request, '%s has already been reviewed.' % obj)
+            else:
+                obj.reject()
+                messages.success(request, '%s rejected.' % obj)
     reject.short_description = 'Reject category request'
 
     def has_add_permission(self, *args, **kwargs):
@@ -73,14 +93,19 @@ class RaceAdmin(options.ModelAdmin):
         'cancelled_at',
         'bot_pid',
     )
+    inlines = [
+        options.EntrantInline,
+    ]
     list_display = (
         '__str__',
         'category',
         'state',
+        'recorded',
     )
     list_filter = (
-        'category',
+        ('category', RelatedDropdownFilter),
         'state',
+        'recorded',
     )
     readonly_fields = (
         'slug',
@@ -98,16 +123,17 @@ class RaceAdmin(options.ModelAdmin):
     def has_delete_permission(self, *args, **kwargs):
         return False
 
-    def save_model(self, request, obj, form, change):
-        obj.version = F('version') + 1
-        obj.save()
-        if not obj.recorded and (
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        race = form.instance
+        if not race.recorded and (
             'goal' in form.changed_data
             or 'custom_goal' in form.changed_data
         ):
-            obj.update_entrant_ratings()
+            race.update_entrant_ratings()
+        race.recalculate_places()
         with options.frontend_urlconf():
-            obj.broadcast_data()
+            race.broadcast_data()
 
 
 class SupporterScheduleAdmin(options.ModelAdmin):
@@ -155,8 +181,10 @@ class UserAdmin(options.ModelAdmin):
         'groups',
         'user_permissions',
         'email',
+        'favourite_categories',
     )
     inlines = [
+        options.UserActionInline,
         options.UserLogInline,
     ]
     readonly_fields = (
