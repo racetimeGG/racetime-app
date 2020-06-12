@@ -34,7 +34,7 @@
                     {% block nocurrentrace %}
                         {% if user.is_authenticated and user.active_race_entrant %}
                             <div class="current-race">
-                                {% include 'racetime/pops/race_row.html' with race=user.active_race_entrant.race nocontext=True %}
+                                {% include 'racetime/pops/race_row.html' with race=user.active_race_entrant.race nocontext=True short=True %}
                             </div>
                         {% endif %}
                     {% endblock nocurrentrace %}
