@@ -78,6 +78,7 @@ class ViewProfile(generic.DetailView):
         queryset = models.Entrant.objects.filter(
             user=self.get_object(),
             race__state=models.RaceStates.finished,
+            race__category__active=True,
         )
         queryset = queryset.select_related('race')
         queryset = queryset.order_by('-race__opened_at')
