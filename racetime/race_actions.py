@@ -200,6 +200,16 @@ class ShowLog:
         )
 
 
+class Help:
+    commands = ['help']
+
+    def action(self, race, user, data):
+        race.add_message(
+            'For help using the site and a list of chat commands, visit: %s'
+            % settings.RT_SITE_URI + '/about/help'
+        )
+
+
 class Random:
     commands = ['random']
     shortcuts = {
@@ -261,6 +271,7 @@ commands = {
         AddComment,
         ShowGoal,
         ShowLog,
+        Help,
         Random,
     ] for command in action.commands
 }
