@@ -455,7 +455,7 @@ class UserRanking(models.Model):
         Return the user's calculated rating, using their current score and
         confidence values.
         """
-        return round((self.score - (2 * self.confidence)) * 100)
+        return max(0, round((self.score - (2 * self.confidence)) * 100))
 
     def best_time_html(self):
         """
