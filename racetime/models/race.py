@@ -191,8 +191,7 @@ class Race(models.Model):
             ),
         ]
 
-    @property
-    def api_dict_summary(self):
+    def api_dict_summary(self, include_category=False):
         summary = {
             'name': str(self),
             'status': {
@@ -213,6 +212,8 @@ class Race(models.Model):
             'started_at': self.started_at,
             'time_limit': self.time_limit,
         }
+        if include_category:
+            summary['category'] = self.category.api_dict_summary()
         if self.is_done:
             summary['ended_at'] = self.ended_at
             summary['cancelled_at'] = self.cancelled_at

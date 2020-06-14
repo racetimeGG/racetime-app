@@ -99,7 +99,7 @@ class CategoryRaceData(Category):
         resp = http.JsonResponse({
             'count': paginator.count,
             'num_pages': paginator.num_pages,
-            'races': [race.api_dict_summary for race in page],
+            'races': [race.api_dict_summary() for race in page],
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp

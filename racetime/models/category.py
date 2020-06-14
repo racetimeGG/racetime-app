@@ -239,7 +239,7 @@ class Category(models.Model):
                 for user in self.all_moderators
             ],
             'current_races': [
-                race.api_dict_summary
+                race.api_dict_summary()
                 for race in self.race_set.exclude(state__in=[
                     RaceStates.finished,
                     RaceStates.cancelled,
