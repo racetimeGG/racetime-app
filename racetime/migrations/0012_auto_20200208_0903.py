@@ -9,7 +9,7 @@ from oauth2_provider.settings import oauth2_settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oauth2_provider', '0006_auto_20171214_2232'),
+        ('oauth2_provider', '0001_initial'),
         ('racetime', '0011_race_chat_message_delay'),
     ]
 
