@@ -13,7 +13,7 @@ setup(
         'django-recaptcha>=2.0.5,<2.1',
         'hashids>=1.2.0,<1.3',
         'Pillow>=6.2.1,<6.3',
-        'requests>=2.22.0,<2.23',
+        'requests>=2.22.0,<2.24',
         'trueskill==0.4.5',
     ],
 )
