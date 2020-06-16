@@ -1158,6 +1158,7 @@ class Entrant(models.Model):
     )
     finish_time = models.DurationField(
         null=True,
+        blank=True,
     )
     place = models.PositiveSmallIntegerField(
         null=True,
