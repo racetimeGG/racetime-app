@@ -95,7 +95,7 @@ class CategoryForm(forms.ModelForm):
         'u': (),
         'strong': (),
     }
-    MIN_SLUGWORDS = 100
+    MIN_SLUGWORDS = 50
 
     class Meta:
         fields = (
