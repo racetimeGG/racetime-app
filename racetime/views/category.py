@@ -96,10 +96,11 @@ class CategoryRaceData(Category):
             return http.HttpResponseBadRequest()
         except EmptyPage:
             page = []
+        show_entrants = self.request.GET.get('show_entrants', 'false').lower() in ['true', 'yes', '1']
         resp = http.JsonResponse({
             'count': paginator.count,
             'num_pages': paginator.num_pages,
-            'races': [race.api_dict_summary(include_entrants=True) for race in page],
+            'races': [race.api_dict_summary(include_entrants=show_entrants) for race in page],
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
