@@ -96,7 +96,7 @@ class Category(models.Model):
         default=None,
         help_text=(
             'Set a number of words to be picked at random for race room '
-            'names. If set, you must provide a minimum of 100 distinct words '
+            'names. If set, you must provide a minimum of 50 distinct words '
             'to use. Changing slug words will not impact existing race rooms.'
         ),
     )
