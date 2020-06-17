@@ -191,7 +191,7 @@ class Race(models.Model):
             ),
         ]
 
-    def api_dict_summary(self, include_category=False):
+    def api_dict_summary(self, include_category=False, include_entrants=False):
         summary = {
             'name': str(self),
             'status': {
@@ -214,12 +214,37 @@ class Race(models.Model):
         }
         if include_category:
             summary['category'] = self.category.api_dict_summary()
+        if include_entrants:
+            summary['entrants'] = self.entrants_dicts()
         if self.is_done:
             summary['ended_at'] = self.ended_at
             summary['cancelled_at'] = self.cancelled_at
             summary['recordable'] = self.recordable
             summary['recorded'] = self.recorded
         return summary
+
+    def entrants_dicts(self):
+        return [
+                {
+                    'user': entrant.user.api_dict_summary(race=self),
+                    'status': {
+                        'value': entrant.summary[0],
+                        'verbose_value': entrant.summary[1],
+                        'help_text': entrant.summary[2],
+                    },
+                    'finish_time': entrant.finish_time,
+                    'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
+                    'place': entrant.place,
+                    'place_ordinal': entrant.place_ordinal,
+                    'score': entrant.rating,
+                    'score_change': entrant.rating_change,
+                    'comment': entrant.comment,
+                    'stream_live': entrant.stream_live,
+                    'stream_override': entrant.stream_override,
+                    'actions': entrant.available_actions,
+                }
+                for entrant in self.ordered_entrants
+            ]
 
     @property
     def as_dict(self):
@@ -248,27 +273,7 @@ class Race(models.Model):
             'info': self.info,
             'entrants_count': self.entrants_count,
             'entrants_count_inactive': self.entrants_count_inactive,
-            'entrants': [
-                {
-                    'user': entrant.user.api_dict_summary(race=self),
-                    'status': {
-                        'value': entrant.summary[0],
-                        'verbose_value': entrant.summary[1],
-                        'help_text': entrant.summary[2],
-                    },
-                    'finish_time': entrant.finish_time,
-                    'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
-                    'place': entrant.place,
-                    'place_ordinal': entrant.place_ordinal,
-                    'score': entrant.rating,
-                    'score_change': entrant.rating_change,
-                    'comment': entrant.comment,
-                    'stream_live': entrant.stream_live,
-                    'stream_override': entrant.stream_override,
-                    'actions': entrant.available_actions,
-                }
-                for entrant in self.ordered_entrants
-            ],
+            'entrants': self.entrants_dicts(),
             'opened_at': self.opened_at,
             'start_delay': self.start_delay,
             'started_at': self.started_at,
