@@ -6,7 +6,7 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Q
 from django.db.transaction import atomic
 from django.forms import model_to_dict
@@ -105,6 +105,24 @@ class ViewProfile(generic.DetailView):
             Q(owner=self.object) | Q(moderators=self.object)
         )
         return queryset.distinct()
+
+class UserRaceData(ViewProfile):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        paginator = Paginator(self.get_entrances(), 10)
+        try:
+            page = paginator.page(self.request.GET.get('page', 1))
+        except PageNotAnInteger:
+            return http.HttpResponseBadRequest()
+        except EmptyPage:
+            page = []
+        resp = http.JsonResponse({
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'races': [entrance.race.api_dict_summary(include_entrants=True) for entrance in page],
+        })
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
 
 
 class LoginRegister(generic.TemplateView):

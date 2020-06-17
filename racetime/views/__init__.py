@@ -87,6 +87,7 @@ from .race_monitor_actions import (
     RemoveMonitor,
 )
 from .user import (
+    UserRaceData,
     CreateAccount,
     EditAccount,
     EditAccountConnections,
