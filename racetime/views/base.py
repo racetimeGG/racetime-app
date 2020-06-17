@@ -55,7 +55,9 @@ class BaseRaceAction(UserMixin, generic.View):
 
     def post(self, *args, **kwargs):
         if self.user.is_banned_from_category(self.get_race().category):
-            raise SafeException('You are currently banned from this category.')
+            return http.JsonResponse({
+                'errors': ['You are currently banned from this category.'],
+            }, status=422)
 
         try:
             self._do_action()
