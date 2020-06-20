@@ -117,21 +117,6 @@ class EntrantInline(admin.TabularInline):
         return False
 
 
-class UserActionInline(admin.TabularInline):
-    can_delete = False
-    extra = 0
-    model = models.UserAction
-    fields = readonly_fields = (
-        'date',
-        'action',
-        'ip_address',
-        'user_agent',
-    )
-
-    def has_add_permission(self, *args, **kwargs):
-        return False
-
-
 class UserLogInline(admin.TabularInline):
     can_delete = False
     extra = 0

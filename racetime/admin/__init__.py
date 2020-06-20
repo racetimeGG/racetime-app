@@ -2,7 +2,8 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib import admin, messages
-from django.urls import set_urlconf
+from django.urls import reverse, set_urlconf
+from django.utils.safestring import mark_safe
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
 from . import forms, options
@@ -206,6 +207,51 @@ class SupporterScheduleAdmin(options.ModelAdmin):
         user.save()
 
 
+class UserActionAdmin(options.ModelAdmin):
+    fields = readonly_fields = (
+        'user',
+        'date',
+        'action',
+        'ip_address',
+        'user_agent',
+    )
+    list_display = (
+        'user_link',
+        'date',
+        'action',
+        'ip_address',
+        'user_agent',
+    )
+    list_filter = (
+        'date',
+        'action',
+    )
+    ordering = ('-date',)
+    search_fields = (
+        'user__name',
+        'ip_address',
+        'user_agent',
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(user__is_superuser=False)
+
+    def user_link(self, action):
+        url = reverse('admin:racetime_user_change', args=[action.user.id])
+        link = '<a href="%s">%s</a>' % (url, action.user)
+        return mark_safe(link)
+    user_link.short_description = 'User'
+
+    def has_add_permission(self, *args, **kwargs):
+        return False
+
+    def has_change_permission(self, *args, **kwargs):
+        return False
+
+    def has_delete_permission(self, *args, **kwargs):
+        return False
+
+
 class UserAdmin(options.ModelAdmin):
     actions = [
         'disconnect_twitch_account',
@@ -220,7 +266,6 @@ class UserAdmin(options.ModelAdmin):
         'favourite_categories',
     )
     inlines = [
-        options.UserActionInline,
         options.UserLogInline,
     ]
     readonly_fields = (
@@ -323,6 +368,7 @@ admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.CategoryRequest, CategoryRequestAdmin)
 admin.site.register(models.Race, RaceAdmin)
 admin.site.register(models.SupporterSchedule, SupporterScheduleAdmin)
+admin.site.register(models.UserAction, UserActionAdmin)
 admin.site.register(models.User, UserAdmin)
 admin.site.site_url = settings.RT_SITE_URI
 admin.site.site_title = '%(site)s admin' % {'site': settings.RT_SITE_INFO['title']}
