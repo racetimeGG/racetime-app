@@ -671,6 +671,7 @@ a .timer {
 }
 .category-info + .category-meta {
     margin-left: 10px;
+    max-width: 320px;
 }
 .meta-user-list {
     font-size: 13px;
