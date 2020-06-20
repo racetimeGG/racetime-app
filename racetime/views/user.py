@@ -107,6 +107,7 @@ class ViewProfile(generic.DetailView):
         )
         return queryset.distinct()
 
+
 class UserRaceData(ViewProfile):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -117,11 +118,17 @@ class UserRaceData(ViewProfile):
             return http.HttpResponseBadRequest()
         except EmptyPage:
             page = []
-        show_entrants = self.request.GET.get('show_entrants', 'false').lower() in ['true', 'yes', '1']
+        show_entrants = (
+            self.request.GET.get('show_entrants', 'false').lower()
+            in ['true', 'yes', '1']
+        )
         resp = http.JsonResponse({
             'count': paginator.count,
             'num_pages': paginator.num_pages,
-            'races': [entrance.race.api_dict_summary(include_entrants=show_entrants) for entrance in page],
+            'races': [
+                entrance.race.api_dict_summary(include_entrants=show_entrants)
+                for entrance in page
+            ],
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
