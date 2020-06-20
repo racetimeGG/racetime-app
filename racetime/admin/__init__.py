@@ -13,14 +13,15 @@ class BanAdmin(options.ModelAdmin):
     autocomplete_fields = (
         'user',
     )
-    actions = [
-        'delete_selected',
-    ]
     list_display = (
         'user',
         'category',
+        'expires_at',
         'notes',
     )
+
+    def has_delete_permission(self, *args, **kwargs):
+        return False
 
 
 class BulletinAdmin(options.ModelAdmin):
