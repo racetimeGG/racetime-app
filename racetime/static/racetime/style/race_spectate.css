@@ -128,9 +128,6 @@
 .streamctl-close .race-stream-control > ul > .streamctl.close {
     display: none;
 }
-.streamctl-close .container > .content > main {
-    margin-right: 0;
-}
 .streamctl-close .container > .content > aside {
     display: none;
 }

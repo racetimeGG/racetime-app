@@ -449,13 +449,13 @@ a .timer {
 
 .container > .content > main {
     flex: 1 0 0;
-    margin-right: 10px;
-}
-.container > .content > main:last-child {
-    margin-right: 0;
 }
 .container > .content > aside {
     flex: 0 0 320px;
+    margin-left: 10px;
+}
+.container > .content > aside:first-child {
+    margin-left: 0;
 }
 
 .container > .content > aside:empty {
@@ -1536,8 +1536,8 @@ footer > .tagline {
         border-radius: 3px;
         padding: 5px;
     }
-    .container > .content > main {
-        margin-right: 0;
+    .container > .content > aside {
+        margin-left: 0;
     }
     footer {
         flex-direction: column;
