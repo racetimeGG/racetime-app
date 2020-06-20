@@ -29,6 +29,40 @@ class BulletinAdmin(options.ModelAdmin):
         return False
 
 
+class CategoryAdmin(options.ModelAdmin):
+    autocomplete_fields = (
+        'owner',
+    )
+    readonly_fields = (
+        'image',
+        'info',
+        'streaming_required',
+        'allow_stream_override',
+        'moderators',
+        'slug_words',
+    )
+    list_display = (
+        '__str__',
+        'short_name',
+        'active',
+        'owner',
+    )
+    list_filter = (
+        'active',
+    )
+    ordering = ('name',)
+    search_fields = ('name', 'short_name')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('name')
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class CategoryRequestAdmin(options.ModelAdmin):
     actions = ['accept', 'reject']
     list_display = (
@@ -85,6 +119,7 @@ class CategoryRequestAdmin(options.ModelAdmin):
 
 class RaceAdmin(options.ModelAdmin):
     autocomplete_fields = (
+        'category',
         'monitors',
     )
     form = forms.RaceForm
@@ -284,6 +319,7 @@ class UserAdmin(options.ModelAdmin):
 admin.site.disable_action('delete_selected')
 admin.site.register(models.Ban, BanAdmin)
 admin.site.register(models.Bulletin, BulletinAdmin)
+admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.CategoryRequest, CategoryRequestAdmin)
 admin.site.register(models.Race, RaceAdmin)
 admin.site.register(models.SupporterSchedule, SupporterScheduleAdmin)
