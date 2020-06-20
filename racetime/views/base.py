@@ -1,10 +1,12 @@
+import re
+
 from django import http
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
 from django.utils.functional import cached_property
 from django.views import generic
 
-from ..models import User, Race
+from ..models import Race, User
 from ..utils import SafeException, exception_to_msglist
 
 
@@ -31,9 +33,8 @@ class CanMonitorRaceMixin(UserMixin, UserPassesTestMixin):
 
 
 class BaseRaceAction(UserMixin, generic.View):
-    action_class = None
-
     _race = None
+    log = False
 
     def action(self, race, user, data):
         raise NotImplementedError
@@ -65,6 +66,10 @@ class BaseRaceAction(UserMixin, generic.View):
             return http.JsonResponse({
                 'errors': exception_to_msglist(ex)
             }, status=422)
+        else:
+            if self.log:
+                name = re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
+                self.user.log_action('race_' + name, self.request)
 
         if self.request.is_ajax():
             return http.HttpResponse()

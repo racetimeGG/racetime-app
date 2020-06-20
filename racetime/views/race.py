@@ -171,6 +171,8 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
 
         race.save()
 
+        self.user.log_action('race_create', self.request)
+
         return http.HttpResponseRedirect(race.get_absolute_url())
 
     def test_func(self):

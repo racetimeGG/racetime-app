@@ -13,7 +13,7 @@ class RaceAction(LoginRequiredMixin, BaseRaceAction):
 
 
 class Join(race_actions.Join, RaceAction):
-    pass
+    log = True
 
 
 class Leave(race_actions.Leave, RaceAction):
@@ -21,7 +21,7 @@ class Leave(race_actions.Leave, RaceAction):
 
 
 class RequestInvite(race_actions.RequestInvite, RaceAction):
-    pass
+    log = True
 
 
 class CancelInvite(race_actions.CancelInvite, RaceAction):
@@ -29,7 +29,7 @@ class CancelInvite(race_actions.CancelInvite, RaceAction):
 
 
 class AcceptInvite(race_actions.AcceptInvite, RaceAction):
-    pass
+    log = True
 
 
 class DeclineInvite(race_actions.DeclineInvite, RaceAction):
