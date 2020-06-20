@@ -1,0 +1,40 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/standing.css' %}">
+{% endblock %}
+
+{% block title %}
+    Account standing |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/user/tabs.html' with current='account_standing' %}
+    <h2>Account standing</h2>
+    <p class="help">
+        Any bans that have been applied to your account will be listed here.
+    </p>
+    <div class="account-standing">
+        <h3>Current standing</h3>
+        {% for ban in current_bans %}
+            {% include 'racetime/user/standing_ban.html' %}
+        {% empty %}
+            <div class="item">
+                <div class="info good-standing">
+                    <span class="image"><span style="background-image: url({% static 'racetime/image/logo.svg' %})"></span></span>
+                    <span class="title">Good standing</span>
+                </div>
+                <blockquote class="reason">
+                    You have no bans applied to your account. Good show.
+                </blockquote>
+            </div>
+        {% endfor %}
+        {% if expired_bans %}
+            <h3>Previous standing</h3>
+            {% for ban in expired_bans %}
+                {% include 'racetime/user/standing_ban.html' %}
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

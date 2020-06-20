@@ -1,0 +1,54 @@
+.account-standing {
+}
+.account-standing > .item {
+    border: 5px solid #1a1c20;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+.account-standing > .item > .info {
+    display: flex;
+    line-height: 32px;
+    padding: 10px;
+}
+.account-standing > .item > .info.good-standing {
+    color: #26dd9a;
+}
+.account-standing > .item > .info > .image {
+    background: linear-gradient(to bottom, #36393f 0, #25272c 100%);
+    border-radius: 10px;
+    height: 32px;
+    margin-right: 10px;
+    position: relative;
+    width: 32px;
+}
+.account-standing > .item > .info > .image > span {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 10px;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.account-standing > .item > .info.category > .image > span {
+    background-size: cover;
+}
+.account-standing > .item > .info > .title {
+}
+.account-standing > .item > .expires,
+.account-standing > .item > .permanent,
+.account-standing > .item > .reason {
+    border-top: 1px solid #1a1c20;
+    padding: 10px;
+}
+.account-standing > .item > .expires {
+}
+.account-standing > .item > .expires > span {
+}
+.account-standing > .item > .expires > time {
+}
+.account-standing > .item > .permanent {
+}
+.account-standing > .item > .reason {
+    margin: 0;
+}

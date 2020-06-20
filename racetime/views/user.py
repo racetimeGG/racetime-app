@@ -314,6 +314,23 @@ class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView
         }
 
 
+class AccountStanding(LoginRequiredMixin, UserMixin, generic.TemplateView):
+    template_name = 'racetime/user/standing.html'
+
+    def current_bans(self):
+        return self.user.current_bans.order_by('created_at')
+
+    def expired_bans(self):
+        return self.user.expired_bans.order_by('created_at')
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'current_bans': self.current_bans(),
+            'expired_bans': self.expired_bans(),
+        }
+
+
 class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
     csrf_protect = decorator_from_middleware(CsrfViewMiddlewareTwitch)
 

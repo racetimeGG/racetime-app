@@ -1,0 +1,61 @@
+{% load static %}
+<div class="item">
+    {% if ban.category %}
+        <div class="info category">
+            {% if ban.category.image %}
+                <span class="image"><span style="background-image: url({{ ban.category.image.url }})"></span></span>
+            {% endif %}
+            <span class="title">{{ ban.category.name }}</span>
+        </div>
+    {% else %}
+        <div class="info site-wide">
+            <span class="image"><span style="background-image: url({% static 'racetime/image/logo.svg' %})"></span></span>
+            <span class="title">Site-wide ban</span>
+        </div>
+    {% endif %}
+    {% if ban.expires_at %}
+        <div class="expires">
+            {% if ban.is_current %}
+                <span>
+                    You are banned from
+                    {% if ban.category %}
+                        {{ ban.category.short_name }}
+                    {% else %}
+                        {{ site_info.title }}
+                    {% endif %}
+                    races until
+                </span>
+                <time class="onlydate" datetime="{{ ban.expires_at.isoformat }}">
+                    {{ ban.expires_at }}
+                </time>.
+            {% else %}
+                You were previously banned from
+                {% if ban.category %}
+                    {{ ban.category.short_name }}
+                {% else %}
+                    {{ site_info.title }}
+                {% endif %}
+                races from
+                <time class="onlydate" datetime="{{ ban.created_at.date.isoformat }}">
+                    {{ ban.created_at.date }}
+                </time> to
+                <time class="onlydate" datetime="{{ ban.expires_at.isoformat }}">
+                    {{ ban.expires_at }}
+                </time>.
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="permanent">
+            You are banned indefinitely from
+            {% if ban.category %}
+                {{ ban.category.short_name }}
+            {% else %}
+                {{ site_info.title }}
+            {% endif %}
+            races.
+        </div>
+    {% endif %}
+    {% if ban.reason %}
+        <blockquote class="reason">{{ ban.reason }}</blockquote>
+    {% endif %}
+</div>

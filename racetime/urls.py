@@ -9,6 +9,7 @@ urlpatterns = [
         path('auth', views.LoginRegister.as_view(), name='login_or_register'),
         path('connections', views.EditAccountConnections.as_view(), name='edit_account_connections'),
         path('security', views.EditAccountSecurity.as_view(), name='edit_account_security'),
+        path('standing', views.AccountStanding.as_view(), name='account_standing'),
         path('login', views.Login.as_view(), name='login'),
         path('logout', views.Logout.as_view(), name='logout'),
         path('create', views.CreateAccount.as_view(), name='create_account'),

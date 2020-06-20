@@ -14,4 +14,9 @@
             Twitch &amp; connections
         </a>
     </li>
+    <li{% if current == 'account_standing' %} class="current"{% endif %}>
+        <a href="{% url 'account_standing' %}">
+            Standing
+        </a>
+    </li>
 </ul>
