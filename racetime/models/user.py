@@ -1,12 +1,12 @@
 import requests
-from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
-from django.core.validators import RegexValidator, MinLengthValidator
+from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.functional import cached_property
 
 from .choices import EntrantStates, RaceStates
@@ -246,6 +246,23 @@ class User(AbstractBaseUser, PermissionsMixin):
             return None
 
     @property
+    def current_bans(self):
+        """
+        Return a queryset of bans applied to this user that are currently
+        active.
+        """
+        return self.ban_set.filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())
+        )
+
+    @property
+    def expired_bans(self):
+        """
+        Return a queryset of bans applied to this user that have expired.
+        """
+        return self.ban_set.filter(expires_at__lte=timezone.now())
+
+    @property
     def hashid(self):
         """
         Return encoded hashid representing this user.
@@ -271,7 +288,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Determine if the user has an active site-wide ban.
         """
-        return self.ban_set.filter(category__isnull=True).exists()
+        return self.current_bans.filter(
+            category__isnull=True,
+        ).exists()
 
     @property
     def is_system(self):
@@ -352,7 +371,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         Determine if this user is banned from the given category.
         """
-        return self.ban_set.filter(
+        return self.current_bans.filter(
             Q(category__isnull=True) | Q(category=category)
         ).exists()
 
@@ -516,10 +535,26 @@ class Ban(models.Model):
         blank=True,
         help_text='If left blank, ban will be site-wide.',
     )
+    expires_at = models.DateField(
+        db_index=True,
+        null=True,
+        blank=True,
+        help_text=(
+            'Date that user may race again. If left blank, ban will be '
+            'permanent.'
+        ),
+    )
+    reason = models.TextField(
+        blank=True,
+        help_text=(
+            'Visible to the USER. Give a brief explaination for the ban.'
+        ),
+    )
     notes = models.TextField(
         blank=True,
         help_text=(
-            'Describe why this ban was issued. Only visible to administrators.'
+            'Any additional detail on why this ban was issued. Only visible '
+            'to administrators.'
         ),
     )
     created_at = models.DateTimeField(
@@ -528,6 +563,10 @@ class Ban(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True,
     )
+
+    @property
+    def is_current(self):
+        return self.expires_at is None or self.expires_at > timezone.now().date()
 
 
 class UserLog(models.Model):
