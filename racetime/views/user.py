@@ -86,6 +86,7 @@ class ViewProfile(generic.DetailView):
 
     def get_favourite_categories(self):
         queryset = models.Category.objects.filter(
+            active=True,
             race__state=models.RaceStates.finished,
             race__entrant__user=self.get_object(),
         )

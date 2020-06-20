@@ -137,7 +137,7 @@
     <ol class="user-categories">
         {% for category in categories %}
             <li>
-                {% if category.active %}<a href="{{ category.get_absolute_url }}">{% else %}<span>{% endif %}
+                <a href="{{ category.get_absolute_url }}">
                     {% if category.image %}
                         <span class="image" style="background-image: url({{ category.image.url }})"></span>
                     {% else %}
@@ -147,14 +147,14 @@
                     {% endif %}
                     <span class="info">
                         <span class="name">
-                            {{ category.name }} {% if not category.active %}(inactive){% endif %}
+                            {{ category.name }}
                         </span>
                         <span class="times-entered">
                             {{ category.times_entered }}
                             race{{ category.times_entered|pluralize }}
                         </span>
                     </span>
-                {% if not category.active %}</span>{% else %}</a>{% endif %}
+                </a>
             </li>
         {% empty %}
             <li>No races entered yet.</li>
