@@ -1,11 +1,11 @@
 New category request received.
 
-Name: {{ object.name }}
-Short name: {{ object.short_name }}
+Name: {{ object.name|safe }}
+Short name: {{ object.short_name|safe }}
 Slug: {{ object.slug }}
 
 Goals:
-{{ object.goals }}
+{{ object.goals|safe }}
 
 Requested at: {{ object.requested_at }}
-Requested by: {{ object.requested_by }}
+Requested by: {{ object.requested_by|safe }}

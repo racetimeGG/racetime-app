@@ -1,1 +1,1 @@
-Category accepted: {{ category.name }}.
+Category accepted: {{ category.name|safe }}.

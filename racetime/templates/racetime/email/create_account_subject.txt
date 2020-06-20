@@ -1,1 +1,1 @@
-Welcome to {{ site_info.title }}, {{ user.name }}.
+Welcome to {{ site_info.title }}, {{ user.name|safe }}.

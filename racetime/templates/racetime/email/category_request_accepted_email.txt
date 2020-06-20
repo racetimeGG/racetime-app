@@ -1,10 +1,10 @@
-Hello {{ user.name }},
+Hello {{ user.name|safe }},
 
 The category you requested has just been added to the site:
 
-    {{ category_url }}
+    {{ category_url|safe }}
 
-Now anyone may create {{ category.short_name }} races on {{ site_info.title }}. Time to get racing!
+Now anyone may create {{ category.short_name|safe }} races on {{ site_info.title }}. Time to get racing!
 
 You have been given ownership of this category by default, this will allow you
 to manage the category goals, moderators, and other details. You can transfer

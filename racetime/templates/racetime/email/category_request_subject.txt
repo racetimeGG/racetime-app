@@ -1,1 +1,1 @@
-New category request received: {{ object.name }}
+New category request received: {{ object.name|safe }}
