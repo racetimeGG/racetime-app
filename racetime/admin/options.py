@@ -121,6 +121,8 @@ class UserLogInline(admin.TabularInline):
     can_delete = False
     extra = 0
     model = models.UserLog
+    ordering = ('-changed_at',)
+    verbose_name = 'Profile updates'
     fields = readonly_fields = (
         'changed_at',
         'name',
