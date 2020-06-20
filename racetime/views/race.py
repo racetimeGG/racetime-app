@@ -239,7 +239,9 @@ class RaceListData(generic.View):
     def current_races(self):
         return [
             race.api_dict_summary(include_category=True)
-            for race in models.Race.objects.exclude(state__in=[
+            for race in models.Race.objects.filter(
+                category__active=True,
+            ).exclude(state__in=[
                 models.RaceStates.finished,
                 models.RaceStates.cancelled,
             ]).all()
