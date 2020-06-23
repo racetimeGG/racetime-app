@@ -198,8 +198,30 @@ Race.prototype.onSocketMessage = function(event) {
     var server_date = new Date(data.date);
     switch (data.type) {
         case 'race.data':
-            if (!this.vars.user.can_moderate) {
-                this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
+            if (this.vars.user.id) {
+                var entrant = data.race.entrants.filter(e => e.user.id === this.vars.user.id)[0]
+                if (entrant) {
+                    this.vars.user.in_race = [
+                        'requested',
+                        'invited',
+                        'declined',
+                    ].indexOf(entrant.status.value) === -1;
+                    this.vars.user.ready = [
+                        'ready',
+                        'in_progress',
+                        'done',
+                        'dnf',
+                        'dq',
+                    ].indexOf(entrant.status.value) !== -1;
+                    this.vars.user.unready = entrant.status.value === 'not_ready';
+                } else {
+                    this.vars.user.in_race = false;
+                    this.vars.user.ready = false;
+                    this.vars.user.unready = false;
+                }
+                if (!this.vars.user.can_moderate) {
+                    this.vars.user.can_monitor = Boolean(data.race.monitors.some(user => user.id === this.vars.user.id));
+                }
             }
             break;
         case 'race.renders':

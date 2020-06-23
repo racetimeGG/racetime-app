@@ -26,6 +26,11 @@ class Race(UserMixin, generic.DetailView):
         race = self.get_object()
         can_moderate = race.category.can_moderate(self.user)
         can_monitor = can_moderate or race.can_monitor(self.user)
+        if self.user.is_authenticated:
+            entrant = race.entrant_set.filter(user=self.user).first()
+        else:
+            entrant = None
+
         return {
             **super().get_context_data(**kwargs),
             'chat_form': self.get_chat_form(),
@@ -49,6 +54,10 @@ class Race(UserMixin, generic.DetailView):
                     'id': self.user.hashid if self.user.is_authenticated else None,
                     'can_moderate': can_moderate,
                     'can_monitor': can_monitor,
+                    'name': self.user.name if self.user.is_authenticated else None,
+                    'in_race': entrant is not None,
+                    'ready': entrant.ready if entrant else False,
+                    'unready': not entrant.ready if entrant else False,
                 },
             },
         }
