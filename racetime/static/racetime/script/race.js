@@ -107,12 +107,12 @@ Race.prototype.createMessageItem = function(message, server_date) {
     var $message = $li.children('.message');
     $message.text(message.message);
     if (message.is_system) {
-        $message.html($message.html().replace(/##(\w+?)##(.+?)##/g, function(matches, $1, $2) {
+        $message.html($message.html().replace(/##(\w+?)##(.+?)##/g, function(match, $1, $2) {
             return '<span class="' + $1 + '">' + $2 + '</span>';
         }));
     }
-    $message.html($message.html().replace(/(https?:\/\/[^\s]+)/g, function(matches, $1) {
-        return '<a href="' + $1 + '" target="_blank">' + $1 + '</a>';
+    $message.html($message.html().replace(/https?:\/\/[^\s]+/g, function(match) {
+        return '<a href="' + match + '" target="_blank">' + match + '</a>';
     }));
 
     //If the posted date is after the server date, assume the message posted at server time
