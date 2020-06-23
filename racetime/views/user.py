@@ -81,7 +81,7 @@ class ViewProfile(generic.DetailView):
             race__category__active=True,
         )
         queryset = queryset.select_related('race')
-        queryset = queryset.order_by('-race__opened_at')
+        queryset = queryset.order_by('-race__ended_at')
         return queryset
 
     def get_favourite_categories(self):
