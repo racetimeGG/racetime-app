@@ -67,7 +67,7 @@ class Category(UserMixin, generic.DetailView):
                 output_field=db_models.PositiveSmallIntegerField(),
                 default=0,
             ),
-        ).order_by('state_sort', 'opened_at').all()
+        ).order_by('state_sort', '-opened_at').all()
 
     def past_races(self):
         return self.object.race_set.filter(state__in=[
