@@ -97,6 +97,7 @@ aside, main {
     flex-direction: column;
     flex-grow: 1;
     font-size: 13px;
+    line-height: 1.384;
     position: relative;
 }
 
@@ -138,10 +139,12 @@ aside, main {
 .race-chat > .messages {
     flex: 1 1 0;
     overflow-y: auto;
-    margin: 10px 0;
+    margin: 8px 0 0;
 }
 
 .race-chat > .messages > li {
+    margin: 1px 0;
+    padding: 2px;
     word-break: break-word;
 }
 .race-chat > .messages > li.system {
@@ -213,14 +216,7 @@ aside, main {
 }
 
 .race-chat > form {
-    display: flex;
-}
-.race-chat > form > ul {
-    flex-grow: 1;
-    margin-right: 5px;
-}
-.race-chat > form > button {
-    font-size: 13px;
+    margin-top: 8px;
 }
 .race-chat > form label {
     display: none;
@@ -232,17 +228,28 @@ aside, main {
     min-height: 0;
     outline: none;
     overflow: hidden;
+    padding: 6px;
     resize: none;
     vertical-align: top;
-    width: calc(100% - 10px);
+    width: calc(100% - 12px);
 }
 .race-chat > form textarea:invalid {
     box-shadow: none;
 }
-.race-chat > form > .popout {
+.race-chat > form > .actions {
     align-items: center;
     display: flex;
-    margin-left: 5px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.race-chat > form > .actions > button {
+    font-size: 13px;
+}
+.race-chat > form > .actions > .popout {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    margin-right: 5px;
     text-decoration: none;
 }
 
@@ -324,7 +331,7 @@ aside, main {
     .race-entrants,
     .race-monitor,
     .race-status > .state > .help,
-    .race-chat > form > .popout {
+    .race-chat > form > .actions > .popout {
         display: none;
     }
 

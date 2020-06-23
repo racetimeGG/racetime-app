@@ -358,7 +358,11 @@ $(function() {
     });
 
     $(document).on('change input keyup', '.race-chat form textarea', function() {
-        $(this).height($(this)[0].scrollHeight - 10);
+        if ($(this).val() === '') {
+            $(this).height(18);
+        } else {
+            $(this).height($(this)[0].scrollHeight - 12);
+        }
     });
 
     $(document).on('click', '.confirm .btn, .dangerous .btn', function() {
