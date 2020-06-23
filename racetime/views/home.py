@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Count, Q
 from django.utils.functional import cached_property
 from django.views import generic
@@ -31,6 +32,7 @@ class Home(UserMixin, generic.TemplateView):
 
         context = super().get_context_data(**kwargs)
         context.update({
+            'show_dev_intro': settings.DEBUG,
             'show_recordable': self.show_recordable,
             'categories': self.prep_categories(categories, sort),
             'favourites': self.prep_categories(favourites, sort) if favourites else None,

@@ -53,6 +53,13 @@
         </ol>
     {% endif %}
     <h3 {% if not favourites %}style="margin-top: 0"{% endif %}>Race categories</h3>
+    {% if not categories and show_dev_intro %}
+        <p>
+            Hello! You have successfully set up a development copy of the site.
+            To add categories and other data, you should run the createsuperuser
+            and fixtures commands in the <a href="https://github.com/racetimeGG/racetime-app#quick-setup-guide" target="_blank">Quick setup guide</a>.
+        </p>
+    {% endif %}
     <ol class="home-categories">
         {% for category in categories %}
             {% include 'racetime/home/category.html' %}
