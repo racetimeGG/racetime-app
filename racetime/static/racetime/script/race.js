@@ -10,10 +10,13 @@ function Race() {
 
     try {
         this.vars = JSON.parse($('#race-vars').text());
+        if (this.vars.user.name) {
+            this.vars.user.name_quoted = this.regquote(this.vars.user.name);
+        }
         var server_date = new Date(this.vars.server_time_utc);
         for (var i in this.vars.chat_history) {
             if (!this.vars.chat_history.hasOwnProperty(i)) continue;
-            this.addMessage(this.vars.chat_history[i], server_date);
+            this.addMessage(this.vars.chat_history[i], server_date, true);
         }
         this.open();
     } catch (e) {
@@ -50,7 +53,7 @@ Race.prototype.ajaxifyActionForm = function(form) {
     });
 };
 
-Race.prototype.addMessage = function(message, server_date) {
+Race.prototype.addMessage = function(message, server_date, mute_notifications) {
     var self = this;
 
     // Temporary fix: skip countdown messages intended for LiveSplit
@@ -64,7 +67,7 @@ Race.prototype.addMessage = function(message, server_date) {
 
     var $messages = $('.race-chat .messages');
     if ($messages.length) {
-        $messages.append(self.createMessageItem(message, server_date));
+        $messages.append(self.createMessageItem(message, server_date, mute_notifications));
         $messages[0].scrollTop = $messages[0].scrollHeight;
     }
 
@@ -78,7 +81,7 @@ Race.prototype.addMessage = function(message, server_date) {
     }
 };
 
-Race.prototype.createMessageItem = function(message, server_date) {
+Race.prototype.createMessageItem = function(message, server_date, mute_notifications) {
     var posted_date = new Date(message.posted_at);
     var timestamp = ('00' + posted_date.getHours()).slice(-2) + ':' + ('00' + posted_date.getMinutes()).slice(-2);
 
@@ -115,6 +118,52 @@ Race.prototype.createMessageItem = function(message, server_date) {
     $message.html($message.html().replace(/https?:\/\/[^\s]+/g, function(match) {
         return '<a href="' + match + '" target="_blank">' + match + '</a>';
     }));
+    if (this.vars.user.name_quoted && !message.bot && !message.is_system) {
+        var foundMention = false;
+        var searchFor = [];
+        if (message.user.id !== this.vars.user.id) {
+            searchFor.push('\\b' + this.vars.user.name_quoted);
+        }
+        if (message.is_monitor) {
+            searchFor.push('@everyone', '@here');
+            if (this.vars.user.in_race) {
+                searchFor.push('@entrants?');
+                if (this.vars.user.ready) {
+                    searchFor.push('@ready');
+                }
+                if (this.vars.user.unready) {
+                    searchFor.push('@unready');
+                }
+            }
+        }
+        if (searchFor.length > 0) {
+            var search = new RegExp('(' + searchFor.join('|') + ')\\b', 'gi');
+            $message[0].childNodes.forEach(function(text) {
+                if (text.nodeType !== Node.TEXT_NODE) return;
+                var span = document.createElement('span');
+                span.classList.add('mention-search');
+                span.textContent = text.textContent;
+                text.parentNode.replaceChild(span, text);
+            });
+            $message.find('.mention-search').each(function() {
+                $(this).html($(this).html().replace(search, function (match) {
+                    foundMention = true;
+                    return '<span class="mention">' + match + '</span>';
+                }));
+            });
+        }
+        if (foundMention) {
+            $li.addClass('mentioned');
+            if (this.notify && !mute_notifications) {
+                new Notification(this.vars.room, {
+                    body: message.user.name + ': ' + $message.text(),
+                    icon: message.user.avatar,
+                    silent: true,
+                    tag: message.id,
+                });
+            }
+        }
+    }
 
     //If the posted date is after the server date, assume the message posted at server time
     var ms_since_posted = Math.max(0, server_date - posted_date);
@@ -232,7 +281,7 @@ Race.prototype.onSocketMessage = function(event) {
             }
             break;
         case 'chat.message':
-            this.addMessage(data.message, server_date);
+            this.addMessage(data.message, server_date, false);
             break;
     }
 };
@@ -340,6 +389,13 @@ Race.prototype.whoops = function(message) {
     $li.find('.message').text(message);
     $messages.append($li);
     $messages[0].scrollTop = $messages[0].scrollHeight
+};
+
+Race.prototype.regquote = function(str) {
+    return str.replace(
+        new RegExp('[.\\\\+*?\\[^\\]$(){}=!<>|:\\/-]', 'g'),
+        '\\$&'
+    );
 };
 
 $(function() {

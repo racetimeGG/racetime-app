@@ -159,6 +159,10 @@ aside, main {
 .race-chat > .messages > li.bot {
     color: #a0ace8;
 }
+.race-chat > .messages > li.mentioned {
+    background-color: #1a1c20;
+    border-radius: 4px;
+}
 .race-chat > .messages > li > .timestamp {
     color: #8c898c;
     font-size: 12px;
@@ -213,6 +217,9 @@ aside, main {
 }
 .race-chat > .messages > li > .message .bot {
     color: #a0ace8;
+}
+.race-chat > .messages > li > .message .mention {
+    font-weight: bold;
 }
 
 .race-chat > form {
