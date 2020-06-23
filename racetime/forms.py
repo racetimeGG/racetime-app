@@ -53,6 +53,7 @@ class ChatForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # This prevents browsers from showing "Please fill in this field" on mouseover.
         self.fields['message'].widget.attrs['title'] = ''
+        self.fields['message'].widget.attrs['placeholder'] = 'Send a message'
 
     class Meta:
         fields = ('message',)
