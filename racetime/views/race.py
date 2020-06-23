@@ -38,8 +38,9 @@ class Race(UserMixin, generic.DetailView):
             'invite_form': self.get_invite_form(),
             'meta_image': (settings.RT_SITE_URI + race.category.image.url) if race.category.image else None,
             'js_vars': {
-                'server_time_utc': timezone.now().isoformat(),
                 'chat_history': race.chat_history(),
+                'room': str(race),
+                'server_time_utc': timezone.now().isoformat(),
                 'urls': {
                     'chat': race.get_ws_url(),
                     'renders': race.get_renders_url(),

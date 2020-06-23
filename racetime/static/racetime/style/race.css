@@ -245,12 +245,20 @@ aside, main {
 .race-chat > form > .actions > button {
     font-size: 13px;
 }
+.race-chat > form > .actions > .notifications,
 .race-chat > form > .actions > .popout {
     align-items: center;
     cursor: pointer;
     display: flex;
     margin-right: 5px;
     text-decoration: none;
+}
+.race-chat > form > .actions > .notifications > .on,
+.race-chat > form > .actions > .notifications.on > .off {
+    display: none;
+}
+.race-chat > form > .actions > .notifications.on > .on {
+    display: initial;
 }
 
 .race-stream-control {

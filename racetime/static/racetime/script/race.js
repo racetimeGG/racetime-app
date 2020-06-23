@@ -6,6 +6,7 @@ function Race() {
         open: this.onSocketOpen.bind(this)
     };
     this.messageIDs = [];
+    this.notify = false;
 
     try {
         this.vars = JSON.parse($('#race-vars').text());
@@ -322,6 +323,10 @@ Race.prototype.whoops = function(message) {
 $(function() {
     var race = new Race();
     window.race = race;
+    if (Notification.permission === 'granted') {
+        race.notify = true;
+        $('.race-chat .notifications').addClass('on');
+    }
 
     $('.race-action-form').each(function() {
         race.ajaxifyActionForm(this);
@@ -374,5 +379,17 @@ $(function() {
             return (className.match(/(^|\s)race-nav-\S+/g) || []).join(' ');
         }).addClass('race-nav-' + $(this).data('nav'));
         $(this).addClass('active').siblings().removeClass('active');
+    });
+
+    $(document).on('click', '.race-chat .notifications', function() {
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission().then((perm) => {
+                race.notify = perm === 'granted';
+                $(this)[race.notify ? 'addClass' : 'removeClass']('on');
+            });
+        } else {
+            race.notify = !race.notify;
+            $(this)[race.notify ? 'addClass' : 'removeClass']('on');
+        }
     });
 });

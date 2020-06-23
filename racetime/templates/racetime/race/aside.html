@@ -30,6 +30,10 @@
         {% csrf_token %}
         <ul>{{ chat_form.as_ul }}</ul>
         <div class="actions">
+            <a class="notifications" title="Enable/Disable notifications for mentions in chat">
+                <i class="material-icons on">notifications</i>
+                <i class="material-icons off">notifications_off</i>
+            </a>
             {% if popout %}
                 <a href="{% url 'race_mini' category=race.category.slug race=race.slug %}" class="popout" title="Show this panel in a separate window" onclick="open(this.href, '{{ race.slug }}', 'width=340,height=720'); return false">
                     <i class="material-icons">open_in_new</i>
