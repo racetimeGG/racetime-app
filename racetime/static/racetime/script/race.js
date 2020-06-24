@@ -463,11 +463,16 @@ $(function() {
 
     $(document).on('click', '.race-chat .notifications', function() {
         if (Notification.permission !== 'granted') {
-            Notification.requestPermission().then((perm) => {
+            var then = (perm) => {
                 race.notify = perm === 'granted';
                 localStorage.setItem('raceNotifications', race.notify);
                 $(this)[race.notify ? 'addClass' : 'removeClass']('on');
-            });
+            };
+            try {
+                Notification.requestPermission().then(then);
+            } catch (e) {
+                Notification.requestPermission(then);
+            }
         } else {
             race.notify = !race.notify;
             localStorage.setItem('raceNotifications', race.notify);
