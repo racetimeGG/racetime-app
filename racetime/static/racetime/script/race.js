@@ -132,7 +132,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
                     searchFor.push('@ready');
                 }
                 if (this.vars.user.unready) {
-                    searchFor.push('@unready');
+                    searchFor.push('@notready', '@unready');
                 }
             }
         }
