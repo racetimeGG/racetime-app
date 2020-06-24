@@ -402,8 +402,10 @@ $(function() {
     var race = new Race();
     window.race = race;
     if (Notification.permission === 'granted') {
-        race.notify = true;
-        $('.race-chat .notifications').addClass('on');
+        race.notify = localStorage.getItem('raceNotifications') !== 'false';
+        if (race.notify) {
+            $('.race-chat .notifications').addClass('on');
+        }
     }
 
     $('.race-action-form').each(function() {
@@ -463,10 +465,12 @@ $(function() {
         if (Notification.permission !== 'granted') {
             Notification.requestPermission().then((perm) => {
                 race.notify = perm === 'granted';
+                localStorage.setItem('raceNotifications', race.notify);
                 $(this)[race.notify ? 'addClass' : 'removeClass']('on');
             });
         } else {
             race.notify = !race.notify;
+            localStorage.setItem('raceNotifications', race.notify);
             $(this)[race.notify ? 'addClass' : 'removeClass']('on');
         }
     });
