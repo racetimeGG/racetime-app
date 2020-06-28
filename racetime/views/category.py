@@ -124,20 +124,21 @@ class CategoryLeaderboards(Category):
     template_name_suffix = '_leaderboards'
 
     def get_context_data(self, **kwargs):
-        req_sort = self.request.GET.get('sort')
-        if req_sort == 'best_time':
-            sort = 'best_time'
-        elif req_sort == 'times_raced':
-            sort = 'times_raced'
-        else:
-            sort = 'score'
-
+        sort = self.get_sort()
         paginator = Paginator(list(self.leaderboards(sort)), 2)
         return {
             **super().get_context_data(**kwargs),
             'leaderboards': paginator.get_page(self.request.GET.get('page')),
             'sort': sort,
         }
+
+    def get_sort(self):
+        req_sort = self.request.GET.get('sort')
+        if req_sort == 'best_time':
+            return 'best_time'
+        if req_sort == 'times_raced':
+            return 'times_raced'
+        return 'score'
 
     def leaderboards(self, sort='score'):
         category = self.get_object()
@@ -167,15 +168,15 @@ class CategoryLeaderboardsData(CategoryLeaderboards):
         self.object = self.get_object()
         resp = http.HttpResponse(
             content=json.dumps({
-                'leaderboards': list(self.leaderboards()),
+                'leaderboards': list(self.leaderboards(self.get_sort())),
             }, cls=DjangoJSONEncoder),
             content_type='application/json',
         )
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
 
-    def leaderboards(self):
-        for goal, rankings in super().leaderboards():
+    def leaderboards(self, sort='score'):
+        for goal, rankings in super().leaderboards(sort):
             yield {
                 'goal': goal.name,
                 'num_ranked': len(rankings),
