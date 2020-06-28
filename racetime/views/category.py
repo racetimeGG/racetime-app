@@ -124,13 +124,22 @@ class CategoryLeaderboards(Category):
     template_name_suffix = '_leaderboards'
 
     def get_context_data(self, **kwargs):
-        paginator = Paginator(list(self.leaderboards()), 2)
+        req_sort = self.request.GET.get('sort')
+        if req_sort == 'best_time':
+            sort = 'best_time'
+        elif req_sort == 'times_raced':
+            sort = 'times_raced'
+        else:
+            sort = 'score'
+
+        paginator = Paginator(list(self.leaderboards(sort)), 2)
         return {
             **super().get_context_data(**kwargs),
             'leaderboards': paginator.get_page(self.request.GET.get('page')),
+            'sort': sort,
         }
 
-    def leaderboards(self):
+    def leaderboards(self, sort='score'):
         category = self.get_object()
         goals = models.Goal.objects.filter(
             category=category,
@@ -143,8 +152,14 @@ class CategoryLeaderboards(Category):
                 category=category,
                 goal=goal,
                 best_time__isnull=False,
-            ).select_related('user').order_by('-rating')[:1000]
-            yield goal, rankings
+            ).select_related('user')
+            if sort == 'best_time':
+                rankings = rankings.order_by('best_time', 'user__name')
+            elif sort == 'times_raced':
+                rankings = rankings.order_by('-times_raced', '-rating', 'user__name')
+            else:
+                rankings = rankings.order_by('-rating', 'user__name')
+            yield goal, rankings[:1000]
 
 
 class CategoryLeaderboardsData(CategoryLeaderboards):

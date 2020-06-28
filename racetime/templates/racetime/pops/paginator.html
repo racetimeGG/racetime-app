@@ -2,11 +2,11 @@
     <div class="pagination">
         <span class="step-links">
             {% if page.has_previous %}
-                <a href="{{ request.path }}">« <span class="text">first</span></a>
+                <a href="{{ request.path }}{% if query %}?{{ query }}{% endif %}">« <span class="text">first</span></a>
                 {% if page.previous_page_number == 1 %}
-                    <a href="{{ request.path }}">‹ <span class="text">previous</span></a>
+                    <a href="{{ request.path }}{% if query %}?{{ query }}{% endif %}">‹ <span class="text">previous</span></a>
                 {% else %}
-                    <a href="?page={{ page.previous_page_number }}">‹ <span class="text">previous</span></a>
+                    <a href="?page={{ page.previous_page_number }}{% if query %}&{{ query }}{% endif %}">‹ <span class="text">previous</span></a>
                 {% endif %}
             {% else %}
                 <span>« <span class="text">first</span></span>
@@ -17,8 +17,8 @@
                 {{ page.number }} of {{ page.paginator.num_pages }}
             </span>
             {% if page.has_next %}
-                <a href="?page={{ page.next_page_number }}"><span class="text">next</span> ›</a>
-                <a href="?page={{ page.paginator.num_pages }}"><span class="text">last</span> »</a>
+                <a href="?page={{ page.next_page_number }}{% if query %}&{{ query }}{% endif %}"><span class="text">next</span> ›</a>
+                <a href="?page={{ page.paginator.num_pages }}{% if query %}&{{ query }}{% endif %}"><span class="text">last</span> »</a>
             {% else %}
                 <span><span class="text">next</span> ›</span>
                 <span><span class="text">last</span> »</span>

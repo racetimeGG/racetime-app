@@ -16,6 +16,32 @@
     {% include 'racetime/category/intro.html' %}
     {% include 'racetime/category/tabs.html' with current='leaderboards' %}
     <h3>Leaderboards</h3>
+    <div class="search-filter" style="margin-top: 10px">
+        <ul>
+        <li class="label">Sort by:</li>
+            <li>
+                {% if sort == 'score' %}
+                    <span>Score</span>
+                {% else %}
+                    <a href="{% url 'leaderboards' category=category.slug %}{% if leaderboards.number > 1 %}?page={{ leaderboards.number }}{% endif %}">Score</a>
+                {% endif %}
+            </li>
+            <li>
+                {% if sort == 'best_time' %}
+                    <span>Best time</span>
+                {% else %}
+                    <a href="{% url 'leaderboards' category=category.slug %}?{% if leaderboards.number > 1 %}page={{ leaderboards.number }}&{% endif %}sort=best_time">Best time</a>
+                {% endif %}
+            </li>
+            <li>
+                {% if sort == 'times_raced' %}
+                    <span>Races entered</span>
+                {% else %}
+                    <a href="{% url 'leaderboards' category=category.slug %}?{% if leaderboards.number > 1 %}page={{ leaderboards.number }}&{% endif %}sort=times_raced">Races entered</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
     <p class="help">
         Note: leaderboards are currently in beta. The ranking algorithm is,
         well, a bit of a potato. A more well thought-out calculation system
@@ -23,7 +49,11 @@
         performance with the scoring below.
     </p>
     <div class="category-leaderboards">
-        {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+        {% if sort != 'score' %}
+            {% include 'racetime/pops/paginator.html' with page=leaderboards query='sort='|add:sort %}
+        {% else %}
+            {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+        {% endif %}
         <ol>
             {% for goal, rankings in leaderboards %}
                 <li>
@@ -31,6 +61,10 @@
                 </li>
             {% endfor %}
         </ol>
-        {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+        {% if sort != 'score' %}
+            {% include 'racetime/pops/paginator.html' with page=leaderboards query='sort='|add:sort %}
+        {% else %}
+            {% include 'racetime/pops/paginator.html' with page=leaderboards %}
+        {% endif %}
     </div>
 {% endblock %}
