@@ -52,6 +52,27 @@
         </ol>
     </div>
     <h3>Past races</h3>
+    {% if can_moderate %}
+        <div class="search-filter" style="margin-top: 10px">
+            <ul>
+            <li class="label">Show:</li>
+                <li>
+                    {% if not filter_by %}
+                        <span>All past races</span>
+                    {% else %}
+                        <a href="{% url 'category' category=category.slug %}">All past races</a>
+                    {% endif %}
+                </li>
+                <li>
+                    {% if filter_by == 'recordable' %}
+                        <span>Recordable</span>
+                    {% else %}
+                        <a href="{% url 'category' category=category.slug %}?filter=recordable">Recordable</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    {% endif %}
     <div class="category-races race-list past">
         {% include 'racetime/pops/paginator.html' with page=past_races %}
         <ol>
@@ -69,7 +90,11 @@
                 </li>
             {% empty %}
                 <li>
-                    No completed races in this category.
+                    {% if filter_by == 'recordable' %}
+                        There are no races awaiting moderation.
+                    {% else %}
+                        No completed races in this category.
+                    {% endif %}
                 </li>
             {% endfor %}
         </ol>

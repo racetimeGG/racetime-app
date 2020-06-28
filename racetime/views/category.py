@@ -29,13 +29,21 @@ class Category(UserMixin, generic.DetailView):
     )
 
     def get_context_data(self, **kwargs):
-        paginator = Paginator(self.past_races(), 10)
+        can_moderate = self.object.can_moderate(self.user)
+        req_filter = self.request.GET.get('filter')
+        if req_filter == 'recordable' and can_moderate:
+            filter_by = 'recordable'
+        else:
+            filter_by = None
+
+        paginator = Paginator(self.past_races(filter_by), 10)
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
-            'can_moderate': self.object.can_moderate(self.user),
+            'can_moderate': can_moderate,
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(),
+            'filter_by': filter_by,
             'is_favourite': (
                 self.user.is_authenticated
                 and self.object in self.user.favourite_categories.all()
@@ -69,10 +77,16 @@ class Category(UserMixin, generic.DetailView):
             ),
         ).order_by('state_sort', '-opened_at').all()
 
-    def past_races(self):
-        return self.object.race_set.filter(state__in=[
+    def past_races(self, filter_by=None):
+        queryset = self.object.race_set.filter(state__in=[
             models.RaceStates.finished,
-        ]).order_by('-ended_at').all()
+        ]).order_by('-ended_at')
+        if filter_by == 'recordable':
+            queryset = queryset.filter(
+                recordable=True,
+                recorded=False,
+            )
+        return queryset
 
 
 class CategoryData(Category):
