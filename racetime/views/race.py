@@ -192,12 +192,13 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
 
 
 class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
-    form_class = forms.RaceEditForm
     model = models.Race
     slug_url_kwarg = 'race'
 
-    def test_func(self):
-        return super().test_func() and self.get_object().is_preparing
+    def get_form_class(self):
+        if self.get_object().is_preparing:
+            return forms.RaceEditForm
+        return forms.StartedRaceEditForm
 
     def form_valid(self, form):
         race = form.save(commit=False)
@@ -236,6 +237,9 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
         if not messaged:
             race.broadcast_data()
         return http.HttpResponseRedirect(race.get_absolute_url())
+
+    def test_func(self):
+        return super().test_func() and not self.get_object().is_done
 
 
 class RaceListData(generic.View):

@@ -316,7 +316,7 @@ class RaceForm(forms.ModelForm):
             if cleaned_data.get('goal') and cleaned_data.get('custom_goal'):
                 raise ValidationError('The race must only have one goal.')
 
-        cleaned_data['recordable'] = not cleaned_data.get('custom_goal')
+            cleaned_data['recordable'] = not cleaned_data.get('custom_goal')
 
         return cleaned_data
 
@@ -371,6 +371,22 @@ class RaceEditForm(RaceForm):
         widgets = {
             'recordable': forms.HiddenInput,
         }
+
+
+class StartedRaceEditForm(RaceForm):
+    goal = None
+    start_delay = None
+    time_limit = None
+
+    class Meta:
+        fields = (
+            'info',
+            'allow_comments',
+            'allow_midrace_chat',
+            'allow_non_entrant_chat',
+            'chat_message_delay',
+        )
+        model = models.Race
 
 
 class RaceSetInfoForm(forms.ModelForm):

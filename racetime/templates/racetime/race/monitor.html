@@ -6,6 +6,8 @@
                 <ul>{{ invite_form.as_ul }}</ul>
             </form>
         </li>
+    {% endif %}
+    {% if not race.is_done %}
         <li class="edit">
             <a href="{% url 'edit_race' race=race.slug category=race.category.slug %}" class="btn">
                 Edit race
