@@ -409,7 +409,7 @@ Race.prototype.regquote = function(str) {
 $(function() {
     var race = new Race();
     window.race = race;
-    if (Notification.permission === 'granted') {
+    if ('Notification' in window && Notification.permission === 'granted') {
         race.notify = localStorage.getItem('raceNotifications') !== 'false';
         if (race.notify) {
             $('.race-chat .notifications').addClass('on');
@@ -470,6 +470,10 @@ $(function() {
     });
 
     $(document).on('click', '.race-chat .notifications', function() {
+        if (!('Notification' in window)) {
+            alert('Sorry, your browser does not support notifications.');
+            return;
+        }
         if (Notification.permission !== 'granted') {
             var then = (perm) => {
                 race.notify = perm === 'granted';
