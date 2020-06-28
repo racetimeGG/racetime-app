@@ -1,0 +1,19 @@
+<p>
+    Hello {{ user.name }},
+</p><p>
+    Unfortunately, the category you requested, {{ name }}, has been rejected by
+    our staff team.
+</p>{% if response %}<p>
+    The staff member who reviewed your request wrote:
+</p><blockquote><p>
+    {{ response|linebreaks }}
+</p></blockquote>{% else %}<p>
+    The staff member who reviewed your request did not leave a comment. If you
+    are unsure why this category was not accepted, please get in touch.
+</p>{% endif %}<p>
+    If you need any help, feel free to ask for assistance in our Discord.
+</p><p>
+    With kindest regards,
+</p><p>
+    The <a href="{{ home_url }}">{{ site_info.title }}</a> team
+</p>

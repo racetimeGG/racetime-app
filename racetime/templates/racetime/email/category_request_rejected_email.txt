@@ -1,0 +1,17 @@
+Hello {{ user.name|safe }},
+
+Unfortunately, the category you requested, {{ name|safe }},
+has been rejected by our staff team.
+{% if response %}
+The staff member who reviewed your request wrote:
+
+    {{ response_plain|safe }}{% else %}
+The staff member who reviewed your request did not leave a comment. If you are
+unsure why this category was not accepted, please get in touch.{% endif %}
+
+If you need any help, feel free to ask for assistance in our Discord.
+
+With kindest regards,
+
+The {{ site_info.title }} team
+{{ home_url }}

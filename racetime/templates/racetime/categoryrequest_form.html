@@ -1,5 +1,13 @@
 {% extends 'racetime/base.html' %}
 
+{% block css %}
+    <style>
+        td p:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+{% endblock %}
+
 {% block title %}
     Request new category |
 {% endblock %}
@@ -30,11 +38,17 @@
                     Accepted as
                     <a href="{% url 'category' category=request.accepted_as.slug %}">{{ request.accepted_as }}</a>
                 {% elif request.reviewed_at %}
-                    Rejected by site staff. The category may already exist on
-                    the site, or else it was deemed unsuitable. Please contact
-                    staff if you have further questions.
+                    Rejected by site staff.
+                    {% if not request.review_response %}
+                        The category may already exist on the site, or else it
+                        was deemed unsuitable. Please contact staff if you have
+                        further questions.
+                    {% endif %}
                 {% else %}
                     Pending review. Check back soon.
+                {% endif %}
+                {% if request.review_response %}
+                    {{ request.review_response|linebreaks }}
                 {% endif %}
             </td>
         </tr>

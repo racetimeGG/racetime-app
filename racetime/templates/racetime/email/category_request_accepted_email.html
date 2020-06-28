@@ -12,7 +12,11 @@
     you to manage the category goals, moderators, and other details. You can
     transfer the category ownership to another user if you don't want/need
     this ability.
-</p><p>
+</p>{% if response %}<p>
+    The staff member who reviewed your request also wrote:
+</p><blockquote><p>
+    {{ response|linebreaks }}
+</p></blockquote>{% endif %}<p>
     If you need any help with category management, feel free to ask for
     assistance in our Discord.
 </p><p>

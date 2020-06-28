@@ -322,6 +322,14 @@ class CategoryRequest(models.Model):
             'category must have at least one goal to start with.'
         ),
     )
+    review_response = models.TextField(
+        blank=True,
+        help_text=(
+            'Visible to the user. If you wish to tell the user something '
+            'about their request (especially when rejecting), use this field. '
+            'Make sure to write this BEFORE accepting/rejecting the category.'
+        ),
+    )
     requested_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -366,6 +374,8 @@ class CategoryRequest(models.Model):
             'category': category,
             'category_url': settings.RT_SITE_URI + category.get_absolute_url(),
             'home_url': settings.RT_SITE_URI,
+            'response': self.review_response,
+            'response_plain': self.review_response.strip().replace('\n', '\n    '),
             'site_info': settings.RT_SITE_INFO,
             'user': self.requested_by,
         }
@@ -397,6 +407,31 @@ class CategoryRequest(models.Model):
         """
         self.reviewed_at = timezone.now()
         self.save()
+
+        context = {
+            'home_url': settings.RT_SITE_URI,
+            'name': self.name,
+            'response': self.review_response,
+            'response_plain': self.review_response.strip().replace('\n', '\n    '),
+            'site_info': settings.RT_SITE_INFO,
+            'user': self.requested_by,
+        }
+        send_mail(
+            subject=render_to_string(
+                'racetime/email/category_request_rejected_subject.txt',
+                context,
+            ),
+            message=render_to_string(
+                'racetime/email/category_request_rejected_email.txt',
+                context,
+            ),
+            html_message=render_to_string(
+                'racetime/email/category_request_rejected_email.html',
+                context,
+            ),
+            from_email=settings.EMAIL_FROM,
+            recipient_list=[self.requested_by.email],
+        )
 
     def __str__(self):
         return self.name
