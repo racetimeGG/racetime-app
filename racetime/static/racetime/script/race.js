@@ -118,13 +118,13 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     $message.html($message.html().replace(/https?:\/\/[^\s]+/g, function(match) {
         return '<a href="' + match + '" target="_blank">' + match + '</a>';
     }));
-    if (this.vars.user.name_quoted && !message.bot && !message.is_system) {
+    if (this.vars.user.name_quoted && !message.is_system) {
         var foundMention = false;
         var searchFor = [];
-        if (message.user.id !== this.vars.user.id) {
+        if (message.is_bot || message.user.id !== this.vars.user.id) {
             searchFor.push('\\b' + this.vars.user.name_quoted);
         }
-        if (message.is_monitor) {
+        if (message.is_bot || message.is_monitor) {
             searchFor.push('@everyone', '@here');
             if (this.vars.user.in_race) {
                 searchFor.push('@entrants?');
@@ -154,13 +154,21 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         }
         if (foundMention) {
             $li.addClass('mentioned');
-            if (this.notify && !mute_notifications) {
-                new Notification(this.vars.room, {
-                    body: message.user.name + ': ' + $message.text(),
-                    icon: message.user.avatar,
-                    silent: true,
-                    tag: message.id,
-                });
+            if (this.notify && !mute_notifications && (message.is_bot || message.user.id !== this.vars.user.id)) {
+                if (message.is_bot) {
+                    new Notification(this.vars.room, {
+                        body: message.bot + ': ' + $message.text(),
+                        silent: true,
+                        tag: message.id,
+                    });
+                } else {
+                    new Notification(this.vars.room, {
+                        body: message.user.name + ': ' + $message.text(),
+                        icon: message.user.avatar,
+                        silent: true,
+                        tag: message.id,
+                    });
+                }
             }
         }
     }
