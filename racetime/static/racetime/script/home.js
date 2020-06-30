@@ -11,6 +11,6 @@ $(function() {
             $misc.show();
         }
     };
-    $(document).on('change input keyup', '.home-filter', homeFilter);
+    $(document).on('change input keyup', '.search-filter > .filter', homeFilter);
     $('.home-filter').each(homeFilter);
 });
