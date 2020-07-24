@@ -134,6 +134,37 @@ class UserRaceData(ViewProfile):
         return resp
 
 
+class UserProfileData(ViewProfile):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user = self.object.api_dict_summary()
+        entrances = self.get_entrances()
+        paginator = Paginator(entrances, 10)
+        resp = http.JsonResponse({
+            'id': user['id'],
+            'full_name': user['full_name'],
+            'name': user['name'],
+            'discriminator': user['discriminator'],
+            'url': user['url'],
+            'avatar': user['avatar'],
+            'pronouns': user['pronouns'],
+            'flair': user['flair'],
+            'twitch_name': user['twitch_name'],
+            'twitch_channel': user['twitch_channel'],
+            'join_date': str(self.object.date_joined),
+            'stats': {
+                'joined': len(entrances),
+                'first': len(entrances.filter(place=1)),
+                'second': len(entrances.filter(place=2)),
+                'third': len(entrances.filter(place=3)),
+                'forfeits': len(entrances.filter(dnf=True)),
+                'dqs': len(entrances.filter(dq=True)),
+            },
+        })
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+
 class LoginRegister(generic.TemplateView):
     template_name = 'racetime/user/login_register.html'
 
