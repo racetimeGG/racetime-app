@@ -74,7 +74,11 @@
         </div>
     {% endif %}
     <div class="category-races race-list past">
-        {% include 'racetime/pops/paginator.html' with page=past_races %}
+        {% if filter_by %}
+            {% include 'racetime/pops/paginator.html' with page=past_races query='filter='|add:filter_by %}
+        {% else %}
+            {% include 'racetime/pops/paginator.html' with page=past_races %}
+        {% endif %}
         <ol>
             {% for race in past_races %}
                 <li>
@@ -98,7 +102,11 @@
                 </li>
             {% endfor %}
         </ol>
-        {% include 'racetime/pops/paginator.html' with page=past_races %}
+        {% if filter_by %}
+            {% include 'racetime/pops/paginator.html' with page=past_races query='filter='|add:filter_by %}
+        {% else %}
+            {% include 'racetime/pops/paginator.html' with page=past_races %}
+        {% endif %}
     </div>
 {% endblock %}
 
