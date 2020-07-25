@@ -138,7 +138,6 @@ class UserProfileData(ViewProfile):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = self.object.api_dict_summary()
-        del user['can_moderate']
         entrances = self.get_entrances()
         resp = http.JsonResponse({
             **user,
