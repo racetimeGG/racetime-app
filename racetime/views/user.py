@@ -138,20 +138,10 @@ class UserProfileData(ViewProfile):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = self.object.api_dict_summary()
+        del user['can_moderate']
         entrances = self.get_entrances()
-        paginator = Paginator(entrances, 10)
         resp = http.JsonResponse({
-            'id': user['id'],
-            'full_name': user['full_name'],
-            'name': user['name'],
-            'discriminator': user['discriminator'],
-            'url': user['url'],
-            'avatar': user['avatar'],
-            'pronouns': user['pronouns'],
-            'flair': user['flair'],
-            'twitch_name': user['twitch_name'],
-            'twitch_channel': user['twitch_channel'],
-            'join_date': str(self.object.date_joined),
+            **user,
             'stats': {
                 'joined': len(entrances),
                 'first': len(entrances.filter(place=1)),
