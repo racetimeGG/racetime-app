@@ -56,6 +56,10 @@ Race.prototype.ajaxifyActionForm = function(form) {
 Race.prototype.addMessage = function(message, server_date, mute_notifications) {
     var self = this;
 
+	function scrollToBottom() {
+		$messages[0].scrollTop = $messages[0].scrollHeight;
+	};
+	
     // Temporary fix: skip countdown messages intended for LiveSplit
     if (message.is_system && message.message.match(/^\d+…$/)) {
         return true;
@@ -67,8 +71,11 @@ Race.prototype.addMessage = function(message, server_date, mute_notifications) {
 
     var $messages = $('.race-chat .messages');
     if ($messages.length) {
-        $messages.append(self.createMessageItem(message, server_date, mute_notifications));
-        $messages[0].scrollTop = $messages[0].scrollHeight;
+		shouldScroll = $messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight;
+		$messages.append(self.createMessageItem(message, server_date, mute_notifications));
+		if (shouldScroll) {
+			scrollToBottom();
+		}
     }
 
     self.messageIDs.push(message.id);
