@@ -24,6 +24,12 @@
             Reconnecting to chat…
         </span>
     </div>
+    <div class="scrollwarning" title="Click here to scroll to the bottom" onwheel="UpdateScroll()">
+        <span>
+            <i class="material-icons">history</i>
+            Chat Paused Due to Scroll
+        </span>
+    </div>
     <ol class="messages"></ol>
     {% if user.is_active %}
     <form action="{% url 'message' category=race.category.slug race=race.slug %}" method="post">

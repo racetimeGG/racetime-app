@@ -9,6 +9,32 @@ function Race() {
     this.notify = false;
 
     try {
+        var userSelection = document.getElementsByClassName("scrollwarning");
+        for (let i = 0; i < userSelection.length; i++) {
+            userSelection[i].addEventListener("click", function() {
+                var $messages = $('.race-chat .messages');
+                $('.race-chat').removeClass('scrollwarning');
+                $messages[0].scrollTop = $messages[0].scrollHeight;
+            })
+        }
+        var chatScroller = document.getElementsByClassName("messages");
+        for (let i = 0; i < chatScroller.length; i++) {
+            chatScroller[i].addEventListener("scroll", function(e) {
+                var $messages = $('.race-chat .messages');
+                if ($messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight) {
+                    $('.race-chat').removeClass('scrollwarning');
+                    $messages[0].scrollTop = $messages[0].scrollHeight;
+                }
+            })
+        }
+    } catch (e) {
+        if ('notice_exception' in window) {
+            window.notice_exception(e);
+        } else {
+            throw e;
+        }
+    }
+    try {
         this.vars = JSON.parse($('#race-vars').text());
         if (this.vars.user.name) {
             this.vars.user.name_quoted = this.regquote(this.vars.user.name);
@@ -75,6 +101,14 @@ Race.prototype.addMessage = function(message, server_date, mute_notifications) {
         $messages.append(self.createMessageItem(message, server_date, mute_notifications));
         if (shouldScroll) {
             scrollToBottom();
+            $('.race-chat').removeClass('scrollwarning');
+        } else {
+            if (message.user && this.vars.user.id === message.user.id) {
+                scrollToBottom();
+                $('.race-chat').removeClass('scrollwarning');
+            } else {
+                $('.race-chat').addClass('scrollwarning');
+            }
         }
     }
 
@@ -93,10 +127,10 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     var timestamp = ('00' + posted_date.getHours()).slice(-2) + ':' + ('00' + posted_date.getMinutes()).slice(-2);
 
     var $li = $(
-        '<li>'
-        + '<span class="timestamp">' + timestamp + '</span>'
-        + '<span class="message"></span>'
-        + '</li>'
+        '<li>' +
+        '<span class="timestamp">' + timestamp + '</span>' +
+        '<span class="message"></span>' +
+        '</li>'
     );
 
     if (message.is_system) {
@@ -153,7 +187,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
                 text.parentNode.replaceChild(span, text);
             });
             $message.find('.mention-search').each(function() {
-                $(this).html($(this).html().replace(search, function (match) {
+                $(this).html($(this).html().replace(search, function(match) {
                     foundMention = true;
                     return '<span class="mention">' + match + '</span>';
                 }));
@@ -197,8 +231,8 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
 };
 
 Race.prototype.guid = function() {
-    return Math.random().toString(36).substring(2, 15)
-        + Math.random().toString(36).substring(2, 15);
+    return Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
 };
 
 Race.prototype.heartbeat = function() {
@@ -328,7 +362,7 @@ Race.prototype.handleRenders = function(renders, version) {
                     break;
                 case 'entrants_monitor':
                     $('<div />').html(renders[segment]).children().each(function() {
-                        var $entrant = $('.race-entrants [data-entrant="'+ $(this).data('entrant') +'"]');
+                        var $entrant = $('.race-entrants [data-entrant="' + $(this).data('entrant') + '"]');
                         if ($entrant.length === 0) return true;
                         var $monitorActions = $entrant.children('.monitor-actions');
                         if ($monitorActions.length === 0) {
@@ -435,7 +469,7 @@ $(function() {
             if (message === '' || message === sending) {
                 return false;
             }
-            data.push({name: 'guid', value: guid});
+            data.push({ name: 'guid', value: guid });
             sending = message;
         },
         complete: function() {
