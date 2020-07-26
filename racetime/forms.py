@@ -1,4 +1,5 @@
 import re
+import markdown
 from datetime import timedelta
 
 from bs4 import BeautifulSoup
@@ -85,15 +86,24 @@ class CategoryForm(forms.ModelForm):
     ALLOWED_TAGS = {
         'a': ('href', 'title'),
         'b': (),
+        'br': (),
+        'blockquote>': (),
+        'code': (),
         'em': (),
         'i': (),
+        'h1': (),
+        'h2': (),
         'h3': (),
         'h4': (),
         'h5': (),
         'h6': (),
+        'hr': (),
+        'li': (),
+        'ol': (),
         'p': (),
         's': (),
         'u': (),
+        'ul': (),
         'strong': (),
     }
     MIN_SLUGWORDS = 50
@@ -121,12 +131,13 @@ class CategoryForm(forms.ModelForm):
 
     def clean_info(self):
         info = self.cleaned_data.get('info')
-        soup = BeautifulSoup(info, 'html.parser')
+        parsedmarkdown = markdown.markdown(info)
+        soup = BeautifulSoup(parsedmarkdown, 'html.parser')
         if soup.find_all(self.is_bad_tag):
             raise ValidationError(
                 'Markup contains disallowed elements and/or attributes.'
             )
-        return info
+        return parsedmarkdown
 
     def clean_image(self):
         image = self.cleaned_data.get('image')

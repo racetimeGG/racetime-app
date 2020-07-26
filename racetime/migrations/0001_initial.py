@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('short_name', models.CharField(help_text='An abbreviation or other short identifier, e.g. "SM64".', max_length=16, unique=True)),
                 ('slug', models.CharField(help_text='A unique identifier for this category used in the URL, e.g. "tetris-99".', max_length=255, unique=True)),
                 ('image', models.ImageField(blank=True, help_text='Recommended size: 285x380. No larger than 100kb.', null=True, upload_to='')),
-                ('info', models.TextField(blank=True, help_text='Displayed on the category page. Limited use of HTML is allowed.', null=True)),
+                ('info', models.TextField(blank=True, help_text='Displayed on the category page. Limited use of HTML is allowed. Supports Markdown.', null=True)),
                 ('streaming_required', models.BooleanField(default=True, help_text='Require entrants to be streaming when they join a race. Moderators may override this for individual races.')),
                 ('active', models.BooleanField(default=True, help_text='Allow new races to be created in this category.')),
                 ('slug_words', models.TextField(blank=True, default=None, help_text='Set a number of words to be picked at random for race room names. If set, you must provide a minimum of 100 distinct words to use. Changing slug words will not impact existing race rooms.', null=True)),
