@@ -87,7 +87,7 @@ class CategoryForm(forms.ModelForm):
         'a': ('href', 'title'),
         'b': (),
         'br': (),
-        'blockquote>': (),
+        'blockquote': (),
         'code': (),
         'em': (),
         'i': (),
