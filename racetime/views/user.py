@@ -134,6 +134,26 @@ class UserRaceData(ViewProfile):
         return resp
 
 
+class UserProfileData(ViewProfile):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        user = self.object.api_dict_summary()
+        entrances = self.get_entrances()
+        resp = http.JsonResponse({
+            **user,
+            'stats': {
+                'joined': len(entrances),
+                'first': len(entrances.filter(place=1)),
+                'second': len(entrances.filter(place=2)),
+                'third': len(entrances.filter(place=3)),
+                'forfeits': len(entrances.filter(dnf=True)),
+                'dqs': len(entrances.filter(dq=True)),
+            },
+        })
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+
 class LoginRegister(generic.TemplateView):
     template_name = 'racetime/user/login_register.html'
 
