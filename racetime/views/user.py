@@ -49,14 +49,7 @@ class ViewProfile(generic.DetailView):
             'categories': self.get_favourite_categories(),
             'entrances': paginator.get_page(self.request.GET.get('page')),
             'mod_categories': self.get_mod_categories(),
-            'stats': {
-                'joined': len(entrances),
-                'first': len(entrances.filter(place=1)),
-                'second': len(entrances.filter(place=2)),
-                'third': len(entrances.filter(place=3)),
-                'forfeits': len(entrances.filter(dnf=True)),
-                'dqs': len(entrances.filter(dq=True)),
-            },
+            'stats': self.get_stats(entrances),
         }
 
     def get_object(self, queryset=None):
@@ -107,6 +100,16 @@ class ViewProfile(generic.DetailView):
         )
         return queryset.distinct()
 
+    def get_stats(self, entrances):
+        return {
+            'joined': len(entrances),
+            'first': len(entrances.filter(place=1)),
+            'second': len(entrances.filter(place=2)),
+            'third': len(entrances.filter(place=3)),
+            'forfeits': len(entrances.filter(dnf=True)),
+            'dqs': len(entrances.filter(dq=True)),
+        }
+
 
 class UserRaceData(ViewProfile):
     def get(self, request, *args, **kwargs):
@@ -141,14 +144,7 @@ class UserProfileData(ViewProfile):
         entrances = self.get_entrances()
         resp = http.JsonResponse({
             **user,
-            'stats': {
-                'joined': len(entrances),
-                'first': len(entrances.filter(place=1)),
-                'second': len(entrances.filter(place=2)),
-                'third': len(entrances.filter(place=3)),
-                'forfeits': len(entrances.filter(dnf=True)),
-                'dqs': len(entrances.filter(dq=True)),
-            },
+            'stats': self.get_stats(entrances),
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
