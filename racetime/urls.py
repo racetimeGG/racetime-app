@@ -40,9 +40,8 @@ urlpatterns = [
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
     path('user/<str:user>/', include([
+        path('data', views.UserProfileData.as_view(), name='user_profile_data'),
         path('races/data', views.UserRaceData.as_view(), name='user_race_list_data'),
-        path('data', views.UserProfileData.as_view(), name='user_profile_data')
-
     ])),
 
     path('<str:category>', views.Category.as_view(), name='category'),
