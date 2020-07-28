@@ -9,17 +9,17 @@ function Race() {
     this.notify = false;
 
     try {
-        var userSelection = document.getElementsByClassName("scrollwarning");
+        var userSelection = $('.race-chat .scrollwarning');
         for (let i = 0; i < userSelection.length; i++) {
-            userSelection[i].addEventListener("click", function() {
+            userSelection[i].addEventListener('click', function() {
                 var $messages = $('.race-chat .messages');
                 $('.race-chat').removeClass('scrollwarning');
                 $messages[0].scrollTop = $messages[0].scrollHeight;
             })
         }
-        var chatScroller = document.getElementsByClassName("messages");
+        var chatScroller = $('.race-chat .messages');
         for (let i = 0; i < chatScroller.length; i++) {
-            chatScroller[i].addEventListener("scroll", function(e) {
+            chatScroller[i].addEventListener('scroll', function(e) {
                 var $messages = $('.race-chat .messages');
                 if ($messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight) {
                     $('.race-chat').removeClass('scrollwarning');
@@ -127,10 +127,10 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     var timestamp = ('00' + posted_date.getHours()).slice(-2) + ':' + ('00' + posted_date.getMinutes()).slice(-2);
 
     var $li = $(
-        '<li>' +
-        '<span class="timestamp">' + timestamp + '</span>' +
-        '<span class="message"></span>' +
-        '</li>'
+        '<li>'
+        + '<span class="timestamp">' + timestamp + '</span>'
+        + '<span class="message"></span>'
+        + '</li>'
     );
 
     if (message.is_system) {
@@ -231,8 +231,8 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
 };
 
 Race.prototype.guid = function() {
-    return Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
+    return Math.random().toString(36).substring(2, 15)
+        + Math.random().toString(36).substring(2, 15);
 };
 
 Race.prototype.heartbeat = function() {

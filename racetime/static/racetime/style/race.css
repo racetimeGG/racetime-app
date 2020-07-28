@@ -11,7 +11,7 @@ body {
     flex-direction: column;
 }
 
-.container>.content {
+.container > .content {
     align-items: stretch;
     flex: 1 1 0;
     margin: 0;
@@ -22,7 +22,7 @@ body {
     .container {
         align-items: center;
     }
-    .container>.content {
+    .container > .content {
         max-width: 1280px;
     }
 }
@@ -34,23 +34,23 @@ main {
 }
 
 .race-entrants::-webkit-scrollbar,
-.race-chat>.messages::-webkit-scrollbar {
+.race-chat > .messages::-webkit-scrollbar {
     width: 7px;
 }
 
 .race-entrants,
-.race-chat>.messages {
+.race-chat > .messages {
     scrollbar-color: #1da674 #36393f;
     scrollbar-width: thin;
 }
 
 .race-entrants::-webkit-scrollbar-track,
-.race-chat>.messages::-webkit-scrollbar-track {
+.race-chat > .messages::-webkit-scrollbar-track {
     background: #36393f;
 }
 
 .race-entrants::-webkit-scrollbar-thumb,
-.race-chat>.messages::-webkit-scrollbar-thumb {
+.race-chat > .messages::-webkit-scrollbar-thumb {
     background-color: #1da674;
     border: 1px solid #36393f;
 }
@@ -68,21 +68,21 @@ main {
     display: none;
 }
 
-.race-actions>ul {
+.race-actions > ul {
     display: flex;
 }
 
-.race-actions>ul>li {
+.race-actions > ul > li {
     flex: 1 1 0;
     padding-left: 5px;
 }
 
-.race-actions>ul>li:first-child {
+.race-actions > ul > li:first-child {
     border-left: none;
     padding-left: 0;
 }
 
-.race-actions>ul>li .btn {
+.race-actions > ul > li .btn {
     display: block;
     width: 100%;
 }
@@ -94,13 +94,13 @@ main {
     margin-bottom: 10px;
 }
 
-.streaming-required>p {
+.streaming-required > p {
     color: #a0e9a0;
     margin: 0 0 5px;
     font-size: 13px;
 }
 
-.streaming-required>.btn {
+.streaming-required > .btn {
     width: auto;
 }
 
@@ -113,7 +113,7 @@ main {
     position: relative;
 }
 
-.race-chat>.disconnected {
+.race-chat > .disconnected {
     cursor: default;
     display: none;
     font-weight: bold;
@@ -125,8 +125,8 @@ main {
     left: 0;
 }
 
-.race-chat>.scrollwarning {
-    cursor: default;
+.race-chat > .scrollwarning {
+    cursor: pointer;
     display: none;
     font-weight: bold;
     justify-content: center;
@@ -137,15 +137,15 @@ main {
     left: 0;
 }
 
-.race-chat.disconnected>.disconnected {
+.race-chat.disconnected > .disconnected {
     display: flex;
 }
 
-.race-chat.scrollwarning>.scrollwarning {
+.race-chat.scrollwarning > .scrollwarning {
     display: flex;
 }
 
-.race-chat>.disconnected>span {
+.race-chat > .disconnected > span {
     align-items: center;
     background-color: #1a1c20;
     border-radius: 10px;
@@ -154,7 +154,7 @@ main {
     pointer-events: none;
 }
 
-.race-chat>.scrollwarning>span {
+.race-chat > .scrollwarning > span {
     align-items: center;
     background-color: #1a1c20;
     border-radius: 10px;
@@ -169,58 +169,58 @@ main {
     }
 }
 
-.race-chat>.disconnected>span>.material-icons {
+.race-chat > .disconnected > span > .material-icons {
     animation: blink 1.2s ease-in-out infinite;
     color: #8c3030;
     margin-right: 5px;
 }
 
-.race-chat>.scrollwarning>span>.material-icons {
+.race-chat > .scrollwarning > span > .material-icons {
     animation: blink 1.2s ease-in-out infinite;
     color: #8c3030;
     margin-right: 5px;
 }
 
-.race-chat>.messages {
+.race-chat > .messages {
     flex: 1 1 0;
     overflow-y: auto;
     margin: 8px 0 0;
 }
 
-.race-chat>.messages>li {
+.race-chat > .messages > li {
     margin: 1px 0;
     padding: 2px;
     word-break: break-word;
 }
 
-.race-chat>.messages>li.system {
+.race-chat > .messages > li.system {
     color: #8c898c;
 }
 
-.race-chat>.messages>li.error {
+.race-chat > .messages > li.error {
     color: #f08080;
 }
 
-.race-chat>.messages>li.highlight {
+.race-chat > .messages > li.highlight {
     color: #a0e9a0;
 }
 
-.race-chat>.messages>li.bot {
+.race-chat > .messages > li.bot {
     color: #a0ace8;
 }
 
-.race-chat>.messages>li.mentioned {
+.race-chat > .messages > li.mentioned {
     background-color: #1a1c20;
     border-radius: 4px;
 }
 
-.race-chat>.messages>li>.timestamp {
+.race-chat > .messages > li > .timestamp {
     color: #8c898c;
     font-size: 12px;
     margin-right: 4px;
 }
 
-.race-chat>.messages>li>.name {
+.race-chat > .messages > li > .name {
     align-items: center;
     color: #b9b4b9;
     display: inline-flex;
@@ -228,7 +228,7 @@ main {
     vertical-align: top;
 }
 
-.race-chat>.messages>li>.name.supporter>span {
+.race-chat > .messages > li > .name.supporter > span {
     background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -236,66 +236,66 @@ main {
     text-fill-color: transparent;
 }
 
-.race-chat>.messages>li.bot>.name {
+.race-chat > .messages > li.bot > .name {
     color: #a0ace8;
 }
 
-.race-chat>.messages>li>.name::before {
+.race-chat > .messages > li > .name::before {
     background: no-repeat 0 0 / contain;
     margin-right: 2px;
     height: 12px;
     width: 12px;
 }
 
-.race-chat>.messages>li>.name.moderator::before {
+.race-chat > .messages > li > .name.moderator::before {
     background-image: url(../image/sword.svg);
     content: '\a0';
 }
 
-.race-chat>.messages>li>.name.supporter.moderator::before {
+.race-chat > .messages > li > .name.supporter.moderator::before {
     background-image: url(../image/gold_sword.svg);
 }
 
-.race-chat>.messages>li>.name.staff::before {
+.race-chat > .messages > li > .name.staff::before {
     background-image: url(../image/star.svg);
     content: '\a0';
 }
 
-.race-chat>.messages>li>.name.supporter.staff::before {
+.race-chat > .messages > li > .name.supporter.staff::before {
     background-image: url(../image/gold_star.svg);
 }
 
-.race-chat>.messages>li>.name::after {
+.race-chat > .messages > li > .name::after {
     content: ':';
 }
 
-.race-chat>.messages>li>.message {}
+.race-chat > .messages > li > .message {}
 
-.race-chat>.messages>li>.message .good {
+.race-chat > .messages > li > .message .good {
     color: #a0e9a0;
 }
 
-.race-chat>.messages>li>.message .bad {
+.race-chat > .messages > li > .message .bad {
     color: #f08080;
 }
 
-.race-chat>.messages>li>.message .bot {
+.race-chat > .messages > li > .message .bot {
     color: #a0ace8;
 }
 
-.race-chat>.messages>li>.message .mention {
+.race-chat > .messages > li > .message .mention {
     font-weight: bold;
 }
 
-.race-chat>form {
+.race-chat > form {
     margin-top: 8px;
 }
 
-.race-chat>form label {
+.race-chat > form label {
     display: none;
 }
 
-.race-chat>form textarea {
+.race-chat > form textarea {
     caret-color: #1da674;
     font-size: 13px;
     height: 18px;
@@ -308,23 +308,23 @@ main {
     width: calc(100% - 12px);
 }
 
-.race-chat>form textarea:invalid {
+.race-chat > form textarea:invalid {
     box-shadow: none;
 }
 
-.race-chat>form>.actions {
+.race-chat > form > .actions {
     align-items: center;
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
 }
 
-.race-chat>form>.actions>button {
+.race-chat > form > .actions > button {
     font-size: 13px;
 }
 
-.race-chat>form>.actions>.notifications,
-.race-chat>form>.actions>.popout {
+.race-chat > form > .actions > .notifications,
+.race-chat > form > .actions > .popout {
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -332,12 +332,12 @@ main {
     text-decoration: none;
 }
 
-.race-chat>form>.actions>.notifications>.on,
-.race-chat>form>.actions>.notifications.on>.off {
+.race-chat > form > .actions > .notifications > .on,
+.race-chat > form > .actions > .notifications.on > .off {
     display: none;
 }
 
-.race-chat>form>.actions>.notifications.on>.on {
+.race-chat > form > .actions > .notifications.on > .on {
     display: initial;
 }
 
@@ -346,13 +346,13 @@ main {
     padding-bottom: 10px;
 }
 
-.race-stream-control>ul {
+.race-stream-control > ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
 }
 
-.race-stream-control>ul>li {
+.race-stream-control > ul > li {
     border: 2px solid #1a1c20;
     border-radius: 4px;
     cursor: pointer;
@@ -364,18 +364,18 @@ main {
     margin: 0 0 5px 5px;
 }
 
-.race-stream-control>ul>.go-spectate {
+.race-stream-control > ul > .go-spectate {
     display: flex;
 }
 
-.race-stream-control>ul>li>a {
+.race-stream-control > ul > li > a {
     display: flex;
     flex-grow: 1;
     justify-content: center;
     text-decoration: none;
 }
 
-.race-stream-control>ul>li .material-icons {
+.race-stream-control > ul > li .material-icons {
     line-height: 32px;
 }
 
@@ -384,12 +384,12 @@ main {
     display: none;
 }
 
-.race-nav>ul {
+.race-nav > ul {
     display: flex;
     justify-content: space-around;
 }
 
-.race-nav>ul>li {
+.race-nav > ul > li {
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -398,11 +398,11 @@ main {
     padding: 5px 0;
 }
 
-.race-nav>ul>.active {
+.race-nav > ul > .active {
     color: #beebd1;
 }
 
-.race-nav>ul>li>.title {
+.race-nav > ul > li > .title {
     font-size: 11px;
 }
 
@@ -410,33 +410,33 @@ main {
     .container {
         align-items: stretch;
     }
-    .container>.content {
+    .container > .content {
         margin: 0;
     }
-    .container>.content>main {
+    .container > .content > main {
         flex: 0 1 auto;
     }
-    .container>.content>aside {
+    .container > .content > aside {
         flex: 1 1 auto;
     }
-    .race-info>.category,
-    .race-info>.goal,
-    .race-info>.info,
+    .race-info > .category,
+    .race-info > .goal,
+    .race-info > .info,
     .race-meta,
     .race-stream-control,
     .race-entrants,
     .race-monitor,
-    .race-status>.state>.help,
-    .race-chat>form>.actions>.popout {
+    .race-status > .state > .help,
+    .race-chat > form > .actions > .popout {
         display: none;
     }
-    .race-nav-info .container>.content>main,
-    .race-nav-entrants .container>.content>main {
+    .race-nav-info .container > .content > main,
+    .race-nav-entrants .container > .content > main {
         flex: 1 1 100%;
     }
-    .race-nav-info .race-info>.category,
-    .race-nav-info .race-info>.goal,
-    .race-nav-info .race-info>.info,
+    .race-nav-info .race-info > .category,
+    .race-nav-info .race-info > .goal,
+    .race-nav-info .race-info > .info,
     .race-nav-info .race-meta,
     .race-nav-entrants .race-entrants,
     .race-nav-entrants .race-monitor {
@@ -452,7 +452,7 @@ main {
     .race-info {
         padding-bottom: 0;
     }
-    .race-info>.category>.name {
+    .race-info > .category > .name {
         font-size: 24px;
     }
     .race-meta {
@@ -465,29 +465,29 @@ main {
     .race-monitor {
         margin-top: 0;
     }
-    .race-monitor>ul {
+    .race-monitor > ul {
         flex-wrap: wrap;
     }
-    .race-monitor>ul>li {
+    .race-monitor > ul > li {
         margin-top: 10px;
     }
-    .race-monitor>ul>.invite {
+    .race-monitor > ul > .invite {
         flex-basis: 100%;
     }
-    .race-monitor>ul>.invite>form>ul {
+    .race-monitor > ul > .invite > form > ul {
         width: 100%;
     }
-    .race-monitor>ul>.invite>form input {
+    .race-monitor > ul > .invite > form input {
         box-sizing: border-box;
         width: 100%;
     }
-    .race-monitor>ul>.invite+li {
+    .race-monitor > ul > .invite+li {
         margin-left: 0;
     }
-    .race-status>.timer {
+    .race-status > .timer {
         font-size: 40px;
     }
-    .race-status>.state>.value {
+    .race-status > .state > .value {
         font-size: 15px;
     }
     .entrant-row {
@@ -495,19 +495,19 @@ main {
         flex-wrap: wrap;
         justify-content: flex-end;
     }
-    .entrant-row>.user {
+    .entrant-row > .user {
         flex-basis: calc(100% - 50px);
     }
-    .entrant-row>.user>.user-pop>.pronouns,
-    .entrant-row>.status,
-    .entrant-row>.finish-time {
+    .entrant-row > .user > .user-pop > .pronouns,
+    .entrant-row > .status,
+    .entrant-row > .finish-time {
         display: none;
     }
-    .entrant-row>.status-or-time {
+    .entrant-row > .status-or-time {
         display: initial;
         font-size: 13px;
     }
-    .entrant-row>.monitor-actions::before {
+    .entrant-row > .monitor-actions::before {
         font-size: 17px;
     }
     .race-nav {
