@@ -27,7 +27,8 @@ body {
     }
 }
 
-aside, main {
+aside,
+main {
     display: flex;
     flex-direction: column;
 }
@@ -36,15 +37,18 @@ aside, main {
 .race-chat > .messages::-webkit-scrollbar {
     width: 7px;
 }
+
 .race-entrants,
 .race-chat > .messages {
     scrollbar-color: #1da674 #36393f;
     scrollbar-width: thin;
 }
+
 .race-entrants::-webkit-scrollbar-track,
 .race-chat > .messages::-webkit-scrollbar-track {
     background: #36393f;
 }
+
 .race-entrants::-webkit-scrollbar-thumb,
 .race-chat > .messages::-webkit-scrollbar-thumb {
     background-color: #1da674;
@@ -59,35 +63,43 @@ aside, main {
 .race-actions {
     margin-bottom: 10px;
 }
+
 .race-actions:empty {
     display: none;
 }
+
 .race-actions > ul {
     display: flex;
 }
+
 .race-actions > ul > li {
     flex: 1 1 0;
     padding-left: 5px;
 }
+
 .race-actions > ul > li:first-child {
     border-left: none;
     padding-left: 0;
 }
+
 .race-actions > ul > li .btn {
     display: block;
     width: 100%;
 }
+
 .streaming-required {
     align-items: center;
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
 }
+
 .streaming-required > p {
     color: #a0e9a0;
     margin: 0 0 5px;
     font-size: 13px;
 }
+
 .streaming-required > .btn {
     width: auto;
 }
@@ -108,12 +120,28 @@ aside, main {
     justify-content: center;
     line-height: 27px;
     position: absolute;
-        top: 10px;
-        right: 0;
-        left: 0;
+    top: 10px;
+    right: 0;
+    left: 0;
+}
+
+.race-chat > .scrollwarning {
+    cursor: pointer;
+    display: none;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 27px;
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    left: 0;
 }
 
 .race-chat.disconnected > .disconnected {
+    display: flex;
+}
+
+.race-chat.scrollwarning > .scrollwarning {
     display: flex;
 }
 
@@ -126,11 +154,28 @@ aside, main {
     pointer-events: none;
 }
 
+.race-chat > .scrollwarning > span {
+    align-items: center;
+    background-color: #1a1c20;
+    border-radius: 10px;
+    display: flex;
+    padding: 0 10px;
+    pointer-events: none;
+}
+
 @keyframes blink {
-    50% { opacity: 0.2 }
+    50% {
+        opacity: 0.2
+    }
 }
 
 .race-chat > .disconnected > span > .material-icons {
+    animation: blink 1.2s ease-in-out infinite;
+    color: #8c3030;
+    margin-right: 5px;
+}
+
+.race-chat > .scrollwarning > span > .material-icons {
     animation: blink 1.2s ease-in-out infinite;
     color: #8c3030;
     margin-right: 5px;
@@ -147,27 +192,34 @@ aside, main {
     padding: 2px;
     word-break: break-word;
 }
+
 .race-chat > .messages > li.system {
     color: #8c898c;
 }
+
 .race-chat > .messages > li.error {
     color: #f08080;
 }
+
 .race-chat > .messages > li.highlight {
     color: #a0e9a0;
 }
+
 .race-chat > .messages > li.bot {
     color: #a0ace8;
 }
+
 .race-chat > .messages > li.mentioned {
     background-color: #1a1c20;
     border-radius: 4px;
 }
+
 .race-chat > .messages > li > .timestamp {
     color: #8c898c;
     font-size: 12px;
     margin-right: 4px;
 }
+
 .race-chat > .messages > li > .name {
     align-items: center;
     color: #b9b4b9;
@@ -175,6 +227,7 @@ aside, main {
     margin-right: 4px;
     vertical-align: top;
 }
+
 .race-chat > .messages > li > .name.supporter > span {
     background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
     -webkit-background-clip: text;
@@ -182,42 +235,54 @@ aside, main {
     -webkit-text-fill-color: transparent;
     text-fill-color: transparent;
 }
+
 .race-chat > .messages > li.bot > .name {
     color: #a0ace8;
 }
+
 .race-chat > .messages > li > .name::before {
     background: no-repeat 0 0 / contain;
     margin-right: 2px;
     height: 12px;
     width: 12px;
 }
+
 .race-chat > .messages > li > .name.moderator::before {
     background-image: url(../image/sword.svg);
     content: '\a0';
 }
+
 .race-chat > .messages > li > .name.supporter.moderator::before {
     background-image: url(../image/gold_sword.svg);
 }
+
 .race-chat > .messages > li > .name.staff::before {
     background-image: url(../image/star.svg);
     content: '\a0';
 }
+
 .race-chat > .messages > li > .name.supporter.staff::before {
     background-image: url(../image/gold_star.svg);
 }
+
 .race-chat > .messages > li > .name::after {
     content: ':';
 }
+
 .race-chat > .messages > li > .message {}
+
 .race-chat > .messages > li > .message .good {
     color: #a0e9a0;
 }
+
 .race-chat > .messages > li > .message .bad {
     color: #f08080;
 }
+
 .race-chat > .messages > li > .message .bot {
     color: #a0ace8;
 }
+
 .race-chat > .messages > li > .message .mention {
     font-weight: bold;
 }
@@ -225,9 +290,11 @@ aside, main {
 .race-chat > form {
     margin-top: 8px;
 }
+
 .race-chat > form label {
     display: none;
 }
+
 .race-chat > form textarea {
     caret-color: #1da674;
     font-size: 13px;
@@ -240,18 +307,22 @@ aside, main {
     vertical-align: top;
     width: calc(100% - 12px);
 }
+
 .race-chat > form textarea:invalid {
     box-shadow: none;
 }
+
 .race-chat > form > .actions {
     align-items: center;
     display: flex;
     justify-content: flex-end;
     margin-top: 10px;
 }
+
 .race-chat > form > .actions > button {
     font-size: 13px;
 }
+
 .race-chat > form > .actions > .notifications,
 .race-chat > form > .actions > .popout {
     align-items: center;
@@ -260,10 +331,12 @@ aside, main {
     margin-right: 5px;
     text-decoration: none;
 }
+
 .race-chat > form > .actions > .notifications > .on,
 .race-chat > form > .actions > .notifications.on > .off {
     display: none;
 }
+
 .race-chat > form > .actions > .notifications.on > .on {
     display: initial;
 }
@@ -272,11 +345,13 @@ aside, main {
     flex: 1 0 auto;
     padding-bottom: 10px;
 }
+
 .race-stream-control > ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
 }
+
 .race-stream-control > ul > li {
     border: 2px solid #1a1c20;
     border-radius: 4px;
@@ -288,15 +363,18 @@ aside, main {
     line-height: 32px;
     margin: 0 0 5px 5px;
 }
+
 .race-stream-control > ul > .go-spectate {
     display: flex;
 }
+
 .race-stream-control > ul > li > a {
     display: flex;
     flex-grow: 1;
     justify-content: center;
     text-decoration: none;
 }
+
 .race-stream-control > ul > li .material-icons {
     line-height: 32px;
 }
@@ -305,10 +383,12 @@ aside, main {
     background: #1e1f24;
     display: none;
 }
+
 .race-nav > ul {
     display: flex;
     justify-content: space-around;
 }
+
 .race-nav > ul > li {
     align-items: center;
     cursor: pointer;
@@ -317,9 +397,11 @@ aside, main {
     flex-direction: column;
     padding: 5px 0;
 }
+
 .race-nav > ul > .active {
     color: #beebd1;
 }
+
 .race-nav > ul > li > .title {
     font-size: 11px;
 }
@@ -337,7 +419,6 @@ aside, main {
     .container > .content > aside {
         flex: 1 1 auto;
     }
-
     .race-info > .category,
     .race-info > .goal,
     .race-info > .info,
@@ -349,12 +430,10 @@ aside, main {
     .race-chat > form > .actions > .popout {
         display: none;
     }
-
     .race-nav-info .container > .content > main,
     .race-nav-entrants .container > .content > main {
         flex: 1 1 100%;
     }
-
     .race-nav-info .race-info > .category,
     .race-nav-info .race-info > .goal,
     .race-nav-info .race-info > .info,
@@ -363,12 +442,10 @@ aside, main {
     .race-nav-entrants .race-monitor {
         display: initial;
     }
-
     .race-nav-info .race-chat,
     .race-nav-entrants .race-chat {
         display: none;
     }
-
     .race-intro {
         display: block;
     }
@@ -404,7 +481,7 @@ aside, main {
         box-sizing: border-box;
         width: 100%;
     }
-    .race-monitor > ul > .invite + li {
+    .race-monitor > ul > .invite+li {
         margin-left: 0;
     }
     .race-status > .timer {
@@ -413,7 +490,6 @@ aside, main {
     .race-status > .state > .value {
         font-size: 15px;
     }
-
     .entrant-row {
         align-items: center;
         flex-wrap: wrap;
@@ -434,11 +510,9 @@ aside, main {
     .entrant-row > .monitor-actions::before {
         font-size: 17px;
     }
-
     .race-nav {
         display: block;
     }
-
     footer {
         display: none;
     }
