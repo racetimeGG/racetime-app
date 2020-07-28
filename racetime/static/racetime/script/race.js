@@ -35,7 +35,7 @@ function Race() {
                     $('.race-chat').removeClass('scrollwarning');
                     $messages[0].scrollTop = $messages[0].scrollHeight;
                 }
-            }, 1000))
+            }, 50))
         }
     } catch (e) {
         if ('notice_exception' in window) {
