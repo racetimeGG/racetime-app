@@ -8,6 +8,16 @@ function Race() {
     this.messageIDs = [];
     this.notify = false;
 
+    const debounce = (func, delay) => {
+        let inDebounce
+        return function() {
+            const context = this
+            const args = arguments
+            clearTimeout(inDebounce)
+            inDebounce = setTimeout(() => func.apply(context, args), delay)
+        }
+    }
+
     try {
         var userSelection = $('.race-chat .scrollwarning');
         for (let i = 0; i < userSelection.length; i++) {
@@ -19,13 +29,13 @@ function Race() {
         }
         var chatScroller = $('.race-chat .messages');
         for (let i = 0; i < chatScroller.length; i++) {
-            chatScroller[i].addEventListener('scroll', function(e) {
+            chatScroller[i].addEventListener('scroll', debounce(function(e) {
                 var $messages = $('.race-chat .messages');
                 if ($messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight) {
                     $('.race-chat').removeClass('scrollwarning');
                     $messages[0].scrollTop = $messages[0].scrollHeight;
                 }
-            })
+            }, 1000))
         }
     } catch (e) {
         if ('notice_exception' in window) {
