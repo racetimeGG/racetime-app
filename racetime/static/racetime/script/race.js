@@ -19,11 +19,11 @@ function Race() {
     }
 
     try {
-		$('.race-chat').ready(function() {
-			var $messages = $('.race-chat .messages');
-			$messages[0].scrollTop = $messages[0].scrollHeight;
-			$('.race-chat').removeClass('scrollwarning');
-		})
+        $('.race-chat').ready(function() {
+            var $messages = $('.race-chat .messages');
+            $messages[0].scrollTop = $messages[0].scrollHeight;
+            $('.race-chat').removeClass('scrollwarning');
+        })
         var userSelection = $('.race-chat .scrollwarning');
         for (let i = 0; i < userSelection.length; i++) {
             userSelection[i].addEventListener('click', function() {
