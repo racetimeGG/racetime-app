@@ -173,6 +173,16 @@ class Category(models.Model):
         This is used when another models' data dict needs to include category
         data, e.g. race data showing which category the race is in.
         """
+        goals = Goal.objects.filter(
+            category=self,
+            active=True,
+        )
+        category_goals = []
+        for goal in goals:
+            category_goals.append({
+                'name': goal.name,
+                'total_races': goal.total_races
+                })
         return {
             'name': self.name,
             'short_name': self.short_name,
@@ -180,6 +190,7 @@ class Category(models.Model):
             'url': self.get_absolute_url(),
             'data_url': self.get_data_url(),
             'image': self.image.url if self.image else None,
+            'goals': category_goals,
         }
 
     def can_edit(self, user):

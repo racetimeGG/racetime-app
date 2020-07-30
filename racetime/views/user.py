@@ -46,7 +46,7 @@ class ViewProfile(generic.DetailView):
 
         return {
             **super().get_context_data(**kwargs),
-            'categories': self.get_favourite_categories(),
+            'categories': self.get_favourite_categories(response_amount=3),
             'entrances': paginator.get_page(self.request.GET.get('page')),
             'mod_categories': self.get_mod_categories(),
             'stats': self.get_stats(entrances),
@@ -77,7 +77,7 @@ class ViewProfile(generic.DetailView):
         queryset = queryset.order_by('-race__ended_at')
         return queryset
 
-    def get_favourite_categories(self):
+    def get_favourite_categories(self, response_amount=0):
         queryset = models.Category.objects.filter(
             active=True,
             race__state=models.RaceStates.finished,
@@ -85,7 +85,10 @@ class ViewProfile(generic.DetailView):
         )
         queryset = queryset.annotate(times_entered=Count('race__entrant'))
         queryset = queryset.order_by('-times_entered')
-        return queryset[:3]
+        if response_amount > 0:
+            return queryset[:response_amount]
+        else:
+            return queryset
 
     def get_mod_categories(self):
         """
@@ -125,11 +128,15 @@ class UserRaceData(ViewProfile):
             self.request.GET.get('show_entrants', 'false').lower()
             in ['true', 'yes', '1']
         )
+        show_category = (
+            self.request.GET.get('show_category', 'false').lower()
+            in ['true', 'yes', '1']
+        )
         resp = http.JsonResponse({
             'count': paginator.count,
             'num_pages': paginator.num_pages,
             'races': [
-                entrance.race.api_dict_summary(include_entrants=show_entrants)
+                entrance.race.api_dict_summary(include_entrants=show_entrants, include_category=show_category)
                 for entrance in page
             ],
         })
@@ -142,9 +149,16 @@ class UserProfileData(ViewProfile):
         self.object = self.get_object()
         user = self.object.api_dict_summary()
         entrances = self.get_entrances()
+        categories = []
+        for cat in self.get_favourite_categories():
+            categories.append({
+                **cat.api_dict_summary(),
+                'times_entered': cat.times_entered
+            })
         resp = http.JsonResponse({
             **user,
             'stats': self.get_stats(entrances),
+            'categories': categories
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
