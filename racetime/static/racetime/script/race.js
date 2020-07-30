@@ -36,7 +36,7 @@ function Race() {
         for (let i = 0; i < chatScroller.length; i++) {
             chatScroller[i].addEventListener('scroll', debounce(function(e) {
                 var $messages = $('.race-chat .messages');
-                if ($messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight) {
+                if (Math.round($messages[0].scrollTop + Math.ceil($messages[0].clientHeight)) >= Math.round($messages[0].scrollHeight)) {
                     $('.race-chat').removeClass('scrollwarning');
                     $messages[0].scrollTop = $messages[0].scrollHeight;
                 }
