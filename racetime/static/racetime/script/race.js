@@ -9,38 +9,26 @@ function Race() {
     this.notify = false;
 
     const debounce = (func, delay) => {
-        let inDebounce
+        let inDebounce;
         return function() {
-            const context = this
-            const args = arguments
-            clearTimeout(inDebounce)
+            const context = this;
+            const args = arguments;
+            clearTimeout(inDebounce);
             inDebounce = setTimeout(() => func.apply(context, args), delay)
         }
-    }
+    };
 
     try {
-        $('.race-chat').ready(function() {
-            var $messages = $('.race-chat .messages');
-            $messages[0].scrollTop = $messages[0].scrollHeight;
-            $('.race-chat').removeClass('scrollwarning');
-        })
-        var userSelection = $('.race-chat .scrollwarning');
-        for (let i = 0; i < userSelection.length; i++) {
-            userSelection[i].addEventListener('click', function() {
-                var $messages = $('.race-chat .messages');
-                $('.race-chat').removeClass('scrollwarning');
-                $messages[0].scrollTop = $messages[0].scrollHeight;
-            })
-        }
-        var chatScroller = $('.race-chat .messages');
-        for (let i = 0; i < chatScroller.length; i++) {
-            chatScroller[i].addEventListener('scroll', debounce(function(e) {
-                var $messages = $('.race-chat .messages');
-                if (Math.round($messages[0].scrollTop + Math.ceil($messages[0].clientHeight)) >= Math.round($messages[0].scrollHeight)) {
-                    $('.race-chat').removeClass('scrollwarning');
-                    $messages[0].scrollTop = $messages[0].scrollHeight;
+        if ($('.race-chat').length) {
+            var self = this;
+            $(document).on('click', '.race-chat .scrollwarning', function() {
+                self.scrollToBottom();
+            });
+            $('.race-chat .messages').on('scroll', debounce(function() {
+                if (self.shouldScroll()) {
+                    self.scrollToBottom();
                 }
-            }, 50))
+            }, 50));
         }
     } catch (e) {
         if ('notice_exception' in window) {
@@ -55,9 +43,12 @@ function Race() {
             this.vars.user.name_quoted = this.regquote(this.vars.user.name);
         }
         var server_date = new Date(this.vars.server_time_utc);
-        for (var i in this.vars.chat_history) {
-            if (!this.vars.chat_history.hasOwnProperty(i)) continue;
-            this.addMessage(this.vars.chat_history[i], server_date, true);
+        if ($('.race-chat').length) {
+            for (var i in this.vars.chat_history) {
+                if (!this.vars.chat_history.hasOwnProperty(i)) continue;
+                this.addMessage(this.vars.chat_history[i], server_date, true);
+            }
+            this.scrollToBottom();
         }
         this.open();
     } catch (e) {
@@ -94,12 +85,20 @@ Race.prototype.ajaxifyActionForm = function(form) {
     });
 };
 
+Race.prototype.shouldScroll = function() {
+    var messages = $('.race-chat .messages')[0];
+    var pos = messages.scrollHeight - (messages.scrollTop + messages.clientHeight);
+    return pos < 20;
+};
+
+Race.prototype.scrollToBottom = function() {
+    $('.race-chat').removeClass('scrollwarning');
+    var messages = $('.race-chat .messages')[0];
+    messages.scrollTop = messages.scrollHeight;
+};
+
 Race.prototype.addMessage = function(message, server_date, mute_notifications) {
     var self = this;
-
-    function scrollToBottom() {
-        $messages[0].scrollTop = $messages[0].scrollHeight;
-    };
 
     // Temporary fix: skip countdown messages intended for LiveSplit
     if (message.is_system && message.message.match(/^\d+…$/)) {
@@ -112,18 +111,12 @@ Race.prototype.addMessage = function(message, server_date, mute_notifications) {
 
     var $messages = $('.race-chat .messages');
     if ($messages.length) {
-        shouldScroll = $messages[0].scrollTop + $messages[0].clientHeight === $messages[0].scrollHeight;
+        var shouldScroll = self.shouldScroll();
         $messages.append(self.createMessageItem(message, server_date, mute_notifications));
-        if (shouldScroll) {
-            scrollToBottom();
-            $('.race-chat').removeClass('scrollwarning');
+        if (shouldScroll || (message.user && this.vars.user.id === message.user.id)) {
+            self.scrollToBottom();
         } else {
-            if (message.user && this.vars.user.id === message.user.id) {
-                scrollToBottom();
-                $('.race-chat').removeClass('scrollwarning');
-            } else {
-                $('.race-chat').addClass('scrollwarning');
-            }
+            $('.race-chat').addClass('scrollwarning');
         }
     }
 
