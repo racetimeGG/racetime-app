@@ -3,13 +3,12 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
-from django.template.loader import render_to_string
 from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
 
-from . import race_actions
+from . import race_actions, race_bot_actions
 from .models import Bot, Race
-from .utils import SafeException, exception_to_msglist, get_action_button
+from .utils import SafeException, exception_to_msglist
 
 
 class OAuthConsumerMixin:
@@ -251,19 +250,13 @@ class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
         Read incoming data and process it so we know what to do.
         """
         action = message_data.get('action')
+        action_class = race_bot_actions.actions.get(action)
         data = message_data.get('data')
 
-        if action == 'message':
-            action_class = race_actions.BotMessage
-        elif action == 'setinfo':
-            action_class = race_actions.BotSetInfo
-        else:
-            action_class = None
-
-        return action, data, action_class
+        return action_class, data
 
     async def do_receive(self, message_data):
-        action, data, action_class = self.parse_data(message_data)
+        action_class, data = self.parse_data(message_data)
 
         state = await self.get_oauth_state()
         bot = await self.get_bot(state.client)
