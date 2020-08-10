@@ -9,8 +9,7 @@ from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 
-from racetime import models
-from racetime.forms import ChatForm, CommentForm, RaceSetInfoForm
+from racetime import forms, models
 from racetime.utils import SafeException
 
 
@@ -169,7 +168,7 @@ class AddComment:
     commands = ['comment']
 
     def action(self, race, user, data):
-        form = CommentForm(data)
+        form = forms.CommentForm(data)
         if not form.is_valid():
             raise SafeException(form.errors)
 
@@ -282,7 +281,7 @@ class Message:
         if not self.guid_is_new(data.get('guid', '')):
             return
 
-        form = ChatForm(data)
+        form = forms.ChatForm(data)
         if not form.is_valid():
             raise SafeException(form.errors)
         message = form.save(commit=False)
