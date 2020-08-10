@@ -26,7 +26,7 @@ class BotEntrantAction:
 
     def get_user(self, data):
         try:
-            return models.User.objects.get_by_hashid(data.get('entrant'))
+            return models.User.objects.get_by_hashid(data.get('user'))
         except models.User.DoesNotExist:
             raise SafeException('No user found matching the given ID.')
 
