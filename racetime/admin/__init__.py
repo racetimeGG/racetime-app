@@ -57,9 +57,6 @@ class CategoryAdmin(options.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).order_by('name')
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
     def has_delete_permission(self, request, obj=None):
         return False
 
