@@ -133,8 +133,8 @@ class Command(BaseCommand):
                 name=name,
                 short_name=short_name,
                 slug=slug,
-                owner=random.choice(users),
             )
+            cat.owners.add(random.choice(users))
             cat.moderators.add(*random.sample(users, random.randint(0, 3)))
 
             goals = []

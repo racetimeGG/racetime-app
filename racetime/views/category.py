@@ -407,10 +407,101 @@ class CategoryModerators(ModPageMixin, generic.TemplateView):
         return {
             **super().get_context_data(**kwargs),
             'add_form': forms.UserSelectForm(),
-            'can_transfer': self.category.can_transfer(self.user),
             'category': self.category,
+            'owners': self.category.all_owners,
             'moderators': self.category.all_moderators,
         }
+
+
+class AddOwner(ModPageMixin, generic.FormView):
+    form_class = forms.UserSelectForm
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.success_url)
+
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+
+        if user in self.category.all_owners:
+            messages.error(
+                self.request,
+                '%(user)s is already an owner.'
+                % {'user': user}
+            )
+            return http.HttpResponseRedirect(self.success_url)
+        if len(self.category.all_owners) >= self.category.max_owners:
+            messages.error(
+                self.request,
+                'You cannot add any more owners to this category. Contact '
+                'staff if you need more slots.'
+            )
+            return http.HttpResponseRedirect(self.success_url)
+
+        self.category.owners.add(user)
+        if user in self.category.all_moderators:
+            self.category.moderators.remove(user)
+
+        models.AuditLog.objects.create(
+            actor=self.user,
+            category=self.category,
+            user=user,
+            action='owner_add',
+        )
+
+        messages.success(
+            self.request,
+            '%(user)s added as a category owner.'
+            % {'user': user}
+        )
+
+        return http.HttpResponseRedirect(self.success_url)
+
+
+class RemoveOwner(ModPageMixin, generic.FormView):
+    form_class = forms.UserSelectForm
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.success_url)
+
+    def form_valid(self, form):
+        user = form.cleaned_data.get('user')
+
+        if user not in self.category.all_owners:
+            messages.error(
+                self.request,
+                '%(user)s is not an owner of this category.'
+                % {'user': user}
+            )
+            return http.HttpResponseRedirect(self.success_url)
+        if len(self.category.all_owners) <= 1:
+            messages.error(
+                self.request,
+                'You cannot remove the last owner of the category. Assign a '
+                'new owner first.'
+            )
+            return http.HttpResponseRedirect(self.success_url)
+        self.category.owners.remove(user)
+
+        models.AuditLog.objects.create(
+            actor=self.user,
+            category=self.category,
+            user=user,
+            action='owner_remove',
+        )
+
+        messages.success(
+            self.request,
+            '%(user)s removed as a category owner.'
+            % {'user': user}
+        )
+
+        if user == self.user:
+            redirect_to = reverse('category', args=(self.category.slug,))
+        else:
+            redirect_to = self.success_url
+        return http.HttpResponseRedirect(redirect_to)
 
 
 class AddModerator(ModPageMixin, generic.FormView):
@@ -423,17 +514,18 @@ class AddModerator(ModPageMixin, generic.FormView):
     def form_valid(self, form):
         user = form.cleaned_data.get('user')
 
-        if user == self.category.owner or user in self.category.all_moderators:
+        if user in self.category.all_owners or user in self.category.all_moderators:
             messages.error(
                 self.request,
-                '%(user)s is already a moderator.'
+                '%(user)s is already a category owner or moderator.'
                 % {'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
         if len(self.category.all_moderators) >= self.category.max_moderators:
             messages.error(
                 self.request,
-                'You cannot add any more moderators to this category.'
+                'You cannot add any more moderators to this category. Contact '
+                'staff if you need more slots.'
             )
             return http.HttpResponseRedirect(self.success_url)
 
@@ -487,54 +579,6 @@ class RemoveModerator(ModPageMixin, generic.FormView):
         )
 
         return http.HttpResponseRedirect(self.success_url)
-
-
-class TransferOwner(ModPageMixin, generic.FormView):
-    form_class = forms.UserSelectForm
-
-    def form_invalid(self, form):
-        messages.error(self.request, form.errors)
-        return http.HttpResponseRedirect(self.success_url)
-
-    def form_valid(self, form):
-        user = form.cleaned_data.get('user')
-        old_owner = self.category.owner
-
-        with atomic():
-            category = self.category
-            category.owner = user
-            category.save()
-            if user in category.moderators.all():
-                self.category.moderators.remove(user)
-            models.AuditLog.objects.create(
-                actor=self.user,
-                category=self.category,
-                action='owner_change',
-                old_value=old_owner.id,
-                new_value=user.id,
-            )
-
-        if old_owner == self.user:
-            messages.success(
-                self.request,
-                'Ownership of %(category)s has been transferred to %(user)s. You '
-                'are no longer the owner of this category.'
-                % {'category': category.name, 'user': user}
-            )
-            # User no longer has authority to view the moderators page, so
-            # bump them back to the category landing page instead.
-            return http.HttpResponseRedirect(self.category.get_absolute_url())
-        else:
-            messages.success(
-                self.request,
-                'Ownership of %(category)s has been transferred to %(user)s. '
-                '%(old_owner)s is no longer the owner of this category.'
-                % {'category': category.name, 'old_owner': old_owner, 'user': user}
-            )
-            return http.HttpResponseRedirect(self.success_url)
-
-    def test_func(self):
-        return self.category.can_transfer(self.user)
 
 
 class CategoryAudit(ManageCategory, generic.DetailView):

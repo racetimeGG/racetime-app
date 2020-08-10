@@ -28,9 +28,10 @@ from .category import (
     ReactivateCategory,
     RequestCategory,
     AddModerator,
+    AddOwner,
     CategoryModerators,
     RemoveModerator,
-    TransferOwner,
+    RemoveOwner,
     CategoryAudit,
 )
 from .goal import (
@@ -130,9 +131,10 @@ __all__ = [
     'ReactivateCategory',
     'RequestCategory',
     'AddModerator',
+    'AddOwner',
     'CategoryModerators',
     'RemoveModerator',
-    'TransferOwner',
+    'RemoveOwner',
     'CategoryAudit',
     # goal
     'GoalList',

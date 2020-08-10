@@ -24,9 +24,11 @@
         </span>
     </div>
     <dl class="category-meta">
-        <dt>Owner</dt>
-        <dd>
-            {% include 'racetime/pops/user.html' with user=category.owner extra_class='inline' hide_flair=True hide_pronouns=True %}
+        <dt>Owners</dt>
+        <dd class="meta-owner-list">
+            {% for owner in category.all_owners %}
+                {% include 'racetime/pops/user.html' with user=owner extra_class='inline' hide_flair=True hide_pronouns=True %}
+            {% endfor %}
         </dd>
         <dt>Moderators</dt>
         <dd class="meta-user-list">

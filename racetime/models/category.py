@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
@@ -25,8 +26,9 @@ class Category(models.Model):
     number of goals, each goal has its own leaderboard plus any number of races
     being run.
 
-    A category has a single owner who acts as the local admin of that category.
-    The owner may appoint moderators who have additional powers for races.
+    A category has one or more owners who act as the local admins of that
+    category. Owners may appoint moderators who have additional powers for
+    races.
 
     All category, goal, moderator and other changes are logged in the AuditLog
     model.
@@ -79,16 +81,24 @@ class Category(models.Model):
         default=True,
         help_text='Allow new races to be created in this category.'
     )
-    owner = models.ForeignKey(
+    owners = models.ManyToManyField(
         'User',
-        on_delete=models.PROTECT,
-        help_text='The user who controls this category.',
+        related_name='owned_categories',
+        help_text='Users who hold ownership of this category.',
     )
     moderators = models.ManyToManyField(
         'User',
         related_name='mod_categories',
         help_text='Users who can moderate races in this category.',
         blank=True,
+    )
+    max_owners = models.PositiveSmallIntegerField(
+        default=5,
+        validators=[MinValueValidator(5), MaxValueValidator(100)],
+    )
+    max_moderators = models.PositiveSmallIntegerField(
+        default=10,
+        validators=[MinValueValidator(10), MaxValueValidator(100)],
     )
     slug_words = models.TextField(
         null=True,
@@ -119,12 +129,28 @@ class Category(models.Model):
         return self.moderators.filter(active=True).order_by('name')
 
     @cached_property
+    def all_owners(self):
+        """
+        Return an ordered QuerySet of active users who have ownership of this
+        category.
+        """
+        return self.owners.filter(active=True).order_by('name')
+
+    @cached_property
     def all_moderator_ids(self):
         """
         Return a list of user IDs of active users who have moderator powers in
         this category.
         """
         return [m.id for m in self.all_moderators]
+
+    @cached_property
+    def all_owner_ids(self):
+        """
+        Return a list of user IDs of active users who have ownership of this
+        category.
+        """
+        return [m.id for m in self.all_owners]
 
     @property
     def json_data(self):
@@ -151,16 +177,6 @@ class Category(models.Model):
     def max_goals(self):
         """
         Sets the limit for the number of active goals this category may use.
-
-        This is a fixed quantity for now. May vary in the future.
-        """
-        return 10
-
-    @property
-    def max_moderators(self):
-        """
-        Sets the limits for the number of active moderators this category may
-        use.
 
         This is a fixed quantity for now. May vary in the future.
         """
@@ -194,17 +210,8 @@ class Category(models.Model):
         """
         return user.is_active and (
             user.is_staff
-            or (self.active and user == self.owner)
+            or (self.active and user.id in self.all_owner_ids)
         )
-
-    def can_transfer(self, user):
-        """
-        Returns True if the given user may transfer ownership of this category
-        to another user.
-
-        At present, this is identical to can_edit().
-        """
-        return self.can_edit(user)
 
     def can_moderate(self, user):
         """
@@ -212,7 +219,7 @@ class Category(models.Model):
         """
         return user.is_active and (
             user.is_staff
-            or user.id == self.owner.id
+            or user.id in self.all_owner_ids
             or user.id in self.all_moderator_ids
         )
 
@@ -233,7 +240,10 @@ class Category(models.Model):
             **self.api_dict_summary(),
             'info': self.info,
             'streaming_required': self.streaming_required,
-            'owner': self.owner.api_dict_summary(category=self),
+            'owners': [
+                user.api_dict_summary(category=self)
+                for user in self.all_owners
+            ],
             'moderators': [
                 user.api_dict_summary(category=self)
                 for user in self.all_moderators
@@ -361,8 +371,8 @@ class CategoryRequest(models.Model):
                 name=self.name,
                 short_name=self.short_name,
                 slug=self.slug,
-                owner=self.requested_by,
             )
+            category.owners.add(self.requested_by)
             for goal in set(self.goals.split('\n')):
                 category.goal_set.create(name=goal)
 
@@ -546,7 +556,8 @@ class AuditLog(models.Model):
             ('slug_words_change', 'updated category slug words'),
             ('streaming_required_change', 'updated category streaming requirement'),
             ('allow_stream_override_change', 'updated category stream override'),
-            ('owner_change', 'transferred category ownership'),
+            ('owner_add', 'added a owner'),
+            ('owner_remove', 'removed a owner'),
             ('moderator_add', 'added a moderator'),
             ('moderator_remove', 'removed a moderator'),
             ('bot_add', 'added a bot'),
@@ -556,6 +567,8 @@ class AuditLog(models.Model):
             ('goal_activate', 're-activated a goal'),
             ('goal_deactivate', 'deactivated a goal'),
             ('goal_rename', 'renamed a goal'),
+            # No longer in use
+            ('owner_change', 'transferred category ownership'),
         ),
     )
     old_value = models.TextField(

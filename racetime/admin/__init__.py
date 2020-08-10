@@ -32,13 +32,14 @@ class BulletinAdmin(options.ModelAdmin):
 
 class CategoryAdmin(options.ModelAdmin):
     autocomplete_fields = (
-        'owner',
+        'owners',
     )
     readonly_fields = (
         'image',
         'info',
         'streaming_required',
         'allow_stream_override',
+        'owners',
         'moderators',
         'slug_words',
     )
@@ -46,7 +47,6 @@ class CategoryAdmin(options.ModelAdmin):
         '__str__',
         'short_name',
         'active',
-        'owner',
     )
     list_filter = (
         'active',

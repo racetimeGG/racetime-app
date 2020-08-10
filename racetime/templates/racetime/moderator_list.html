@@ -16,53 +16,69 @@
     </ol>
     <h2>Moderators &amp; ownership</h2>
     <p>
-        Set which users can moderate this category, or transfer ownership to
-        another user. Moderators have the ability to record races, disqualify
+        Set which users hold ownership, or can moderate this category.
+        Category owners have full control over the category's details, can
+        add/remove other owners and moderators, manage goals and bots.
+        Moderators have the ability to record races, disqualify
         entrants and can also perform any monitor actions.
     </p>
-    <h3>Moderators</h3>
-    <p class="help">
-        Users with moderator permission within this category.
-    </p>
-    <ul class="mod-list">
-        {% for user in moderators %}
-            <li>
-                {% include 'racetime/pops/user.html' with hide_pronouns=True %}
-                <form action="{% url 'category_mods_remove' category=category.slug %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="user" value="{{ user.hashid }}">
-                    <button class="btn dangerous" type="submit">Remove</button>
-                </form>
-            </li>
-        {% empty %}
-            <li>
-                There are no moderators assigned to this category.
-            </li>
-        {% endfor %}
-    </ul>
-    <h3>Add a moderator</h3>
-    <p class="help">
-        Start typing in a name to add a moderator to the list above.
-    </p>
-    <form class="add-moderator-form layout-form" action="{% url 'category_mods_add' category=category.slug %}" method="post">
-        {% csrf_token %}
-        {% include 'racetime/forms/user_select.html' %}
-        <button class="btn" type="submit">Add moderator</button>
-    </form>
-    {% if can_transfer %}
-        <h3 class="dangerous">Transfer ownership</h3>
+    <div class="division">
+        <h3>Owners</h3>
         <p class="help">
-            Start typing in a name to transfer ownership of this category to
-            another user. That user will become the category owner.
+            Users with ownership of this category. Owners have full control over
+            this category, and can manage everything within.
         </p>
+        <ul class="mod-list">
+            {% for user in owners %}
+                <li>
+                    {% include 'racetime/pops/user.html' with hide_pronouns=True %}
+                    <form action="{% url 'category_owners_remove' category=category.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ user.hashid }}">
+                        <button class="btn dangerous" type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        <h3>Add a new owner</h3>
         <p class="help">
-            <strong>This action cannot be undone!</strong> You will lose the ability to
-            manage this category, and all related permissions.
+            Start typing in a name to add an owner to the list above.
         </p>
-        <form class="add-moderator-form layout-form dangerous" action="{% url 'category_transfer_owner' category=category.slug %}" method="post">
+        <form class="add-owner-form layout-form" action="{% url 'category_owners_add' category=category.slug %}" method="post">
             {% csrf_token %}
             {% include 'racetime/forms/user_select.html' %}
-            <button class="btn" type="submit">Transfer owner</button>
+            <button class="btn" type="submit">Add owner</button>
         </form>
-    {% endif %}
+    </div>
+    <div class="division">
+        <h3>Moderators</h3>
+        <p class="help">
+            Users with moderator permission within this category.
+        </p>
+        <ul class="mod-list">
+            {% for user in moderators %}
+                <li>
+                    {% include 'racetime/pops/user.html' with hide_pronouns=True %}
+                    <form action="{% url 'category_mods_remove' category=category.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ user.hashid }}">
+                        <button class="btn dangerous" type="submit">Remove</button>
+                    </form>
+                </li>
+            {% empty %}
+                <li>
+                    There are no moderators assigned to this category.
+                </li>
+            {% endfor %}
+        </ul>
+        <h3>Add a moderator</h3>
+        <p class="help">
+            Start typing in a name to add a moderator to the list above.
+        </p>
+        <form class="add-moderator-form layout-form" action="{% url 'category_mods_add' category=category.slug %}" method="post">
+            {% csrf_token %}
+            {% include 'racetime/forms/user_select.html' %}
+            <button class="btn" type="submit">Add moderator</button>
+        </form>
+    </div>
 {% endblock %}

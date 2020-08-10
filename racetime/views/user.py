@@ -96,7 +96,7 @@ class ViewProfile(generic.DetailView):
             return []
         queryset = models.Category.objects.filter(active=True).order_by('name')
         queryset = queryset.filter(
-            Q(owner=self.object) | Q(moderators=self.object)
+            Q(owners=self.object) | Q(moderators=self.object)
         )
         return queryset.distinct()
 
