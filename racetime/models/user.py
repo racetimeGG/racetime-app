@@ -242,6 +242,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         editable=False,
     )
+    twitch_login = models.CharField(
+        max_length=25,
+        null=True,
+        editable=False,
+    )
     twitch_name = models.CharField(
         max_length=25,
         null=True,
@@ -350,8 +355,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         Return the full URI of the user's Twitch channel, or none if they have
         no connected account.
         """
-        if self.twitch_name:
-            return f'https://www.twitch.tv/{self.twitch_name.lower()}'
+        if self.twitch_login:
+            return f'https://www.twitch.tv/{self.twitch_login}'
         return None
 
     @property
@@ -381,7 +386,8 @@ class User(AbstractBaseUser, PermissionsMixin):
             'avatar': self.avatar.url if self.avatar else None,
             'pronouns': self.pronouns,
             'flair': self.flair(can_moderate),
-            'twitch_name': self.twitch_name,
+            'twitch_name': self.twitch_login,
+            'twitch_display_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,
             'can_moderate': can_moderate,
         }

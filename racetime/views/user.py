@@ -406,6 +406,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                         )
                     else:
                         user.twitch_id = data.get('id')
+                        user.twitch_login = data.get('login')
                         user.twitch_name = data.get('display_name')
                         user.save()
                         user.log_action('twitch_auth', self.request)
@@ -432,6 +433,7 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
         else:
             user.twitch_code = None
             user.twitch_id = None
+            user.twitch_login = None
             user.twitch_name = None
             user.save()
             user.log_action('twitch_disconnect', self.request)

@@ -310,7 +310,7 @@ class RaceBot:
                             if entrant.race not in races_to_reload:
                                 races_to_reload.append(entrant.race)
                             self.logger.info(
-                                '[Twitch] Updated %(user)s twitch channel name to %(twitch_name)s'
+                                '[Twitch] Updated %(user)s twitch display name to %(twitch_name)s'
                                 % {'user': user, 'twitch_name': user.twitch_name}
                             )
 

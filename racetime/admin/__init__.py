@@ -287,6 +287,7 @@ class UserAdmin(options.ModelAdmin):
     search_fields = (
         'name',
         'twitch_name',
+        'twitch_login',
     )
     ordering = ('name', 'date_joined')
 
@@ -308,6 +309,7 @@ class UserAdmin(options.ModelAdmin):
                 )
                 user.twitch_code = None
                 user.twitch_id = None
+                user.twitch_login = None
                 user.twitch_name = None
                 user.save()
                 self.message_user(
