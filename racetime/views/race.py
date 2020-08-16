@@ -89,12 +89,11 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        messages = self.object.message_set.filter(deleted=False).order_by('posted_at')
-        content = '\n'.join(
-            '[%s] %s' % (m.posted_at.replace(microsecond=0), m.message_plain) if m.is_system
-            else '[%s] %s: %s' % (m.posted_at.replace(microsecond=0), m.user or m.bot, m.message_plain)
-            for m in messages
-        )
+        messages = self.object.message_set.order_by('posted_at')
+        if not self.object.category.can_moderate(self.user):
+            messages = messages.filter(deleted=False)
+
+        content = '\n'.join(self.message_to_str(msg) for msg in messages)
 
         resp = http.HttpResponse(
             content=content,
@@ -113,6 +112,30 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
             resp['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         return resp
+
+    def message_to_str(self, msg):
+        """
+        Format a Message object as a string for the chat log output.
+        """
+        timestamp = msg.posted_at.replace(microsecond=0)
+        if msg.is_system:
+            return '[%s] %s' % (
+                timestamp,
+                msg.message_plain,
+            )
+        if msg.deleted:
+            return '[%s] [deleted by %s at %s] %s: %s' % (
+                timestamp,
+                msg.deleted_by,
+                msg.deleted_at.replace(microsecond=0),
+                msg.user or msg.bot,
+                msg.message_plain,
+            )
+        return '[%s] %s: %s' % (
+            timestamp,
+            msg.user or msg.bot,
+            msg.message_plain,
+        )
 
 
 class RaceData(RaceMixin, generic.View):
