@@ -95,14 +95,19 @@ class RaceChatLog(Race):
 
         resp = http.HttpResponse(
             content=content,
-            content_type='text/plain',
+            content_type='text/plain; charset=utf-8',
         )
 
-        filename = '%s_%s_chatlog.txt' % (
-            self.object.category.slug,
-            self.object.slug,
+        dl = (
+            self.request.GET.get('dl', 'true').lower()
+            in ['true', 'yes', '1']
         )
-        resp['Content-Disposition'] = f'attachment; filename="{filename}"'
+        if dl:
+            filename = '%s_%s_chatlog.txt' % (
+                self.object.category.slug,
+                self.object.slug,
+            )
+            resp['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         return resp
 
