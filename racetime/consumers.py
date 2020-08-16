@@ -94,6 +94,18 @@ class RaceConsumer(AsyncWebsocketConsumer):
     async def whoops(self, *errors):
         await self.deliver('error', errors=errors)
 
+    async def chat_delete(self, event):
+        """
+        Handler for chat.delete type event.
+        """
+        await self.deliver(event['type'], message=event['message'])
+
+    async def chat_purge(self, event):
+        """
+        Handler for chat.purge type event.
+        """
+        await self.deliver(event['type'], user=event['user'])
+
     async def chat_message(self, event):
         """
         Handler for chat.message type event.
