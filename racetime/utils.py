@@ -12,6 +12,7 @@ from hashids import Hashids
 __all__ = [
     'RedisChannelLayer',
     'SafeException',
+    'chunkify',
     'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
@@ -326,6 +327,19 @@ class SafeException(Exception):
     Used to indicate an exception whose message is safe to display to end-users.
     """
     pass
+
+
+def chunkify(items, size=100):
+    """
+    Generator that splits an iterable into chunks of given size.
+    """
+    n = 0
+    while True:
+        chunk = items[n:n + size]
+        if not chunk:
+            break
+        yield chunk
+        n += size
 
 
 def determine_ip(request):

@@ -2,7 +2,6 @@ import logging
 import os
 from datetime import timedelta
 from itertools import chain
-from math import ceil
 from time import sleep
 
 import requests
@@ -11,7 +10,7 @@ from django.db.models import F
 from django.utils import timezone
 
 from . import models
-from .utils import notice_exception
+from .utils import chunkify, notice_exception
 
 
 class RaceBot:
@@ -270,13 +269,7 @@ class RaceBot:
         entrants_to_update = []
         races_to_reload = []
 
-        all_twitch_ids = list(entrants.keys())
-        entrant_chunks = [
-            all_twitch_ids[n:n+100]
-            for n in range(0, ceil(len(all_twitch_ids) / 100) * 100, 100)
-        ]
-
-        for chunk in entrant_chunks:
+        for chunk in chunkify(list(entrants.keys()), size=100):
             try:
                 resp = requests.get('https://api.twitch.tv/helix/streams', params={
                     'first': 100,
