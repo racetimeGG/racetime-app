@@ -49,6 +49,8 @@ def invalidate_caches(sender, instance, **kwargs):
 
 @receiver(signals.post_save, sender=models.Message)
 def broadcast_message(sender, instance, **kwargs):
+    if instance.deleted:
+        return
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(instance.race.slug, {
         'type': 'chat.message',
