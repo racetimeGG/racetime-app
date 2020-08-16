@@ -378,12 +378,21 @@ Race.prototype.onSocketMessage = function(event) {
             this.addMessage(data.message, server_date, false);
             break;
         case 'chat.delete':
-            this.deleteMessage(data.message.id, null);
-            this.whoops(data.message.deleted_by + ' deleted a message from ' + data.message.name, 'system', false);
+            this.deleteMessage(data.delete.id, null);
+            this.whoops(
+                data.delete.deleted_by.name + ' deleted a message from '
+                + (data.delete.is_bot ? data.delete.bot : data.delete.user.name),
+                'system',
+                false
+            );
             break;
         case 'chat.purge':
-            this.deleteMessage(null, data.user.id);
-            this.whoops(data.user.purged_by + ' purged all messages from ' + data.user.name, 'system', false);
+            this.deleteMessage(null, data.purge.user.id);
+            this.whoops(
+                data.purge.purged_by.name + ' purged all messages from ' + data.purge.user.name,
+                'system',
+                false
+            );
             break;
     }
 };

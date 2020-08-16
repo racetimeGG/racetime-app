@@ -98,13 +98,13 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for chat.delete type event.
         """
-        await self.deliver(event['type'], message=event['message'])
+        await self.deliver(event['type'], delete=event['delete'])
 
     async def chat_purge(self, event):
         """
         Handler for chat.purge type event.
         """
-        await self.deliver(event['type'], user=event['user'])
+        await self.deliver(event['type'], purge=event['purge'])
 
     async def chat_message(self, event):
         """

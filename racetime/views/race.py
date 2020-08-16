@@ -134,10 +134,15 @@ class RaceChatDelete(RaceChatMixin):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(race.slug, {
             'type': 'chat.delete',
-            'message': {
+            'delete': {
                 'id': message.hashid,
-                'name': message.user.name if message.user else message.bot.name,
-                'deleted_by': self.user.name,
+                'user': (
+                    message.user.api_dict_summary(race=race)
+                    if message.user else None
+                ),
+                'bot': message.bot.name if message.is_bot else None,
+                'is_bot': message.is_bot,
+                'deleted_by': self.user.api_dict_summary(race=race),
             },
         })
 
@@ -175,10 +180,9 @@ class RaceChatPurge(RaceChatMixin):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(race.slug, {
             'type': 'chat.purge',
-            'user': {
-                'id': message.user.hashid,
-                'name': message.user.name,
-                'purged_by': self.user.name,
+            'purge': {
+                'user': message.user.api_dict_summary(race=race),
+                'purged_by': self.user.api_dict_summary(race=race),
             },
         })
 
