@@ -1,3 +1,5 @@
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django import http
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -8,9 +10,9 @@ from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 
-from .base import CanMonitorRaceMixin, UserMixin
+from .base import CanModerateRaceMixin, CanMonitorRaceMixin, UserMixin
 from .. import forms, models
-from ..utils import get_action_button, twitch_auth_url
+from ..utils import get_action_button, get_hashids, twitch_auth_url
 
 
 class RaceMixin(SingleObjectMixin):
@@ -83,6 +85,101 @@ class RaceMini(Race):
 
 class RaceSpectate(Race):
     template_name_suffix = '_spectate'
+
+
+class RaceChatMixin(CanModerateRaceMixin, RaceMixin, generic.View):
+    def get_message(self, race):
+        hashid = self.kwargs.get('message')
+        try:
+            message_id, = get_hashids(models.Message).decode(hashid)
+        except ValueError:
+            raise http.Http404
+
+        try:
+            return models.Message.objects.get(
+                id=message_id,
+                race=race,
+            )
+        except models.Message.DoesNotExist:
+            raise http.Http404
+
+
+class RaceChatDelete(RaceChatMixin):
+    def post(self, request, *args, **kwargs):
+        race = self.get_object()
+        message = self.get_message(race)
+
+        if message.is_system:
+            return http.JsonResponse({
+                'errors': ['System messages cannot be deleted.'],
+            }, status=422)
+
+        if not self.user.is_staff and race.chat_is_closed:
+            return http.JsonResponse({
+                'errors': [
+                    'This race chat is now closed. Please contact staff if '
+                    'you need to delete something.'
+                ],
+            }, status=422)
+
+        if not message.deleted:
+            message.deleted = True
+            message.deleted_by = self.user
+            message.deleted_at = timezone.now()
+            message.save()
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(race.slug, {
+            'type': 'chat.delete',
+            'message': {
+                'id': message.hashid,
+                'name': message.user.name if message.user else message.bot.name,
+                'deleted_by': self.user.name,
+            },
+        })
+
+        return http.HttpResponse()
+
+
+class RaceChatPurge(RaceChatMixin):
+    def post(self, request, *args, **kwargs):
+        race = self.get_object()
+        message = self.get_message(race)
+
+        if message.is_bot or message.is_system:
+            return http.JsonResponse({
+                'errors': ['Bot/System messages cannot be purged.'],
+            }, status=422)
+
+        if not self.user.is_staff and race.chat_is_closed:
+            return http.JsonResponse({
+                'errors': [
+                    'This race chat is now closed. Please contact staff if '
+                    'you need to delete something.'
+                ],
+            }, status=422)
+
+        models.Message.objects.filter(
+            user=message.user,
+            race=race,
+            deleted=False,
+        ).update(
+            deleted=True,
+            deleted_by=self.user,
+            deleted_at=timezone.now(),
+        )
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(race.slug, {
+            'type': 'chat.purge',
+            'user': {
+                'id': message.user.hashid,
+                'name': message.user.name,
+                'purged_by': self.user.name,
+            },
+        })
+
+        return http.HttpResponse()
 
 
 class RaceChatLog(RaceMixin, UserMixin, generic.View):

@@ -109,6 +109,8 @@ urlpatterns = [
             path('record', views.RecordRace.as_view(), name='record_race'),
             path('unrecord', views.UnrecordRace.as_view(), name='unrecord_race'),
             path('rematch', views.Rematch.as_view(), name='rematch'),
+            path('delete/<str:message>', views.RaceChatDelete.as_view(), name='chat_delete'),
+            path('purge/<str:message>', views.RaceChatPurge.as_view(), name='chat_purge'),
 
             path('<str:entrant>/', include([
                 path('accept_request', views.AcceptRequest.as_view(), name='accept_request'),
