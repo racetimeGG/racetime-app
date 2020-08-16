@@ -6,16 +6,27 @@ from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
+from django.views.generic.detail import SingleObjectMixin
 
 from .base import CanMonitorRaceMixin, UserMixin
 from .. import forms, models
 from ..utils import get_action_button, twitch_auth_url
 
 
-class Race(UserMixin, generic.DetailView):
+class RaceMixin(SingleObjectMixin):
     slug_url_kwarg = 'race'
     model = models.Race
 
+    def get_queryset(self):
+        category_slug = self.kwargs.get('category')
+        queryset = super().get_queryset()
+        queryset = queryset.filter(
+            category__slug=category_slug,
+        )
+        return queryset
+
+
+class Race(RaceMixin, UserMixin, generic.DetailView):
     def get_chat_form(self):
         return forms.ChatForm()
 
@@ -62,14 +73,6 @@ class Race(UserMixin, generic.DetailView):
             },
         }
 
-    def get_queryset(self):
-        category_slug = self.kwargs.get('category')
-        queryset = super().get_queryset()
-        queryset = queryset.filter(
-            category__slug=category_slug,
-        )
-        return queryset
-
     def twitch_auth_url(self):
         return twitch_auth_url(self.request)
 
@@ -82,7 +85,7 @@ class RaceSpectate(Race):
     template_name_suffix = '_spectate'
 
 
-class RaceChatLog(Race):
+class RaceChatLog(RaceMixin, UserMixin, generic.View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
@@ -112,7 +115,7 @@ class RaceChatLog(Race):
         return resp
 
 
-class RaceData(Race):
+class RaceData(RaceMixin, generic.View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         resp = http.HttpResponse(
@@ -123,7 +126,7 @@ class RaceData(Race):
         return resp
 
 
-class RaceRenders(Race):
+class RaceRenders(RaceMixin, UserMixin, generic.View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.user.is_authenticated:
@@ -140,7 +143,7 @@ class RaceRenders(Race):
         return resp
 
 
-class RaceFormMixin:
+class RaceFormMixin(RaceMixin, UserMixin):
     def get_category(self):
         category_slug = self.kwargs.get('category')
         return get_object_or_404(models.Category.objects, slug=category_slug)
@@ -158,7 +161,7 @@ class RaceFormMixin:
         return kwargs
 
 
-class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateView):
+class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
     form_class = forms.RaceCreationForm
     model = models.Race
 
@@ -197,9 +200,6 @@ class CreateRace(UserPassesTestMixin, UserMixin, RaceFormMixin, generic.CreateVi
 
 
 class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
-    model = models.Race
-    slug_url_kwarg = 'race'
-
     def get_form_class(self):
         if self.get_object().is_preparing:
             return forms.RaceEditForm
