@@ -433,19 +433,25 @@ Race.prototype.reconnect = function() {
     }.bind(this), 1000);
 };
 
-Race.prototype.whoops = function(message) {
+Race.prototype.whoops = function(message, cls = 'error', forceScroll = true) {
     var $messages = $('.race-chat .messages');
     var date = new Date();
     var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
     var $li = $(
-        '<li class="error">' +
+        '<li>' +
         '<span class="timestamp">' + timestamp + '</span>' +
         '<span class="message"></span>' +
         '</li>'
     );
+    $li.addClass(cls);
     $li.find('.message').text(message);
+    var shouldScroll = forceScroll || this.shouldScroll();
     $messages.append($li);
-    $messages[0].scrollTop = $messages[0].scrollHeight
+    if (shouldScroll) {
+        this.scrollToBottom();
+    } else {
+        $('.race-chat').addClass('scrollwarning');
+    }
 };
 
 Race.prototype.regquote = function(str) {
