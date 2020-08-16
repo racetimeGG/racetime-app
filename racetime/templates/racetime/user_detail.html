@@ -96,6 +96,12 @@
                                             {{ entrant.rating_change|intcomma|slice:'1:' }}
                                         </span>
                                     {% endif %}
+                                {% elif entrant.rating %}
+                                    <span class="score" title="Leaderboard score for {{ entrant.race.goal_str }}">
+                                        {{ entrant.rating|intcomma }}
+                                    </span>
+                                {% elif entrant.race.goal %}
+                                    <span class="score" title="Not ranked">n/a</span>
                                 {% endif %}
                             </li>
                         {% endfor %}
