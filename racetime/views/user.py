@@ -129,7 +129,10 @@ class UserRaceData(ViewProfile):
             'count': paginator.count,
             'num_pages': paginator.num_pages,
             'races': [
-                entrance.race.api_dict_summary(include_entrants=show_entrants)
+                entrance.race.api_dict_summary(
+                    include_category=True,
+                    include_entrants=show_entrants,
+                )
                 for entrance in page
             ],
         })
