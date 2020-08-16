@@ -50,6 +50,10 @@ class Home(UserMixin, generic.TemplateView):
                 expression='race__id',
                 filter=Q(race__state__in=[c.value for c in RaceStates.current]),
             ),
+            open_race_count=Count(
+                expression='race__id',
+                filter=Q(race__state=RaceStates.open.value),
+            ),
             finished_race_count=Count(
                 expression='race__id',
                 filter=Q(race__state=RaceStates.finished.value),

@@ -20,7 +20,7 @@
         {% if category.current_race_count %}
             <span class="active-races">
                 {{ category.current_race_count }} active
-                race{{ category.current_race_count|pluralize }}
+                ({{ category.open_race_count }} open)
             </span>
         {% endif %}
         {% if category.finished_race_count %}
