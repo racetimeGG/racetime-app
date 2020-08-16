@@ -376,7 +376,7 @@ class TwitchAuth(LoginRequiredMixin, UserMixin, generic.View):
                 user.twitch_code = code
 
                 try:
-                    token = user.twitch_access_token(request)
+                    token = user.twitch_access_token()
                     resp = requests.get('https://api.twitch.tv/helix/users', headers={
                         'Authorization': f'Bearer {token}',
                         'Client-ID': settings.TWITCH_CLIENT_ID,

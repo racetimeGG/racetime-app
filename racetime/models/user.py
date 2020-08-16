@@ -442,7 +442,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             user_agent=request.headers.get('user-agent'),
         )
 
-    def twitch_access_token(self, request):
+    def twitch_access_token(self):
         """
         Obtain an Oauth2 token from Twitch's API using this user's
         authentication code.
