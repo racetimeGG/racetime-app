@@ -135,7 +135,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     var timestamp = ('00' + posted_date.getHours()).slice(-2) + ':' + ('00' + posted_date.getMinutes()).slice(-2);
 
     var $li = $(
-        '<li>'
+        '<li data-id="' + message.id + '">'
         + '<span class="timestamp">' + timestamp + '</span>'
         + '<span class="message"></span>'
         + '</li>'
@@ -149,6 +149,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         $bot.text(message.bot);
         $bot.insertAfter($li.children('.timestamp'));
     } else {
+        $li.attr('data-userid', message.user.id);
         var $user = $('<span class="name"></span>');
         $user.addClass(message.user.flair);
         $('<span />').text(message.user.name).appendTo($user);
@@ -222,6 +223,15 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         }
     }
 
+    if (!message.is_system && this.vars.user.can_moderate) {
+        var $modactions = $('<span class="mod-actions"></span>');
+        $modactions.append('<span class="material-icons" data-action="delete" title="Delete this message">delete</span>');
+        if (!message.is_bot) {
+            $modactions.append('<span class="material-icons" data-action="purge" title="Purge all messages">block</span>');
+        }
+        $modactions.insertAfter($li.children('.timestamp'));
+    }
+
     //If the posted date is after the server date, assume the message posted at server time
     var ms_since_posted = Math.max(0, server_date - posted_date);
     var remaining_delay = (message.delay * 1000) - ms_since_posted;
@@ -236,6 +246,33 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     }
 
     return $li;
+};
+
+Race.prototype.deleteMessage = function(messageID, userID) {
+    if (messageID) {
+        var $messages = $('.race-chat .messages').children('[data-id="' + messageID + '"]');
+    } else if (userID) {
+        var $messages = $('.race-chat .messages').children('[data-userid="' + userID + '"]');
+    } else {
+        throw 'Must supply message ID or user ID';
+    }
+    $messages = $messages.not('.deleted');
+    if ($messages.length === 0) return;
+    var can_moderate = this.vars.user.can_moderate;
+    $messages.each(function() {
+        $(this).addClass('deleted');
+        var $deleted = $('<span class="deleted">message deleted</span>').insertAfter(
+            $(this).children('.message')
+        );
+        if (can_moderate) {
+            $deleted.attr('title', 'Message deleted. Click to view original message.');
+            $(this).children('.message').attr('title', 'Message was deleted by a moderator.');
+        } else {
+            $deleted.attr('title', 'Message was deleted by a moderator.');
+            $(this).children('.message').remove();
+        }
+        $(this).children('.mod-actions').remove();
+    });
 };
 
 Race.prototype.guid = function() {
@@ -339,6 +376,14 @@ Race.prototype.onSocketMessage = function(event) {
             break;
         case 'chat.message':
             this.addMessage(data.message, server_date, false);
+            break;
+        case 'chat.delete':
+            this.deleteMessage(data.message.id, null);
+            this.whoops(data.message.deleted_by + ' deleted a message from ' + data.message.name, 'system', false);
+            break;
+        case 'chat.purge':
+            this.deleteMessage(null, data.user.id);
+            this.whoops(data.user.purged_by + ' purged all messages from ' + data.user.name, 'system', false);
             break;
     }
 };
@@ -464,6 +509,11 @@ Race.prototype.regquote = function(str) {
 $(function() {
     var race = new Race();
     window.race = race;
+
+    if (race.vars.user.can_moderate) {
+        $('.race-chat').addClass('can-moderate');
+    }
+
     if ('Notification' in window && Notification.permission === 'granted') {
         race.notify = localStorage.getItem('raceNotifications') !== 'false';
         if (race.notify) {
@@ -496,6 +546,25 @@ $(function() {
         }
     });
 
+    $(document).on('click', '.race-chat > .messages > li.deleted > .deleted', function() {
+        if ($(this).prev('.message') && race.vars.user.can_moderate) {
+            $(this).closest('li').toggleClass('show-delete');
+        }
+    });
+    $(document).on('click', '.race-chat > .messages > li.deleted > .message', function() {
+        $(this).closest('li').toggleClass('show-delete');
+    });
+
+    $(document).on('click', '.race-chat .mod-actions > span', function() {
+        var url = race.vars.urls[$(this).data('action')];
+        url = url.replace('$0', $(this).closest('li').data('id'));
+        $.post({
+            url: url,
+            data: {'csrfmiddlewaretoken': Cookies.get('csrftoken')},
+            error: race.onError.bind(race),
+        });
+    });
+
     $(document).on('keydown', '.race-chat form textarea', function(event) {
         if (event.which === 13) {
             if ($(this).val()) {
@@ -522,6 +591,10 @@ $(function() {
             return (className.match(/(^|\s)race-nav-\S+/g) || []).join(' ');
         }).addClass('race-nav-' + $(this).data('nav'));
         $(this).addClass('active').siblings().removeClass('active');
+    });
+
+    $(document).on('click', '.race-chat .moderation', function() {
+        $('body').toggleClass('show-mod-actions');
     });
 
     $(document).on('click', '.race-chat .notifications', function() {

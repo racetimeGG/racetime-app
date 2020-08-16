@@ -36,6 +36,12 @@
         {% csrf_token %}
         <ul>{{ chat_form.as_ul }}</ul>
         <div class="actions">
+            {% if can_moderate %}
+                <a class="moderation" title="Toggle moderator action buttons">
+                    <i class="material-icons on">report</i>
+                    <i class="material-icons off">report_off</i>
+                </a>
+            {% endif %}
             <a class="notifications" title="Enable/Disable notifications for mentions in chat">
                 <i class="material-icons on">notifications</i>
                 <i class="material-icons off">notifications_off</i>

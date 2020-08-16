@@ -220,6 +220,26 @@ main {
     margin-right: 4px;
 }
 
+.race-chat > .messages > li > .mod-actions {
+    color: #ddd8dd;
+    display: none;
+    vertical-align: top;
+}
+
+.show-mod-actions .race-chat > .messages > li > .mod-actions {
+    display: inline-flex;
+}
+
+.race-chat > .messages > li > .mod-actions > span {
+    cursor: pointer;
+    font-size: 13px;
+    height: 18px;
+    line-height: 18px;
+    margin: 0 2px 0 -2px;
+    text-align: center;
+    width: 16px;
+}
+
 .race-chat > .messages > li > .name {
     align-items: center;
     color: #b9b4b9;
@@ -269,7 +289,13 @@ main {
     content: ':';
 }
 
-.race-chat > .messages > li > .message {}
+.race-chat > .messages > li.deleted > .message {
+    display: none;
+    font-style: italic;
+}
+.race-chat > .messages > li.deleted.show-delete > .message {
+    display: initial;
+}
 
 .race-chat > .messages > li > .message .good {
     color: #a0e9a0;
@@ -285,6 +311,24 @@ main {
 
 .race-chat > .messages > li > .message .mention {
     font-weight: bold;
+}
+
+.race-chat > .messages > li > .deleted {
+    color: #b9b4b9;
+    font-style: italic;
+}
+.race-chat > .messages > li.show-delete > .deleted {
+    display: none;
+}
+.race-chat.can-moderate > .messages > li > .deleted {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.race-chat.can-moderate > .messages > li > .deleted::before {
+    content: '<';
+}
+.race-chat.can-moderate > .messages > li > .deleted::after {
+    content: '>';
 }
 
 .race-chat > form {
@@ -323,6 +367,7 @@ main {
     font-size: 13px;
 }
 
+.race-chat > form > .actions > .moderation,
 .race-chat > form > .actions > .notifications,
 .race-chat > form > .actions > .popout {
     align-items: center;
@@ -332,11 +377,19 @@ main {
     text-decoration: none;
 }
 
+.race-chat > form > .actions > .moderation {
+    margin-right: auto;
+}
+
+.race-chat > form > .actions > .moderation > .on,
+.show-mod-actions .race-chat > form > .actions > .moderation > .off,
 .race-chat > form > .actions > .notifications > .on,
 .race-chat > form > .actions > .notifications.on > .off {
     display: none;
 }
 
+
+.show-mod-actions .race-chat > form > .actions > .moderation > .on,
 .race-chat > form > .actions > .notifications.on > .on {
     display: initial;
 }

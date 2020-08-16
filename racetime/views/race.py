@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import F
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
@@ -62,6 +63,8 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
                 'urls': {
                     'chat': race.get_ws_url(),
                     'renders': race.get_renders_url(),
+                    'delete': reverse('chat_delete', args=(race.category.slug, race.slug, '$0')),
+                    'purge': reverse('chat_purge', args=(race.category.slug, race.slug, '$0')),
                 },
                 'user': {
                     'id': self.user.hashid if self.user.is_authenticated else None,
