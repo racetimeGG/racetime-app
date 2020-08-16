@@ -334,14 +334,7 @@ class Message:
                 'You do not have permission to chat during the race.'
             )
 
-        if (
-            not can_moderate
-            and race.is_done
-            and (race.recorded or (
-                not race.recordable
-                and (race.ended_at or race.cancelled_at) <= timezone.now() - timedelta(hours=1)
-            ))
-        ):
+        if not can_moderate and race.chat_is_closed:
             raise SafeException(
                 'This race chat is now closed. No new messages may be added.'
             )

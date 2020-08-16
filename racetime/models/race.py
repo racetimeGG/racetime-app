@@ -292,6 +292,18 @@ class Race(models.Model):
         }
 
     @property
+    def chat_is_closed(self):
+        """
+        Determine if chat is closed for the race, meaning users cannot post
+        anything. This happens when a race gets recorded, or 1 hour after it
+        finishes if race is unrecordable.
+        """
+        return self.is_done and (self.recorded or (
+            not self.recordable
+            and (self.ended_at or self.cancelled_at) <= timezone.now() - timedelta(hours=1)
+        ))
+
+    @property
     def entrants_count(self):
         """
         Count the number of entrants who have joined this race (not including

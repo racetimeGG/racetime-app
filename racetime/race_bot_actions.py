@@ -50,13 +50,7 @@ class BotMessage(Message):
         message.save()
 
     def assert_can_chat(self, race, bot):
-        if (
-            race.is_done
-            and (race.recorded or (
-                not race.recordable
-                and (race.ended_at or race.cancelled_at) <= timezone.now() - timedelta(hours=1)
-            ))
-        ):
+        if race.chat_is_closed:
             raise SafeException(
                 'This race chat is now closed. No new messages may be added.'
             )
