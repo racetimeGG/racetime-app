@@ -197,7 +197,7 @@ RT_SITE_INFO = {
     'header_text': 'racetime<span class="dot">.</span>dev',
     'meta_site_name': 'racetime.dev',
     'meta_description': 'racetime development environment',
-    'footer_text': 'Development environment. Last restart: ' + datetime.now().isoformat(),
+    'footer_text': ['Development environment. Last restart: ' + datetime.now().isoformat()],
     'footer_links': (
         (
             {'text': 'Discord', 'link': 'https://discord.racetime.gg', 'img': 'racetime/image/social/discord.svg'},
