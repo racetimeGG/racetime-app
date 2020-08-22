@@ -14,7 +14,7 @@
             <span class="user">
                 {% include 'racetime/pops/user.html' with user=ranking.user %}
             </span>
-            <span class="score">
+            <span class="score" title="Current score">
                 {{ ranking.rating|intcomma }}
             </span>
             <span class="extra">
