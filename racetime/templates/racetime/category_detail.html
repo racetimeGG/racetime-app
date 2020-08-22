@@ -34,7 +34,12 @@
             {% for race in current_races %}
                 <li>
                     <span class="race-detail">
-                        <span class="slug">{{ race.slug }}</span>
+                        <span class="title">
+                            <span class="slug">{{ race.slug }}</span>
+                            {% if race.unlisted %}
+                                <span class="unlisted" title="Only moderators can see this. Users may access an unlisted race if they have the direct link.">(unlisted)</span>
+                            {% endif %}
+                        </span>
                     </span>
                     <span class="race-row">
                         {% include 'racetime/pops/race_row.html' %}
@@ -83,7 +88,12 @@
             {% for race in past_races %}
                 <li>
                     <span class="race-detail">
-                        <span class="slug">{{ race.slug }}</span>
+                        <span class="title">
+                            <span class="slug">{{ race.slug }}</span>
+                            {% if race.unlisted %}
+                                <span class="unlisted" title="Only moderators can see this. Users may access an unlisted race if they have the direct link.">(unlisted)</span>
+                            {% endif %}
+                        </span>
                         <time class="datetime" datetime="{{ race.started_at.isoformat }}" title="Date/time race started at">
                             {{ race.started_at }}
                         </time>

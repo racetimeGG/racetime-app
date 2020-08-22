@@ -48,15 +48,24 @@ class Home(UserMixin, generic.TemplateView):
         queryset = queryset.annotate(
             current_race_count=Count(
                 expression='race__id',
-                filter=Q(race__state__in=[c.value for c in RaceStates.current]),
+                filter=Q(
+                    race__state__in=[c.value for c in RaceStates.current],
+                    race__unlisted=False,
+                ),
             ),
             open_race_count=Count(
                 expression='race__id',
-                filter=Q(race__state=RaceStates.open.value),
+                filter=Q(
+                    race__state=RaceStates.open.value,
+                    race__unlisted=False,
+                ),
             ),
             finished_race_count=Count(
                 expression='race__id',
-                filter=Q(race__state=RaceStates.finished.value),
+                filter=Q(
+                    race__state=RaceStates.finished.value,
+                    race__unlisted=False,
+                ),
             ),
         )
         if self.show_recordable:

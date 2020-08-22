@@ -106,6 +106,7 @@ class CategoryForm(forms.ModelForm):
             'info',
             'streaming_required',
             'allow_stream_override',
+            'allow_unlisted',
             'slug_words',
         )
         model = models.Category
@@ -305,6 +306,10 @@ class RaceForm(forms.ModelForm):
                 self.fields['streaming_required'].help_text += (
                     ' Only moderators can change this.'
                 )
+        if 'unlisted' in self.fields and not category.allow_unlisted and not can_moderate:
+            del self.fields['unlisted']
+        if 'unlisted' in self.fields and category.unlisted_by_default:
+            self.fields['unlisted'].initial = True
 
     def clean(self):
         cleaned_data = super().clean()
@@ -336,6 +341,7 @@ class RaceCreationForm(RaceForm):
             'goal',
             'custom_goal',
             'invitational',
+            'unlisted',
             'info',
             'recordable',
             'start_delay',
@@ -357,6 +363,7 @@ class RaceEditForm(RaceForm):
         fields = (
             'goal',
             'custom_goal',
+            'unlisted',
             'info',
             'recordable',
             'start_delay',
@@ -380,6 +387,7 @@ class StartedRaceEditForm(RaceForm):
 
     class Meta:
         fields = (
+            'unlisted',
             'info',
             'allow_comments',
             'allow_midrace_chat',

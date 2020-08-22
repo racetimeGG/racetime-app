@@ -36,13 +36,13 @@ class Category(UserMixin, generic.DetailView):
         else:
             filter_by = None
 
-        paginator = Paginator(self.past_races(filter_by), 10)
+        paginator = Paginator(self.past_races(filter_by, can_moderate), 10)
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
             'can_moderate': can_moderate,
             'can_start_race': self.object.can_start_race(self.user),
-            'current_races': self.current_races(),
+            'current_races': self.current_races(can_moderate),
             'filter_by': filter_by,
             'is_favourite': (
                 self.user.is_authenticated
@@ -52,8 +52,8 @@ class Category(UserMixin, generic.DetailView):
             'meta_image': (settings.RT_SITE_URI + self.object.image.url) if self.object.image else None,
         }
 
-    def current_races(self):
-        return self.object.race_set.exclude(state__in=[
+    def current_races(self, can_moderate=False):
+        queryset = self.object.race_set.exclude(state__in=[
             models.RaceStates.finished,
             models.RaceStates.cancelled,
         ]).annotate(
@@ -76,8 +76,11 @@ class Category(UserMixin, generic.DetailView):
                 default=0,
             ),
         ).order_by('state_sort', '-opened_at').all()
+        if not can_moderate:
+            queryset = queryset.filter(unlisted=False)
+        return queryset
 
-    def past_races(self, filter_by=None):
+    def past_races(self, filter_by=None, can_moderate=False):
         queryset = self.object.race_set.filter(state__in=[
             models.RaceStates.finished,
         ]).order_by('-ended_at')
@@ -86,6 +89,8 @@ class Category(UserMixin, generic.DetailView):
                 recordable=True,
                 recorded=False,
             )
+        if not can_moderate:
+            queryset = queryset.filter(unlisted=False)
         return queryset
 
 
@@ -282,6 +287,7 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
             'slug_words',
             'streaming_required',
             'allow_stream_override',
+            'allow_unlisted',
         } & set(form.changed_data)
         if changed_fields:
             for field in changed_fields:

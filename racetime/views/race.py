@@ -387,6 +387,7 @@ class RaceListData(generic.View):
             race.api_dict_summary(include_category=True)
             for race in models.Race.objects.filter(
                 category__active=True,
+                unlisted=False,
             ).exclude(state__in=[
                 models.RaceStates.finished,
                 models.RaceStates.cancelled,

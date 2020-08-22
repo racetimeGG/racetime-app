@@ -36,6 +36,7 @@ class CategoryAdmin(options.ModelAdmin):
         'info',
         'streaming_required',
         'allow_stream_override',
+        'allow_unlisted',
         'owners',
         'moderators',
         'slug_words',
@@ -132,11 +133,13 @@ class RaceAdmin(options.ModelAdmin):
         'category',
         'state',
         'recorded',
+        'unlisted',
     )
     list_filter = (
         ('category', RelatedDropdownFilter),
         'state',
         'recorded',
+        'unlisted',
     )
     readonly_fields = (
         'slug',

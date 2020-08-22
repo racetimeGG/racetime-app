@@ -72,6 +72,7 @@ class ViewProfile(generic.DetailView):
             user=self.get_object(),
             race__state=models.RaceStates.finished,
             race__category__active=True,
+            race__unlisted=False,
         )
         queryset = queryset.select_related('race')
         queryset = queryset.order_by('-race__ended_at')
@@ -82,6 +83,7 @@ class ViewProfile(generic.DetailView):
             active=True,
             race__state=models.RaceStates.finished,
             race__entrant__user=self.get_object(),
+            race__unlisted=False,
         )
         queryset = queryset.annotate(times_entered=Count('race__entrant'))
         queryset = queryset.order_by('-times_entered')

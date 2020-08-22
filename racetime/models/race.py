@@ -82,6 +82,15 @@ class Race(models.Model):
     cancelled_at = models.DateTimeField(
         null=True,
     )
+    unlisted = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text=(
+            'Hide this race from the category page, meaning only people with '
+            'the direct link can find it. Unlisted races will be made visible '
+            'when the room closes.'
+        ),
+    )
     recordable = models.BooleanField(
         default=True,
         help_text=(
@@ -828,6 +837,7 @@ class Race(models.Model):
 
         with atomic():
             self.state = RaceStates.cancelled.value
+            self.unlisted = False
             self.recordable = False
             self.cancelled_at = timezone.now()
             if self.started_at:
@@ -854,6 +864,7 @@ class Race(models.Model):
             self.ended_at = timezone.now()
             if not self.entrant_set.filter(finish_time__isnull=False):
                 # Nobody finished, so race should not be recorded.
+                self.unlisted = False
                 self.recordable = False
             self.version = F('version') + 1
             self.save()
@@ -872,6 +883,7 @@ class Race(models.Model):
         if self.recordable and not self.recorded:
             self.recorded = True
             self.recorded_by = recorded_by
+            self.unlisted = False
             self.version = F('version') + 1
             self.save()
 
@@ -891,6 +903,7 @@ class Race(models.Model):
         """
         if self.recordable and not self.recorded:
             self.recordable = False
+            self.unlisted = False
             self.version = F('version') + 1
             self.save()
             self.add_message(
@@ -934,6 +947,7 @@ class Race(models.Model):
                 custom_goal=self.custom_goal,
                 slug=self.category.generate_race_slug(),
                 opened_by=user,
+                unlisted=self.unlisted,
                 recordable=not self.custom_goal,
                 start_delay=self.start_delay,
                 time_limit=self.time_limit,

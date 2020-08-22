@@ -77,6 +77,29 @@ class Category(models.Model):
             'their race room. By default, only moderators can change this.'
         ),
     )
+    allow_user_races = models.BooleanField(
+        default=True,
+        help_text=(
+            'Allow users to create start races. If disabled, only category '
+            'moderators will be allowed to start a race.'
+        ),
+    )
+    allow_unlisted = models.BooleanField(
+        default=False,
+        verbose_name='Allow unlisted races',
+        help_text=(
+            'Allow users to create unlisted race rooms in this category '
+            '(moderators can always do this).'
+        ),
+    )
+    unlisted_by_default = models.BooleanField(
+        default=False,
+        help_text=(
+            'Races in this category will be unlisted by default, assuming '
+            'the user starting the race has permission to create an unlisted '
+            'race.'
+        ),
+    )
     active = models.BooleanField(
         default=True,
         help_text='Allow new races to be created in this category.'
@@ -230,7 +253,12 @@ class Category(models.Model):
 
         Users must be active and not banned to start races.
         """
-        return self.active and user.is_active and not user.is_banned_from_category(self)
+        return (
+            self.active
+            and user.is_active
+            and not user.is_banned_from_category(self)
+            and (self.allow_user_races or self.can_moderate(user))
+        )
 
     def dump_json_data(self):
         """
@@ -250,10 +278,11 @@ class Category(models.Model):
             ],
             'current_races': [
                 race.api_dict_summary()
-                for race in self.race_set.exclude(state__in=[
-                    RaceStates.finished,
-                    RaceStates.cancelled,
-                ]).all()
+                for race in self.race_set.filter(
+                    unlisted=False,
+                ).exclude(
+                    state__in=[RaceStates.finished, RaceStates.cancelled],
+                )
             ],
         }, cls=DjangoJSONEncoder)
 
@@ -556,6 +585,7 @@ class AuditLog(models.Model):
             ('slug_words_change', 'updated category slug words'),
             ('streaming_required_change', 'updated category streaming requirement'),
             ('allow_stream_override_change', 'updated category stream override'),
+            ('allow_unlisted_change', 'updated unlisted races user permission'),
             ('owner_add', 'added a owner'),
             ('owner_remove', 'removed a owner'),
             ('moderator_add', 'added a moderator'),
