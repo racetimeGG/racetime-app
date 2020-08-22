@@ -31,9 +31,6 @@ class BulletinAdmin(options.ModelAdmin):
 
 
 class CategoryAdmin(options.ModelAdmin):
-    autocomplete_fields = (
-        'owners',
-    )
     readonly_fields = (
         'image',
         'info',
