@@ -38,6 +38,7 @@ urlpatterns = [
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
+    path('user/search', views.AutocompleteUser.as_view(), name='autocomplete_user'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
     path('user/<str:user>/', include([
         path('data', views.UserProfileData.as_view(), name='user_profile_data'),

@@ -18,15 +18,28 @@ class AutocompleteMixin:
         return str(term).strip()
 
     def get(self, request, *args, **kwargs):
+        # Get terms
         term = self.clean_term(request.GET.get('term', ''))
+        name = self.clean_term(request.GET.get('name', ''))
+        scrim = self.clean_term(request.GET.get('discriminator', ''))
 
-        results = self.get_results(term)
+        # Validate the type of search type we are doing. Defaults to term
+        if name and scrim:
+            term = name + "#" + scrim
+        elif name and not scrim:
+            term = name
+        elif scrim and not name:
+            term = "#" + scrim
+
+        # Build up a dict response based on our query term
+        builtresponse = []
+        if term:
+            results = self.get_results(term)
+            for result in results:
+                builtresponse.append(self.item_from_result(result))
 
         return http.JsonResponse({
-            'results': [
-                self.item_from_result(result)
-                for result in results
-            ],
+            'results': builtresponse,
         })
 
     def get_results(self, term):
@@ -56,7 +69,8 @@ class AutocompleteUser(generic.View, AutocompleteMixin):
             name = term
             scrim = None
 
-        queryset = queryset.filter(name__istartswith=name)
+        if name:
+            queryset = queryset.filter(name__istartswith=name)
         if scrim:
             queryset = queryset.filter(discriminator=scrim)
 
