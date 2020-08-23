@@ -31,6 +31,10 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
     ])),
 
+    path('autocomplete/', include([
+        path('user', views.AutocompleteUser.as_view(), name='autocomplete_user'),
+    ])),
+
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
