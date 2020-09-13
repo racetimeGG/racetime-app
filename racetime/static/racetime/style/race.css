@@ -217,7 +217,7 @@ main {
 .race-chat > .messages > li > .timestamp {
     color: #8c898c;
     font-size: 12px;
-    margin-right: 4px;
+    margin-right: 2px;
 }
 
 .race-chat > .messages > li > .mod-actions {
@@ -235,7 +235,6 @@ main {
     font-size: 13px;
     height: 18px;
     line-height: 18px;
-    margin: 0 2px 0 -2px;
     text-align: center;
     width: 16px;
 }
@@ -244,7 +243,6 @@ main {
     align-items: center;
     color: #b9b4b9;
     display: inline-flex;
-    margin-right: 4px;
     vertical-align: top;
 }
 
@@ -283,10 +281,6 @@ main {
 
 .race-chat > .messages > li > .name.supporter.staff::before {
     background-image: url(../image/gold_star.svg);
-}
-
-.race-chat > .messages > li > .name::after {
-    content: ':';
 }
 
 .race-chat > .messages > li.deleted > .message {

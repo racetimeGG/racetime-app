@@ -136,7 +136,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
 
     var $li = $(
         '<li data-id="' + message.id + '">'
-        + '<span class="timestamp">' + timestamp + '</span>'
+        + '<span class="timestamp">' + timestamp + '</span> '
         + '<span class="message"></span>'
         + '</li>'
     );
@@ -147,13 +147,18 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         $li.addClass('bot');
         var $bot = $('<span class="name"></span>');
         $bot.text(message.bot);
-        $bot.insertAfter($li.children('.timestamp'));
+        $('<span />').text(message.bot).appendTo($bot.find('.name'));
+        $bot.add('<span class="name-after">: </span>').insertBefore(
+            $li.children('.message')
+        );
     } else {
         $li.attr('data-userid', message.user.id);
         var $user = $('<span class="name"></span>');
         $user.addClass(message.user.flair);
         $('<span />').text(message.user.name).appendTo($user);
-        $user.insertAfter($li.children('.timestamp'));
+        $user.add('<span class="name-after">: </span>').insertBefore(
+            $li.children('.message')
+        );
     }
     if (message.highlight) {
         $li.addClass('highlight')
@@ -382,7 +387,7 @@ Race.prototype.onSocketMessage = function(event) {
             if (this.vars.user.can_moderate) {
                 this.whoops(
                     data.delete.deleted_by.name + ' deleted a message from '
-                    + (data.delete.is_bot ? data.delete.bot : data.delete.user.name),
+                    + (data.delete.is_bot ? data.delete.bot : data.delete.user.name) + '.',
                     'system',
                     false
                 );
@@ -392,7 +397,8 @@ Race.prototype.onSocketMessage = function(event) {
             this.deleteMessage(null, data.purge.user.id);
             if (this.vars.user.can_moderate) {
                 this.whoops(
-                    data.purge.purged_by.name + ' purged all messages from ' + data.purge.user.name,
+                    data.purge.purged_by.name + ' purged all messages from '
+                    + data.purge.user.name + '.',
                     'system',
                     false
                 );
@@ -497,7 +503,7 @@ Race.prototype.whoops = function(message, cls = 'error', forceScroll = true) {
     var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
     var $li = $(
         '<li>' +
-        '<span class="timestamp">' + timestamp + '</span>' +
+        '<span class="timestamp">' + timestamp + '</span> ' +
         '<span class="message"></span>' +
         '</li>'
     );
