@@ -1,3 +1,5 @@
+import csv
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django import http
@@ -251,6 +253,58 @@ class RaceData(RaceMixin, generic.View):
         )
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+
+class RaceCSV(RaceMixin, generic.View):
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        filename = '%s_%s.csv' % (
+            self.object.category.slug,
+            self.object.slug,
+        )
+        response = http.HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Category', self.object.category])
+        writer.writerow(['Room name', self.object])
+        writer.writerow(['URL', settings.RT_SITE_URI + self.object.get_absolute_url()])
+        writer.writerow(['Goal' + (' (custom)' if not self.object.goal else ''), self.object.goal_str])
+        writer.writerow(['Info', self.object.info])
+        writer.writerow(['Total entrants', self.object.entrants_count])
+        writer.writerow(['Of which inactive', self.object.entrants_count_inactive])
+        writer.writerow(['Opened at (UTC)', self.object.opened_at.strftime('%Y-%m-%d %H:%M:%S')])
+        if self.object.started_at:
+            writer.writerow(['Started at (UTC)', self.object.started_at.strftime('%Y-%m-%d %H:%M:%S')])
+        if self.object.ended_at:
+            writer.writerow(['Ended at (UTC)', self.object.ended_at.strftime('%Y-%m-%d %H:%M:%S')])
+        if self.object.cancelled_at:
+            writer.writerow(['Cancelled at (UTC)', self.object.cancelled_at.strftime('%Y-%m-%d %H:%M:%S')])
+        writer.writerow([])
+        writer.writerow([
+            'Place',
+            'Entrant',
+            'Pronouns',
+            'Status',
+            'Finish time',
+            'Original score',
+            'Score change',
+            'Comment',
+        ])
+        for entrant in self.object.ordered_entrants:
+            writer.writerow([
+                entrant.place_ordinal,
+                entrant.user,
+                entrant.user.pronouns or '',
+                entrant.summary[1],
+                entrant.finish_time_str or 'n/a',
+                entrant.rating or 'n/a',
+                entrant.rating_change or '0',
+                entrant.comment or '',
+            ])
+
+        return response
 
 
 class RaceRenders(RaceMixin, UserMixin, generic.View):

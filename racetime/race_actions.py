@@ -198,6 +198,16 @@ class ShowLog:
         )
 
 
+class ShowCSV:
+    commands = ['csv']
+
+    def action(self, race, user, data):
+        race.add_message(
+            'CSV results file: %s'
+            % settings.RT_SITE_URI + reverse('race_csv', args=(race.category.slug, race.slug))
+        )
+
+
 class Help:
     commands = ['help']
 
@@ -269,6 +279,7 @@ commands = {
         AddComment,
         ShowGoal,
         ShowLog,
+        ShowCSV,
         Help,
         Random,
     ] for command in action.commands

@@ -78,6 +78,7 @@ urlpatterns = [
 
     path('<str:category>/<str:race>', views.Race.as_view(), name='race'),
     path('<str:category>/<str:race>/', include([
+        path('csv', views.RaceCSV.as_view(), name='race_csv'),
         path('data', views.RaceData.as_view(), name='race_data'),
         path('mini', views.RaceMini.as_view(), name='race_mini'),
         path('log', views.RaceChatLog.as_view(), name='race_log'),
