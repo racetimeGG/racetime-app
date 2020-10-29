@@ -6,6 +6,10 @@ $(function() {
         var $customGoal = $goal.next();
         var $additional = $customGoal.nextAll().hide();
 
+        if ($goal.find('input').length === 1) {
+            $goal.find('input').prop('checked', true);
+        }
+
         var $selectedGoal = $goal.find(':checked');
         if ($selectedGoal.length > 0) {
             if ($selectedGoal.val() === '') {
