@@ -1480,7 +1480,7 @@ class Entrant(models.Model):
                 and not self.dnf \
                 and not self.dq \
                 and not self.finish_time:
-            if timezone.now() - self.race.started_at < timedelta(minutes=1):
+            if timezone.now() - self.race.started_at < timedelta(seconds=15):
                 raise SafeException(
                     'You cannot forfeit this early. If you are using an '
                     'auto-splitter, you should configure it to not auto-reset '
