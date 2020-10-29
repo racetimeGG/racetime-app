@@ -863,17 +863,25 @@ class Race(models.Model):
             self.state = RaceStates.finished.value
             self.ended_at = timezone.now()
             if not self.entrant_set.filter(finish_time__isnull=False):
-                # Nobody finished, so race should not be recorded.
+                # Nobody finished, so race should be cancelled.
+                self.state = RaceStates.cancelled.value
+                self.cancelled_at = self.ended_at
                 self.unlisted = False
                 self.recordable = False
             self.version = F('version') + 1
             self.save()
             self.__dnf_remaining_entrants()
 
-        self.add_message(
-            'Race finished in %(timer)s' % {'timer': self.timer_str},
-            highlight=True,
-        )
+        if self.state == RaceStates.finished.value:
+            self.add_message(
+                'Race finished in %(timer)s' % {'timer': self.timer_str},
+                highlight=True,
+            )
+        else:
+            self.add_message(
+                'This race has been cancelled due to all entrants forfeiting.',
+                highlight=True,
+            )
 
     def record(self, recorded_by):
         """
