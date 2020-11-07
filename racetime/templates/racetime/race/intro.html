@@ -13,10 +13,12 @@
     {% endif %}
 </div>
 <dl class="race-meta">
-    <dt>Opened by</dt>
-    <dd>
-        {% include 'racetime/pops/user.html' with user=race.opened_by extra_class='inline' hide_pronouns=True %}
-    </dd>
+    {% if race.opened_by %}
+        <dt>Opened by</dt>
+        <dd>
+            {% include 'racetime/pops/user.html' with user=race.opened_by extra_class='inline' hide_pronouns=True %}
+        </dd>
+    {% endif %}
     <dt>Race monitors</dt>
     <dd class="meta-user-list">
         {% for monitor in race.monitors.all %}

@@ -67,7 +67,6 @@ class Race(models.Model):
         'User',
         on_delete=models.SET_NULL,
         related_name='opened_races',
-        # n.b. this would only be nulled if a user got deleted.
         null=True,
     )
     opened_at = models.DateTimeField(
@@ -298,7 +297,7 @@ class Race(models.Model):
             'ended_at': self.ended_at,
             'cancelled_at': self.cancelled_at,
             'time_limit': self.time_limit,
-            'opened_by': self.opened_by.api_dict_summary(race=self),
+            'opened_by': self.opened_by.api_dict_summary(race=self) if self.opened_by else None,
             'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
             'recordable': self.recordable,
             'recorded': self.recorded,
