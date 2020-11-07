@@ -326,6 +326,20 @@ class RaceForm(forms.ModelForm):
         return cleaned_data
 
 
+class OAuthRaceForm(RaceForm):
+    def __init__(self, category, can_moderate, *args, **kwargs):
+        self.category = category
+        super().__init__(category, can_moderate, *args, **kwargs)
+
+    def clean_goal(self):
+        goal = self.cleaned_data.get('goal')
+        print(goal)
+        print(repr(goal))
+        if goal:
+            return self.category.goal_set.filter(name=goal).first()
+        return None
+
+
 class RaceCreationForm(RaceForm):
     invitational = forms.BooleanField(
         required=False,
@@ -359,20 +373,10 @@ class RaceCreationForm(RaceForm):
         }
 
 
-class OAuthRaceCreationForm(RaceCreationForm):
+class OAuthRaceCreationForm(RaceCreationForm, OAuthRaceForm):
     goal = forms.CharField(
         required=False,
     )
-
-    def __init__(self, category, can_moderate, *args, **kwargs):
-        self.category = category
-        super().__init__(category, can_moderate, *args, **kwargs)
-
-    def clean_goal(self):
-        goal = self.cleaned_data.get('goal')
-        if goal:
-            return self.category.goal_set.filter(name=goal).first()
-        return None
 
 
 class RaceEditForm(RaceForm):
@@ -396,6 +400,12 @@ class RaceEditForm(RaceForm):
         widgets = {
             'recordable': forms.HiddenInput,
         }
+
+
+class OAuthRaceEditForm(RaceEditForm, OAuthRaceForm):
+    goal = forms.CharField(
+        required=False,
+    )
 
 
 class StartedRaceEditForm(RaceForm):

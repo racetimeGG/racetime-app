@@ -345,6 +345,27 @@ class RaceFormMixin(RaceMixin, UserMixin):
         return kwargs
 
 
+class BotMixin:
+    """
+    Mixin for views accessible by category bots.
+
+    TODO: This should live somewhere more central, probably.
+    """
+    def get_bot(self, category):
+        _, oauth_request = self.verify_request(self.request)
+        return models.Bot.objects.filter(
+            application=oauth_request.client,
+            category=category,
+            active=True,
+        ).first()
+
+    def form_invalid(self, form):
+        return http.JsonResponse(
+            {'errors': form.errors},
+            status=422,
+        )
+
+
 class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
     form_class = forms.RaceCreationForm
     model = models.Race
@@ -387,7 +408,7 @@ class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, generic.CreateView):
+class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, BotMixin, generic.CreateView):
     form_class = forms.OAuthRaceCreationForm
     model = models.Race
     required_scopes = ['create_race']
@@ -405,12 +426,7 @@ class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, generic.Create
                 form.add_error(None, 'You can only have one open race room at a time.')
                 return self.form_invalid(form)
         else:
-            _, oauth_request = self.verify_request(self.request)
-            bot = models.Bot.objects.filter(
-                application=oauth_request.client,
-                category=category,
-                active=True,
-            ).first()
+            bot = self.get_bot(category)
             if not bot:
                 return http.HttpResponseForbidden()
 
@@ -436,21 +452,22 @@ class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, generic.Create
         resp['Location'] = race.get_absolute_url()
         return resp
 
-    def form_invalid(self, form):
-        return http.JsonResponse(
-            {'errors': form.errors},
-            status=422,
-        )
 
+class BaseEditRace(RaceFormMixin, generic.UpdateView):
+    form_class = forms.RaceEditForm
+    form_class_started = forms.StartedRaceEditForm
 
-class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
     def get_form_class(self):
         if self.get_object().is_preparing:
-            return forms.RaceEditForm
-        return forms.StartedRaceEditForm
+            return self.form_class
+        return self.form_class_started
 
     def form_valid(self, form):
         race = form.save(commit=False)
+        self.update_race(race, form, self.user)
+        return http.HttpResponseRedirect(race.get_absolute_url())
+
+    def update_race(self, race, form, who_changed):
         race.version = F('version') + 1
         with atomic():
             race.save()
@@ -461,13 +478,13 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
             race.add_message(
                 '%(user)s set a new goal: %(goal)s.'
-                % {'user': self.user, 'goal': race.goal_str}
+                % {'user': who_changed, 'goal': race.goal_str}
             )
             messaged = True
         if 'info' in form.changed_data:
             race.add_message(
                 '%(user)s updated the race information.'
-                % {'user': self.user}
+                % {'user': who_changed}
             )
             messaged = True
         if 'streaming_required' in form.changed_data:
@@ -487,8 +504,39 @@ class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):
             race.broadcast_data()
         return http.HttpResponseRedirect(race.get_absolute_url())
 
+
+class EditRace(CanMonitorRaceMixin, BaseEditRace):
     def test_func(self):
         return super().test_func() and not self.get_object().is_done
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
+    form_class = forms.OAuthRaceEditForm
+    required_scopes = ['create_race']
+
+    def form_invalid(self, form):
+        print(repr(form))
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        race = form.save(commit=False)
+
+        if race.is_done:
+            return http.HttpResponseForbidden()
+
+        if self.request.resource_owner:
+            who_changed = self.request.resource_owner
+            if not race.can_monitor(who_changed):
+                return http.HttpResponseForbidden()
+        else:
+            who_changed = self.get_bot(race.category)
+
+        if not who_changed:
+            return http.HttpResponseForbidden()
+
+        self.update_race(race, form, who_changed)
+        return http.HttpResponse()
 
 
 class RaceListData(generic.View):

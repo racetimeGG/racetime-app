@@ -30,6 +30,7 @@ urlpatterns = [
         path('done', views.OAuthDone.as_view(), name='oauth2_authorize_done'),
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
         path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
+        path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
     ])),
 
     path('autocomplete/', include([
