@@ -123,6 +123,15 @@ class Category(models.Model):
         default=10,
         validators=[MinValueValidator(10), MaxValueValidator(100)],
     )
+    max_bots = models.PositiveSmallIntegerField(
+        default=3,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+    max_goals = models.PositiveSmallIntegerField(
+        default=10,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+
     slug_words = models.TextField(
         null=True,
         blank=True,
@@ -187,23 +196,6 @@ class Category(models.Model):
             settings.RT_CACHE_TIMEOUT,
         )
 
-    @property
-    def max_bots(self):
-        """
-        Sets the limit for the number of active bots this category may use.
-
-        This is a fixed quantity for now. May vary in the future.
-        """
-        return 3
-
-    @property
-    def max_goals(self):
-        """
-        Sets the limit for the number of active goals this category may use.
-
-        This is a fixed quantity for now. May vary in the future.
-        """
-        return 10
 
     def api_dict_summary(self):
         """
