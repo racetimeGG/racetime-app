@@ -295,7 +295,7 @@ class RaceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if 'info' in self.fields:
             self.fields['info'].widget = forms.TextInput()
-        if 'goal' in self.fields:
+        if 'goal' in self.fields and isinstance(self.fields['goal'], forms.ModelChoiceField):
             self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
                 category=category,
             )
@@ -357,6 +357,22 @@ class RaceCreationForm(RaceForm):
         widgets = {
             'recordable': forms.HiddenInput,
         }
+
+
+class OAuthRaceCreationForm(RaceCreationForm):
+    goal = forms.CharField(
+        required=False,
+    )
+
+    def __init__(self, category, can_moderate, *args, **kwargs):
+        self.category = category
+        super().__init__(category, can_moderate, *args, **kwargs)
+
+    def clean_goal(self):
+        goal = self.cleaned_data.get('goal')
+        if goal:
+            return self.category.goal_set.filter(name=goal).first()
+        return None
 
 
 class RaceEditForm(RaceForm):

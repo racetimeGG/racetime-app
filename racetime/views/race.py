@@ -10,8 +10,11 @@ from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
+from oauth2_provider.views import ScopedProtectedResourceView
 
 from .base import CanModerateRaceMixin, CanMonitorRaceMixin, UserMixin
 from .. import forms, models
@@ -346,15 +349,18 @@ class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
     form_class = forms.RaceCreationForm
     model = models.Race
 
-    def form_valid(self, form):
-        category = self.get_category()
-
-        if not category.can_moderate(self.user) and self.user.opened_races.exclude(
+    def user_has_race(self, category, user):
+        return not category.can_moderate(user) and user.opened_races.exclude(
             state__in=[
                 models.RaceStates.finished.value,
                 models.RaceStates.cancelled.value,
             ],
-        ).exists():
+        ).exists()
+
+    def form_valid(self, form):
+        category = self.get_category()
+
+        if self.user_has_race(category, self.user):
             form.add_error(None, 'You can only have one open race room at a time.')
             return self.form_invalid(form)
 
@@ -378,6 +384,63 @@ class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
         if not self.user.is_authenticated:
             return False
         return self.get_category().can_start_race(self.user)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, generic.CreateView):
+    form_class = forms.OAuthRaceCreationForm
+    model = models.Race
+    required_scopes = ['create_race']
+
+    def form_valid(self, form):
+        category = self.get_category()
+
+        user = None
+        bot = None
+        if self.request.resource_owner:
+            user = self.request.resource_owner
+            if not category.can_start_race(user):
+                return http.HttpResponseForbidden()
+            if self.user_has_race(category, user):
+                form.add_error(None, 'You can only have one open race room at a time.')
+                return self.form_invalid(form)
+        else:
+            _, oauth_request = self.verify_request(self.request)
+            bot = models.Bot.objects.filter(
+                application=oauth_request.client,
+                category=category,
+                active=True,
+            ).first()
+            if not bot:
+                return http.HttpResponseForbidden()
+
+        race = form.save(commit=False)
+
+        race.category = category
+        race.slug = category.generate_race_slug()
+
+        if form.cleaned_data.get('invitational'):
+            race.state = models.RaceStates.invitational.value
+
+        if user:
+            race.opened_by = user
+
+        race.save()
+
+        if bot:
+            race.add_message(
+                'Race opened automatically by %(bot)s' % {'bot': bot}
+            )
+
+        resp = http.HttpResponse(status=201)
+        resp['Location'] = race.get_absolute_url()
+        return resp
+
+    def form_invalid(self, form):
+        return http.JsonResponse(
+            {'errors': form.errors},
+            status=422,
+        )
 
 
 class EditRace(CanMonitorRaceMixin, RaceFormMixin, generic.UpdateView):

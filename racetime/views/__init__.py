@@ -45,6 +45,7 @@ from .home import Home
 from .race import (
     CreateRace,
     EditRace,
+    OAuthCreateRace,
     Race,
     RaceCSV,
     RaceChatDelete,
@@ -151,6 +152,7 @@ __all__ = [
     # race
     'CreateRace',
     'EditRace',
+    'OAuthCreateRace',
     'Race',
     'RaceCSV',
     'RaceChatDelete',

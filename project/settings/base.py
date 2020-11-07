@@ -183,6 +183,7 @@ OAUTH2_PROVIDER = {
         'read': 'See your name, Twitch username and basic user information.',
         'chat_message': 'Send chat messages to race rooms on your behalf.',
         'race_action': 'Join and interact with races on your behalf.',
+        'create_race': 'Create race rooms on your behalf.',
     },
 }
 

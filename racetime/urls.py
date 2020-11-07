@@ -29,6 +29,7 @@ urlpatterns = [
         path('delete/<pk>', views.OAuthDeleteToken.as_view(), name='oauth2_delete'),
         path('done', views.OAuthDone.as_view(), name='oauth2_authorize_done'),
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
+        path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
     ])),
 
     path('autocomplete/', include([
