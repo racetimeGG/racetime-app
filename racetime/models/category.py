@@ -196,7 +196,6 @@ class Category(models.Model):
             settings.RT_CACHE_TIMEOUT,
         )
 
-
     def api_dict_summary(self):
         """
         Return a summary dict of this category's data.
