@@ -267,6 +267,10 @@ class Category(models.Model):
                 user.api_dict_summary(category=self)
                 for user in self.all_moderators
             ],
+            'goals': [
+                goal.name
+                for goal in self.goal_set.filter(active=True)
+            ],
             'current_races': [
                 race.api_dict_summary()
                 for race in self.race_set.filter(
