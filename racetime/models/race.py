@@ -134,6 +134,14 @@ class Race(models.Model):
             'Override the streaming rules for this category.'
         ),
     )
+    auto_start = models.BooleanField(
+        default=True,
+        verbose_name='Auto-start',
+        help_text=(
+            'Begin the race as soon as everyone is ready. If disabled, a race '
+            'monitor must use the "Force start" action to begin the race.'
+        ),
+    )
     allow_comments = models.BooleanField(
         default=True,
         help_text='Allow race entrants to add a glib remark after they finish.',
@@ -147,6 +155,7 @@ class Race(models.Model):
     )
     allow_non_entrant_chat = models.BooleanField(
         default=True,
+        verbose_name='Allow non-entrant chat',
         help_text=(
             'Allow users who are not entered in the race to chat while the '
             'race is in progress (anyone may use chat before and after the race).'
