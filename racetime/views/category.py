@@ -49,7 +49,7 @@ class Category(UserMixin, generic.DetailView):
                 and self.object in self.user.favourite_categories.all()
             ),
             'past_races': paginator.get_page(self.request.GET.get('page')),
-            'meta_image': (settings.RT_SITE_URI + self.object.image.url) if self.object.image else None,
+            'meta_image': self.object.image.url if self.object.image else None,
         }
 
     def current_races(self, can_moderate=False):

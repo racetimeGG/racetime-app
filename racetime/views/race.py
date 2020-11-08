@@ -60,7 +60,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
             'can_moderate': can_moderate,
             'can_monitor': can_monitor,
             'invite_form': self.get_invite_form(),
-            'meta_image': (settings.RT_SITE_URI + race.category.image.url) if race.category.image else None,
+            'meta_image': race.category.image.url if race.category.image else None,
             'js_vars': {
                 'chat_history': race.chat_history(),
                 'room': str(race),
