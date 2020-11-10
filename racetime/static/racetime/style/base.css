@@ -809,8 +809,16 @@ a .timer {
     font-weight: bold;
 }
 
-.category-side-info > :first-child {
-    margin-top: 0;
+.category-side-info * {
+    all: revert;
+}
+
+.category-side-info > h1 {
+    font-weight:normal;
+}
+
+.category-side-info > h2 {
+    font-weight:normal;
 }
 
 .race-intro {

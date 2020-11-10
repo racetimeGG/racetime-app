@@ -60,7 +60,7 @@ class Category(models.Model):
         null=True,
         blank=True,
         help_text=(
-            'Displayed on the category page. Limited use of HTML is allowed.'
+            'Displayed on the category page. Limited use of HTML is allowed. Supports Markdown.'
         ),
     )
     streaming_required = models.BooleanField(
