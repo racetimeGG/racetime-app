@@ -601,7 +601,7 @@ class Race(models.Model):
         Return the last 100 chat messages sent to this race room.
         """
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
-        messages = messages.select_related('user')
+        messages = messages.prefetch_related('user', 'bot')
         return OrderedDict(
             (message.hashid, message.as_dict)
             for message in reversed(messages[:100])
