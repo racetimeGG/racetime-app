@@ -1,4 +1,6 @@
 -e .
 channels_redis
 django-cors-middleware
+django-extensions
+django-debug-toolbar
 mysqlclient

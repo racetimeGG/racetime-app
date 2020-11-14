@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
+    'debug_toolbar',
     'captcha',
     'channels',
     'corsheaders',
@@ -33,6 +35,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -80,6 +83,12 @@ CHANNEL_LAYERS = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 REAL_IP_HEADER = None
+
+INTERNAL_IPS = ['127.0.0.1']
+DEBUG_TOOLBAR_CONFIG = {
+    'DISABLE_PANELS': {'debug_toolbar.panels.redirects.RedirectsPanel'},
+    'SHOW_TOOLBAR_CALLBACK': 'project.debug.show_toolbar',
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
