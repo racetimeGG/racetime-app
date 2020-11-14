@@ -1476,6 +1476,7 @@ class Entrant(models.Model):
                 and self.finish_time:
             self.finish_time = None
             self.place = None
+            self.comment = None
             with atomic():
                 self.save()
                 self.race.increment_version()
@@ -1526,6 +1527,7 @@ class Entrant(models.Model):
                 and not self.dq \
                 and not self.finish_time:
             self.dnf = False
+            self.comment = None
             with atomic():
                 self.save()
                 self.race.increment_version()
