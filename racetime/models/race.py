@@ -311,6 +311,14 @@ class Race(models.Model):
             'chat_message_delay': self.chat_message_delay,
         }
 
+    @cached_property
+    def all_monitor_ids(self):
+        """
+        Return a list of user IDs of active users who have monitor powers in
+        this race.
+        """
+        return [m.id for m in self.monitors.all()]
+
     @property
     def chat_is_closed(self):
         """
@@ -713,7 +721,7 @@ class Race(models.Model):
         return user.is_active and (
             self.category.can_moderate(user)
             or self.opened_by == user
-            or user in self.monitors.all()
+            or user.id in self.all_monitor_ids
         )
 
     def can_add_monitor(self, user):
@@ -740,7 +748,7 @@ class Race(models.Model):
         """
         Determine if the user can be removed as a monitor to this race.
         """
-        return not self.is_done and user in self.monitors.all()
+        return not self.is_done and user.id in self.all_monitor_ids
 
     def remove_monitor(self, user, removed_by):
         """
