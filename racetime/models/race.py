@@ -1114,6 +1114,12 @@ class Race(models.Model):
             entrant.save()
             place += 1
 
+        self.entrant_set.exclude(
+            finish_time__isnull=False,
+            dnf=False,
+            dq=False,
+        ).update(place=None)
+
         self.increment_version()
 
     def get_absolute_url(self):
