@@ -1715,6 +1715,7 @@ class Entrant(models.Model):
         if self.can_disqualify:
             self.dq = True
             self.place = None
+            self.comment = None
             with atomic():
                 self.save()
                 self.race.increment_version()
