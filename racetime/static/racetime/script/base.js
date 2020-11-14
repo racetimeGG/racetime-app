@@ -179,7 +179,7 @@ $(function() {
         $('.entrant-row > .monitor-actions').removeClass('open');
     });
 
-    $(document).on('mouseenter', '.entrant-row > .user > .comment', function() {
+    $(document).on('mouseenter', '.entrant-row > .user > .comment:not(.hidden)', function() {
         var props = $(this).offset();
         props.position = 'absolute';
         $(this).css(props).addClass('open');

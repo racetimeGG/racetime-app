@@ -20,9 +20,11 @@
             </span>
         {% endif %}
         {% if entrant.comment %}
-            <span class="comment">
+            <span class="comment {% if not race.comments_visible %}hidden{% endif %}">
                 <i class="material-icons">more</i>
-                <span class="text">{{ entrant.comment }}</span>
+                {% if race.comments_visible %}
+                    <span class="text">{{ entrant.comment }}</span>
+                {% endif %}
             </span>
         {% endif %}
     </span>

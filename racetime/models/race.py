@@ -145,6 +145,13 @@ class Race(models.Model):
         default=True,
         help_text='Allow race entrants to add a glib remark after they finish.',
     )
+    hide_comments = models.BooleanField(
+        default=False,
+        help_text=(
+            'Do not show comments until the race has finished. Has no effect '
+            'if comments are not enabled (duh!).'
+        ),
+    )
     allow_midrace_chat = models.BooleanField(
         default=True,
         help_text=(
@@ -255,7 +262,7 @@ class Race(models.Model):
                 'place_ordinal': entrant.place_ordinal,
                 'score': entrant.rating,
                 'score_change': entrant.rating_change,
-                'comment': entrant.comment,
+                'comment': entrant.comment if self.comments_visible else None,
                 'stream_live': entrant.stream_live,
                 'stream_override': entrant.stream_override,
                 'actions': entrant.available_actions,
@@ -306,6 +313,7 @@ class Race(models.Model):
             'recorded': self.recorded,
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
             'allow_comments': self.allow_comments,
+            'hide_comments': self.hide_comments,
             'allow_midrace_chat': self.allow_midrace_chat,
             'allow_non_entrant_chat': self.allow_non_entrant_chat,
             'chat_message_delay': self.chat_message_delay,
@@ -330,6 +338,13 @@ class Race(models.Model):
             not self.recordable
             and (self.ended_at or self.cancelled_at) <= timezone.now() - timedelta(hours=1)
         ))
+
+    @property
+    def comments_visible(self):
+        """
+        Determine if comments are currently visible for this race.
+        """
+        return self.is_done or not self.hide_comments
 
     @property
     def entrants_count(self):
@@ -982,6 +997,7 @@ class Race(models.Model):
                 time_limit=self.time_limit,
                 streaming_required=self.streaming_required,
                 allow_comments=self.allow_comments,
+                hide_comments=self.hide_comments,
                 allow_midrace_chat=self.allow_midrace_chat,
                 allow_non_entrant_chat=self.allow_non_entrant_chat,
                 chat_message_delay=self.chat_message_delay,
@@ -1588,15 +1604,20 @@ class Entrant(models.Model):
                 self.save()
                 self.race.increment_version()
             if previous_comment:
-                self.race.add_message(
-                '%(user)s changed the comment to: "%(comment)s"'
-                % {'user': self.user, 'comment': comment}
+                msg = (
+                    '%(user)s changed their comment: "%(comment)s"'
+                    if self.race.comments_visible else
+                    '%(user)s changed their comment.'
                 )
             else:
-                self.race.add_message(
+                msg = (
                     '%(user)s added a comment: "%(comment)s"'
-                    % {'user': self.user, 'comment': comment}
+                    if self.race.comments_visible else
+                    '%(user)s added a comment.'
                 )
+            self.race.add_message(
+                msg % {'user': self.user, 'comment': comment}
+            )
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
 
