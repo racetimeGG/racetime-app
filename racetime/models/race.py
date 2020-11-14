@@ -1253,6 +1253,10 @@ class Entrant(models.Model):
                 name='unique_user_race',
             ),
         ]
+        indexes = [
+            models.Index(fields=('race', 'state')),
+            models.Index(fields=('race', 'state', 'dnf', 'dq')),
+        ]
 
     @property
     def can_add_monitor(self):

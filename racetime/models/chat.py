@@ -58,6 +58,11 @@ class Message(models.Model):
         default=None,
     )
 
+    class Meta:
+        indexes = [
+            models.Index(fields=('race', 'deleted')),
+        ]
+
     @property
     def as_dict(self):
         """
