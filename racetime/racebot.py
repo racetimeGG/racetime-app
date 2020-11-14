@@ -130,9 +130,9 @@ class RaceBot:
             )
 
     def handle_open_race(self, race):
-        if len(race['object'].entrant_set.filter(
+        if race['object'].entrant_set.filter(
             state=models.EntrantStates.joined.value,
-        )) < 2:
+        ).count() < 2:
             self.check_open_time_limit_lowentrants(race)
         else:
             self.check_open_time_limit(race)

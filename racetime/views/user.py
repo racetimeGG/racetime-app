@@ -104,12 +104,12 @@ class ViewProfile(generic.DetailView):
 
     def get_stats(self, entrances):
         return {
-            'joined': len(entrances),
-            'first': len(entrances.filter(place=1)),
-            'second': len(entrances.filter(place=2)),
-            'third': len(entrances.filter(place=3)),
-            'forfeits': len(entrances.filter(dnf=True)),
-            'dqs': len(entrances.filter(dq=True)),
+            'joined': entrances.count(),
+            'first': entrances.filter(place=1).count(),
+            'second': entrances.filter(place=2).count(),
+            'third': entrances.filter(place=3).count(),
+            'forfeits': entrances.filter(dnf=True).count(),
+            'dqs': entrances.filter(dq=True).count(),
         }
 
 

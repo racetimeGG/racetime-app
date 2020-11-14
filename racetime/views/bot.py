@@ -22,7 +22,7 @@ class BotPageMixin(UserPassesTestMixin, UserMixin):
         """
         Determine if the category is at the maximum active bot count.
         """
-        return max(0, self.category.max_bots - len(self.active_bots()))
+        return max(0, self.category.max_bots - self.active_bots().count())
 
     @cached_property
     def category(self):

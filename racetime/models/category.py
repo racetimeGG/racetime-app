@@ -512,14 +512,14 @@ class Goal(models.Model):
 
     @cached_property
     def completed_races(self):
-        return len(self.race_set.filter(
+        return self.race_set.filter(
             state=RaceStates.finished,
             recorded=True,
-        ))
+        ).count()
 
     @cached_property
     def total_races(self):
-        return len(self.race_set.all())
+        return self.race_set.all().count()
 
     @property
     def hashid(self):

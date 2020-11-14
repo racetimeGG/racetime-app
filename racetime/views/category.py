@@ -184,7 +184,7 @@ class CategoryLeaderboardsData(CategoryLeaderboards):
         for goal, rankings in super().leaderboards(sort):
             yield {
                 'goal': goal.name,
-                'num_ranked': len(rankings),
+                'num_ranked': rankings.count(),
                 'rankings': [
                     {
                         'user': ranking.user.api_dict_summary(category=self.object),
@@ -436,7 +436,7 @@ class AddOwner(ModPageMixin, generic.FormView):
                 % {'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
-        if len(self.category.all_owners) >= self.category.max_owners:
+        if self.category.all_owners.count() >= self.category.max_owners:
             messages.error(
                 self.request,
                 'You cannot add any more owners to this category. Contact '
@@ -481,7 +481,7 @@ class RemoveOwner(ModPageMixin, generic.FormView):
                 % {'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
-        if len(self.category.all_owners) <= 1:
+        if self.category.all_owners.count() <= 1:
             messages.error(
                 self.request,
                 'You cannot remove the last owner of the category. Assign a '
@@ -527,7 +527,7 @@ class AddModerator(ModPageMixin, generic.FormView):
                 % {'user': user}
             )
             return http.HttpResponseRedirect(self.success_url)
-        if len(self.category.all_moderators) >= self.category.max_moderators:
+        if self.category.all_moderators.count() >= self.category.max_moderators:
             messages.error(
                 self.request,
                 'You cannot add any more moderators to this category. Contact '

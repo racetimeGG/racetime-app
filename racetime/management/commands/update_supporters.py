@@ -23,7 +23,7 @@ class Command(BaseCommand):
         if subbed:
             self.stdout.write(
                 'Adding %d new supporter(s): %s' % (
-                    len(subbed.all()),
+                    subbed.count(),
                     ', '.join([str(u) for u in subbed]),
                 )
             )
@@ -33,7 +33,7 @@ class Command(BaseCommand):
         if lapsed:
             self.stdout.write(
                 'Removing %d lapsed supporter(s): %s' % (
-                    len(lapsed.all()),
+                    lapsed.count(),
                     ', '.join([str(u) for u in lapsed]),
                 )
             )

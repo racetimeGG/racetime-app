@@ -351,11 +351,11 @@ class Message:
 
         if (
             not can_moderate
-            and len(models.Message.objects.filter(
+            and models.Message.objects.filter(
                 user=user,
                 race=race,
                 posted_at__gte=timezone.now() - timedelta(seconds=5),
-            )) > 10
+            ).count() > 10
         ):
             raise SafeException(
                 'You are chatting too much. Please wait a few seconds.'

@@ -329,9 +329,9 @@ class Race(models.Model):
         Count the number of entrants who have joined this race (not including
         invitees).
         """
-        return len(self.entrant_set.filter(
+        return self.entrant_set.filter(
             state=EntrantStates.joined.value,
-        ))
+        ).count()
 
     @property
     def entrants_count_inactive(self):
@@ -339,12 +339,12 @@ class Race(models.Model):
         Count the number of entrants who have joined this race and have either
         forfeited or been disqualified.
         """
-        return len(self.entrant_set.filter(
+        return self.entrant_set.filter(
             state=EntrantStates.joined.value,
         ).exclude(
             dnf=False,
             dq=False,
-        ))
+        ).count()
 
     @property
     def goal_str(self):
@@ -415,10 +415,10 @@ class Race(models.Model):
         """
         Count the number of entrants who have joined but not readied up.
         """
-        return len(self.entrant_set.filter(
+        return self.entrant_set.filter(
             state=EntrantStates.joined.value,
             ready=False,
-        ))
+        ).count()
 
     @cached_property
     def ordered_entrants(self):
@@ -807,10 +807,10 @@ class Race(models.Model):
         A race can begin once all entrants who have joined the race are ready,
         and there are at least 2 active race entrants.
         """
-        return self.is_preparing and len(self.entrant_set.filter(
+        return self.is_preparing and self.entrant_set.filter(
             state=EntrantStates.joined.value,
-            ready=True
-        )) >= 2
+            ready=True,
+        ).count() >= 2
 
     def begin(self, begun_by=None):
         """
@@ -1447,11 +1447,11 @@ class Entrant(models.Model):
                 and not self.dq \
                 and not self.finish_time:
             self.finish_time = timezone.now() - self.race.started_at
-            self.place = len(self.race.entrant_set.filter(
+            self.place = self.race.entrant_set.filter(
                 dnf=False,
                 dq=False,
                 finish_time__isnull=False,
-            )) + 1
+            ).count() + 1
             with atomic():
                 self.save()
                 self.race.increment_version()

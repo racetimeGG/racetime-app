@@ -20,7 +20,7 @@ class GoalPageMixin(UserPassesTestMixin, UserMixin):
         """
         Determine if the category is at the maximum active goal count.
         """
-        return max(0, self.category.max_goals - len(self.active_goals()))
+        return max(0, self.category.max_goals - self.active_goals().count())
 
     @cached_property
     def category(self):
@@ -158,7 +158,7 @@ class EditGoal(GoalPageMixin, generic.UpdateView):
 
 class DeactivateGoal(GoalPageMixin, generic.View):
     def post(self, request, *args, **kwargs):
-        if len(self.active_goals()) < 2:
+        if self.active_goals().count() < 2:
             messages.error(
                 request,
                 'You must have at least one active goal. Please add or '
