@@ -158,7 +158,7 @@ class EditGoal(GoalPageMixin, generic.UpdateView):
 
 class DeactivateGoal(GoalPageMixin, generic.View):
     def post(self, request, *args, **kwargs):
-        if self.active_goals().count() < 2:
+        if self.active_goals().count() < 2 and not self.user.is_staff:
             messages.error(
                 request,
                 'You must have at least one active goal. Please add or '
