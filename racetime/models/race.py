@@ -242,26 +242,26 @@ class Race(models.Model):
 
     def entrants_dicts(self):
         return [
-                {
-                    'user': entrant.user.api_dict_summary(race=self),
-                    'status': {
-                        'value': entrant.summary[0],
-                        'verbose_value': entrant.summary[1],
-                        'help_text': entrant.summary[2],
-                    },
-                    'finish_time': entrant.finish_time,
-                    'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
-                    'place': entrant.place,
-                    'place_ordinal': entrant.place_ordinal,
-                    'score': entrant.rating,
-                    'score_change': entrant.rating_change,
-                    'comment': entrant.comment,
-                    'stream_live': entrant.stream_live,
-                    'stream_override': entrant.stream_override,
-                    'actions': entrant.available_actions,
-                }
-                for entrant in self.ordered_entrants
-            ]
+            {
+                'user': entrant.user.api_dict_summary(race=self),
+                'status': {
+                    'value': entrant.summary[0],
+                    'verbose_value': entrant.summary[1],
+                    'help_text': entrant.summary[2],
+                },
+                'finish_time': entrant.finish_time,
+                'finished_at': self.started_at + entrant.finish_time if entrant.finish_time else None,
+                'place': entrant.place,
+                'place_ordinal': entrant.place_ordinal,
+                'score': entrant.rating,
+                'score_change': entrant.rating_change,
+                'comment': entrant.comment,
+                'stream_live': entrant.stream_live,
+                'stream_override': entrant.stream_override,
+                'actions': entrant.available_actions,
+            }
+            for entrant in self.ordered_entrants
+        ]
 
     @property
     def as_dict(self):
