@@ -7,8 +7,8 @@ from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
 
 from . import race_actions, race_bot_actions
-from .models import Bot, Race
-from .utils import SafeException, exception_to_msglist
+from .models import Bot, Race, Message
+from .utils import SafeException, exception_to_msglist, get_hashids
 
 
 class OAuthConsumerMixin:
@@ -77,7 +77,14 @@ class RaceConsumer(AsyncWebsocketConsumer):
             elif action == 'getrace':
                 await self.send_race()
             elif action == 'gethistory':
-                await self.send_chat_history()
+                last_message_id = None
+                hashid = message_data.get('data', {}).get('last_message')
+                if hashid:
+                    try:
+                        last_message_id, = get_hashids(Message).decode(hashid)
+                    except ValueError:
+                        pass
+                await self.send_chat_history(last_message_id)
             else:
                 await self.do_receive(message_data)
 
@@ -171,8 +178,8 @@ class RaceConsumer(AsyncWebsocketConsumer):
                 version=self.state.get('race_version'),
             )
 
-    async def send_chat_history(self):
-        messages = await self.get_chat_history()
+    async def send_chat_history(self, last_message_id=None):
+        messages = await self.get_chat_history(last_message_id)
         await self.deliver('chat.history', messages=messages)
 
     @database_sync_to_async
@@ -187,13 +194,13 @@ class RaceConsumer(AsyncWebsocketConsumer):
         action.action(race, user, data)
 
     @database_sync_to_async
-    def get_chat_history(self):
+    def get_chat_history(self, last_message_id=None):
         try:
             race = Race.objects.get(slug=self.state.get('race_slug'))
         except Race.DoesNotExist:
             return []
         else:
-            return list(race.chat_history().values())
+            return list(race.chat_history(last_message_id).values())
 
     @database_sync_to_async
     def load_race(self):

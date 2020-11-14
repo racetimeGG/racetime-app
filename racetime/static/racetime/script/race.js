@@ -285,6 +285,20 @@ Race.prototype.guid = function() {
         + Math.random().toString(36).substring(2, 15);
 };
 
+Race.prototype.getHistory = function() {
+    clearTimeout(this.catchupTimeout);
+    this.catchupTimeout = setTimeout(function() {
+        try {
+            this.chatSocket.send(JSON.stringify({
+                action: 'gethistory',
+                data: {
+                    last_message: this.messageIDs[this.messageIDs.length - 1] || null
+                },
+            }));
+        } catch (e) {}
+    }.bind(this), 1000);
+};
+
 Race.prototype.heartbeat = function() {
     clearTimeout(this.pingTimeout);
     clearTimeout(this.pongTimeout);
@@ -378,6 +392,11 @@ Race.prototype.onSocketMessage = function(event) {
             if (this.vars.user.can_moderate || this.vars.user.can_monitor || !('actions' in data.renders)) {
                 this.raceTick();
             }
+            break;
+        case 'chat.history':
+            data.messages.forEach(function(message) {
+                this.addMessage(message, server_date, false);
+            }.bind(this));
             break;
         case 'chat.message':
             this.addMessage(data.message, server_date, false);
@@ -494,6 +513,7 @@ Race.prototype.reconnect = function() {
 
     setTimeout(function() {
         this.open();
+        this.getHistory();
     }.bind(this), 1000);
 };
 

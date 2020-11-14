@@ -596,12 +596,14 @@ class Race(models.Model):
         self.version = F('version') + 1
         self.save()
 
-    def chat_history(self):
+    def chat_history(self, last_message_id=None):
         """
         Return the last 100 chat messages sent to this race room.
         """
         messages = self.message_set.filter(deleted=False).order_by('-posted_at')
         messages = messages.prefetch_related('user', 'bot')
+        if last_message_id:
+            messages = messages.filter(id__gt=last_message_id)
         return OrderedDict(
             (message.hashid, message.as_dict)
             for message in reversed(messages[:100])
