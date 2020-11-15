@@ -188,7 +188,7 @@ class Race(models.Model):
         ),
         blank=True,
     )
-    bot_pid = models.PositiveSmallIntegerField(
+    bot_pid = models.PositiveIntegerField(
         null=True,
         db_index=True,
     )
@@ -1245,10 +1245,10 @@ class Entrant(models.Model):
     place = models.PositiveSmallIntegerField(
         null=True,
     )
-    rating = models.PositiveSmallIntegerField(
+    rating = models.PositiveIntegerField(
         null=True,
     )
-    rating_change = models.SmallIntegerField(
+    rating_change = models.IntegerField(
         null=True,
     )
     comment = models.TextField(

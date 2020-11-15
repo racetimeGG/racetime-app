@@ -495,7 +495,7 @@ class UserRanking(models.Model):
     confidence = models.FloatField(
         default=0.0,
     )
-    rating = models.PositiveSmallIntegerField(
+    rating = models.PositiveIntegerField(
         default=0,
         db_index=True,
     )
@@ -503,7 +503,7 @@ class UserRanking(models.Model):
         null=True,
         db_index=True,
     )
-    times_raced = models.PositiveSmallIntegerField(
+    times_raced = models.PositiveIntegerField(
         default=0,
         db_index=True,
     )
