@@ -263,6 +263,7 @@ class Race(models.Model):
                 'score': entrant.rating,
                 'score_change': entrant.rating_change,
                 'comment': entrant.comment if self.comments_visible else None,
+                'has_comment': bool(entrant.comment),
                 'stream_live': entrant.stream_live,
                 'stream_override': entrant.stream_override,
                 'actions': entrant.available_actions,
