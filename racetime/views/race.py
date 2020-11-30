@@ -254,6 +254,7 @@ class RaceData(RaceMixin, generic.View):
             content=self.object.json_data,
             content_type='application/json',
         )
+        resp['Cache-Control'] = 'public, max-age=5, must-revalidate'
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
 
