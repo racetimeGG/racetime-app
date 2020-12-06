@@ -58,7 +58,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
             'chat_form': self.get_chat_form(),
             'available_actions': [
                 get_action_button(action, race.slug, race.category.slug)
-                for action in race.available_actions(self.user, can_monitor)
+                for action in race.available_actions(self.user)
             ],
             'can_moderate': can_moderate,
             'can_monitor': can_monitor,

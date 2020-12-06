@@ -643,7 +643,7 @@ class Race(models.Model):
         """
         can_moderate = self.category.can_moderate(user)
         can_monitor = self.can_monitor(user)
-        available_actions = self.available_actions(user, can_monitor)
+        available_actions = self.available_actions(user)
 
         renders = {
             'actions': '',
@@ -677,7 +677,7 @@ class Race(models.Model):
 
         return renders
 
-    def available_actions(self, user, can_monitor):
+    def available_actions(self, user):
         """
         Return a list of actions the user can currently take.
 
@@ -691,12 +691,12 @@ class Race(models.Model):
         entrant = self.in_race(user)
         if entrant:
             return entrant.available_actions
-        elif self.is_preparing and self.can_join(user):
+        elif self.is_preparing and (not self.streaming_required or user.twitch_channel):
             actions = []
             if self.state == RaceStates.open.value:
                 actions.append('join')
             elif self.state == RaceStates.invitational.value:
-                actions.append('join' if can_monitor else 'request_invite')
+                actions.append('request_invite')
             return actions
         return []
 
@@ -1075,6 +1075,8 @@ class Race(models.Model):
         Only valid for invitational rooms. Monitors can choose to accept or
         reject join requests.
         """
+        if self.can_monitor(user):
+            return self.join(user)
         if self.can_join(user) and self.state == RaceStates.invitational.value:
             with atomic():
                 self.entrant_set.create(
