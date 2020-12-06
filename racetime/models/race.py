@@ -206,6 +206,8 @@ class Race(models.Model):
     OPEN_TIME_LIMIT_LOWENTRANTS = timedelta(minutes=30)
     # How long a race room can be open for in general.
     OPEN_TIME_LIMIT = timedelta(hours=4)
+    # Maximum number of race monitors that can be appointed.
+    MAX_MONITORS = 5
 
     class Meta:
         constraints = [
@@ -730,6 +732,10 @@ class Race(models.Model):
         """
         Promote a user to race monitor.
         """
+        if self.monitors.count() > self.MAX_MONITORS:
+            raise SafeException(
+                'Races cannot have more than %d monitors.' % self.MAX_MONITORS
+            )
         if self.can_add_monitor(user):
             with atomic():
                 self.increment_version()
