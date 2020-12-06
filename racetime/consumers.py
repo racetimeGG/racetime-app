@@ -3,12 +3,13 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.core.serializers.json import DjangoJSONEncoder
+from django.template.loader import render_to_string
 from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
 
 from . import race_actions, race_bot_actions
 from .models import Bot, Race, Message
-from .utils import SafeException, exception_to_msglist, get_hashids
+from .utils import SafeException, exception_to_msglist, get_hashids, get_action_button
 
 
 class OAuthConsumerMixin:
@@ -132,27 +133,40 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for race.update type event.
         """
-        #user_id = self.scope.get('user').hashid if self.scope.get('user').is_authenticated else None
-        #if user_id:
-        #    entrant = next(filter(
-        #        lambda e: e.get('user', {}).get('id') == user_id,
-        #        event['race'].get('entrants'),
-        #    ), None)
-        #    if entrant:
-        #        if event['race']['status']['value'] == 'pending':
-        #            event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
-        #        elif entrant.get('actions'):
-        #            event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
-        #                'available_actions': [
-        #                    get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
-        #                    for action in entrant.get('actions')
-        #                ],
-        #                'race': self,
-        #            })
-        #    elif event['race']['status']['value'] not in ['open', 'invitational']:
-        #        event['renders']['actions'] = ''
-        #else:
-        #    event['renders']['actions'] = ''
+        user = self.scope.get('user') if self.scope.get('user').is_authenticated else None
+        if user:
+            entrant = next(filter(
+                lambda e: e.get('user', {}).get('id') == user.hashid,
+                event['race'].get('entrants'),
+            ), None)
+            if entrant:
+                if event['race']['status']['value'] == 'pending':
+                    event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
+                elif entrant.get('actions'):
+                    event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
+                        'available_actions': [
+                            get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
+                            for action in entrant.get('actions')
+                        ],
+                    })
+            elif event['race']['streaming_required'] and not user.twitch_channel:
+                event['renders']['actions'] = ''
+            elif event['race']['status']['value'] == 'open':
+                event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
+                    'available_actions': [
+                        get_action_button('join', event['race']['slug'], event['race']['category']['slug']),
+                    ],
+                })
+            elif event['race']['status']['value'] == 'invitational':
+                event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
+                    'available_actions': [
+                        get_action_button('request_invite', event['race']['slug'], event['race']['category']['slug']),
+                    ],
+                })
+            else:
+                event['renders']['actions'] = ''
+        else:
+            event['renders']['actions'] = ''
 
         self.state['race_dict'] = event['race']
         self.state['race_renders'] = event['renders']
