@@ -406,28 +406,6 @@ class Race(models.Model):
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
 
     @property
-    def json_data(self):
-        """
-        Return current race data as a JSON string.
-        """
-        return cache.get_or_set(
-            str(self) + '/data',
-            self.dump_json_data,
-            settings.RT_CACHE_TIMEOUT,
-        )
-
-    @property
-    def json_renders(self):
-        """
-        Return rendered race HTML blocks as a JSON string.
-        """
-        return cache.get_or_set(
-            str(self) + '/renders',
-            self.dump_json_renders,
-            settings.RT_CACHE_TIMEOUT,
-        )
-
-    @property
     def monitor_list(self):
         """
         Return a comma-separated string listing all race monitors.

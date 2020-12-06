@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.humanize.templatetags.humanize import ordinal
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.serializers.json import DjangoJSONEncoder
@@ -96,13 +97,23 @@ class Category(UserMixin, generic.DetailView):
 
 class CategoryData(Category):
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        age = settings.RT_CACHE_TIMEOUT.get('CategoryData', 0)
+        content = cache.get_or_set(
+            '%s/data' % self.kwargs.get('category'),
+            self.get_json_data,
+            age,
+        )
         resp = http.HttpResponse(
-            content=self.object.json_data,
+            content=content,
             content_type='application/json',
         )
+        if age:
+            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+    def get_json_data(self):
+        return self.get_object().dump_json_data()
 
 
 class CategoryRaceData(Category):

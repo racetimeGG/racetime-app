@@ -1,10 +1,13 @@
 import csv
+import json
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django import http
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.cache import cache
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
@@ -249,14 +252,23 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
 
 class RaceData(RaceMixin, generic.View):
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        age = settings.RT_CACHE_TIMEOUT.get('RaceData', 0)
+        content = cache.get_or_set(
+            '%s/%s/data' % (self.kwargs.get('category'), self.kwargs.get('race')),
+            self.get_json_data,
+            age,
+        )
         resp = http.HttpResponse(
-            content=self.object.json_data,
+            content=content,
             content_type='application/json',
         )
-        resp['Cache-Control'] = 'public, max-age=5, must-revalidate'
+        if age:
+            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+    def get_json_data(self):
+        return self.get_object().dump_json_data()
 
 
 class RaceCSV(RaceMixin, generic.View):
@@ -313,19 +325,31 @@ class RaceCSV(RaceMixin, generic.View):
 
 class RaceRenders(RaceMixin, UserMixin, generic.View):
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
         if self.user.is_authenticated:
-            resp = http.JsonResponse({
+            age = 0
+            self.object = self.get_object()
+            content = {
                 'renders': self.object.get_renders(self.user, self.request),
                 'version': self.object.version,
-            })
+            }
         else:
-            resp = http.HttpResponse(
-                content=self.object.json_renders,
-                content_type='application/json',
+            age = settings.RT_CACHE_TIMEOUT.get('RaceRenders', 0)
+            content = cache.get_or_set(
+                '%s/%s/renders' % (self.kwargs.get('category'), self.kwargs.get('race')),
+                self.get_json_data,
+                age,
             )
+        resp = http.HttpResponse(
+            content=content,
+            content_type='application/json',
+        )
+        if age:
+            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
+
+    def get_json_data(self):
+        return self.get_object().dump_json_renders()
 
 
 class RaceFormMixin(RaceMixin, UserMixin):
@@ -542,20 +566,30 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
 
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
-        resp = http.JsonResponse({
-            'races': self.current_races(),
-        })
+        age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
+        content = cache.get_or_set('races/data', self.get_json_data, age)
+        resp = http.HttpResponse(
+            content=content,
+            content_type='application/json',
+        )
+        if age:
+            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
 
     def current_races(self):
-        return [
-            race.api_dict_summary(include_category=True)
-            for race in models.Race.objects.filter(
-                category__active=True,
-                unlisted=False,
-            ).exclude(state__in=[
-                models.RaceStates.finished,
-                models.RaceStates.cancelled,
-            ]).all()
-        ]
+        return {
+            'races': [
+                race.api_dict_summary(include_category=True)
+                for race in models.Race.objects.filter(
+                    category__active=True,
+                    unlisted=False,
+                ).exclude(state__in=[
+                    models.RaceStates.finished,
+                    models.RaceStates.cancelled,
+                ]).all()
+            ]
+        }
+
+    def get_json_data(self):
+        return json.dumps(self.current_races(), cls=DjangoJSONEncoder)

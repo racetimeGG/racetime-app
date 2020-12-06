@@ -217,4 +217,9 @@ RT_SITE_INFO = {
     'extra_scripts': [],
 }
 
-RT_CACHE_TIMEOUT = 3600
+RT_CACHE_TIMEOUT = {
+    'RaceListData': 30,
+    'CategoryData': 60,
+    'RaceData': 5,
+    'RaceRenders': 15,
+}

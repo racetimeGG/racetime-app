@@ -184,18 +184,6 @@ class Category(models.Model):
         """
         return [m.id for m in self.all_owners]
 
-    @property
-    def json_data(self):
-        """
-        Return category data as a JSON string. Data will be cached according to
-        settings.
-        """
-        return cache.get_or_set(
-            self.slug + '/data',
-            self.dump_json_data,
-            settings.RT_CACHE_TIMEOUT,
-        )
-
     def api_dict_summary(self):
         """
         Return a summary dict of this category's data.
