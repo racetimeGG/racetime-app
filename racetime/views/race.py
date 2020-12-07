@@ -328,10 +328,10 @@ class RaceRenders(RaceMixin, UserMixin, generic.View):
         if self.user.is_authenticated:
             age = 0
             self.object = self.get_object()
-            content = {
+            content = json.dumps({
                 'renders': self.object.get_renders(self.user, self.request),
                 'version': self.object.version,
-            }
+            }, cls=DjangoJSONEncoder)
         else:
             age = settings.RT_CACHE_TIMEOUT.get('RaceRenders', 0)
             content = cache.get_or_set(
