@@ -6,6 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
 from django.utils import timezone
 from oauth2_provider.settings import oauth2_settings
+from websockets import ConnectionClosed
 
 from . import race_actions, race_bot_actions
 from .models import Bot, Race, Message
@@ -93,11 +94,14 @@ class RaceConsumer(AsyncWebsocketConsumer):
         pass
 
     async def deliver(self, event_type, **kwargs):
-        await self.send(text_data=json.dumps({
-            'type': event_type,
-            'date': timezone.now().isoformat(),
-            **kwargs,
-        }, cls=DjangoJSONEncoder))
+        try:
+            await self.send(text_data=json.dumps({
+                'type': event_type,
+                'date': timezone.now().isoformat(),
+                **kwargs,
+            }, cls=DjangoJSONEncoder))
+        except ConnectionClosed as ex:
+            await self.websocket_disconnect({'code': ex.code})
 
     async def whoops(self, *errors):
         await self.deliver('error', errors=errors)
