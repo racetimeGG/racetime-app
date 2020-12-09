@@ -354,7 +354,7 @@ class AdministrateCategory(UserPassesTestMixin, UserMixin, generic.View):
         return http.HttpResponseRedirect(self.success_url)
 
     def test_func(self):
-        return self.user.is_staff
+        return self.user.is_authenticated and self.user.is_staff
 
 
 class DeactivateCategory(AdministrateCategory):
