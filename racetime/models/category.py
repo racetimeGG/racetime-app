@@ -210,7 +210,7 @@ class Category(models.Model):
         Active categories can be edited by the owner. Inactive categories are
         only available to staff.
         """
-        return user.is_active and (
+        return (
             user.is_staff
             or (self.active and user.id in self.all_owner_ids)
         )
@@ -219,7 +219,7 @@ class Category(models.Model):
         """
         Determine if the given user can moderate this category.
         """
-        return user.is_active and (
+        return (
             user.is_staff
             or user.id in self.all_owner_ids
             or user.id in self.all_moderator_ids
@@ -234,7 +234,6 @@ class Category(models.Model):
         """
         return (
             self.active
-            and user.is_active
             and not user.is_banned_from_category(self)
             and (self.allow_user_races or self.can_moderate(user))
         )

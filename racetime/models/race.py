@@ -705,8 +705,7 @@ class Race(models.Model):
         Determine if the user is allowed to join this race.
         """
         return (
-            user.is_active
-            and not user.is_banned_from_category(self.category)
+            not user.is_banned_from_category(self.category)
             and not self.in_race(user)
             and (not self.streaming_required or user.twitch_channel)
             and not user.active_race_entrant
@@ -716,7 +715,7 @@ class Race(models.Model):
         """
         Determine if the given user has the ability to monitor this race.
         """
-        return user.is_active and (
+        return (
             self.category.can_moderate(user)
             or self.opened_by == user
             or user.id in self.all_monitor_ids
