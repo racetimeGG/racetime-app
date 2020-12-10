@@ -7,6 +7,11 @@ function Race() {
     };
     this.messageIDs = [];
     this.notify = false;
+    this.latency = {
+        lastUpdated: 0,
+        value: 0,
+        version: 0,
+    }
 
     const debounce = (func, delay) => {
         let inDebounce;
@@ -387,7 +392,14 @@ Race.prototype.onSocketMessage = function(event) {
             }
             break;
         case 'race.renders':
-            window.globalLatency = server_date - Date.now();
+            if (data.version > this.latency.version && (Date.now() - this.latency.lastUpdated) > 1000) {
+                this.latency = {
+                    lastUpdated: Date.now(),
+                    value: server_date - Date.now(),
+                    version: data.version,
+                }
+                window.globalLatency = this.latency.value;
+            }
             this.handleRenders(data.renders, data.version);
             if (this.vars.user.can_moderate || this.vars.user.can_monitor || !('actions' in data.renders)) {
                 this.raceTick();
