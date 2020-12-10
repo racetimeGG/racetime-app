@@ -329,7 +329,7 @@ class Message:
         if (
             not can_monitor
             and not race.allow_midrace_chat
-            and race.is_in_progress
+            and (race.is_pending or race.is_in_progress)
         ):
             raise SafeException(
                 'You do not have permission to chat during the race.'
@@ -338,7 +338,7 @@ class Message:
             not can_monitor
             and not race.allow_non_entrant_chat
             and not race.in_race(user)
-            and race.is_in_progress
+            and (race.is_pending or race.is_in_progress)
         ):
             raise SafeException(
                 'You do not have permission to chat during the race.'
