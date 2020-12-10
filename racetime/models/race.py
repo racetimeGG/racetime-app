@@ -233,6 +233,7 @@ class Race(models.Model):
             },
             'info': self.info,
             'entrants_count': self.entrants_count,
+            'entrants_count_finished': self.entrants_count_finished,
             'entrants_count_inactive': self.entrants_count_inactive,
             'opened_at': self.opened_at,
             'started_at': self.started_at,
@@ -368,6 +369,19 @@ class Race(models.Model):
         return self.entrant_set.filter(
             state=EntrantStates.joined.value,
         ).exclude(
+            dnf=False,
+            dq=False,
+        ).count()
+
+    @property
+    def entrants_count_finished(self):
+        """
+        Count the number of entrants who have joined this race and have
+        finished.
+        """
+        return self.entrant_set.filter(
+            state=EntrantStates.joined.value,
+            finish_time__isnull=False,
             dnf=False,
             dq=False,
         ).count()
