@@ -300,6 +300,7 @@ class Race(models.Model):
             },
             'info': self.info,
             'entrants_count': self.entrants_count,
+            'entrants_count_finished': self.entrants_count_finished,
             'entrants_count_inactive': self.entrants_count_inactive,
             'entrants': self.entrants_dicts(),
             'opened_at': self.opened_at,
