@@ -502,7 +502,7 @@ class BaseEditRace(RaceFormMixin, generic.UpdateView):
         messaged = False
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
             race.add_message(
-                '%(user)s set a new goal: %(goal)s.'
+                '%(user)s set a new goal: %(goal)s'
                 % {'user': who_changed, 'goal': race.goal_str}
             )
             messaged = True
