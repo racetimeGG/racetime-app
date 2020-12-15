@@ -21,7 +21,7 @@
                     <button type="submit" title="Add to favourites"><i class="material-icons">star_border</i></button>
                 </form>
             {% endif %}
-            {% if category.short_name != category.name %}
+            {% if category.archived %}
             <p>This category has been archived.</p>
             {% endif %}
         </span>
