@@ -1,5 +1,5 @@
 {% load humanize %}
-<li data-slug="{{ category.slug }}" data-search="{{ category.name|lower }} {{ category.short_name|lower }}">
+<li data-slug="{{ category.slug }}" data-search="{{ category.name|lower }} {{ category.short_name|lower }} {{ category.search_name|lower}}">
     <a href="{{ category.get_absolute_url }}">
         {% if category.image %}
             <span class="image" style="background-image: url({{ category.image.url }})"></span>
