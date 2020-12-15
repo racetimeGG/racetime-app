@@ -293,6 +293,7 @@ class EditCategory(UserPassesTestMixin, UserMixin, generic.UpdateView):
         changed_fields = {
             'name',
             'short_name',
+            'search_name',
             'image',
             'info',
             'slug_words',

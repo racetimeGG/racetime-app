@@ -36,12 +36,19 @@ class Category(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
-        help_text='The full name of this category, e.g. "Super Mario 64".',
+        help_text='The full name of this category, e.g. "Pokémon Emerald".',
     )
     short_name = models.CharField(
         max_length=16,
         db_index=True,
-        help_text='An abbreviation or other short identifier, e.g. "SM64".',
+        help_text='An abbreviation or other short identifier, e.g. "PKMNE".',
+    )
+    search_name = models.CharField(
+        max_length=255,
+        db_index=True,
+        help_text=(
+            'A searchable name for the category, e.g. "Pokemon Emerald".'
+        ),
     )
     slug = models.CharField(
         max_length=255,
@@ -563,6 +570,7 @@ class AuditLog(models.Model):
             ('deactivate', 'set category to inactive'),
             ('name_change', 'updated category name'),
             ('short_name_change', 'updated category short name'),
+            ('search_name_change', 'updated category search name'),
             ('image_change', 'updated category image'),
             ('info_change', 'updated category info'),
             ('slug_words_change', 'updated category slug words'),

@@ -102,6 +102,7 @@ class CategoryForm(forms.ModelForm):
         fields = (
             'name',
             'short_name',
+            'search_name',
             'image',
             'info',
             'streaming_required',
