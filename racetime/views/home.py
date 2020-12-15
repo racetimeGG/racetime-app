@@ -24,6 +24,8 @@ class Home(UserMixin, generic.TemplateView):
             sort = 'default'
 
         categories = Category.objects.all()
+        archived = categories.exclude(archived=False)
+        categories = categories.exclude(archived=True)
         if self.user.is_authenticated:
             favourites = self.user.favourite_categories.all()
             categories = categories.exclude(id__in=[f.id for f in favourites])
@@ -35,6 +37,7 @@ class Home(UserMixin, generic.TemplateView):
             'show_dev_intro': settings.DEBUG,
             'show_recordable': self.show_recordable,
             'categories': self.prep_categories(categories, sort),
+            'archived_categories': self.prep_categories(archived, sort),
             'favourites': self.prep_categories(favourites, sort) if favourites else None,
             'sort': sort,
         })

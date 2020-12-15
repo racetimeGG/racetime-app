@@ -111,6 +111,13 @@ class Category(models.Model):
         default=True,
         help_text='Allow new races to be created in this category.'
     )
+    archived = models.BooleanField(
+        default=False,
+        help_text=(
+            'Archive the race, preventing new races from being made in this category '
+            'and moves the category to a separate section.'
+        )
+    )
     owners = models.ManyToManyField(
         'User',
         related_name='owned_categories',
@@ -241,6 +248,7 @@ class Category(models.Model):
         """
         return (
             self.active
+            and not self.archived
             and user.is_authenticated
             and not user.is_banned_from_category(self)
             and (self.allow_user_races or self.can_moderate(user))
@@ -568,6 +576,8 @@ class AuditLog(models.Model):
         choices=(
             ('activate', 'set category to active'),
             ('deactivate', 'set category to inactive'),
+            ('archive', 'archived the category'),
+            ('restore', 'restored the category'),
             ('name_change', 'updated category name'),
             ('short_name_change', 'updated category short name'),
             ('search_name_change', 'updated category search name'),

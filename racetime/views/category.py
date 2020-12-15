@@ -400,6 +400,48 @@ class ReactivateCategory(AdministrateCategory):
         )
 
 
+class ArchiveCategory(AdministrateCategory):
+    """
+    Archives the category, moving it to a separate section and preventing new races from being created.
+    """
+    def action(self, category):
+        if category.archived:
+            return
+        with atomic():
+            category.archived = True
+            category.save()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=category,
+                action='archived',
+            )
+        messages.info(
+            self.request,
+            'Category archived. No more races can be created in this category.',
+        )
+
+
+class RestoreCategory(AdministrateCategory):
+    """
+    Restores the category, moving it out of the archived section and allowing new races to be created.
+    """
+    def action(self, category):
+        if not category.archived:
+            return
+        with atomic():
+            category.archived = False
+            category.save()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=category,
+                action='restore',
+            )
+        messages.info(
+            self.request,
+            'Category restored. Races can now be created in this category.',
+        )
+
+
 class ManageCategory(UserPassesTestMixin, UserMixin):
     kwargs = NotImplemented
 

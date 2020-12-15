@@ -75,4 +75,10 @@
         </li>
         {% endif %}
     </ol>
+    <h3 {% if not favourites %}style="margin-top: 0"{% endif %}>Archived categories</h3>
+    <ol class="home-categories">
+        {% for category in archived_categories %}
+            {% include 'racetime/home/category.html' %}
+        {% endfor %}
+    </ol>
 {% endblock %}

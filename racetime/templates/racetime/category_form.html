@@ -22,6 +22,27 @@
         <button class="btn" type="submit">Submit</button>
     </form>
     {% if user.is_staff %}
+        {% if not category.archived %}
+        <h3>Archive category</h3>
+        <p class="help">
+            This will archive the category, preventing new races from being made in it but leaving it in public view.
+        </p>
+        <form class="layout-form" action="{% url 'category_archive' category=category.slug %}" method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">Archive category</button>
+        </form>
+        {% else %}
+        <h3>Restore category</h3>
+        <p class="help">
+            This will restore the archive, bringing it out of the archived section and allowing new
+            races to be created in it.
+        </p>
+        <form class="layout-form" action="{% url 'category_restore' category=category.slug %}" method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">Restore category</button>
+        </form>
+        {% endif %}
+
         {% if category.active %}
         <h3 class="dangerous">
             Deactivate category
