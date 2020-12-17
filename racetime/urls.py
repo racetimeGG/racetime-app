@@ -1,7 +1,9 @@
 from django.urls import path, include
 from oauth2_provider import views as oauth2_views
+from rest_framework_simplejwt import views as jwt_views
 
 from . import views
+from .views import api as api_views
 
 urlpatterns = [
     path('account', views.EditAccount.as_view(), name='edit_account'),
@@ -31,6 +33,12 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
         path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
         path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
+    ])),
+
+    path('api/', include([
+        path('token', api_views.TokenObtainPairSerializerView.as_view(), name='token_obtain'),
+        path('token/refresh', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+        path('userdata', api_views.ApiUserdata.as_view(), name='api_userdata'),
     ])),
 
     path('autocomplete/', include([

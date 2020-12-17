@@ -2,7 +2,7 @@
 Quick-start development settings - unsuitable for production
 See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.forms',
     'django_admin_listfilter_dropdown',
     'oauth2_provider',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -222,4 +223,26 @@ RT_CACHE_TIMEOUT = {
     'CategoryData': 60,
     'RaceData': 5,
     'RaceRenders': 15,
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
 }

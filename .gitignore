@@ -13,3 +13,4 @@ __pycache__
 
 # Python venv
 /venv
+.cache
