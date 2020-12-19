@@ -1,6 +1,9 @@
 from .api import (
     TokenObtainPairSerializerView,
 )
+from .category import (
+    CategoryViewSet
+)
 from .user import (
     ApiUserdata,
 )
@@ -8,6 +11,8 @@ from .user import (
 __all__ = [
     # API
     'TokenObtainPairSerializerView',
+    # Category API
+    'CategoryViewSet',
     # User API
     'ApiUserdata',
 ]

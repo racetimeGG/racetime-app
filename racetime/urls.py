@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.urls import path, include
 from oauth2_provider import views as oauth2_views
 from rest_framework_simplejwt import views as jwt_views
@@ -35,10 +36,19 @@ urlpatterns = [
         path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
     ])),
 
+    url(r'^openid/', include('oidc_provider.urls', namespace='oidc_provider')),
+
     path('api/', include([
-        path('token', api_views.TokenObtainPairSerializerView.as_view(), name='token_obtain'),
-        path('token/refresh', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
-        path('userdata', api_views.ApiUserdata.as_view(), name='api_userdata'),
+        path('categories', api_views.CategoryViewSet.as_view(
+            {'get': 'list', 'post': 'create'}),
+            name="api_category_list",
+        ),
+        path('category/<str:slug>', api_views.CategoryViewSet.as_view({
+            'get': 'retrieve',
+            'put': 'update',
+            'patch': 'partial_update',
+            'delete': 'destroy'
+        }), name="api_category_detail"),
     ])),
 
     path('autocomplete/', include([

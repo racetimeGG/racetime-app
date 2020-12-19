@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     'django.forms',
     'django_admin_listfilter_dropdown',
     'oauth2_provider',
-    'rest_framework'
+    'oidc_provider',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
