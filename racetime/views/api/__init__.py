@@ -1,5 +1,6 @@
 from .category import (
-    CategoryViewSet
+    CategoryViewSet,
+    CategoryStatsViewSet,
 )
 from .user import (
     ApiUserdata,
@@ -8,6 +9,7 @@ from .user import (
 __all__ = [
     # Category API
     'CategoryViewSet',
+    'CategoryStatsViewSet',
     # User API
     'ApiUserdata',
 ]

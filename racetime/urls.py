@@ -37,18 +37,7 @@ urlpatterns = [
 
     url(r'^openid/', include('oidc_provider.urls', namespace='oidc_provider')),
 
-    path('api/', include([
-        path('categories', api_views.CategoryViewSet.as_view(
-            {'get': 'list', 'post': 'create'}),
-            name="api_category_list",
-        ),
-        path('category/<str:slug>', api_views.CategoryViewSet.as_view({
-            'get': 'retrieve',
-            'put': 'update',
-            'patch': 'partial_update',
-            'delete': 'destroy'
-        }), name="api_category_detail"),
-    ])),
+    url('api/', include('racetime.views.api.urls', namespace='api')),
 
     path('autocomplete/', include([
         path('user', views.AutocompleteUser.as_view(), name='autocomplete_user'),
