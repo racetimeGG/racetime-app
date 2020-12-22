@@ -1,10 +1,19 @@
 -e .
+asgiref~=3.2.10
+channels~=2.4.0
 channels_redis
-django~=3.0.11
+Django~=3.0.11
+django-oauth-toolkit~=1.3.3
 django-cors-middleware
 django-extensions
 django-debug-toolbar~=3.2
-django-oauth-toolkit
-django-rest-framework
+django-filter
+djangorestframework~=3.12.2
 django-oidc-provider
 mysqlclient
+requests~=2.24.0
+beautifulsoup4~=4.9.3
+hashids~=1.3.1
+trueskill~=0.4.5
+websockets~=8.1
+setuptools~=41.2.0
