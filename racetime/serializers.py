@@ -1,16 +1,6 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer as SimpleJwtTokenObtainPairSerializer
 
 from racetime import models
-
-
-class TokenObtainPairSerializer(SimpleJwtTokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super(TokenObtainPairSerializer, cls).get_token(user)
-        token['sub'] = user.hashid
-        token['name'] = user.get_full_name()
-        return token
 
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):

@@ -1,6 +1,10 @@
 -e .
 channels_redis
+django~=3.0.11
 django-cors-middleware
 django-extensions
-django-debug-toolbar
+django-debug-toolbar~=3.2
+django-oauth-toolkit
+django-rest-framework
+django-oidc-provider
 mysqlclient

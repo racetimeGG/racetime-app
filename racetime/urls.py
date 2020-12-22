@@ -1,7 +1,6 @@
 from django.conf.urls import url
 from django.urls import path, include
 from oauth2_provider import views as oauth2_views
-from rest_framework_simplejwt import views as jwt_views
 
 from . import views
 from .views import api as api_views
