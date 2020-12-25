@@ -35,6 +35,9 @@ settings to configure this.
    `docker-compose exec racetime.web python manage.py createsuperuser` to
    create a superuser account that you can log in as.
 1. (Optional) Run
+   `docker-compose exec racetime.web python manage.py creatersakey` to
+   generate an RSA key to be used by the racetime API and OpenID Connect provider.
+1. (Optional) Run
    `docker-compose exec racetime.web python manage.py fixtures` to set up some
    basic data for testing purproses (e.g. users and race categories).
    * Users created by the fixtures command will have password `pass`.
