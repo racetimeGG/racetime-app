@@ -1,0 +1,37 @@
+.footer {
+  @apply px-2 lg:px-32 py-4;
+  @apply flex flex-row;
+}
+
+.spacer {
+  @apply flex-grow;
+}
+
+.links {
+  @apply flex flex-row;
+
+  ul {
+    @apply mr-8;
+
+    li {
+      @apply leading-loose;
+      @apply cursor-pointer;
+
+      span {
+        @apply px-1;
+      }
+    }
+  }
+}
+
+.motd {
+  @apply text-lg text-green-600;
+}
+
+.link {
+  @apply hover:text-green-200 transition;
+}
+
+.patreonLink {
+  @apply text-yellow-300 hover:text-yellow-200 transition;
+}

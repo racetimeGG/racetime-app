@@ -1,0 +1,12 @@
+.inline {
+  @apply inline-block h-6;
+  @apply text-green-200;
+  @apply border-b border-green-600 cursor-pointer;
+  @apply hover:bg-green-800 bg-opacity-50 transition;
+}
+
+.avatar {
+  @apply inline-block object-cover;
+  @apply w-5 h-5 rounded-full;
+  @apply mr-1;
+}

@@ -1,0 +1,34 @@
+.shell {
+  @apply m-4;
+}
+
+.slug {
+  @apply text-xs;
+}
+
+.raceCard {
+  @apply bg-gray-800;
+  @apply rounded-lg border-2 border-gray-600;
+  @apply hover:border-green-600;
+}
+
+.raceCard:hover {
+  .goal {
+    @apply from-green-700 border-green-600;
+  }
+}
+
+.goal {
+  @apply capitalize;
+  @apply text-lg font-semibold p-1;
+  @apply bg-gradient-to-r from-gray-700;
+  @apply border-b border-gray-600;
+}
+
+.body {
+  @apply grid grid-cols-8;
+}
+
+.info {
+  @apply col-span-5 p-1;
+}

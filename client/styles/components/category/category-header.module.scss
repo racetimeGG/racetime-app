@@ -1,0 +1,19 @@
+.header {
+  @apply grid grid-cols-3;
+}
+
+
+.headerLeft {
+  @apply col-span-2;
+}
+
+.headerRight {
+}
+
+.name {
+  @apply text-4xl;
+}
+
+.shortName {
+  @apply text-lg text-green-200;
+}

@@ -1,0 +1,62 @@
+.nav {
+  @apply bg-gradient-to-b from-gray-800;
+  @apply flex flex-row items-center;
+  @apply sm:px-2 lg:px-32 py-2;
+  @apply text-white;
+  @apply text-xl;
+  @apply select-none;
+  @apply w-screen;
+}
+
+.item {
+  @apply transition;
+  @apply ml-4 md:ml-7 lg:ml-10;
+  @apply hover:text-green-300;
+  @apply cursor-pointer;
+}
+
+.spacer {
+  @apply flex-grow;
+}
+
+.profile {
+  @apply flex flex-row items-center;
+}
+
+.button {
+  @apply transition;
+  @apply px-2 py-1 ml-4 rounded;
+  @apply border border-green-300;
+  @apply font-semibold text-green-300 hover:text-green-200 hover:border-green-200;
+}
+
+.logo {
+  @apply transition;
+  @apply text-3xl font-semibold;
+  @apply hover:text-green-300;
+  @apply flex flex-row items-center;
+  @apply cursor-pointer;
+}
+
+.name {
+  @apply hidden lg:block;
+}
+
+.icon {
+  @apply h-14 w-14 mr-2;
+  @apply inline-block;
+  @apply object-contain;
+  display: inline-block;
+  background-size: cover;
+  background-image: url("/icon.svg");
+}
+
+.up {
+  @apply mr-3;
+}
+
+.upIcon {
+  @apply fill-current text-green-300 hover:text-green-100 transition;
+  @apply mx-1;
+}
+

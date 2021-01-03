@@ -1,0 +1,22 @@
+body {
+  @apply bg-gray-900;
+  @apply text-white;
+}
+
+#application {
+  @apply flex flex-col items-center;
+  @apply h-screen w-screen;
+}
+
+nav {
+  @apply w-screen;
+}
+
+main {
+  @apply w-screen px-2 lg:px-0 lg:w-3/5 flex-1;
+}
+
+footer {
+  @apply bg-green-900;
+  @apply w-screen;
+}

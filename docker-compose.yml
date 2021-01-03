@@ -13,6 +13,14 @@ services:
     restart: on-failure
     volumes:
       - ".:/opt/racetime"
+  racetime.client:
+    build:
+      context: ./client
+      target: client
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./client:/opt/client"
   racetime.racebot:
     build:
       context: .

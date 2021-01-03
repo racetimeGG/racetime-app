@@ -1,0 +1,42 @@
+{
+  "name": "racetime-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A new, modern frontend for racetime.gg",
+  "license": "GPL-3.0+",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spell/racetime-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spell/racetime-client/issues"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.32",
+    "@fortawesome/free-brands-svg-icons": "^5.15.1",
+    "@fortawesome/free-regular-svg-icons": "^5.15.1",
+    "@fortawesome/free-solid-svg-icons": "^5.15.1",
+    "@fortawesome/react-fontawesome": "^0.1.13",
+    "axios": "^0.21.0",
+    "next": "10.0.3",
+    "oidc-client": "^1.10.1",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "tailwindcss": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.14",
+    "@types/react": "^17.0.0",
+    "autoprefixer": "^10.1.0",
+    "postcss": "^8.2.1",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-preset-env": "^6.7.0",
+    "sass": "^1.30.0",
+    "typescript": "^4.1.3"
+  }
+}
