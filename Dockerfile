@@ -1,8 +1,7 @@
-FROM jfloff/alpine-python:3.8 AS base
+FROM python:alpine AS base
 
 # mariadb-dev for mysqlclient, libressl-dev for channels, jpeg/zlib for Pillow
-RUN apk add --no-cache jpeg-dev mariadb-dev libressl-dev zlib-dev
-
+RUN apk add --no-cache gcc jpeg-dev mariadb-dev libressl-dev zlib-dev musl-dev libffi-dev
 RUN adduser -DHh /opt/racetime app
 RUN install -d -g app -o app /opt/racetime
 

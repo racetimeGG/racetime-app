@@ -14,3 +14,6 @@ __pycache__
 # Python venv
 /venv
 .cache
+
+# Alpine Linux
+.ash_history
