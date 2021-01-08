@@ -46,6 +46,7 @@ class Category(models.Model):
     search_name = models.CharField(
         max_length=255,
         db_index=True,
+        blank=True,
         help_text=(
             'A searchable name for the category, e.g. "Pokemon Emerald".'
         ),
