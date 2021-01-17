@@ -317,7 +317,7 @@ class RaceCSV(RaceMixin, generic.View):
                 entrant.finish_time_str or 'n/a',
                 entrant.rating or 'n/a',
                 entrant.rating_change or '0',
-                entrant.comment or '',
+                (entrant.comment or '') if self.object.comments_visible else '',
             ])
 
         return response
