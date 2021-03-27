@@ -115,8 +115,7 @@ class ViewProfile(generic.DetailView):
             'first': entrances.filter(place=1).count(),
             'second': entrances.filter(place=2).count(),
             'third': entrances.filter(place=3).count(),
-            'forfeits': entrances.filter(dnf=True).count(),
-            'dqs': entrances.filter(dq=True).count(),
+            'forfeits': entrances.filter(Q(dnf=True) | Q(dq=True)).count(),
         }
 
 
