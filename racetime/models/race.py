@@ -162,6 +162,7 @@ class Race(models.Model):
     )
     allow_midrace_chat = models.BooleanField(
         default=True,
+        verbose_name='Allow mid-race chat',
         help_text=(
             'Allow users to chat during the race (race monitors can always '
             'use chat messages).'
@@ -1523,7 +1524,7 @@ class Entrant(models.Model):
                 self.save()
                 self.race.increment_version()
             self.race.add_message(
-                '%(user)s has been undone from the race.'
+                '%(user)s is no longer done.'
                 % {'user': self.user}
             )
             self.race.recalculate_places()

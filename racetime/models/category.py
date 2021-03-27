@@ -145,7 +145,7 @@ class Category(models.Model):
         help_text=(
             'Set a number of words to be picked at random for race room '
             'names. If set, you must provide a minimum of 50 distinct words '
-            'to use. Changing slug words will not impact existing race rooms.'
+            'to use. Add one word per line, no punctuation or numbers.'
         ),
     )
     created_at = models.DateTimeField(
