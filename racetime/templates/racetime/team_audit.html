@@ -10,17 +10,17 @@
 {% endblock %}
 
 {% block title %}
-    Audit log | {{ category.name }} |
+    Audit log | {{ team.name }} |
 {% endblock %}
 
 {% block main %}
-    {% include 'racetime/category/manage_tabs.html' with current='category_audit_log' %}
+    {% include 'racetime/team/manage_tabs.html' with current='team_audit_log' %}
     <ol class="breadcrumbs">
-        <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+        <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
     </ol>
     <h2>Audit log</h2>
     <p>
-        This page shows all actions, changes and updates to your category.
+        This page shows all actions, changes and updates to your team.
     </p>
     {% include 'racetime/pops/audit_log.html' %}
 {% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/team.css' %}">
+{% endblock %}
+
+{% block title %}
+    {{ team.name }} |
+{% endblock %}
+
+{% block meta %}
+    <meta property="og:title" content="{{ team.name }}">
+    <meta name="description" content="Team page for {{ team.name }}.">
+    <meta property="og:description" content="Team page for {{ team.name }}.">
+    {% if team.avatar %}
+        <meta property="og:image" content="{{ team.avatar.url }}">
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    <div class="team-intro">
+        {% if team.avatar %}
+            <span class="image" style="background-image: url({{ team.avatar.url }})"></span>
+        {% endif %}
+        <div class="team-info">
+            <ol class="breadcrumbs">
+                <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
+            </ol>
+            <span class="title">
+                <h2 class="name">{{ team.name }}</h2>
+            </span>
+            <span class="created">
+                Created on
+                <time class="onlydate" datetime="{{ team.created_at.isoformat }}">
+                    {{ team.created_at.date }}
+                </time>
+            </span>
+        </div>
+        <dl class="team-meta">
+            <dt>Owners</dt>
+            <dd class="meta-owner-list">
+                {% for owner in team.all_owners %}
+                    {% include 'racetime/pops/user.html' with user=owner.user extra_class='inline' hide_flair=True hide_pronouns=True %}
+                {% endfor %}
+            </dd>
+        </dl>
+    </div>
+    <h3>Roster</h3>
+    {% if can_manage %}
+        <a href="{% url 'edit_team' team=team.slug %}" class="btn category-nav">
+            <span>Manage</span>
+        </a>
+    {% endif %}
+    <div class="team-members">
+        <ul>
+            {% for member in team.all_members %}
+                <li>
+                    {% include 'racetime/pops/user.html' with user=member.user extra_class='inline' %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    {% if team %}
+    Edit team
+    {% else %}
+    Create new team
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% if team %}
+        {% include 'racetime/team/manage_tabs.html' with current='edit_team' %}
+        <ol class="breadcrumbs">
+            <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
+        </ol>
+        <h2>Edit team</h2>
+    {% else %}
+        <h2>Create new team</h2>
+    {% endif %}
+    <form class="team-form layout-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <ul>{{ form.as_ul }}</ul>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+    {% if team %}
+        <h3 class="dangerous">
+            Delete team
+        </h3>
+        <p class="help">
+            This will permanently delete your team. This action <b>cannot</b> be undone!
+            Make sure you're really really sure you really want to do this. Really.
+        </p>
+        <form class="layout-form dangerous" action="{% url 'delete_team' team=team.slug %}" method="post">
+            {% csrf_token %}
+            <ul>{{ delete_form.as_ul }}</ul>
+            <button class="btn" type="submit">Delete team</button>
+        </form>
+    {% endif %}
+{% endblock %}

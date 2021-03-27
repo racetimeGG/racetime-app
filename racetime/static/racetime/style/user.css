@@ -72,6 +72,15 @@
 .user-profile > .supporter-badge > div > .material-icons {
     margin-right: 3px;
 }
+.user-profile > .team-badge a {
+    color: #ddd8dd;
+}
+.user-profile > .team-badge > img {
+    border-radius: 100%;
+    margin: -2px 5px -2px 0;
+    height: 22px;
+    width: 22px;
+}
 .user-profile > .twitch-channel {
     background: #1a1c20;
     border-radius: 4px;

@@ -1,0 +1,28 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Manage team access | {{ category.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/manage_tabs.html' with current='category_teams' %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+    </ol>
+    <h2>Manage team access</h2>
+    <p>
+        Control teams that have special access to this category. Teams that you
+        select here will be able to bypass certain restrictions on the category,
+        e.g. being able to create multiple race rooms.
+    </p>
+    <p>
+        You do not need to add access for a team to be able to race in this
+        category. Typically, you should only add access for teams involved in
+        things like tourney admin, stream organization and so on.
+    </p>
+    <form class="category-teams-form layout-form" method="post">
+        {% csrf_token %}
+        <ul>{{ form.as_ul }}</ul>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+{% endblock %}

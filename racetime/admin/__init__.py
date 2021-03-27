@@ -204,6 +204,22 @@ class SupporterScheduleAdmin(options.ModelAdmin):
         user.save()
 
 
+class TeamAdmin(options.ModelAdmin):
+    readonly_fields = (
+        'name',
+        'slug',
+        'avatar',
+    )
+    list_display = (
+        'name',
+    )
+    ordering = ('name', 'created_at', 'updated_at')
+    search_fields = ('name', 'slug')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class UserActionAdmin(options.ModelAdmin):
     fields = readonly_fields = (
         'user',
@@ -367,6 +383,7 @@ admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.CategoryRequest, CategoryRequestAdmin)
 admin.site.register(models.Race, RaceAdmin)
 admin.site.register(models.SupporterSchedule, SupporterScheduleAdmin)
+admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.UserAction, UserActionAdmin)
 admin.site.register(models.User, UserAdmin)
 admin.site.site_url = settings.RT_SITE_URI

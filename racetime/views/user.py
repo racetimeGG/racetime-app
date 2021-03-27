@@ -50,6 +50,7 @@ class ViewProfile(generic.DetailView):
             'entrances': paginator.get_page(self.request.GET.get('page')),
             'mod_categories': self.get_mod_categories(),
             'stats': self.get_stats(entrances),
+            'teams': self.get_teams(),
         }
 
     def get_object(self, queryset=None):
@@ -102,6 +103,12 @@ class ViewProfile(generic.DetailView):
         )
         return queryset.distinct()
 
+    def get_teams(self):
+        return models.Team.objects.filter(
+            teammember__user=self.object,
+            teammember__invite=False,
+        ).order_by('name')
+
     def get_stats(self, entrances):
         return {
             'joined': entrances.count(),
@@ -150,6 +157,10 @@ class UserProfileData(ViewProfile):
         resp = http.JsonResponse({
             **user,
             'stats': self.get_stats(entrances),
+            'teams': [
+                team.api_dict_summary()
+                for team in self.get_teams()
+            ],
         })
         resp['X-Date-Exact'] = timezone.now().isoformat()
         return resp
@@ -341,6 +352,85 @@ class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView
             'authorized_tokens': self.get_authorized_tokens(),
             'twitch_url': twitch_auth_url(self.request),
         }
+
+
+class TeamPageMixin(LoginRequiredMixin, UserMixin):
+    pass
+
+
+class EditAccountTeams(TeamPageMixin, generic.ListView):
+    model = models.TeamMember
+    template_name = 'racetime/user/edit_account_teams.html'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            user=self.user,
+        ).order_by('team__name')
+
+
+class JoinTeam(TeamPageMixin, generic.UpdateView):
+    form_class = forms.TeamActionForm
+    model = models.Team
+    slug_url_kwarg = 'team'
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            'Team does not exist, or you are already a member, or your invite '
+            'has been withdrawn.'
+        )
+        return http.HttpResponseRedirect(reverse('edit_account_teams'))
+
+    def form_valid(self, form):
+        member = self.object.teammember_set.filter(
+            user=self.user,
+            invite=True,
+        ).first()
+        if not member or not member.invite:
+            return self.form_invalid(form)
+        member.invite = False
+        member.joined_at = timezone.now()
+        member.save()
+        messages.success(self.request, (
+            'You accepted an invitation to %(team)s.'
+        ) % {'team': self.object})
+        return http.HttpResponseRedirect(reverse('edit_account_teams'))
+
+
+class LeaveTeam(TeamPageMixin, generic.UpdateView):
+    form_class = forms.TeamActionForm
+    model = models.Team
+    slug_url_kwarg = 'team'
+
+    def form_invalid(self, form):
+        messages.error(
+            self.request,
+            'Team does not exist, or you are no longer a member.'
+        )
+        return http.HttpResponseRedirect(reverse('edit_account_teams'))
+
+    def form_valid(self, form):
+        member = self.object.teammember_set.filter(
+            user=self.user,
+        ).first()
+        if not member:
+            return self.form_invalid(form)
+        invite = member.invite
+        if member.owner and self.object.all_owners.count() <= 1:
+            messages.error(
+                self.request,
+                'You cannot leave a team if you are the only owner. Either '
+                'add another owner, or if you no longer need it, delete the '
+                'team from its management page.'
+            )
+        else:
+            member.delete()
+            messages.success(self.request, (
+                'You are no longer a member of %(team)s.'
+                if not invite else
+                'You declined an invitation to %(team)s.'
+            ) % {'team': self.object})
+        return http.HttpResponseRedirect(reverse('edit_account_teams'))
 
 
 class AccountStanding(LoginRequiredMixin, UserMixin, generic.TemplateView):

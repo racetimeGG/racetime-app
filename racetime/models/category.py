@@ -3,16 +3,16 @@ from functools import partial
 
 from django.apps import apps
 from django.conf import settings
-from django.core.cache import cache
 from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from racetime.models.abstract import AbstractAuditLog
 
 from .choices import RaceStates
 from ..utils import SafeException, generate_race_slug, get_hashids
@@ -524,7 +524,7 @@ class Goal(models.Model):
         return self.name
 
 
-class AuditLog(models.Model):
+class AuditLog(AbstractAuditLog):
     """
     The audit log records any changes made within a category.
 
@@ -532,11 +532,6 @@ class AuditLog(models.Model):
     when logging a 'moderator_add' action, `user` is the added moderator, and
     `actor` is the person who added them.
     """
-    actor = models.ForeignKey(
-        'User',
-        on_delete=models.CASCADE,
-        related_name='+',
-    )
     category = models.ForeignKey(
         'Category',
         on_delete=models.CASCADE,
@@ -553,78 +548,42 @@ class AuditLog(models.Model):
         related_name='+',
         null=True,
     )
-    user = models.ForeignKey(
-        'User',
-        on_delete=models.SET_NULL,
+    team = models.ForeignKey(
+        'Team',
+        on_delete=models.CASCADE,
         related_name='+',
         null=True,
     )
-    date = models.DateTimeField(
-        auto_now_add=True,
-    )
-    action = models.CharField(
-        max_length=255,
-        db_index=True,
-        choices=(
-            ('activate', 'set category to active'),
-            ('deactivate', 'set category to inactive'),
-            ('name_change', 'updated category name'),
-            ('short_name_change', 'updated category short name'),
-            ('search_name_change', 'updated category search name'),
-            ('image_change', 'updated category image'),
-            ('info_change', 'updated category info'),
-            ('slug_words_change', 'updated category slug words'),
-            ('streaming_required_change', 'updated category streaming requirement'),
-            ('allow_stream_override_change', 'updated category stream override'),
-            ('allow_unlisted_change', 'updated unlisted races user permission'),
-            ('owner_add', 'added a owner'),
-            ('owner_remove', 'removed a owner'),
-            ('moderator_add', 'added a moderator'),
-            ('moderator_remove', 'removed a moderator'),
-            ('bot_add', 'added a bot'),
-            ('bot_activate', 're-activated a bot'),
-            ('bot_deactivate', 'deactivated a bot'),
-            ('goal_add', 'added a new goal'),
-            ('goal_activate', 're-activated a goal'),
-            ('goal_deactivate', 'deactivated a goal'),
-            ('goal_rename', 'renamed a goal'),
-            # No longer in use
-            ('owner_change', 'transferred category ownership'),
-        ),
-    )
-    old_value = models.TextField(
-        null=True,
-    )
-    new_value = models.TextField(
-        null=True,
-    )
 
-    @property
-    def action_display(self):
-        """
-        Return friendly text for the logged action.
-        """
-        try:
-            return [
-                choice[1] for choice in self._meta.get_field('action').choices
-                if choice[0] == self.action
-            ][0]
-        except IndexError:
-            return self.action
-
-    @cached_property
-    def old_value_display(self):
-        """
-        Format the old value field for display.
-        """
-        return self._value_display(self.old_value)
-
-    @cached_property
-    def new_value_display(self):
-        """
-        Format the new value field for display.
-        """
-        return self._value_display(self.new_value)
+    actions = (
+        ('activate', 'set category to active'),
+        ('deactivate', 'set category to inactive'),
+        ('name_change', 'updated category name'),
+        ('short_name_change', 'updated category short name'),
+        ('search_name_change', 'updated category search name'),
+        ('image_change', 'updated category image'),
+        ('info_change', 'updated category info'),
+        ('slug_words_change', 'updated category slug words'),
+        ('streaming_required_change', 'updated category streaming requirement'),
+        ('allow_stream_override_change', 'updated category stream override'),
+        ('allow_unlisted_change', 'updated unlisted races user permission'),
+        ('owner_add', 'added a owner'),
+        ('owner_remove', 'removed a owner'),
+        ('moderator_add', 'added a moderator'),
+        ('moderator_remove', 'removed a moderator'),
+        ('team_add', 'granted team access'),
+        ('team_remove', 'revoked team access'),
+        ('bot_add', 'added a bot'),
+        ('bot_activate', 're-activated a bot'),
+        ('bot_deactivate', 'deactivated a bot'),
+        ('goal_add', 'added a new goal'),
+        ('goal_activate', 're-activated a goal'),
+        ('goal_deactivate', 'deactivated a goal'),
+        ('goal_rename', 'renamed a goal'),
+        # No longer in use
+        ('owner_change', 'transferred category ownership'),
+    )
+    hide_values = ('info_change', 'slug_words_change')
 
     def _value_display(self, value):
         """
@@ -636,9 +595,4 @@ class AuditLog(models.Model):
                 return User.objects.get(id=value)
             except User.DoesNotExist:
                 pass
-        if self.action in ['info_change', 'slug_words_change']:
-            return None
-        return value
-
-    def __str__(self):
-        return str(self.actor) + ' ' + self.action_display
+        return super()._value_display(value)

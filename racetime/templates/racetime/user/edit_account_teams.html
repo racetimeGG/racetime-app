@@ -1,0 +1,71 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/bot_list.css' %}">
+{% endblock %}
+
+{% block title %}
+    Account settings |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/user/tabs.html' with current='edit_account_teams' %}
+    <a href="{% url 'create_team' %}" class="btn category-nav">
+        <i class="material-icons">add</i>
+        <span>Create new team</span>
+    </a>
+    <h2>Teams</h2>
+    <ol class="bot-list">
+        {% for member in object_list %}
+            <li>
+                <dl>
+                    <dt>Name</dt>
+                    <dd class="name">
+                        <a href="{% url 'team' team=member.team.slug %}">{{ member.team.name }}</a>
+                        <div class="actions">
+                            {% if member.invite %}
+                                <form action="{% url 'join_team' team=member.team.slug %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn" type="submit">Join</button>
+                                </form>
+                            {% endif %}
+                            <form action="{% url 'leave_team' team=member.team.slug %}" method="post">
+                                {% csrf_token %}
+                                <button class="btn dangerous" type="submit">
+                                    {% if member.invite %}
+                                        Decline
+                                    {% else %}
+                                        Leave
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </dd>
+                    <dt>Role</dt>
+                    <dd>
+                        {% if member.invite %}
+                            Invited
+                        {% elif member.owner %}
+                            Owner
+                        {% else %}
+                            Member
+                        {% endif %}
+                    </dd>
+                    {% if member.joined_at %}
+                        <dt>Joined on</dt>
+                        <dd>
+                            <time class="datetime" datetime="{{ member.joined_at.isoformat }}">
+                                {{ member.joined_at }}
+                            </time>
+                        </dd>
+                    {% endif %}
+                </dl>
+            </li>
+        {% empty %}
+            <li>
+                You are not a member of any teams.
+            </li>
+        {% endfor %}
+    </ol>
+{% endblock %}

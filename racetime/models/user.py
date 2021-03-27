@@ -1,49 +1,17 @@
-import unicodedata
-
 import requests
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
-from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
 
 from .choices import EntrantStates, RaceStates
 from ..utils import determine_ip, get_hashids, timer_html
-
-
-@deconstructible
-class UsernameValidator:
-    message = (
-        'Name is too short. You must have at least 3 letters in your name, '
-        'or 2 letters and some digit(s).'
-    )
-    code = 'username_too_short'
-
-    def __init__(self, message=None, code=None):
-        if message is not None:
-            self.message = message
-        if code is not None:
-            self.code = code
-
-    def __call__(self, value):
-        char_cats = [unicodedata.category(c)[0] for c in value]
-        letters = char_cats.count('L')
-        numerals = char_cats.count('N')
-        if letters < 2 or letters + numerals < 3:
-            raise ValidationError(self.message, code=self.code)
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, self.__class__) and
-            self.message == other.message and
-            self.code == other.code
-        )
+from ..validators import UsernameValidator
 
 
 class UserManager(BaseUserManager):

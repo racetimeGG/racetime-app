@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.db.models import Count
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils.html import format_html
 
 from . import models
 
@@ -201,6 +202,28 @@ class CategoryRequestForm(forms.ModelForm):
             )
 
         return '\n'.join(goals)
+
+
+class TeamSelectField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return format_html(
+            '{name} <a href="{url}" target="_blank">[view]</a>',
+            name=obj.name,
+            url=obj.get_absolute_url(),
+        )
+
+
+class CategoryTeamsForm(forms.ModelForm):
+    teams = TeamSelectField(
+        queryset=models.Team.objects.all(),
+        label='',
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+    class Meta:
+        fields = ('teams',)
+        model = models.Category
 
 
 class GoalForm(forms.ModelForm):
@@ -551,3 +574,58 @@ class PasswordResetForm(auth_forms.PasswordResetForm):
             from_email=from_email,
             recipient_list=[to_email],
         )
+
+
+class TeamActionForm(forms.ModelForm):
+    class Meta:
+        fields = ()
+        model = models.Team
+
+
+class TeamForm(forms.ModelForm):
+    class Meta:
+        fields = (
+            'name',
+            'avatar',
+        )
+        model = models.Team
+
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        try:
+            if avatar and avatar.size > 100 * 1024:
+                raise ValidationError(
+                    'Uploaded avatar is too large (limit: 100kb)'
+                )
+        except AttributeError:
+            raise ValidationError(
+                'Unable to determine avatar size, upload was possibly corrupted.'
+            )
+        return avatar
+
+
+class TeamCreateForm(TeamForm):
+    class Meta:
+        fields = (
+            'name',
+            'slug',
+            'avatar',
+        )
+        model = models.Team
+
+
+class TeamDeleteForm(forms.ModelForm):
+    class Meta:
+        fields = (
+            'name',
+        )
+        help_texts = {
+            'name': 'Enter the name of your team to confirm deletion.',
+        }
+        model = models.Team
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name != self.instance.name:
+            raise ValidationError('Name is incorrect.')
+        return name

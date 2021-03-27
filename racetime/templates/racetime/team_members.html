@@ -1,0 +1,68 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/moderator_list.css' %}">
+{% endblock %}
+
+{% block title %}
+    Manage members | {{ team.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/team/manage_tabs.html' with current='team_members' %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
+    </ol>
+    <h2>Manage members</h2>
+    <h3>Current members</h3>
+    <ul class="mod-list">
+        {% for member in members %}
+            <li>
+                {% include 'racetime/pops/user.html' with user=member.user hide_pronouns=True %}
+                {% if member.owner %}
+                    <form action="{% url 'team_owner_remove' team=team.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ member.user.hashid }}">
+                        <button class="btn dangerous" type="submit">Demote to member</button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'team_owner_add' team=team.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ member.user.hashid }}">
+                        <button class="btn" type="submit">Make owner</button>
+                    </form>
+                    <form action="{% url 'team_member_remove' team=team.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ member.user.hashid }}">
+                        <button class="btn dangerous" type="submit">Remove</button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    {% if invited_members %}
+        <h3>Invited members</h3>
+        <ul class="mod-list">
+            {% for member in invited_members %}
+                <li>
+                    {% include 'racetime/pops/user.html' with user=member.user hide_pronouns=True %}
+                    <form action="{% url 'team_member_remove' team=team.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="user" value="{{ member.user.hashid }}">
+                        <button class="btn dangerous" type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <h3>Invite to team</h3>
+    <p class="help">
+        Start typing in a name to invite someone to your team.
+    </p>
+    <form class="add-member-form layout-form" action="{% url 'team_member_add' team=team.slug %}" method="post">
+        {% csrf_token %}
+        {% include 'racetime/forms/user_select.html' %}
+        <button class="btn" type="submit">Invite to team</button>
+    </form>
+{% endblock %}

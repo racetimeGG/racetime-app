@@ -4,6 +4,7 @@ from .category import AuditLog, Category, CategoryRequest, Goal
 from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
+from .team import Team, TeamAuditLog, TeamMember
 from .user import (
     Ban,
     SupporterSchedule,
@@ -31,6 +32,10 @@ __all__ = [
     # race
     'Entrant',
     'Race',
+    # team
+    'Team',
+    'TeamAuditLog',
+    'TeamMember',
     # user
     'Ban',
     'SupporterSchedule',

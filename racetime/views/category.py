@@ -599,6 +599,55 @@ class RemoveModerator(ModPageMixin, generic.FormView):
         return http.HttpResponseRedirect(self.success_url)
 
 
+class CategoryTeams(UserPassesTestMixin, UserMixin, generic.UpdateView):
+    form_class = forms.CategoryTeamsForm
+    model = models.Category
+    slug_url_kwarg = 'category'
+    template_name_suffix = '_teams'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['teams'] = self.object.team_set.all()
+        return kwargs
+
+    @atomic
+    def form_valid(self, form):
+        category = self.get_object()
+        original_teams = set(category.team_set.all())
+        teams = set(form.cleaned_data.get('teams'))
+        added_teams = teams - original_teams
+        removed_teams = original_teams - teams
+
+        audit = []
+        for team in added_teams:
+            audit.append(models.AuditLog(
+                actor=self.user,
+                category=category,
+                action='team_add',
+                team=team,
+            ))
+        for team in removed_teams:
+            audit.append(models.AuditLog(
+                actor=self.user,
+                category=category,
+                action='team_remove',
+                team=team,
+            ))
+            self.object.save()
+
+        category.team_set.set(teams)
+        models.AuditLog.objects.bulk_create(audit)
+
+        messages.success(self.request, 'Team access updated.')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('category_teams', args=(self.object.slug,))
+
+    def test_func(self):
+        return self.get_object().can_edit(self.user)
+
+
 class CategoryAudit(ManageCategory, generic.DetailView):
     model = models.Category
     slug_url_kwarg = 'category'

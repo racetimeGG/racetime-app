@@ -1,0 +1,17 @@
+<ul class="nav-tabs">
+    <li{% if current == 'edit_team' %} class="current"{% endif %}>
+        <a href="{% url 'edit_team' team=team.slug %}">
+            Edit team
+        </a>
+    </li>
+    <li{% if current == 'team_members' %} class="current"{% endif %}>
+        <a href="{% url 'team_members' team=team.slug %}">
+            Manage members
+        </a>
+    </li>
+    <li{% if current == 'team_audit_log' %} class="current"{% endif %}>
+        <a href="{% url 'team_audit_log' team=team.slug %}">
+            View audit log
+        </a>
+    </li>
+</ul>

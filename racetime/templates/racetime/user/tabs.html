@@ -14,6 +14,11 @@
             Twitch &amp; connections
         </a>
     </li>
+    <li{% if current == 'edit_account_teams' %} class="current"{% endif %}>
+        <a href="{% url 'edit_account_teams' %}">
+            Teams
+        </a>
+    </li>
     <li{% if current == 'account_standing' %} class="current"{% endif %}>
         <a href="{% url 'account_standing' %}">
             Standing

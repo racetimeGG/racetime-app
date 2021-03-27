@@ -34,6 +34,14 @@
                 <span><a href="{% url 'category' category=category.slug %}">{{ category.name }}</a> moderator</span>
             </div>
         {% endfor %}
+        {% for team in teams %}
+            <div class="role-badge team-badge">
+                {% if team.avatar %}
+                    <img src="{{ team.avatar.url }}" alt="">
+                {% endif %}
+                <span><a href="{% url 'team' team=team.slug %}">{{ team.name }}</a></span>
+            </div>
+        {% endfor %}
         {% if profile.is_supporter %}
             <div class="supporter-badge" title="{{ profile.name }} is one of our generous site supporters!">
                 <div>

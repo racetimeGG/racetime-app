@@ -1,0 +1,54 @@
+{% include 'racetime/pops/paginator.html' with page=audit_log %}
+<ol class="audit-log">
+    {% for entry in audit_log %}
+        <li>
+            <div class="summary">
+                {% if entry.actor.avatar %}
+                <span class="avatar" style="background-image: url({{ entry.actor.avatar.url }})"></span>
+                {% endif %}
+                <span class="text">
+                    <span class="actor">{% include 'racetime/pops/user.html' with user=entry.actor hide_avatar=True hide_pronouns=True %}</span>
+                    <span class="action">{{ entry.action_display }}</span>
+                    <time class="datetime" datetime="{{ entry.date.isoformat }}">
+                        {{ entry.date }}
+                    </time>
+                </span>
+                {% if entry.goal or entry.bot or entry.user or entry.team or entry.old_value_display or entry.new_value_display %}
+                    <i class="material-icons show-detail" title="Show details">keyboard_arrow_down</i>
+                    <i class="material-icons hide-detail" title="Hide details">keyboard_arrow_up</i>
+                {% endif %}
+            </div>
+            <dl class="details">
+                {% if entry.goal %}
+                    <dt>Goal</dt>
+                    <dd>{{ entry.goal }}</dd>
+                {% endif %}
+                {% if entry.bot %}
+                    <dt>Bot</dt>
+                    <dd>{{ entry.bot }}</dd>
+                {% endif %}
+                {% if entry.user %}
+                    <dt>User</dt>
+                    <dd>{{ entry.user }}</dd>
+                {% endif %}
+                {% if entry.team %}
+                    <dt>Team</dt>
+                    <dd>{{ entry.team }}</dd>
+                {% endif %}
+                {% if entry.old_value_display %}
+                    <dt>Old value</dt>
+                    <dd>{{ entry.old_value_display }}</dd>
+                {% endif %}
+                {% if entry.new_value_display %}
+                    <dt>New value</dt>
+                    <dd>{{ entry.new_value_display }}</dd>
+                {% endif %}
+            </dl>
+        </li>
+    {% empty %}
+        <li class="empty">
+            The log is currently empty.
+        </li>
+    {% endfor %}
+</ol>
+{% include 'racetime/pops/paginator.html' with page=audit_log %}

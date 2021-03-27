@@ -391,22 +391,37 @@ class BotMixin:
         )
 
 
-class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
-    form_class = forms.RaceCreationForm
-    model = models.Race
+class BaseCreateRace(RaceFormMixin, generic.CreateView):
+    def room_restriction_applies(self, category, user):
+        has_team_access = user.teammember_set.filter(
+            invite=False,
+            team__categories=category,
+        ).exists()
+        return (
+            not has_team_access
+            and not category.can_moderate(user)
+        )
 
-    def user_has_race(self, category, user):
-        return not category.can_moderate(user) and user.opened_races.exclude(
+    def user_has_race(self, user):
+        return user.opened_races.exclude(
             state__in=[
                 models.RaceStates.finished.value,
                 models.RaceStates.cancelled.value,
             ],
         ).exists()
 
+
+class CreateRace(UserPassesTestMixin, BaseCreateRace):
+    form_class = forms.RaceCreationForm
+    model = models.Race
+
     def form_valid(self, form):
         category = self.get_category()
 
-        if self.user_has_race(category, self.user):
+        if (
+            self.room_restriction_applies(category, self.user)
+            and self.user_has_race(self.user)
+        ):
             form.add_error(None, 'You can only have one open race room at a time.')
             return self.form_invalid(form)
 
@@ -433,7 +448,7 @@ class CreateRace(UserPassesTestMixin, RaceFormMixin, generic.CreateView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, BotMixin, generic.CreateView):
+class OAuthCreateRace(ScopedProtectedResourceView, BotMixin, BaseCreateRace):
     form_class = forms.OAuthRaceCreationForm
     model = models.Race
     required_scopes = ['create_race']
@@ -447,7 +462,10 @@ class OAuthCreateRace(ScopedProtectedResourceView, RaceFormMixin, BotMixin, gene
             user = self.request.resource_owner
             if not category.can_start_race(user):
                 return http.HttpResponseForbidden()
-            if self.user_has_race(category, user):
+            if (
+                self.room_restriction_applies(category, user)
+                and self.user_has_race(user)
+            ):
                 form.add_error(None, 'You can only have one open race room at a time.')
                 return self.form_invalid(form)
         else:

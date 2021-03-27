@@ -1,0 +1,79 @@
+
+.team-intro {
+    display: flex;
+    padding-bottom: 10px;
+}
+.team-intro > .image {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 100%;
+    height: 96px;
+    margin-right: 10px;
+    flex: 0 0 96px;
+}
+.team-info {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+}
+.team-info > .title {
+    line-height: 35px;
+}
+.team-info {
+    align-items: baseline;
+    display: flex;
+    flex-grow: 1;
+}
+.team-info > .created {
+    color: #8c898c;
+    font-size: 13px;
+}
+.team-info + .team-meta {
+    margin-left: 10px;
+    max-width: 320px;
+}
+
+.team-members {}
+.team-members > ul {
+}
+.team-members > ul > li {
+    border-top: 1px solid #1a1c20;
+}
+.team-members > ul > li:first-child {
+    border-top: none;
+}
+.team-members > ul > li > .user-pop {
+    color: #eee;
+    font-size: 16px;
+    line-height: 32px;
+    margin: 5px 0;
+}
+.team-members > ul > li > .user-pop::after {
+    content: none;
+}
+.team-members > ul > li > .user-pop > .avatar {
+    width: 32px;
+    height: 32px;
+}
+.team-members > ul > li > .user-pop > .scrim {
+    font-size: 13px;
+}
+.team-members > ul > li > .user-pop > .pronouns {
+    font-size: 14px;
+    line-height: 22px;
+}
+
+
+@media only screen and (max-width: 600px) {
+    .team-intro {
+        flex-wrap: wrap;
+    }
+    .team-info > .title {
+        line-height: inherit;
+    }
+    .team-info + .team-meta {
+        margin-left: 0;
+        max-width: none;
+    }
+}

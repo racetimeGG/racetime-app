@@ -10,6 +10,10 @@ urlpatterns = [
         path('connections', views.EditAccountConnections.as_view(), name='edit_account_connections'),
         path('security', views.EditAccountSecurity.as_view(), name='edit_account_security'),
         path('standing', views.AccountStanding.as_view(), name='account_standing'),
+        path('teams', views.EditAccountTeams.as_view(), name='edit_account_teams'),
+        path('teams/create', views.CreateTeam.as_view(), name='create_team'),
+        path('teams/join/<str:team>', views.JoinTeam.as_view(), name='join_team'),
+        path('teams/leave/<str:team>', views.LeaveTeam.as_view(), name='leave_team'),
         path('login', views.Login.as_view(), name='login'),
         path('logout', views.Logout.as_view(), name='logout'),
         path('create', views.CreateAccount.as_view(), name='create_account'),
@@ -31,6 +35,23 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
         path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
         path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
+    ])),
+
+    path('team/', include([
+        path('<str:team>', views.Team.as_view(), name='team'),
+        path('<str:team>/', include([
+            path('data', views.TeamData.as_view(), name='team_data'),
+            path('manage/', include([
+                path('edit', views.EditTeam.as_view(), name='edit_team'),
+                path('delete', views.DeleteTeam.as_view(), name='delete_team'),
+                path('members', views.TeamMembers.as_view(), name='team_members'),
+                path('members/add', views.AddMember.as_view(), name='team_member_add'),
+                path('members/remove', views.RemoveMember.as_view(), name='team_member_remove'),
+                path('members/add-owner', views.AddOwner.as_view(), name='team_owner_add'),
+                path('members/remove-owner', views.RemoveOwner.as_view(), name='team_owner_remove'),
+                path('log', views.TeamAudit.as_view(), name='team_audit_log'),
+            ])),
+        ])),
     ])),
 
     path('autocomplete/', include([
@@ -69,6 +90,7 @@ urlpatterns = [
             path('mods/remove_owner', views.RemoveOwner.as_view(), name='category_owners_remove'),
             path('mods/add_moderator', views.AddModerator.as_view(), name='category_mods_add'),
             path('mods/remove_moderator', views.RemoveModerator.as_view(), name='category_mods_remove'),
+            path('teams', views.CategoryTeams.as_view(), name='category_teams'),
             path('log', views.CategoryAudit.as_view(), name='category_audit_log'),
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
