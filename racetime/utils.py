@@ -16,6 +16,7 @@ __all__ = [
     'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
+    'generate_team_name',
     'get_action_button',
     'get_hashids',
     'notice_exception',
@@ -306,6 +307,65 @@ slug_nouns = [
     'zombie',
 ]
 
+team_names = [
+    'aces',
+    'adventurers',
+    'all-stars',
+    'battletoads',
+    'bosses',
+    'brigade',
+    'buccaneers',
+    'bunch',
+    'cactuars',
+    'charmers',
+    'checkpoints',
+    'chocobos',
+    'citizens',
+    'cohort',
+    'company',
+    'contingent',
+    'crewmates',
+    'detectives',
+    'dreamers',
+    'gamers',
+    'gang',
+    'geniuses',
+    'glitchers',
+    'heroes',
+    'inklings',
+    'kerbals',
+    'kids',
+    'legends',
+    'lumas',
+    'meeple',
+    'moogles',
+    'nachos',
+    'nerds',
+    'party',
+    'pikmin',
+    'platoon',
+    'polygons',
+    'raiders',
+    'resetters',
+    'roadies',
+    'runners',
+    'sentinels',
+    'spacers',
+    'spelunkers',
+    'splits',
+    'squad',
+    'swabbies',
+    'team',
+    'tooltips',
+    'trainers',
+    'tricksters',
+    'vikings',
+    'villagers',
+    'yoshis',
+    'zeroes',
+    'zoomers',
+]
+
 
 class RedisChannelLayer(BaseRedisChannelLayer):
     """
@@ -372,6 +432,14 @@ def generate_race_slug(custom_nouns=None):
     ])
 
 
+def generate_team_name():
+    name = ('The %s %s' % (
+        random.choice(slug_adjectives),
+        random.choice(team_names),
+    )).title()
+    return name
+
+
 def get_action_button(action, race_slug, category_slug):
     race_action_buttons = {
         'join': {'label': 'Join', 'class': ''},
@@ -379,12 +447,13 @@ def get_action_button(action, race_slug, category_slug):
         'cancel_invite': {'label': 'Withdraw join request', 'class': ''},
         'accept_invite': {'label': 'Accept invite', 'class': ''},
         'decline_invite': {'label': 'Decline invite', 'class': ''},
+        'set_team': {'label': 'Choose team…', 'class': ''},
         'ready': {'label': 'Ready', 'class': ''},
         'not_live': {'label': 'Not live', 'class': ''},
         'unready': {'label': 'Not ready', 'class': ''},
         'leave': {'label': 'Quit', 'class': ''},
-        'add_comment': {'label': 'Add comment', 'class': ''},
-        'change_comment': {'label': 'Change comment', 'class': ''},
+        'add_comment': {'label': 'Add comment…', 'class': ''},
+        'change_comment': {'label': 'Change comment…', 'class': ''},
         'done': {'label': 'Done', 'class': ''},
         'undone': {'label': 'Undo finish', 'class': 'dangerous'},
         'forfeit': {'label': 'Forfeit', 'class': 'dangerous'},

@@ -67,6 +67,7 @@ main {
 
 .race-actions {
     margin-bottom: 10px;
+    position: relative;
 }
 
 .race-actions:empty {
@@ -90,6 +91,20 @@ main {
 .race-actions > ul > li .btn {
     display: block;
     width: 100%;
+}
+
+.race-actions .modal {
+    background: #1a1c20;
+    border: 1px solid #1da674;
+    border-radius: 4px;
+    padding: 5px;
+    position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+}
+.race-actions .modal .btn-row {
+    margin: 10px 5px 5px;
 }
 
 .streaming-required {

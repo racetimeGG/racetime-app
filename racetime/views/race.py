@@ -72,6 +72,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
                 'urls': {
                     'chat': race.get_ws_url(),
                     'renders': race.get_renders_url(),
+                    'available_teams': reverse('available_teams', args=(race.category.slug, race.slug)),
                     'delete': reverse('chat_delete', args=(race.category.slug, race.slug, '$0')),
                     'purge': reverse('chat_purge', args=(race.category.slug, race.slug, '$0')),
                 },
@@ -249,6 +250,16 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
             msg.user or msg.bot,
             msg.message_plain,
         )
+
+
+class RaceAvailableTeams(RaceMixin, UserMixin, generic.View):
+    def get(self, request, *args, **kwargs):
+        if not self.user:
+            return http.HttpResponseForbidden()
+        return http.JsonResponse({
+            team.slug: team.name
+            for team in self.get_object().get_available_teams(self.user).values()
+        })
 
 
 class RaceData(RaceMixin, generic.View):

@@ -62,3 +62,16 @@
         <div class="monitor-actions"></div>
     {% endif %}
 </li>
+{% if race.team_race %}
+    {% if entrant.team %}
+        <li class="team-row">
+            {% include 'racetime/pops/team.html' with team=entrant.team extra_class='inline' target='_blank' %}
+        </li>
+    {% else %}
+        <li class="team-row no-team">
+            <span class="team-pop">
+                <span class="name">No team selected</span>
+            </span>
+        </li>
+    {% endif %}
+{% endif %}

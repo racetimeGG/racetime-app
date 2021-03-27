@@ -5,14 +5,14 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
-from racetime.models.abstract import AbstractAuditLog
 
+from .abstract import AbstractAuditLog
 from ..validators import UsernameValidator
 
 
 class Team(models.Model):
     name = models.CharField(
-        max_length=25,
+        max_length=50,
         null=True,
         unique=True,
         help_text=(
@@ -45,6 +45,9 @@ class Team(models.Model):
             'Add some information to your team\'s public profile. It can '
             'include anything you like.'
         ),
+    )
+    formal = models.BooleanField(
+        default=True,
     )
     categories = models.ManyToManyField(
         'Category',
@@ -121,13 +124,21 @@ class Team(models.Model):
         """
         Return a summary dict of this team's data.
         """
-        return {
-            'name': self.name,
-            'slug': self.slug,
-            'url': self.get_absolute_url(),
-            'data_url': self.get_data_url(),
-            'avatar': self.avatar.url if self.avatar else None,
-        }
+        if self.formal:
+            return {
+                'name': self.name,
+                'slug': self.slug,
+                'formal': True,
+                'url': self.get_absolute_url(),
+                'data_url': self.get_data_url(),
+                'avatar': self.avatar.url if self.avatar else None,
+            }
+        else:
+            return {
+                'name': self.name,
+                'slug': self.slug,
+                'formal': False,
+            }
 
     def dump_json_data(self):
         """
@@ -135,6 +146,7 @@ class Team(models.Model):
         """
         value = json.dumps({
             **self.api_dict_summary(),
+            'profile': self.profile,
             'categories': [
                 category.api_dict_summary()
                 for category in self.all_categories

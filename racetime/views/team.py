@@ -20,52 +20,16 @@ class Team(UserMixin, generic.DetailView):
     model = models.Team
     slug_url_kwarg = 'team'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            formal=True,
+        )
+
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
             'can_manage': self.object.can_manage(self.user),
         }
-
-    def current_races(self, can_moderate=False):
-        queryset = self.object.race_set.exclude(state__in=[
-            models.RaceStates.finished,
-            models.RaceStates.cancelled,
-        ]).annotate(
-            state_sort=db_models.Case(
-                # Open/Invitational
-                db_models.When(
-                    state__in=[models.RaceStates.open, models.RaceStates.invitational],
-                    then=1,
-                ),
-                # Pending/In progress
-                db_models.When(
-                    state=models.RaceStates.pending,
-                    then=2,
-                ),
-                db_models.When(
-                    state=models.RaceStates.in_progress,
-                    then=2,
-                ),
-                output_field=db_models.PositiveSmallIntegerField(),
-                default=0,
-            ),
-        ).order_by('state_sort', '-opened_at').all()
-        if not can_moderate:
-            queryset = queryset.filter(unlisted=False)
-        return queryset
-
-    def past_races(self, filter_by=None, can_moderate=False):
-        queryset = self.object.race_set.filter(state__in=[
-            models.RaceStates.finished,
-        ]).order_by('-ended_at')
-        if filter_by == 'recordable':
-            queryset = queryset.filter(
-                recordable=True,
-                recorded=False,
-            )
-        if not can_moderate:
-            queryset = queryset.filter(unlisted=False)
-        return queryset
 
 
 class TeamData(Team):
@@ -121,12 +85,15 @@ class ManageTeam(UserPassesTestMixin, UserMixin):
     @cached_property
     def team(self):
         slug = self.kwargs.get('team')
-        return get_object_or_404(models.Team, slug=slug)
+        return get_object_or_404(models.Team, slug=slug, formal=True)
 
     def test_func(self):
         return self.user.is_authenticated and (
             self.user.is_staff
-            or self.user in self.get_object().owners.all()
+            or self.team.teammember_set.filter(
+                user=self.user,
+                owner=True,
+            ).exists()
         )
 
 

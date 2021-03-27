@@ -124,6 +124,8 @@ urlpatterns = [
         path('unforfeit', views.Unforfeit.as_view(), name='unforfeit'),
         path('add_comment', views.AddComment.as_view(), name='add_comment'),
         path('add_comment', views.AddComment.as_view(), name='change_comment'),
+        path('set_team', views.SetTeam.as_view(), name='set_team'),
+        path('available_teams', views.RaceAvailableTeams.as_view(), name='available_teams'),
 
         path('monitor/', include([
             path('edit', views.EditRace.as_view(), name='edit_race'),

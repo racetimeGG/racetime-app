@@ -4,7 +4,6 @@ $(function() {
 
     if ($goal.length) {
         var $customGoal = $goal.next();
-        var $additional = $customGoal.nextAll().hide();
 
         if ($goal.find('input').length === 1) {
             $goal.find('input').prop('checked', true);
@@ -24,10 +23,13 @@ $(function() {
             $customGoal.hide();
         }
 
+        var $lastMain = $('#id_invitational').closest('li');
+        var $additional = $lastMain.nextAll().hide();
+
         $('<li class="toggle-additional">' +
             '<span class="show"><i class="material-icons">expand_more</i> Show additional options</span>' +
             '<span class="hide" style="display: none"><i class="material-icons">expand_less</i> Hide additional options</span>' +
-            '</li>').insertAfter($customGoal);
+            '</li>').insertAfter($lastMain);
 
         $(document).on('click', '.race-form .toggle-additional', function () {
             $additional.toggle();

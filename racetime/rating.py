@@ -1,6 +1,9 @@
+from collections import defaultdict
+from datetime import timedelta
+
 from django.apps import apps
 from django.db.transaction import atomic
-from trueskill import Rating, global_env
+from trueskill import Rating, TrueSkill
 
 
 class UserRating:
@@ -30,14 +33,14 @@ class UserRating:
     def save(self):
         self.ranking.save()
 
-    def set_rating(self, rating, finish_time):
+    def set_rating(self, rating):
         original_rating = self.ranking.rating
 
-        if finish_time and (
+        if self.entrant.finish_time and (
             not self.ranking.best_time
-            or finish_time < self.ranking.best_time
+            or self.entrant.finish_time < self.ranking.best_time
         ):
-            self.ranking.best_time = finish_time
+            self.ranking.best_time = self.entrant.finish_time
         self.ranking.score = rating.mu
         self.ranking.confidence = rating.sigma
         self.ranking.rating = self.ranking.calculated_rating
@@ -50,22 +53,45 @@ class UserRating:
         self.rating = rating
 
 
+def _sort_key(group):
+    entrants = [user.entrant for user in group]
+    if any(entrant.dnf or entrant.dq for entrant in entrants):
+        return timedelta.max
+    finish_times = [entrant.finish_time for entrant in entrants]
+    return sum(finish_times, timedelta(0)) / len(finish_times)
+
+
 def rate_race(race):
-    env = global_env()
     entrants = race.ordered_entrants
     users = [
         UserRating(entrant, race)
         for entrant in entrants
     ]
-    rating_groups = [(user.rating,) for user in users]
-    num_finished = len([entrant for entrant in entrants if entrant.place])
-    ranks = [
-        entrant.place if entrant.place else num_finished + 1
-        for entrant in entrants
-    ]
+    if not race.team_race:
+        groups = [(user,) for user in users]
+    else:
+        groups = defaultdict(list)
+        for user in users:
+            groups[user.entrant.team_id].append(user)
+        groups = list(groups.values())
+        groups.sort(key=_sort_key)
+
+    rating_groups = []
+    ranks = []
+    current_rank = 0
+    for group in groups:
+        sort_key = _sort_key(group)
+        rating_groups.append(tuple(user.rating for user in group))
+        ranks.append(current_rank)
+        if sort_key < timedelta.max:
+            current_rank += 1
+
+    print(rating_groups)
+    print(ranks)
+    env = TrueSkill(backend='mpmath')
     rated = env.rate(rating_groups, ranks)
 
     with atomic():
-        for group, user_rating, entrant in zip(rated, users, entrants):
-            rating = group[0]
-            user_rating.set_rating(rating, entrant.finish_time if entrant.place else None)
+        for ratings, group in zip(rated, groups):
+            for rating, user in zip(ratings, group):
+                user.set_rating(rating)

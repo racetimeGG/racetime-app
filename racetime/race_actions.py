@@ -70,6 +70,39 @@ class DeclineInvite:
             raise SafeException('Possible sync error. Refresh to continue.')
 
 
+class SetTeam:
+    commands = ['team']
+
+    def action(self, race, user, data):
+        team_str = (data.get('team') or data.get('comment', '')).lower().strip()
+        available_teams = race.get_available_teams(user)
+        if not team_str:
+            raise SafeException(
+                'You must specify a team. Available teams are: "new" (create '
+                'a new team), "%(teams)s".'
+                % {'teams': '", "'.join(sorted(available_teams.keys()))}
+                if available_teams else
+                'You must specify a team. Available teams are: "new" (create '
+                'a new team).'
+            )
+        if team_str == 'new':
+            race.create_team(user)
+        elif team_str in available_teams:
+            race.join_team(user, available_teams[team_str])
+        else:
+            for team in available_teams.values():
+                if team.name.lower() == team_str:
+                    race.join_team(user, team)
+                    return
+            raise SafeException(
+                'Team not found. Available teams are: "new" (create a new '
+                'team), "%(teams)s".'
+                % {'teams': '", "'.join(sorted(available_teams.keys()))}
+                if available_teams else
+                'Team not found. Available teams are: "new" (create a new team).'
+            )
+
+
 class Ready:
     commands = ['ready']
 
@@ -268,6 +301,7 @@ commands = {
         CancelInvite,
         AcceptInvite,
         DeclineInvite,
+        SetTeam,
         Ready,
         Unready,
         Done,

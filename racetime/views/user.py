@@ -105,6 +105,7 @@ class ViewProfile(generic.DetailView):
 
     def get_teams(self):
         return models.Team.objects.filter(
+            formal=True,
             teammember__user=self.object,
             teammember__invite=False,
         ).order_by('name')
@@ -363,6 +364,7 @@ class EditAccountTeams(TeamPageMixin, generic.ListView):
 
     def get_queryset(self):
         return super().get_queryset().filter(
+            team__formal=True,
             user=self.user,
         ).order_by('team__name')
 
@@ -382,6 +384,7 @@ class JoinTeam(TeamPageMixin, generic.UpdateView):
 
     def form_valid(self, form):
         member = self.object.teammember_set.filter(
+            team__formal=True,
             user=self.user,
             invite=True,
         ).first()
@@ -410,6 +413,7 @@ class LeaveTeam(TeamPageMixin, generic.UpdateView):
 
     def form_valid(self, form):
         member = self.object.teammember_set.filter(
+            team__formal=True,
             user=self.user,
         ).first()
         if not member:

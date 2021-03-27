@@ -35,6 +35,7 @@ class EntrantInline(admin.TabularInline):
     fields = (
         'place_ordinal',
         'user',
+        'team',
         'state',
         'ready',
         'stream_override',
@@ -48,6 +49,7 @@ class EntrantInline(admin.TabularInline):
     }
     readonly_fields = (
         'user',
+        'team',
         'state',
         'place_ordinal',
     )

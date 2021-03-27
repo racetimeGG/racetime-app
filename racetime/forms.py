@@ -334,6 +334,8 @@ class RaceForm(forms.ModelForm):
             del self.fields['unlisted']
         if 'unlisted' in self.fields and category.unlisted_by_default:
             self.fields['unlisted'].initial = True
+        if 'require_even_teams' in self.fields and self.instance.pk and not self.instance.team_race:
+            del self.fields['require_even_teams']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -378,10 +380,12 @@ class RaceCreationForm(RaceForm):
         fields = (
             'goal',
             'custom_goal',
+            'team_race',
             'invitational',
             'unlisted',
             'info',
             'recordable',
+            'require_even_teams',
             'start_delay',
             'time_limit',
             'streaming_required',
@@ -413,6 +417,7 @@ class RaceEditForm(RaceForm):
             'unlisted',
             'info',
             'recordable',
+            'require_even_teams',
             'start_delay',
             'time_limit',
             'streaming_required',

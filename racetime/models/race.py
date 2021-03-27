@@ -1,5 +1,6 @@
 import json
-from collections import OrderedDict
+import random
+from collections import OrderedDict, defaultdict
 from datetime import timedelta
 
 from asgiref.sync import async_to_sync
@@ -18,10 +19,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 
 from .choices import EntrantStates, RaceStates
 from ..rating import rate_race
-from ..utils import SafeException, get_action_button, timer_html, timer_str
+from ..utils import SafeException, generate_team_name, get_action_button, timer_html, timer_str
 
 
 class Race(models.Model):
@@ -80,6 +82,21 @@ class Race(models.Model):
     )
     cancelled_at = models.DateTimeField(
         null=True,
+    )
+    team_race = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text=(
+            'Create a team race. Entrants will need to join a team to '
+            'participate.'
+        ),
+    )
+    require_even_teams = models.BooleanField(
+        default=False,
+        help_text=(
+            'Require all teams to have an equal number of participants before '
+            'the race can start (only applies to team races).'
+        ),
     )
     unlisted = models.BooleanField(
         default=False,
@@ -263,6 +280,7 @@ class Race(models.Model):
         return [
             {
                 'user': entrant.user.api_dict_summary(race=self),
+                'team': entrant.team.api_dict_summary() if entrant.team else None,
                 'status': {
                     'value': entrant.summary[0],
                     'verbose_value': entrant.summary[1],
@@ -519,7 +537,7 @@ class Race(models.Model):
                 output_field=models.PositiveSmallIntegerField(),
                 default=0,
             ),
-        ).select_related('user').order_by(
+        ).select_related('user', 'team').order_by(
             'state_sort',
             'place',
             'finish_time',
@@ -842,10 +860,35 @@ class Race(models.Model):
         A race can begin once all entrants who have joined the race are ready,
         and there are at least 2 active race entrants.
         """
-        return self.is_preparing and self.entrant_set.filter(
-            state=EntrantStates.joined.value,
-            ready=True,
-        ).count() >= 2
+        return (
+            self.is_preparing
+            and self.entrant_set.filter(
+                state=EntrantStates.joined.value,
+                ready=True,
+            ).count() >= 2
+            and (not self.team_race or self.teams_set)
+        )
+
+    @property
+    def teams_set(self):
+        """
+        Determine if all entrants have a team set, there are at least 2 teams,
+        and (if even teams is required) teams all have the same number of
+        participants.
+        """
+        if self.entrant_set.filter(team__isnull=True).exists():
+            return False
+
+        teams = defaultdict(int)
+        for entrant in self.entrant_set.filter(
+            team__isnull=False,
+        ).select_related('team'):
+            teams[entrant.team] += 1
+
+        return len(teams) >= 2 and (
+            not self.require_even_teams
+            or len(set(teams.values())) == 1
+        )
 
     def begin(self, begun_by=None):
         """
@@ -1134,6 +1177,79 @@ class Race(models.Model):
         else:
             raise SafeException('User is not eligible to join this race.')
 
+    def create_team(self, user):
+        if not self.team_race:
+            raise SafeException('Not a team race.')
+        with atomic():
+            Team = apps.get_model('racetime', 'Team')
+            name = generate_team_name()
+            slug = slugify(name) + '-' + '%04d' % random.choice(range(1, 9999))
+            team = Team.objects.create(
+                name=name,
+                slug=slug,
+                formal=False,
+            )
+            team.teammember_set.create(
+                user=user,
+                invite=False,
+                invited_at=timezone.now(),
+                joined_at=timezone.now(),
+            )
+        self.join_team(user, team)
+
+    @atomic
+    def join_team(self, user, team):
+        if not self.team_race:
+            raise SafeException('Not a team race.')
+        entrant = self.in_race(user)
+        if not entrant or entrant.state != EntrantStates.joined.value:
+            raise SafeException('Cannot join a team (join the race first!).')
+        if entrant.team == team:
+            raise SafeException('You are already in that team.')
+        if not self.is_preparing:
+            raise SafeException('Cannot change team during the race.')
+        if team.formal and not team.teammember_set.filter(
+            user=user,
+            invite=False,
+        ).exists():
+            raise SafeException('You cannot join that team without an invitation.')
+        if entrant.team:
+            self.leave_team(entrant)
+        entrant.team = team
+        entrant.save()
+        self.increment_version()
+        self.add_message(
+            '%(user)s joins %(team)s.'
+            % {'user': user, 'team': team}
+        )
+
+    def leave_team(self, entrant):
+        self.add_message(
+            '%(user)s leaves %(team)s.'
+            % {'user': entrant.user, 'team': entrant.team},
+            broadcast=False,
+        )
+        if not entrant.team.formal:
+            entrant.team.teammember_set.filter(user=entrant.user).delete()
+            if entrant.team.all_members.count() == 0:
+                entrant.team.delete()
+
+    def get_available_teams(self, user):
+        if not self.team_race:
+            raise SafeException('Not a team race.')
+        teams = {
+            entrant.team.slug: entrant.team
+            for entrant in self.entrant_set.filter(
+                team__formal=False,
+            ).select_related('team')
+        }
+        for member in user.teammember_set.filter(
+            team__formal=True,
+            invite=False,
+        ).select_related('team'):
+            teams[member.team.slug] = member.team
+        return teams
+
     @atomic
     def recalculate_places(self):
         """
@@ -1229,6 +1345,11 @@ class Entrant(models.Model):
     user = models.ForeignKey(
         'User',
         on_delete=models.CASCADE,
+    )
+    team = models.ForeignKey(
+        'Team',
+        on_delete=models.CASCADE,
+        null=True,
     )
     race = models.ForeignKey(
         'Race',
@@ -1358,7 +1479,9 @@ class Entrant(models.Model):
         elif self.state == EntrantStates.joined.value:
             if self.race.is_preparing:
                 if not self.ready:
-                    if not self.race.streaming_required or self.stream_live or self.stream_override:
+                    if self.race.team_race and not self.team:
+                        actions.append('set_team')
+                    elif not self.race.streaming_required or self.stream_live or self.stream_override:
                         actions.append('ready')
                     else:
                         actions.append('not_live')
@@ -1430,6 +1553,8 @@ class Entrant(models.Model):
         """
         if self.state == EntrantStates.joined.value and self.race.is_preparing:
             with atomic():
+                if self.team:
+                    self.race.leave_team(self)
                 self.delete()
                 self.race.increment_version()
             self.race.add_message(
@@ -1452,6 +1577,8 @@ class Entrant(models.Model):
             and not self.ready
             and (not self.race.streaming_required or self.stream_live or self.stream_override)
         ):
+            if self.race.team_race and not self.team:
+                raise SafeException('You must join a team before readying up.')
             with atomic():
                 self.ready = True
                 self.save()
@@ -1490,18 +1617,15 @@ class Entrant(models.Model):
                 and not self.dq \
                 and not self.finish_time:
             self.finish_time = timezone.now() - self.race.started_at
-            self.place = self.race.entrant_set.filter(
-                dnf=False,
-                dq=False,
-                finish_time__isnull=False,
-            ).count() + 1
             if self.finish_time < timedelta(seconds=5):
                 raise SafeException(
                     'You cannot finish this early. Did you hit .done by accident?'
                 )
             with atomic():
                 self.save()
+                self.race.recalculate_places()
                 self.race.increment_version()
+            self.refresh_from_db()
             self.race.add_message(
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
                 % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str}

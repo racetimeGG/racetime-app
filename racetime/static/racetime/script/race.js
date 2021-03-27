@@ -78,6 +78,32 @@ Race.prototype.ajaxifyActionForm = function(form) {
             $('.race-action-form button').prop('disabled', true);
         },
         beforeSerialize: function($form) {
+            if ($form.hasClass('set_team') && $form.find('[name="team"]').length === 0) {
+                var $modal = $('<div class="modal layout-form">' +
+                    '<ul>' +
+                      '<li>' +
+                        '<label>Select team:</label>' +
+                        '<ul class="team-opts">' +
+                          '<li><label><input type="radio" name="team" value="new"> <i>New team</i></label></li>' +
+                        '</ul>' +
+                      '</li>' +
+                    '</ul>' +
+                    '<div class="btn-row">' +
+                      '<button class="btn" type="submit">Choose team</button>' +
+                      '<button class="btn close" type="button">Close</button>' +
+                    '</div>' +
+                  '</div>');
+                $.get(self.vars.urls.available_teams, '', function(data) {
+                    for (var i in data) {
+                        var $li = $('<li><label><input type="radio" name="team"> </label></li>');
+                        $li.find('input').attr('value', i);
+                        $li.find('label').append(document.createTextNode(data[i]));
+                        $modal.find('.team-opts').append($li);
+                    }
+                });
+                $modal.appendTo($form);
+                return false;
+            }
             if ($form.hasClass('add_comment') || $form.hasClass('change_comment')) {
                 var promptText = self.vars.hide_comments ? 'Enter a comment (will be hidden until the race ends):' : 'Enter a comment:';
                 var comment = prompt(promptText);

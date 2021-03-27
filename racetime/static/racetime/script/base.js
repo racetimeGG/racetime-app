@@ -205,4 +205,8 @@ $(function() {
             }
         });
     });
+
+    $(document).on('click', '.modal .close', function(event) {
+        $(this).closest('.modal').remove();
+    });
 });

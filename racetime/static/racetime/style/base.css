@@ -104,7 +104,7 @@ table th {
     vertical-align: top;
 }
 
-.btn.cancel {
+.btn.cancel, .btn.close {
     border-color: #ddd8dd;
     color: #ddd8dd;
 }
@@ -140,6 +140,17 @@ table th {
     line-height: 20px;
     text-align: center;
     width: 20px;
+}
+
+.btn-row {
+    display: flex;
+    flex-direction: row;
+}
+.btn-row > .btn {
+    margin-left: 5px;
+}
+.btn-row > .btn:first-child {
+    margin-left: 0;
 }
 
 .breadcrumbs {
@@ -1036,6 +1047,23 @@ a .timer {
     height: 22px;
     line-height: 22px;
     margin-left: 5px;
+}
+.team-row {
+    display: flex;
+    padding-left: 55px;
+    font-size: 13px;
+}
+.team-row.no-team {
+    color: #8c898c;
+    font-style: italic;
+}
+.team-row .team-pop {
+    height: 18px;
+    line-height: 18px;
+}
+.team-row .team-pop .avatar {
+    height: 18px;
+    width: 18px;
 }
 .race-entrants > .count {
     border-top: 1px solid #08090a;

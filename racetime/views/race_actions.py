@@ -36,6 +36,10 @@ class DeclineInvite(race_actions.DeclineInvite, RaceAction):
     pass
 
 
+class SetTeam(race_actions.SetTeam, RaceAction):
+    pass
+
+
 class Ready(race_actions.Ready, RaceAction):
     pass
 

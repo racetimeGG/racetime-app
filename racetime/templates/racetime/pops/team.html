@@ -1,14 +1,14 @@
 {% if team %}
-    {% if no_link %}
+    {% if no_link or not team.formal %}
     <span class="team-pop {{ extra_class }}">
     {% else %}
-    <a class="team-pop {{ extra_class }}" href="{{ team.get_absolute_url }}">
+    <a class="team-pop {{ extra_class }}" href="{{ team.get_absolute_url }}"{% if target %} target="{{ target }}"{% endif %}>
     {% endif %}
         {% if team.avatar and not hide_avatar %}
         <span class="avatar" style="background-image: url({{ team.avatar.url }})"></span>
         {% endif %}
         <span class="name">{{ team.name }}</span>
-    {% if not no_link %}
+    {% if not no_link and team.formal %}
     </a>
     {% else %}
     </span>
