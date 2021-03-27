@@ -1495,6 +1495,10 @@ class Entrant(models.Model):
                 dq=False,
                 finish_time__isnull=False,
             ).count() + 1
+            if self.finish_time < timedelta(seconds=5):
+                raise SafeException(
+                    'You cannot finish this early. Did you hit .done by accident?'
+                )
             with atomic():
                 self.save()
                 self.race.increment_version()
@@ -1541,7 +1545,7 @@ class Entrant(models.Model):
                 and not self.dnf \
                 and not self.dq \
                 and not self.finish_time:
-            if timezone.now() - self.race.started_at < timedelta(seconds=15):
+            if timezone.now() - self.race.started_at < timedelta(seconds=5):
                 raise SafeException(
                     'You cannot forfeit this early. If you are using an '
                     'auto-splitter, you should configure it to not auto-reset '
