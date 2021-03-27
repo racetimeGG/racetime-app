@@ -328,6 +328,14 @@ class Message:
 
         if (
             not can_monitor
+            and not race.allow_prerace_chat
+            and race.is_preparing
+        ):
+            raise SafeException(
+                'You do not have permission to chat prior to the race.'
+            )
+        if (
+            not can_monitor
             and not race.allow_midrace_chat
             and (race.is_pending or race.is_in_progress)
         ):

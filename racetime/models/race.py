@@ -152,6 +152,14 @@ class Race(models.Model):
             'if comments are not enabled (duh!).'
         ),
     )
+    allow_prerace_chat = models.BooleanField(
+        default=True,
+        verbose_name='Allow pre-race chat',
+        help_text=(
+            'Allow users to chat before the race starts (race monitors can '
+            'always use chat messages).'
+        ),
+    )
     allow_midrace_chat = models.BooleanField(
         default=True,
         help_text=(
@@ -319,6 +327,7 @@ class Race(models.Model):
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
             'allow_comments': self.allow_comments,
             'hide_comments': self.hide_comments,
+            'allow_prerace_chat': self.allow_prerace_chat,
             'allow_midrace_chat': self.allow_midrace_chat,
             'allow_non_entrant_chat': self.allow_non_entrant_chat,
             'chat_message_delay': self.chat_message_delay,
@@ -998,6 +1007,7 @@ class Race(models.Model):
                 streaming_required=self.streaming_required,
                 allow_comments=self.allow_comments,
                 hide_comments=self.hide_comments,
+                allow_prerace_chat=self.allow_prerace_chat,
                 allow_midrace_chat=self.allow_midrace_chat,
                 allow_non_entrant_chat=self.allow_non_entrant_chat,
                 chat_message_delay=self.chat_message_delay,

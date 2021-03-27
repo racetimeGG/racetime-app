@@ -138,7 +138,6 @@ class Category(models.Model):
         default=10,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
-
     slug_words = models.TextField(
         null=True,
         blank=True,
