@@ -454,6 +454,7 @@ a .timer {
 .container > .content > aside {
     flex: 0 0 320px;
     margin-left: 10px;
+    width: 320px;
 }
 .container > .content > aside:first-child {
     margin-left: 0;
