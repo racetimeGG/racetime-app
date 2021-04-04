@@ -30,6 +30,9 @@
                                     <button class="btn" type="submit">Join</button>
                                 </form>
                             {% endif %}
+                            {% if member.owner %}
+                                <a class="btn" href="{% url 'edit_team' team=member.team.slug %}">Manage</a>
+                            {% endif %}
                             <form action="{% url 'leave_team' team=member.team.slug %}" method="post">
                                 {% csrf_token %}
                                 <button class="btn dangerous" type="submit">
