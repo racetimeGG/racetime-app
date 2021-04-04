@@ -1578,6 +1578,7 @@ footer > .tagline {
         border: none;
         border-radius: 3px;
         padding: 5px;
+        width: auto;
     }
     .container > .content > aside {
         margin-left: 0;

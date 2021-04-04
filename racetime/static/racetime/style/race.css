@@ -18,13 +18,17 @@ body {
     max-width: 1280px;
 }
 
+.container > .content > main {
+    min-width: 640px;
+}
+
 @media only screen and (max-width: 1124px) {
     .container {
         align-items: stretch;
     }
-    
+
     .container > .content main {
-        min-width: 0px;
+        min-width: 0;
     }
 }
 
@@ -32,10 +36,6 @@ aside,
 main {
     display: flex;
     flex-direction: column;
-}
-
-.container > .content > main {
-    min-width: 640px;
 }
 
 .race-entrants::-webkit-scrollbar,
