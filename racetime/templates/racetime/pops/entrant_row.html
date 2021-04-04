@@ -24,6 +24,8 @@
                 <i class="material-icons">more</i>
                 {% if race.comments_visible %}
                     <span class="text">{{ entrant.comment }}</span>
+                {% else %}
+                    <span class="text">Comments are hidden until the race ends.</span>
                 {% endif %}
             </span>
         {% endif %}

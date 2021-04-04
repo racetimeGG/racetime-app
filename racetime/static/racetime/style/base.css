@@ -916,6 +916,10 @@ a .timer {
     word-break: break-word;
     z-index: 1;
 }
+.entrant-row > .user > .comment.hidden > .text {
+    color: #8c898c;
+    font-style: italic;
+}
 .entrant-row > .user > .comment.open > .text {
     display: block;
     opacity: 1;
