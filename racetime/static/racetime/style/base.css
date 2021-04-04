@@ -197,6 +197,7 @@ table th {
     line-height: 1.6923;
 }
 .user-pop > .pronouns {
+    width: max-content;
     background: #1a1c20;
     color: #8c898c;
     border-radius: 4px;
@@ -453,6 +454,7 @@ a .timer {
 .container > .content > aside {
     flex: 0 0 320px;
     margin-left: 10px;
+    width: 320px;
 }
 .container > .content > aside:first-child {
     margin-left: 0;
