@@ -359,8 +359,6 @@ class OAuthRaceForm(RaceForm):
 
     def clean_goal(self):
         goal = self.cleaned_data.get('goal')
-        print(goal)
-        print(repr(goal))
         if goal:
             return self.category.goal_set.filter(name=goal).first()
         return None

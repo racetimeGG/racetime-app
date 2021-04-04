@@ -86,8 +86,6 @@ def rate_race(race):
         if sort_key < timedelta.max:
             current_rank += 1
 
-    print(rating_groups)
-    print(ranks)
     env = TrueSkill(backend='mpmath')
     rated = env.rate(rating_groups, ranks)
 

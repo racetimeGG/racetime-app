@@ -571,7 +571,6 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
     required_scopes = ['create_race']
 
     def form_invalid(self, form):
-        print(repr(form))
         return super().form_invalid(form)
 
     def form_valid(self, form):
