@@ -40,7 +40,12 @@
                     <div class="user-info">
                         {% if user.is_authenticated %}
                             {% include 'racetime/pops/user.html' with hide_pronouns=True %}
-                            <a href="{% url 'edit_account' %}" class="btn settings">Settings</a>
+                            <a href="{% url 'edit_account' %}" class="btn settings">
+                                Settings
+                                {% if user.team_invites %}
+                                    <span class="notification">{{ user.team_invites }}</span>
+                                {% endif %}
+                            </a>
                             <form action="{% url 'logout' %}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.get_full_path }}">

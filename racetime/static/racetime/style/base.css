@@ -132,6 +132,16 @@ table th {
     color: #666;
 }
 
+.btn > .notification {
+    background: #ddd8dd;
+    border-radius: 100%;
+    color: #0c0f14;
+    display: inline-block;
+    line-height: 20px;
+    text-align: center;
+    width: 20px;
+}
+
 .breadcrumbs {
     display: flex;
     font-size: 13px;
@@ -1449,6 +1459,18 @@ footer > .tagline {
 .nav-tabs > .current > span {
     background: #1e1f24;
     color: #ddd8dd;
+}
+.nav-tabs > li .notification {
+    background: #26dd9a;
+    border-radius: 100%;
+    color: #0c0f14;
+    margin-left: 5px;
+    text-align: center;
+    width: 22px;
+}
+.nav-tabs > .current .notification {
+    background: #ddd8dd;
+    color: #1e1f24;
 }
 
 .copied-to-clipboard {

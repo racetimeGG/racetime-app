@@ -317,6 +317,15 @@ class User(AbstractBaseUser, PermissionsMixin):
             return ' / '.join(self.pronouns.split('/'))
         return ''
 
+    @cached_property
+    def team_invites(self):
+        """
+        Determine how many open team invites a user has.
+        """
+        return self.teammember_set.filter(
+            invite=True,
+        ).count()
+
     @property
     def twitch_channel(self):
         """

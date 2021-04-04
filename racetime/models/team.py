@@ -33,7 +33,7 @@ class Team(models.Model):
         null=True,
         unique=True,
         help_text=(
-            'Forms part of the URL of your team page, e.g. "your-team" will'
+            'Forms part of the URL of your team page, e.g. "your-team" will '
             'give "racetime.gg/team/your-team". Slug must be unique, and can '
             'only use letters, numbers and hyphens.'
         ),

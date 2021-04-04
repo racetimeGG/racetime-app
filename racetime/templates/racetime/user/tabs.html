@@ -17,6 +17,9 @@
     <li{% if current == 'edit_account_teams' %} class="current"{% endif %}>
         <a href="{% url 'edit_account_teams' %}">
             Teams
+            {% if user.team_invites %}
+                <span class="notification">{{ user.team_invites }}</span>
+            {% endif %}
         </a>
     </li>
     <li{% if current == 'account_standing' %} class="current"{% endif %}>

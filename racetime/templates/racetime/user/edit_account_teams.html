@@ -45,17 +45,26 @@
                     <dt>Role</dt>
                     <dd>
                         {% if member.invite %}
-                            Invited
+                            You've been invited to join this team. Select "Join" to
+                            accept this invite, or "Decline" if you're not interested.
                         {% elif member.owner %}
                             Owner
                         {% else %}
                             Member
                         {% endif %}
                     </dd>
+                    {% if member.invite %}
+                        <dt>Invited on</dt>
+                        <dd>
+                            <time class="onlydate" datetime="{{ member.invited_at.isoformat }}">
+                                {{ member.invited_at }}
+                            </time>
+                        </dd>
+                    {% endif %}
                     {% if member.joined_at %}
                         <dt>Joined on</dt>
                         <dd>
-                            <time class="datetime" datetime="{{ member.joined_at.isoformat }}">
+                            <time class="onlydate" datetime="{{ member.joined_at.isoformat }}">
                                 {{ member.joined_at }}
                             </time>
                         </dd>
