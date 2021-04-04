@@ -79,7 +79,8 @@ Race.prototype.ajaxifyActionForm = function(form) {
         },
         beforeSerialize: function($form) {
             if ($form.hasClass('add_comment') || $form.hasClass('change_comment')) {
-                var comment = prompt('Enter a comment:');
+                var promptText = self.vars.hide_comments ? 'Enter a comment (will be hidden until the race ends):' : 'Enter a comment:';
+                var comment = prompt(promptText);
                 if (!comment) return false;
                 var $input = $('<input type="hidden" name="comment">');
                 $input.val(comment);
@@ -365,6 +366,7 @@ Race.prototype.onSocketMessage = function(event) {
     var server_date = new Date(data.date);
     switch (data.type) {
         case 'race.data':
+            this.vars.hide_comments = data.race.hide_comments;
             if (this.vars.user.id) {
                 var entrant = data.race.entrants.filter(e => e.user.id === this.vars.user.id)[0]
                 if (entrant) {
