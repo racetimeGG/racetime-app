@@ -156,7 +156,8 @@ table th {
     content: none;
 }
 
-.user-pop {
+.user-pop,
+.team-pop {
     display: flex;
     text-decoration: none;
     align-items: center;
@@ -181,7 +182,8 @@ table th {
 .user-pop.supporter.staff::after {
     background-image: url(../image/gold_star.svg);
 }
-.user-pop > .avatar {
+.user-pop > .avatar,
+.team-pop > .avatar {
     background-image: radial-gradient(#1a1c20, #8c898c);
     background-position: center;
     background-repeat: no-repeat;
@@ -191,7 +193,8 @@ table th {
     width: 32px;
     margin-right: 5px;
 }
-.user-pop > .name {
+.user-pop > .name,
+.team-pop > .name {
     white-space: nowrap;
 }
 .user-pop.supporter > .name {
@@ -217,11 +220,13 @@ table th {
     margin-left: 5px;
     padding: 0 4px;
 }
-.user-pop.inline {
+.user-pop.inline,
+.team-pop.inline {
     display: inline-flex;
     vertical-align: top;
 }
-.user-pop.inline > .avatar {
+.user-pop.inline > .avatar,
+.team-pop.inline > .avatar {
     height: 22px;
     width: 22px;
 }
