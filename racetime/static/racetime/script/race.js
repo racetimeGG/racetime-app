@@ -84,8 +84,9 @@ Race.prototype.ajaxifyActionForm = function(form) {
                       '<li>' +
                         '<label>Select team:</label>' +
                         '<ul class="team-opts">' +
-                          '<li><label><input type="radio" name="team" value="new"> <i>New team</i></label></li>' +
+                          '<li><label><input type="radio" name="team" value="new"> <i>Create new team</i></label></li>' +
                         '</ul>' +
+                        '<span class="helptext">Tip: visit account settings to manage your own teams and invite specific members.</span>' +
                       '</li>' +
                     '</ul>' +
                     '<div class="btn-row">' +
