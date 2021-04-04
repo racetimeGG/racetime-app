@@ -589,6 +589,7 @@ class TeamForm(forms.ModelForm):
         fields = (
             'name',
             'avatar',
+            'profile',
         )
         model = models.Team
 

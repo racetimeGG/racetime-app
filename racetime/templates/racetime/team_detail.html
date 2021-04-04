@@ -46,6 +46,9 @@
             </dd>
         </dl>
     </div>
+    {% if team.profile %}
+        <p class="team-profile">{{ team.profile|urlize }}</p>
+    {% endif %}
     <h3>Roster</h3>
     {% if can_manage %}
         <a href="{% url 'edit_team' team=team.slug %}" class="btn category-nav">

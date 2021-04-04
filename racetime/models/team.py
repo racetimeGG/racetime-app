@@ -38,6 +38,14 @@ class Team(models.Model):
             'only use letters, numbers and hyphens.'
         ),
     )
+    profile = models.TextField(
+        null=True,
+        blank=True,
+        help_text=(
+            'Add some information to your team\'s public profile. It can '
+            'include anything you like.'
+        ),
+    )
     categories = models.ManyToManyField(
         'Category',
     )

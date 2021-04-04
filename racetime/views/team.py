@@ -150,6 +150,7 @@ class EditTeam(ManageTeam, generic.UpdateView):
         changed_fields = {
             'name',
             'avatar',
+            'profile',
         } & set(form.changed_data)
         if changed_fields:
             for field in changed_fields:
