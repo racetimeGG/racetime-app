@@ -1621,17 +1621,9 @@ class Entrant(models.Model):
                 self.save()
                 self.race.increment_version()
             if previous_comment:
-                msg = (
-                    '%(user)s changed their comment: "%(comment)s"'
-                    if self.race.comments_visible else
-                    '%(user)s changed their comment.'
-                )
+                msg = '%(user)s changed their comment.'
             else:
-                msg = (
-                    '%(user)s added a comment: "%(comment)s"'
-                    if self.race.comments_visible else
-                    '%(user)s added a comment.'
-                )
+                msg = '%(user)s added a comment.'
             self.race.add_message(
                 msg % {'user': self.user, 'comment': comment}
             )
