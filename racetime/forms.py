@@ -215,7 +215,7 @@ class TeamSelectField(forms.ModelMultipleChoiceField):
 
 class CategoryTeamsForm(forms.ModelForm):
     teams = TeamSelectField(
-        queryset=models.Team.objects.all(),
+        queryset=models.Team.objects.filter(formal=True),
         label='',
         required=False,
         widget=forms.CheckboxSelectMultiple,
