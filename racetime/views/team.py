@@ -186,7 +186,7 @@ class TeamMembers(MemberPageMixin, generic.TemplateView):
         }
 
 
-class AddOwner(MemberPageMixin, generic.FormView):
+class AddTeamOwner(MemberPageMixin, generic.FormView):
     form_class = forms.UserSelectForm
 
     def form_invalid(self, form):
@@ -238,7 +238,7 @@ class AddOwner(MemberPageMixin, generic.FormView):
         return http.HttpResponseRedirect(self.success_url)
 
 
-class RemoveOwner(MemberPageMixin, generic.FormView):
+class RemoveTeamOwner(MemberPageMixin, generic.FormView):
     form_class = forms.UserSelectForm
 
     def form_invalid(self, form):
@@ -294,7 +294,7 @@ class RemoveOwner(MemberPageMixin, generic.FormView):
         return http.HttpResponseRedirect(redirect_to)
 
 
-class AddMember(MemberPageMixin, generic.FormView):
+class AddTeamMember(MemberPageMixin, generic.FormView):
     form_class = forms.UserSelectForm
 
     def form_invalid(self, form):
@@ -340,7 +340,7 @@ class AddMember(MemberPageMixin, generic.FormView):
         return http.HttpResponseRedirect(self.success_url)
 
 
-class RemoveMember(MemberPageMixin, generic.FormView):
+class RemoveTeamMember(MemberPageMixin, generic.FormView):
     form_class = forms.UserSelectForm
 
     def form_invalid(self, form):
