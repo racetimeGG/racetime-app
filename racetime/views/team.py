@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 from django.views import generic
 
 from .base import UserMixin
@@ -36,7 +37,7 @@ class TeamData(Team):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('TeamData', 0)
         content = cache.get_or_set(
-            'team/%s/data' % self.kwargs.get('team'),
+            'team/%s/data' % slugify(self.kwargs.get('team')),
             self.get_json_data,
             age,
         )

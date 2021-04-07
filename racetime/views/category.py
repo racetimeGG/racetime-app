@@ -16,6 +16,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 from django.views import generic
 
 from .base import UserMixin
@@ -99,7 +100,7 @@ class CategoryData(Category):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('CategoryData', 0)
         content = cache.get_or_set(
-            '%s/data' % self.kwargs.get('category'),
+            '%s/data' % slugify(self.kwargs.get('category')),
             self.get_json_data,
             age,
         )

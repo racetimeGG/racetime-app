@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.text import slugify
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
@@ -266,7 +267,10 @@ class RaceData(RaceMixin, generic.View):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('RaceData', 0)
         content = cache.get_or_set(
-            '%s/%s/data' % (self.kwargs.get('category'), self.kwargs.get('race')),
+            '%s/%s/data' % (
+                slugify(self.kwargs.get('category')),
+                slugify(self.kwargs.get('race')),
+            ),
             self.get_json_data,
             age,
         )
@@ -347,7 +351,10 @@ class RaceRenders(RaceMixin, UserMixin, generic.View):
         else:
             age = settings.RT_CACHE_TIMEOUT.get('RaceRenders', 0)
             content = cache.get_or_set(
-                '%s/%s/renders' % (self.kwargs.get('category'), self.kwargs.get('race')),
+                '%s/%s/renders' % (
+                    slugify(self.kwargs.get('category')),
+                    slugify(self.kwargs.get('race')),
+                ),
                 self.get_json_data,
                 age,
             )
