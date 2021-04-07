@@ -169,7 +169,11 @@ class RaceBot:
         """
         If all entrants in the race are ready, begin the race countdown.
         """
-        if race['object'].can_begin and race['object'].auto_start:
+        if (
+            race['object'].auto_start
+            and race['object'].num_unready == 0
+            and race['object'].can_begin
+        ):
             race['object'].begin()
             race['object'].add_message(
                 'Everyone is ready. The race will begin in %(delta)d seconds!'
