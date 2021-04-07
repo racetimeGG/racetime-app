@@ -240,8 +240,6 @@ class RaceBot:
                 raise requests.RequestException
         except requests.RequestException as ex:
             notice_exception(ex)
-            self.logger.error('[Twitch] Could not fetch access token!')
-            self.logger.error(str(ex))
         else:
             data = resp.json()
             self.twitch_token = data.get('access_token')
@@ -280,10 +278,9 @@ class RaceBot:
                 })
                 if resp.status_code != 200:
                     raise requests.RequestException
-            except requests.RequestException as ex:
-                notice_exception(ex)
-                self.logger.error('[Twitch] API error occurred!')
-                self.logger.error(str(ex))
+            except requests.RequestException:
+                # This is almost always a blip on the Twitch API, and can be ignored.
+                pass
             else:
                 live_users = []
                 twitch_names = {}
