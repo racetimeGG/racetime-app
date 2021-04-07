@@ -417,7 +417,7 @@ Race.prototype.onSocketMessage = function(event) {
                 }
                 if (!this.vars.user.can_moderate) {
                     this.vars.user.can_monitor = Boolean(
-                        data.race.opened_by.id === this.vars.user.id
+                        (data.race.opened_by && data.race.opened_by.id === this.vars.user.id)
                         || data.race.monitors.some(user => user.id === this.vars.user.id)
                     );
                 }
