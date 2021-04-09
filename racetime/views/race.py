@@ -602,6 +602,9 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
 
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
+        self.filter = {"category__active": True, "unlisted": False}
+        if self.request.user.is_authenticated:
+            self.filter.pop("unlisted")
         age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
         content = cache.get_or_set('races/data', self.get_json_data, age)
         resp = http.HttpResponse(
@@ -618,8 +621,7 @@ class RaceListData(generic.View):
             'races': [
                 race.api_dict_summary(include_category=True)
                 for race in models.Race.objects.filter(
-                    category__active=True,
-                    unlisted=False,
+                    **self.filter
                 ).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
