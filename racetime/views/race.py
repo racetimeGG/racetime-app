@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import F
+from django.db.models import F, Q
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -614,16 +614,19 @@ class RaceListData(generic.View):
         return resp
 
     def current_races(self):
+        unlisted_filter = Q(unlisted=False)
+        if self.request.user.is_authenticated:
+            unlisted_filter |= Q(unlisted=True, entrant__user=self.request.user)
+
         return {
             'races': [
                 race.api_dict_summary(include_category=True)
                 for race in models.Race.objects.filter(
                     category__active=True,
-                    unlisted=False,
-                ).exclude(state__in=[
+                ).filter(unlisted_filter).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
-                ]).all()
+                ])
             ]
         }
 
