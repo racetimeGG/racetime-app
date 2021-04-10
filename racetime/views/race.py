@@ -19,7 +19,6 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
 from oauth2_provider.views import ScopedProtectedResourceView
-from itertools import chain
 
 from .base import CanModerateRaceMixin, CanMonitorRaceMixin, UserMixin
 from .. import forms, models
@@ -603,9 +602,9 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
 
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
-        self.unlisted = False
+        self.filter = {"category__active": True, "unlisted": False}
         if self.request.user.is_authenticated:
-            self.unlisted = True
+            self.filter.pop("unlisted")
         age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
         content = cache.get_or_set('races/data', self.get_json_data, age)
         resp = http.HttpResponse(
@@ -618,38 +617,16 @@ class RaceListData(generic.View):
         return resp
 
     def current_races(self):
-        # Find all the base races that are not unlisted
-        formatted_races = []
-        races = models.Race.objects.filter(
-                category__active=True,
-                unlisted=False,
-            ).exclude(state__in=[
-                models.RaceStates.finished,
-                models.RaceStates.cancelled,
-            ]).all()
-        for race in races:
-            formatted_races.append(race.api_dict_summary(include_category=True))
-        # If we did authenticate and we are unlisted
-        if self.unlisted == True:
-            unlisted = models.Race.objects.filter(
-                    category__active=True,
-                    unlisted=True,
+        return {
+            'races': [
+                race.api_dict_summary(include_category=True)
+                for race in models.Race.objects.filter(
+                    **self.filter
                 ).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
                 ]).all()
-            unlisted_races = []
-            # Check all of the unlisted races if the authenticated user is a part of the race or invited
-            for race in unlisted:
-                for entrant in race.api_dict_summary(include_category=True, include_entrants=True).get("entrants"):
-                    if entrant.get("user").get("id") == self.request.user.hashid:
-                        unlisted_races.append(race.api_dict_summary(include_category=True))
-                        found = True
-                        break
-            # Merge the lists back together
-            formatted_races = list(chain(formatted_races, unlisted_races))
-        return {
-            'races': formatted_races
+            ]
         }
 
     def get_json_data(self):
