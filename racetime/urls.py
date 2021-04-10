@@ -35,6 +35,8 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
         path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
         path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
+        path('<str:category>/<str:race>/monitor/purge/<str:message>', views.OAuthRaceChatPurge.as_view(), name='oauth2_chat_purge'),
+        path('<str:category>/<str:race>/monitor/delete/<str:message>', views.OAuthRaceChatDelete.as_view(), name='oauth2_chat_delete'),
     ])),
 
     path('team/', include([
