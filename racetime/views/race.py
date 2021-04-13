@@ -713,12 +713,12 @@ class RaceListData(generic.View):
         return {
             'races': [
                 race.api_dict_summary(include_category=True)
-                for race in models.Race.objects.filter(
+                for race in list(set(models.Race.objects.filter(
                     category__active=True,
                 ).filter(unlisted_filter).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
-                ])
+                ])))
             ]
         }
 
