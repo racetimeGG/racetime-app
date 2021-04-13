@@ -694,28 +694,33 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
 
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
-        age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
-        content = cache.get_or_set('races/data', self.get_json_data, age)
-        resp = http.HttpResponse(
-            content=content,
-            content_type='application/json',
-        )
-        if age:
-            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        self.unlisted_filter = Q(unlisted=False)
+        if self.request.user.is_authenticated:
+            self.unlisted_filter |= Q(unlisted=True, entrant__user=self.request.user)
+            resp = http.HttpResponse(
+                content=self.get_json_data(),
+                content_type='application/json',
+            )
+            return resp
+        else:
+            age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
+            content = cache.get_or_set('races/data', self.get_json_data, age)
+            resp = http.HttpResponse(
+                content=content,
+                content_type='application/json',
+            )
+            if age:
+                resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
+            resp['X-Date-Exact'] = timezone.now().isoformat()
+            return resp
 
     def current_races(self):
-        unlisted_filter = Q(unlisted=False)
-        if self.request.user.is_authenticated:
-            unlisted_filter |= Q(unlisted=True, entrant__user=self.request.user)
-
         return {
             'races': [
                 race.api_dict_summary(include_category=True)
                 for race in list(set(models.Race.objects.filter(
                     category__active=True,
-                ).filter(unlisted_filter).exclude(state__in=[
+                ).filter(self.unlisted_filter).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
                 ])))
