@@ -1,4 +1,5 @@
 {% extends 'racetime/base.html' %} {% load static %} {% block css %}
+<base target="_blank">
 <link rel="stylesheet" href="{% static 'racetime/style/race.css' %}"> {% endblock %} {% block js %} {{ js_vars|json_script:"race-vars" }}
 <script src="{% static 'racetime/script/race.js' %}"></script>
 {% endblock %} {% block title %} Race room ({{ race.slug }}) | {{ race.category.name }} | {% endblock %} {% block meta %}
@@ -13,7 +14,11 @@
 <meta property="og:description" content="This race was cancelled."> {% endif %} {% if meta_image %}
 <meta property="og:image" content="{{ meta_image }}"> {% endif %} {% endblock %} {% block header %}{% endblock header %} {% block nocurrentrace %}{% endblock nocurrentrace %} {% block footer %}{% endblock footer %} {% block main %}
 <style>
-    time {
+    .timer {
+        display: none !important;
+    }
+    
+    .go-spectate {
         display: none !important;
     }
 </style>
