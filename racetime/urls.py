@@ -107,6 +107,7 @@ urlpatterns = [
         path('csv', views.RaceCSV.as_view(), name='race_csv'),
         path('data', views.RaceData.as_view(), name='race_data'),
         path('mini', views.RaceMini.as_view(), name='race_mini'),
+        path('livesplit', views.RaceLivesplit.as_view(), name='race_livesplit'),
         path('log', views.RaceChatLog.as_view(), name='race_log'),
         path('renders', views.RaceRenders.as_view(), name='race_renders'),
         path('spectate', views.RaceSpectate.as_view(), name='race_spectate'),

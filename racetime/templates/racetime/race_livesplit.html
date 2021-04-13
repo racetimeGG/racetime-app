@@ -1,0 +1,44 @@
+{% extends 'racetime/base.html' %} {% load static %} {% block css %}
+<link rel="stylesheet" href="{% static 'racetime/style/race.css' %}"> {% endblock %} {% block js %} {{ js_vars|json_script:"race-vars" }}
+<script src="{% static 'racetime/script/race.js' %}"></script>
+{% endblock %} {% block title %} Race room ({{ race.slug }}) | {{ race.category.name }} | {% endblock %} {% block meta %}
+<meta property="og:title" content="{{ race.category.name }} ~ {{ race.goal_str }} ({{ race.state_info.verbose_value }})"> {% if race.is_preparing %}
+<meta name="description" content="Race room open, {% if race.state == 'open' %}anyone may join this race{% else %}by invitation only{% endif %}.">
+<meta property="og:description" content="Race room open, {% if race.state == 'open' %}anyone may join this race{% else %}by invitation only{% endif %}."> {% elif race.is_pending or race.is_in_progress %}
+<meta name="description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} are currently racing.">
+<meta property="og:description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} are currently racing."> {% elif race.state == 'finished' %}
+<meta name="description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} finished this race in {{ race.timer_str }}.">
+<meta property="og:description" content="{{ race.entrants_count }} entrant{{ race.entrants_count|pluralize }} finished this race in {{ race.timer_str }}."> {% else %}
+<meta name="description" content="This race was cancelled.">
+<meta property="og:description" content="This race was cancelled."> {% endif %} {% if meta_image %}
+<meta property="og:image" content="{{ meta_image }}"> {% endif %} {% endblock %} {% block header %}{% endblock header %} {% block nocurrentrace %}{% endblock nocurrentrace %} {% block footer %}{% endblock footer %} {% block main %}
+<style>
+    time {
+        display: none !important;
+    }
+</style>
+<div class="race-intro">
+    {% include 'racetime/race/intro.html' %}
+</div>
+<div class="race-entrants">
+    {% include 'racetime/race/entrants.html' %}
+</div>
+<div class="race-monitor">{% if can_monitor %} {% include 'racetime/race/monitor.html' %} {% endif %}</div>
+{% endblock %} {% block aside %} {% include 'racetime/race/aside.html' with popout=True %} {% endblock %} {% block prefooter %}
+<div class="race-nav">
+    <ul>
+        <li data-nav="info">
+            <i class="material-icons">info</i>
+            <span class="title">Info</span>
+        </li>
+        <li data-nav="entrants">
+            <i class="material-icons">list_alt</i>
+            <span class="title">Entrants</span>
+        </li>
+        <li class="active" data-nav="chat">
+            <i class="material-icons">chat</i>
+            <span class="title">Chat</span>
+        </li>
+    </ul>
+</div>
+{% endblock %}

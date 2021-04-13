@@ -59,6 +59,7 @@ from .race import (
     RaceData,
     RaceListData,
     RaceMini,
+    RaceLivesplit,
     RaceRenders,
     RaceSpectate,
 )
@@ -188,6 +189,7 @@ __all__ = [
     'RaceData',
     'RaceListData',
     'RaceMini',
+    'RaceLivesplit',
     'RaceRenders',
     'RaceSpectate',
     # race_actions

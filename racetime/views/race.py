@@ -97,6 +97,10 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
+class RaceLivesplit(Race):
+    template_name_suffix = '_livesplit'
+
+
 class RaceSpectate(Race):
     template_name_suffix = '_spectate'
 
