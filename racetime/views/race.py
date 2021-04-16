@@ -97,7 +97,7 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
-class RaceLivesplit(Race):
+class RaceLiveSplit(Race):
     template_name_suffix = '_livesplit'
 
 
@@ -187,47 +187,9 @@ class RaceChatDelete(RaceChatMixin):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class OAuthRaceChatDelete(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
-    required_scopes = ['chat_delete']
-
+    required_scopes = ['race_action']
     def post(self, request, *args, **kwargs):
-        race = self.get_object()
-        message = self.get_message(race)
-
-        if message.is_system:
-            return http.JsonResponse({
-                'errors': ['System messages cannot be deleted.'],
-            }, status=422)
-
-        if not self.user.is_staff and race.chat_is_closed:
-            return http.JsonResponse({
-                'errors': [
-                    'This race chat is now closed. Please contact staff if '
-                    'you need to delete something.'
-                ],
-            }, status=422)
-
-        if not message.deleted:
-            message.deleted = True
-            message.deleted_by = self.user
-            message.deleted_at = timezone.now()
-            message.save()
-
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(race.slug, {
-            'type': 'chat.delete',
-            'delete': {
-                'id': message.hashid,
-                'user': (
-                    message.user.api_dict_summary(race=race)
-                    if message.user else None
-                ),
-                'bot': message.bot.name if message.is_bot else None,
-                'is_bot': message.is_bot,
-                'deleted_by': self.user.api_dict_summary(race=race),
-            },
-        })
-
-        return http.HttpResponse()
+        RaceChatDelete.post(self, request, *args, **kwargs)
 
 
 class RaceChatPurge(RaceChatMixin):
@@ -272,45 +234,9 @@ class RaceChatPurge(RaceChatMixin):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class OAuthRaceChatPurge(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
-    required_scopes = ['chat_purge']
-
+    required_scopes = ['race_action']
     def post(self, request, *args, **kwargs):
-        race = self.get_object()
-        message = self.get_message(race)
-
-        if message.is_bot or message.is_system:
-            return http.JsonResponse({
-                'errors': ['Bot/System messages cannot be purged.'],
-            }, status=422)
-
-        if not self.user.is_staff and race.chat_is_closed:
-            return http.JsonResponse({
-                'errors': [
-                    'This race chat is now closed. Please contact staff if '
-                    'you need to delete something.'
-                ],
-            }, status=422)
-
-        models.Message.objects.filter(
-            user=message.user,
-            race=race,
-            deleted=False,
-        ).update(
-            deleted=True,
-            deleted_by=self.user,
-            deleted_at=timezone.now(),
-        )
-
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(race.slug, {
-            'type': 'chat.purge',
-            'purge': {
-                'user': message.user.api_dict_summary(race=race),
-                'purged_by': self.user.api_dict_summary(race=race),
-            },
-        })
-
-        return http.HttpResponse()
+        RaceChatPurge.post(self, request, *args, **kwargs)
 
 
 class RaceChatLog(RaceMixin, UserMixin, generic.View):
