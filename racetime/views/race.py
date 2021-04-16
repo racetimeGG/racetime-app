@@ -6,6 +6,7 @@ from channels.layers import get_channel_layer
 from django import http
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F, Q
@@ -97,6 +98,7 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
+@method_decorator(login_required, name='dispatch')
 class RaceLiveSplit(Race):
     template_name_suffix = '_livesplit'
 
