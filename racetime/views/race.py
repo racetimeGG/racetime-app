@@ -6,9 +6,10 @@ from channels.layers import get_channel_layer
 from django import http
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import F
+from django.db.models import F, Q
 from django.db.transaction import atomic
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -97,6 +98,11 @@ class RaceMini(Race):
     template_name_suffix = '_mini'
 
 
+@method_decorator(login_required, name='dispatch')
+class RaceLiveSplit(Race):
+    template_name_suffix = '_livesplit'
+
+
 class RaceSpectate(Race):
     template_name_suffix = '_spectate'
 
@@ -116,6 +122,27 @@ class RaceChatMixin(CanModerateRaceMixin, RaceMixin, generic.View):
             )
         except models.Message.DoesNotExist:
             raise http.Http404
+
+
+class BotMixin:
+    """
+    Mixin for views accessible by category bots.
+
+    TODO: This should live somewhere more central, probably.
+    """
+    def get_bot(self, category):
+        _, oauth_request = self.verify_request(self.request)
+        return models.Bot.objects.filter(
+            application=oauth_request.client,
+            category=category,
+            active=True,
+        ).first()
+
+    def form_invalid(self, form):
+        return http.JsonResponse(
+            {'errors': form.errors},
+            status=422,
+        )
 
 
 class RaceChatDelete(RaceChatMixin):
@@ -160,6 +187,13 @@ class RaceChatDelete(RaceChatMixin):
         return http.HttpResponse()
 
 
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthRaceChatDelete(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
+    required_scopes = ['race_action']
+    def post(self, request, *args, **kwargs):
+        RaceChatDelete.post(self, request, *args, **kwargs)
+
+
 class RaceChatPurge(RaceChatMixin):
     def post(self, request, *args, **kwargs):
         race = self.get_object()
@@ -198,6 +232,13 @@ class RaceChatPurge(RaceChatMixin):
         })
 
         return http.HttpResponse()
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthRaceChatPurge(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
+    required_scopes = ['race_action']
+    def post(self, request, *args, **kwargs):
+        RaceChatPurge.post(self, request, *args, **kwargs)
 
 
 class RaceChatLog(RaceMixin, UserMixin, generic.View):
@@ -387,27 +428,6 @@ class RaceFormMixin(RaceMixin, UserMixin):
         kwargs['category'] = self.get_category()
         kwargs['can_moderate'] = kwargs['category'].can_moderate(self.user)
         return kwargs
-
-
-class BotMixin:
-    """
-    Mixin for views accessible by category bots.
-
-    TODO: This should live somewhere more central, probably.
-    """
-    def get_bot(self, category):
-        _, oauth_request = self.verify_request(self.request)
-        return models.Bot.objects.filter(
-            application=oauth_request.client,
-            category=category,
-            active=True,
-        ).first()
-
-    def form_invalid(self, form):
-        return http.JsonResponse(
-            {'errors': form.errors},
-            status=422,
-        )
 
 
 class BaseCreateRace(RaceFormMixin, generic.CreateView):
@@ -602,28 +622,36 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
 
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
-        age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
-        content = cache.get_or_set('races/data', self.get_json_data, age)
-        resp = http.HttpResponse(
-            content=content,
-            content_type='application/json',
-        )
-        if age:
-            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        self.unlisted_filter = Q(unlisted=False)
+        if self.request.user.is_authenticated:
+            self.unlisted_filter |= Q(unlisted=True, entrant__user=self.request.user)
+            resp = http.HttpResponse(
+                content=self.get_json_data(),
+                content_type='application/json',
+            )
+            return resp
+        else:
+            age = settings.RT_CACHE_TIMEOUT.get('RaceListData', 0)
+            content = cache.get_or_set('races/data', self.get_json_data, age)
+            resp = http.HttpResponse(
+                content=content,
+                content_type='application/json',
+            )
+            if age:
+                resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
+            resp['X-Date-Exact'] = timezone.now().isoformat()
+            return resp
 
     def current_races(self):
         return {
             'races': [
                 race.api_dict_summary(include_category=True)
-                for race in models.Race.objects.filter(
+                for race in list(set(models.Race.objects.filter(
                     category__active=True,
-                    unlisted=False,
-                ).exclude(state__in=[
+                ).filter(self.unlisted_filter).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
-                ]).all()
+                ])))
             ]
         }
 

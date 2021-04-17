@@ -1,0 +1,47 @@
+{% extends 'racetime/base.html' %} {% load static %} {% block css %}
+<base target="_blank">
+<link rel="stylesheet" href="{% static 'racetime/style/race.css' %}"> {% endblock %} {% block js %} {{ js_vars|json_script:"race-vars" }}
+<script src="{% static 'racetime/script/race.js' %}"></script>
+{% endblock %}
+{% block header %}{% endblock header %} 
+{% block nocurrentrace %}{% endblock nocurrentrace %} 
+{% block footer %}{% endblock footer %} 
+{% block main %}
+<style>
+    .timer {
+        display: none !important;
+    }
+    
+    .go-spectate {
+        display: none !important;
+    }
+</style>
+<div class="race-intro">
+    {% include 'racetime/race/intro.html' %}
+</div>
+<div class="race-entrants">
+    {% include 'racetime/race/entrants.html' %}
+</div>
+<div class="race-monitor">{% if can_monitor %} {% include 'racetime/race/monitor.html' %} {% endif %}</div>
+{% endblock %} 
+    {% block aside %} 
+        {% include 'racetime/race/aside.html' with popout=True %}
+    {% endblock %}
+{% block prefooter %}
+<div class="race-nav">
+    <ul>
+        <li data-nav="info">
+            <i class="material-icons">info</i>
+            <span class="title">Info</span>
+        </li>
+        <li data-nav="entrants">
+            <i class="material-icons">list_alt</i>
+            <span class="title">Entrants</span>
+        </li>
+        <li class="active" data-nav="chat">
+            <i class="material-icons">chat</i>
+            <span class="title">Chat</span>
+        </li>
+    </ul>
+</div>
+{% endblock %}
