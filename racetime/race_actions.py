@@ -358,7 +358,10 @@ class Message:
 
     def assert_can_chat(self, race, user):
         can_moderate = race.category.can_moderate(user)
-        can_monitor = race.can_monitor(user)
+        can_monitor = race.can_monitor(user) or user.teammember_set.filter(
+            invite=False,
+            team__categories=race.category,
+        ).exists()
 
         if (
             not can_monitor
