@@ -36,7 +36,7 @@ class UserRating:
     def set_rating(self, rating):
         original_rating = self.ranking.rating
 
-        if self.entrant.finish_time and (
+        if self.entrant.finish_time and not self.entrant.dq and (
             not self.ranking.best_time
             or self.entrant.finish_time < self.ranking.best_time
         ):

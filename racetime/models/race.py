@@ -953,7 +953,11 @@ class Race(models.Model):
         with atomic():
             self.state = RaceStates.finished.value
             self.ended_at = timezone.now()
-            if not self.entrant_set.filter(finish_time__isnull=False):
+            if not self.entrant_set.filter(
+                finish_time__isnull=False,
+                dq=False,
+                dnf=False,
+            ):
                 # Nobody finished, so race should be cancelled.
                 self.state = RaceStates.cancelled.value
                 self.cancelled_at = self.ended_at
