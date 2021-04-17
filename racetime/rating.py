@@ -12,6 +12,7 @@ class UserRating:
 
         self.entrant = entrant
         self.user = entrant.user
+        self.is_banned = entrant.user.is_banned_from_category(race.category)
         try:
             self.ranking = UserRanking.objects.get(
                 user=entrant.user,
@@ -30,10 +31,10 @@ class UserRating:
             )
             self.ranking.rating = self.ranking.calculated_rating
 
-    def save(self):
-        self.ranking.save()
-
     def set_rating(self, rating):
+        if self.is_banned:
+            return
+
         original_rating = self.ranking.rating
 
         if self.entrant.finish_time and not self.entrant.dq and (
