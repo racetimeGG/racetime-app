@@ -74,7 +74,7 @@ class SetTeam:
     commands = ['team']
 
     def action(self, race, user, data):
-        team_str = (data.get('team') or data.get('comment', '')).lower().strip()
+        team_str = (data.get('team') or data.get('comment', '')).strip()
         available_teams = race.get_available_teams(user)
         if not team_str:
             raise SafeException(
@@ -85,7 +85,7 @@ class SetTeam:
                 'You must specify a team. Available teams are: "new" (create '
                 'a new team).'
             )
-        if team_str == 'new':
+        if team_str.lower() == 'new':
             race.create_team(user)
         elif team_str in available_teams:
             race.join_team(user, available_teams[team_str])
