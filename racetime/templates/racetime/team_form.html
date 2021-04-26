@@ -8,6 +8,34 @@
     {% endif %}
 {% endblock %}
 
+{% block js %}
+    {% if not team %}
+        <script>
+        $(function() {
+            var changedSlug = false;
+            $(document).on('change', '#id_slug', function() {
+                changedSlug = $(this).val() !== '';
+            });
+            $(document).on('blur', '#id_name', function() {
+                var $slug = $('#id_slug');
+                var nameVal = $(this).val()
+                var slugVal = $slug.val();
+                if (!nameVal || (slugVal && changedSlug)) return;
+                $slug.val(nameVal
+                    .toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/&/g, '-and-')
+                    .replace(/[^\w\-]+/g, '')
+                    .replace(/--+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '')
+                );
+            });
+        });
+        </script>
+    {% endif %}
+{% endblock %}
+
 {% block main %}
     {% if team %}
         {% include 'racetime/team/manage_tabs.html' with current='edit_team' %}
