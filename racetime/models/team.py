@@ -30,12 +30,14 @@ class Team(models.Model):
         ],
     )
     slug = models.SlugField(
-        null=True,
+        max_length=50,
         unique=True,
+        validators=[validators.MinLengthValidator(3)],
         help_text=(
             'Forms part of the URL of your team page, e.g. "your-team" will '
             'give "racetime.gg/team/your-team". Slug must be unique, and can '
-            'only use letters, numbers and hyphens.'
+            'only use letters, numbers and hyphens. You cannot change this '
+            'later.'
         ),
     )
     profile = models.TextField(

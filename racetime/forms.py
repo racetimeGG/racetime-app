@@ -609,6 +609,12 @@ class TeamForm(forms.ModelForm):
             )
         return avatar
 
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if slug == 'new':
+            raise ValidationError('That slug is not a valid choice.')
+        return slug
+
 
 class TeamCreateForm(TeamForm):
     class Meta:
