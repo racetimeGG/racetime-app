@@ -98,6 +98,7 @@ main {
     border: 1px solid #1da674;
     border-radius: 4px;
     padding: 5px;
+    z-index: 10;
     position: absolute;
         top: 0;
         right: 0;
