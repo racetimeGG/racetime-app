@@ -1,6 +1,8 @@
 import json
 import random
 from urllib.parse import urlencode
+from math import floor
+from datetime import timedelta
 
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
 from django.conf import settings
@@ -510,16 +512,21 @@ def _format_timer(delta, format_str):
     )
 
 
+def _round_down_to_second(delta):
+    rounded_seconds = floor(delta.total_seconds() / 1000) * 1000
+    return timedelta(seconds=rounded_seconds)
+
+
 def timer_html(delta, deciseconds=True):
     if deciseconds:
         return _format_timer(delta, '{}{:01}:{:02}:{:02}<small>.{}</small>')
-    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
+    return _format_timer(_round_down_to_second(delta), '{}{:01}:{:02}:{:02}')
 
 
 def timer_str(delta, deciseconds=True):
     if deciseconds:
         return _format_timer(delta, '{}{:01}:{:02}:{:02}.{}')
-    return _format_timer(delta, '{}{:01}:{:02}:{:02}')
+    return _format_timer(_round_down_to_second(delta), '{}{:01}:{:02}:{:02}')
 
 
 def twitch_auth_url(request):
