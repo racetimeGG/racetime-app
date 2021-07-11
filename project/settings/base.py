@@ -220,6 +220,7 @@ RT_SITE_INFO = {
 RT_CACHE_TIMEOUT = {
     'RaceListData': 30,
     'CategoryData': 60,
+    'CategoryListData': 60,
     'RaceData': 5,
     'RaceRenders': 15,
 }

@@ -117,6 +117,31 @@ class CategoryData(Category):
         return self.get_object().dump_json_data()
 
 
+class CategoryListData(generic.View):
+    def get(self, request):
+        age = settings.RT_CACHE_TIMEOUT.get('CategoryListData', 0)
+        content = cache.get_or_set(
+            'categories/data',
+            self.get_json_data,
+            age,
+        )
+        resp = http.HttpResponse(
+            content=content,
+            content_type='application/json',
+        )
+        if age:
+            resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        return resp
+
+    def get_json_data(self):
+        return json.dumps({
+            'categories': [
+                c.api_dict_summary() for c in Category.model.objects.all()
+            ]
+        })
+
+
 class CategoryRaceData(Category):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
