@@ -70,6 +70,7 @@ urlpatterns = [
         path('races/data', views.UserRaceData.as_view(), name='user_race_list_data'),
     ])),
 
+    path('categories/data', views.CategoryListData.as_view(), name='category_list_data'),
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
