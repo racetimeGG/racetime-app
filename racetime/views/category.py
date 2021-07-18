@@ -137,7 +137,7 @@ class CategoryListData(generic.View):
     def get_json_data(self):
         return json.dumps({
             'categories': [
-                c.api_dict_summary() for c in Category.model.objects.all()
+                c.api_dict_summary() for c in Category.model.objects.filter(active=True).order_by('name')
             ]
         })
 
