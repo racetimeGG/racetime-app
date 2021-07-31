@@ -201,6 +201,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             'the race timer to switch between detailed and simple mode.'
         ),
     )
+    hide_avatars_while_racing = models.BooleanField(
+        default=False,
+        verbose_name='Hide other racers\'s avatars while racing',
+        help_text=(
+            'Hide user avatars while in a race.'
+        )
+    )
     twitch_code = models.CharField(
         max_length=30,
         null=True,
@@ -316,6 +323,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.pronouns:
             return ' / '.join(self.pronouns.split('/'))
         return ''
+
+    @property
+    def hide_all_avatars(self):
+        """
+        Determine whether to hide others' avatars based on user preference
+        and race status.
+        """
+        return self.active_race_entrant and self.hide_avatars_while_racing
 
     @cached_property
     def team_invites(self):
