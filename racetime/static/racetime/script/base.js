@@ -35,13 +35,19 @@ $(function() {
         timer -= secs * 1000;
         var ds = (timer - (timer % 100)) / 100;
 
-        $(this).html(
+        var currentTimerHtml =
             (negative ? '-' : '')
             + hours
             + ':' + ('00' + mins).slice(-2)
             + ':' + ('00' + secs).slice(-2)
-            + '<small>.' + ('' + ds) + '</small>'
-        );
+            + '<small>.' + ('' + ds) + '</small>';
+
+        var displayedTime = $(this).attr('displayed-time');
+
+        if (currentTimerHtml != displayedTime) {
+            $(this).html(currentTimerHtml);
+            $(this).attr('displayed-time', currentTimerHtml);
+        }
     };
     var autotick = function() {
         $('time.autotick').each(updateTimer);
