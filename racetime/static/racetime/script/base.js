@@ -42,11 +42,11 @@ $(function() {
             + ':' + ('00' + secs).slice(-2)
             + '<small>.' + ('' + ds) + '</small>';
 
-        var displayedTime = $(this).attr('displayed-time');
+        var displayedTime = $(this).data('displayed-time');
 
-        if (currentTimerHtml != displayedTime) {
+        if (currentTimerHtml !== displayedTime) {
             $(this).html(currentTimerHtml);
-            $(this).attr('displayed-time', currentTimerHtml);
+            $(this).data('displayed-time', currentTimerHtml);
         }
     };
     var autotick = function() {
