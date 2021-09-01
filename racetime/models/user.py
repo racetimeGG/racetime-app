@@ -142,12 +142,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True,
         choices=(
-            ('', 'None'),
-            ('she/her', 'Feminine (she/her)'),
-            ('he/him', 'Masculine (he/him)'),
-            ('they/them', 'Neutral (they/them)'),
+            ('', 'none'),
+            ('she/her', 'she/her'),
+            ('he/him', 'he/him'),
+            ('they/them', 'they/them'),
+            ('she/they', 'she/they'),
+            ('he/they', 'he/they'),
+            ('other/ask!', 'other/ask!'),
         ),
-        verbose_name='Preferred pronouns',
         help_text='Select which pronouns appear next to your name on the site.',
     )
     profile_bio = models.TextField(
