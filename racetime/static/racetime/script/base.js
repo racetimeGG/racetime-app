@@ -20,12 +20,12 @@ $(function() {
             $(this).closest('.race-status').addClass('go');
         }
 
-        timer = Math.abs(timer);
-
         if ($('body').hasClass('timer-no-deciseconds')) {
-            // Always round up to the nearest second if deciseconds are hidden
-            timer = timer + 1000 - (timer % 100);
+            // Always round down to the nearest second if deciseconds are hidden
+            timer = Math.floor(timer / 1000) * 1000;
         }
+
+        timer = Math.abs(timer);
 
         var hours = (timer - (timer % 3600000)) / 3600000;
         timer -= hours * 3600000;
