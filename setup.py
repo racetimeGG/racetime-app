@@ -16,6 +16,6 @@ setup(
         'Pillow>=6.2.1,<8.3',
         'requests>=2.22.0,<2.25',
         'trueskill==0.4.5',
-        'websockets>=8.1,<9.0',
+        'websockets>=8.1,<11.0',
     ],
 )
