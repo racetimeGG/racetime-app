@@ -3,7 +3,7 @@
   "dependencies": {
     "jquery": "^3.6.0",
     "jquery-form": "^4.3.0",
-    "jquery-ui-dist": "^1.12.1",
+    "jquery-ui-dist": "^1.13.0",
     "js-cookie": "^2.2.1"
   }
 }
