@@ -225,11 +225,10 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Load race information from the DB.
         """
-        try:
-            race = Race.objects.get(
-                slug=self.scope['url_route']['kwargs']['race']
-            )
-        except Race.DoesNotExist:
+        race = Race.objects.filter(
+            slug=self.scope['url_route']['kwargs']['race'],
+        ).order_by('-opened_at').first()
+        if race is None:
             self.state = {}
         else:
             self.state['category_slug'] = race.category.slug
