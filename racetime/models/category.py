@@ -546,6 +546,14 @@ class Emote(models.Model):
         help_text='Recommended size: 56x56. Keep file size small as possible.',
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['category', 'name'],
+                name='unique_emote_category_name',
+            ),
+        ]
+
 
 class AuditLog(AbstractAuditLog):
     """
