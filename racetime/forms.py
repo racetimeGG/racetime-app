@@ -642,3 +642,32 @@ class TeamDeleteForm(forms.ModelForm):
         if name != self.instance.name:
             raise ValidationError('Name is incorrect.')
         return name
+
+
+class EmoteForm(forms.ModelForm):
+    class Meta:
+        fields = (
+            'name',
+            'image',
+        )
+        model = models.Emote
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not re.fullmatch(r'[A-Z][A-Za-z]+', name):
+            raise ValidationError('That emote name is not valid.')
+        return name
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        try:
+            if image and image.size > 16 * 1024:
+                raise ValidationError(
+                    'Uploaded emote is too large (limit: 16kb)'
+                )
+        except AttributeError:
+            raise ValidationError(
+                'Unable to determine emote image size, upload was possibly '
+                'corrupted.'
+            )
+        return image

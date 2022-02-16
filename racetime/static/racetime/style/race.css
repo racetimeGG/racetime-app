@@ -328,6 +328,12 @@ main {
     font-weight: bold;
 }
 
+.race-chat > .messages > li > .message .emote {
+    height: 22px;
+    vertical-align: top;
+    width: 22px;
+}
+
 .race-chat > .messages > li > .deleted {
     color: #b9b4b9;
     font-style: italic;

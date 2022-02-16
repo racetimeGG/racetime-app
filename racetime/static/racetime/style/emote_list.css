@@ -1,0 +1,12 @@
+.emote-list li {
+    align-items: center;
+    display: flex;
+}
+.emote-list img {
+    height: 22px;
+    width: 22px;
+    margin-right: 5px;
+}
+.emote-list form {
+    margin-left: 5px;
+}

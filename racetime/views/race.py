@@ -68,6 +68,10 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
             'meta_image': race.category.image.url if race.category.image else None,
             'js_vars': {
                 'chat_history': race.chat_history(),
+                'emotes': {
+                    emote.name: emote.image.url
+                    for emote in race.category.emote_set.all().order_by('name')
+                },
                 'hide_comments': race.hide_comments,
                 'room': str(race),
                 'server_time_utc': timezone.now().isoformat(),

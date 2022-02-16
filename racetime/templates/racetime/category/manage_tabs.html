@@ -6,7 +6,7 @@
     </li>
     <li{% if current == 'category_goals' %} class="current"{% endif %}>
         <a href="{% url 'category_goals' category=category.slug %}">
-            Manage goals
+            Goals
         </a>
     </li>
     <li{% if current == 'category_mods' %} class="current"{% endif %}>
@@ -14,19 +14,24 @@
             Moderators &amp; ownership
         </a>
     </li>
+    <li{% if current == 'category_emotes' %} class="current"{% endif %}>
+        <a href="{% url 'category_emotes' category=category.slug %}">
+            Emotes
+        </a>
+    </li>
     <li{% if current == 'category_teams' %} class="current"{% endif %}>
         <a href="{% url 'category_teams' category=category.slug %}">
-            Manage team access
+            Team access
         </a>
     </li>
     <li{% if current == 'category_bots' %} class="current"{% endif %}>
         <a href="{% url 'category_bots' category=category.slug %}">
-            Manage bots
+            Bots
         </a>
     </li>
     <li{% if current == 'category_audit_log' %} class="current"{% endif %}>
         <a href="{% url 'category_audit_log' category=category.slug %}">
-            View audit log
+            Audit log
         </a>
     </li>
 </ul>

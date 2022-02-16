@@ -140,6 +140,10 @@ class Category(models.Model):
         default=10,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
     )
+    max_emotes = models.PositiveSmallIntegerField(
+        default=50,
+        validators=[MinValueValidator(0), MaxValueValidator(1000)],
+    )
     slug_words = models.TextField(
         null=True,
         blank=True,
@@ -275,6 +279,10 @@ class Category(models.Model):
                     state__in=[RaceStates.finished, RaceStates.cancelled],
                 )
             ],
+            'emotes': {
+                emote.name: emote.image.url
+                for emote in self.emote_set.all().order_by('name')
+            },
         }, cls=DjangoJSONEncoder)
 
         return value
@@ -525,6 +533,20 @@ class Goal(models.Model):
         return self.name
 
 
+class Emote(models.Model):
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.CASCADE,
+    )
+    name = models.CharField(
+        max_length=16,
+        help_text='Must be one word with camel-case, e.g. "PogChamp".',
+    )
+    image = models.ImageField(
+        help_text='Recommended size: 56x56. Keep file size small as possible.',
+    )
+
+
 class AuditLog(AbstractAuditLog):
     """
     The audit log records any changes made within a category.
@@ -581,6 +603,8 @@ class AuditLog(AbstractAuditLog):
         ('goal_activate', 're-activated a goal'),
         ('goal_deactivate', 'deactivated a goal'),
         ('goal_rename', 'renamed a goal'),
+        ('emote_add', 'added an emote'),
+        ('emote_remove', 'deleted an emote'),
         # No longer in use
         ('owner_change', 'transferred category ownership'),
     )

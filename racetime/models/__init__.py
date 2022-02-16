@@ -1,6 +1,6 @@
 from .admin import Bulletin
 from .bot import Bot
-from .category import AuditLog, Category, CategoryRequest, Goal
+from .category import AuditLog, Category, CategoryRequest, Emote, Goal
 from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
@@ -23,6 +23,7 @@ __all__ = [
     'AuditLog',
     'Category',
     'CategoryRequest',
+    'Emote',
     'Goal',
     # chat
     'Message',

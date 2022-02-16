@@ -873,6 +873,11 @@ a .timer {
     white-space: pre-wrap;
     word-break: break-word;
 }
+.race-info > .info .emote {
+    height: 22px;
+    vertical-align: top;
+    width: 22px;
+}
 
 .race-entrants > ol > .no-entrants {
     border-top: 1px solid #08090a;

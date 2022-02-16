@@ -625,6 +625,96 @@ class RemoveModerator(ModPageMixin, generic.FormView):
         return http.HttpResponseRedirect(self.success_url)
 
 
+class CategoryEmotes(ModPageMixin, generic.TemplateView):
+    template_name = 'racetime/emote_list.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'add_form': forms.EmoteForm(),
+            'available_emotes': max(0, self.category.max_emotes - self.category.emote_set.all().count()),
+            'category': self.category,
+            'emotes': self.category.emote_set.all().order_by('name'),
+        }
+
+
+class AddEmote(ManageCategory, generic.FormView):
+    form_class = forms.EmoteForm
+
+    @property
+    def success_url(self):
+        return reverse('category_emotes', args=(self.category.slug,))
+
+    def form_invalid(self, form):
+        messages.error(self.request, form.errors)
+        return http.HttpResponseRedirect(self.success_url)
+
+    def form_valid(self, form):
+        emote = form.save(commit=False)
+        emote.category = self.category
+
+        if self.category.emote_set.filter(name=emote.name).exists():
+            messages.error(
+                self.request,
+                '%(emote)s is already an emote. Delete it first to re-upload.'
+                % {'emote': emote.name}
+            )
+            return http.HttpResponseRedirect(self.success_url)
+        if self.category.emote_set.all().count() >= self.category.max_emotes:
+            messages.error(
+                self.request,
+                'You cannot add any more emotes to this category. Contact '
+                'staff if you need more slots.'
+            )
+            return http.HttpResponseRedirect(self.success_url)
+
+        emote.save()
+        models.AuditLog.objects.create(
+            actor=self.user,
+            category=self.category,
+            action='emote_add',
+            new_value=emote.name,
+        )
+
+        messages.success(
+            self.request,
+            '%(emote)s emote added.'
+            % {'emote': emote.name}
+        )
+
+        return http.HttpResponseRedirect(self.success_url)
+
+
+class RemoveEmote(ManageCategory, generic.View):
+    @property
+    def success_url(self):
+        return reverse('category_emotes', args=(self.category.slug,))
+
+    def post(self, request, emote_name, *args, **kwargs):
+        category = self.category
+        emote = category.emote_set.filter(name=emote_name).first()
+        if emote:
+            emote.delete()
+            models.AuditLog.objects.create(
+                actor=self.user,
+                category=self.category,
+                action='emote_remove',
+                old_value=emote_name,
+            )
+            messages.success(
+                self.request,
+                '%(emote)s deleted.'
+                % {'emote': emote_name}
+            )
+        else:
+            messages.error(
+                self.request,
+                'Emote not found (was it already deleted?).'
+            )
+
+        return http.HttpResponseRedirect(self.success_url)
+
+
 class CategoryTeams(UserPassesTestMixin, UserMixin, generic.UpdateView):
     form_class = forms.CategoryTeamsForm
     model = models.Category
