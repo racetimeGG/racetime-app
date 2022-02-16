@@ -19,6 +19,7 @@ def context_processor(request):
             visible_from__lte=timezone.now(),
             visible_to__gte=timezone.now(),
         ),
+        'emotes': {},
         'login_next': request.GET.get('next', request.get_full_path),
         'site_info': settings.RT_SITE_INFO,
     }

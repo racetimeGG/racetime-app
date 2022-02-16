@@ -45,6 +45,10 @@ class Category(UserMixin, generic.DetailView):
             'can_moderate': can_moderate,
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(can_moderate),
+            'emotes': {
+                emote.name: emote.image.url
+                for emote in self.object.emote_set.all().order_by('name')
+            },
             'filter_by': filter_by,
             'is_favourite': (
                 self.user.is_authenticated

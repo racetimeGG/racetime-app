@@ -818,6 +818,11 @@ a .timer {
     overflow: hidden;
     word-break: break-word;
 }
+.race-list > ol > li > .race-row > .race > .info .emote {
+    height: 17px;
+    width: 17px;
+    vertical-align: top;
+}
 .race-list > ol > li > .race-row > .watch-live {
     border: 5px solid #1a1c20;
     border-radius: 10px;

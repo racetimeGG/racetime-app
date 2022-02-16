@@ -117,6 +117,7 @@
                 </footer>
             {% endblock %}
         {% endblock %}
+        {{ emotes|json_script:"emotes" }}
         <script src="{% static 'jquery.min.js' %}"></script>
         <script src="{% static 'jquery-ui.min.js' %}"></script>
         <script src="{% static 'jquery.form.min.js' %}"></script>

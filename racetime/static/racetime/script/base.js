@@ -215,4 +215,28 @@ $(function() {
     $(document).on('click', '.modal .close', function(event) {
         $(this).closest('.modal').remove();
     });
+
+    window.emotes = JSON.parse($('#emotes').text());
+    window.displayEmotes = function() {
+        if ($(this).hasClass('emotes-done') || Object.keys(window.emotes).length === 0) {
+            return;
+        }
+        $(this)[0].childNodes.forEach(function(text) {
+            if (text.nodeType !== Node.TEXT_NODE) return;
+            var span = document.createElement('span');
+            span.classList.add('text');
+            span.textContent = text.textContent;
+            text.parentNode.replaceChild(span, text);
+        });
+
+        var search = new RegExp('\\b(' + Object.keys(window.emotes).join('|') + ')\\b', 'g');
+        $(this).find('.text').each(function() {
+            $(this).html($(this).html().replace(search, function(match) {
+                return '<img src="' + window.emotes[match] + '" class="emote" alt="' + match + '" title="' + match + '">';
+            }));
+        });
+        $(this).addClass('emotes-done');
+    };
+
+    $('.emotes-enabled').each(window.displayEmotes);
 });

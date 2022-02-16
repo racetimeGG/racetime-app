@@ -259,12 +259,11 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
                 }
             }
         }
-        if (Object.keys(this.vars.emotes).length > 0) {
-            var emotes = this.vars.emotes;
-            var search = new RegExp('(' + Object.keys(emotes).join('|') + ')\\b', 'gi');
+        if (Object.keys(window.emotes).length > 0) {
+            var search = new RegExp('\\b(' + Object.keys(window.emotes).join('|') + ')\\b', 'g');
             $message.find('.mention-search').each(function() {
                 $(this).html($(this).html().replace(search, function(match) {
-                    return '<img src="' + emotes[match] + '" class="emote" alt="' + match + '" title="' + match + '">';
+                    return '<img src="' + window.emotes[match] + '" class="emote" alt="' + match + '" title="' + match + '">';
                 }));
             });
         }
@@ -546,28 +545,7 @@ Race.prototype.handleRenders = function(renders, version) {
         $('.race-info .info a').each(function() {
             $(this).attr('target', '_blank');
         });
-        var $info = $('.race-info .info');
-        if (!$info.hasClass('emotes-done')) {
-            $info[0].childNodes.forEach(function(text) {
-                if (text.nodeType !== Node.TEXT_NODE) return;
-                var span = document.createElement('span');
-                span.classList.add('text');
-                span.textContent = text.textContent;
-                text.parentNode.replaceChild(span, text);
-            });
-            console.log('emote search');
-            console.log($info.html());
-            if (Object.keys(self.vars.emotes).length > 0) {
-                var emotes = self.vars.emotes;
-                var search = new RegExp('(' + Object.keys(emotes).join('|') + ')\\b', 'gi');
-                $info.find('.text').each(function() {
-                    $(this).html($(this).html().replace(search, function(match) {
-                        return '<img src="' + emotes[match] + '" class="emote" alt="' + match + '" title="' + match + '">';
-                    }));
-                });
-            }
-            $info.addClass('emotes-done');
-        }
+        window.displayEmotes.call($('.race-info .info'));
     });
 };
 
