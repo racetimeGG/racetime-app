@@ -870,6 +870,7 @@ a .timer {
 }
 .race-info > .info {
     color: #8c898c;
+    white-space: pre-wrap;
     word-break: break-word;
 }
 

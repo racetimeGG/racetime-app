@@ -138,11 +138,17 @@ class BotSetInfo:
     name = 'setinfo'
 
     def action(self, race, bot, data):
+        if 'info' in data:
+            # Backwards compatibility.
+            data = {'info_user': data['info']}
         form = forms.RaceSetInfoForm(data=data)
         if not form.is_valid():
             raise SafeException(form.errors)
 
-        race.info = form.cleaned_data.get('info')
+        if 'info_bot' in form.changed_data:
+            race.info_bot = form.cleaned_data.get('info_bot')
+        if 'info_user' in form.changed_data:
+            race.info_user = form.cleaned_data.get('info_user')
         race.version = F('version') + 1
         race.save()
 

@@ -53,10 +53,17 @@ class Race(models.Model):
             + mark_safe('<strong>Custom races cannot be recorded.</strong>')
         ),
     )
-    info = models.TextField(
+    info_bot = models.TextField(
         max_length=1000,
         null=True,
         blank=True,
+        verbose_name='Info (bot-supplied)',
+    )
+    info_user = models.TextField(
+        max_length=1000,
+        null=True,
+        blank=True,
+        verbose_name='Info',
         help_text='Any useful information for race entrants (e.g. randomizer seed).',
     )
     slug = models.SlugField()
@@ -326,6 +333,8 @@ class Race(models.Model):
                 'custom': not self.goal,
             },
             'info': self.info,
+            'info_bot': self.info_bot,
+            'info_user': self.info_user,
             'team_race': self.team_race,
             'entrants_count': self.entrants_count,
             'entrants_count_finished': self.entrants_count_finished,
@@ -423,6 +432,13 @@ class Race(models.Model):
         Return the current race goal (or custom goal) as a string.
         """
         return str(self.goal) if self.goal else self.custom_goal
+
+    @property
+    def info(self):
+        return '\n'.join([
+            self.info_bot or '',
+            self.info_user or '',
+        ])
 
     @property
     def is_preparing(self):

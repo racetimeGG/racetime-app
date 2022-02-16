@@ -317,8 +317,8 @@ class RaceForm(forms.ModelForm):
 
     def __init__(self, category, can_moderate, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'info' in self.fields:
-            self.fields['info'].widget = forms.TextInput()
+        if 'info_user' in self.fields:
+            self.fields['info_user'].widget = forms.TextInput()
         if 'goal' in self.fields and isinstance(self.fields['goal'], forms.ModelChoiceField):
             self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
                 category=category,
@@ -381,7 +381,7 @@ class RaceCreationForm(RaceForm):
             'team_race',
             'invitational',
             'unlisted',
-            'info',
+            'info_user',
             'recordable',
             'require_even_teams',
             'start_delay',
@@ -413,7 +413,7 @@ class RaceEditForm(RaceForm):
             'goal',
             'custom_goal',
             'unlisted',
-            'info',
+            'info_user',
             'recordable',
             'require_even_teams',
             'start_delay',
@@ -447,7 +447,7 @@ class StartedRaceEditForm(RaceForm):
     class Meta:
         fields = (
             'unlisted',
-            'info',
+            'info_user',
             'allow_comments',
             'hide_comments',
             'allow_midrace_chat',
@@ -465,7 +465,8 @@ class RaceSetInfoForm(forms.ModelForm):
 
     class Meta:
         fields = (
-            'info',
+            'info_bot',
+            'info_user',
         )
         model = models.Race
 
