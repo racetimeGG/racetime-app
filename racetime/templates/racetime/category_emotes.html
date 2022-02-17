@@ -1,0 +1,49 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'racetime/style/emote_list.css' %}">
+{% endblock %}
+
+{% block title %}
+    Emotes | {{ category.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/manage_tabs.html' with current='category_emotes' %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+    </ol>
+    <h2>Emotes</h2>
+    <p>
+        Manage emotes that can be used in this category. Any emotes you upload
+        here must abide by our rules, be less than 16kb in size and below 54x54
+        pixels.
+    </p>
+    <ul class="emote-list">
+        {% for emote in current_emotes %}
+            <li>
+                <img src="{{ emote.image.url }}" alt="">
+                <span class="name">{{ emote.name }}</span>
+                <form action="{% url 'category_emotes_remove' category=category.slug emote_name=emote.name %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn dangerous" type="submit">Remove</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    {% if available_emotes > 0 %}
+        <h3>Add a new emote</h3>
+        <p class="help">You can add up to {{ available_emotes }} more emote{{ available_emotes|pluralize }}.</p>
+        <form class="add-emote-form layout-form" action="{% url 'category_emotes_add' category=category.slug %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <ul>{{ add_form.as_ul }}</ul>
+            <button class="btn" type="submit">Add emote</button>
+        </form>
+    {% else %}
+        <p>
+            You have reached the maximum number of emotes for this
+            category. To add more, you must first delete an existing emote.
+        </p>
+    {% endif %}
+{% endblock %}

@@ -239,6 +239,16 @@ class CategoryLeaderboardsData(CategoryLeaderboards):
             }
 
 
+class CategoryEmotes(Category):
+    template_name = 'racetime/emote_list.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            **super().get_context_data(**kwargs),
+            'emote_list': self.object.emote_set.all().order_by('name'),
+        }
+
+
 class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
     form_class = forms.CategoryRequestForm
     model = models.CategoryRequest
@@ -629,8 +639,8 @@ class RemoveModerator(ModPageMixin, generic.FormView):
         return http.HttpResponseRedirect(self.success_url)
 
 
-class CategoryEmotes(ModPageMixin, generic.TemplateView):
-    template_name = 'racetime/emote_list.html'
+class CategoryManageEmotes(ManageCategory, generic.TemplateView):
+    template_name = 'racetime/category_emotes.html'
 
     def get_context_data(self, **kwargs):
         return {
@@ -638,7 +648,7 @@ class CategoryEmotes(ModPageMixin, generic.TemplateView):
             'add_form': forms.EmoteForm(),
             'available_emotes': max(0, self.category.max_emotes - self.category.emote_set.all().count()),
             'category': self.category,
-            'emotes': self.category.emote_set.all().order_by('name'),
+            'current_emotes': self.category.emote_set.all().order_by('name'),
         }
 
 

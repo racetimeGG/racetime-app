@@ -50,6 +50,9 @@
                 <a href="{% url 'race_mini' category=race.category.slug race=race.slug %}" class="popout" title="Show this panel in a separate window" onclick="open(this.href, '{{ race.slug }}', 'width=340,height=720'); return false">
                     <i class="material-icons">open_in_new</i>
                 </a>
+                <a href="{% url 'category_list_emotes' category=race.category.slug %}" class="popout" title="Custom emotes list" onclick="open(this.href, '{{ category.slug }}.emotes', 'width=240,height=500'); return false">
+                    <i class="material-icons">insert_emoticon</i>
+                </a>
             {% endif %}
             <button type="submit" class="btn">Chat</button>
         </div>
