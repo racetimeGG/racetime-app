@@ -40,6 +40,10 @@
                 <img src="{{ emote.image.url }}" alt="{{ emote.name }}" title="{{ emote.name }}">
                 <span class="name">{{ emote.name }}</span>
             </li>
+        {% empty %}
+            <li class="help">
+                No custom emotes available. Ask the category owners to add some!
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}
