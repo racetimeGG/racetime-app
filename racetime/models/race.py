@@ -438,7 +438,7 @@ class Race(models.Model):
         return '\n'.join([
             self.info_bot or '',
             self.info_user or '',
-        ])
+        ]).strip()
 
     @property
     def is_preparing(self):
