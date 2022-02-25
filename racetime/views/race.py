@@ -567,7 +567,7 @@ class BaseEditRace(RaceFormMixin, generic.UpdateView):
                 % {'user': who_changed, 'goal': race.goal_str}
             )
             messaged = True
-        if 'info' in form.changed_data:
+        if 'info_user' in form.changed_data:
             race.add_message(
                 '%(user)s updated the race information.'
                 % {'user': who_changed}
