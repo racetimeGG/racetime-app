@@ -406,6 +406,13 @@ class OAuthRaceCreationForm(RaceCreationForm, OAuthRaceForm):
         required=False,
     )
 
+    class Meta:
+        fields = (
+            *RaceCreationForm.Meta.fields,
+            'info_bot',
+        )
+        model = models.Race
+
 
 class RaceEditForm(RaceForm):
     class Meta:
