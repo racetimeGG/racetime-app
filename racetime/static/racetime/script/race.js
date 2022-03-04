@@ -545,7 +545,9 @@ Race.prototype.handleRenders = function(renders, version) {
         $('.race-info .info a').each(function() {
             $(this).attr('target', '_blank');
         });
-        window.displayEmotes.call($('.race-info .info'));
+        if ($('.race-info .info').length) {
+            window.displayEmotes.call($('.race-info .info'));
+        }
     });
 };
 
