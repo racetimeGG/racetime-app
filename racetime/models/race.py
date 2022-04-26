@@ -151,6 +151,14 @@ class Race(models.Model):
             'not finished in this time will be disqualified.'
         ),
     )
+    time_limit_auto_complete = models.BooleanField(
+        default=False,
+        verbose_name='Time limit auto-complete',
+        help_text=(
+            'Complete the race instead of canceling it if the time limit '
+            'is reached with no finishers.'
+        ),
+    )
     streaming_required = models.BooleanField(
         default=True,
         help_text=(
@@ -347,6 +355,7 @@ class Race(models.Model):
             'cancelled_at': self.cancelled_at,
             'unlisted': self.unlisted,
             'time_limit': self.time_limit,
+            'time_limit_auto_complete': self.time_limit_auto_complete,
             'require_even_teams': self.require_even_teams,
             'streaming_required': self.streaming_required,
             'auto_start': self.auto_start,
@@ -973,7 +982,7 @@ class Race(models.Model):
                 finish_time__isnull=False,
                 dq=False,
                 dnf=False,
-            ):
+            ) and not self.time_limit_auto_complete:
                 # Nobody finished, so race should be cancelled.
                 self.state = RaceStates.cancelled.value
                 self.cancelled_at = self.ended_at
@@ -1070,6 +1079,7 @@ class Race(models.Model):
                 recordable=not self.custom_goal,
                 start_delay=self.start_delay,
                 time_limit=self.time_limit,
+                time_limit_auto_complete=self.time_limit_auto_complete,
                 streaming_required=self.streaming_required,
                 allow_comments=self.allow_comments,
                 hide_comments=self.hide_comments,
