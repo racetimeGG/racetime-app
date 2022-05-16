@@ -142,7 +142,7 @@ class Undone:
     def action(self, race, user, data):
         entrant = race.in_race(user)
         if entrant:
-            entrant.update_split('__FINISH__', '-')
+            entrant.update_split('', '-', True)
             entrant.undone()
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
@@ -157,7 +157,7 @@ class Split:
             split_name = data.get('split', '')
             if not split_name:
                 raise SafeException('Split name must not be empty')
-            entrant.update_split(split_name, data['time'])
+            entrant.update_split(split_name, data.get('time', '-'), data.get('is_finish', False))
         else:
             raise SafeException('Possible sync error. Refresh to contniue.')
 
@@ -204,7 +204,7 @@ class UndoneOrUnforfeit:
     def action(self, race, user, data):
         entrant = race.in_race(user)
         if entrant and entrant.finish_time:
-            entrant.update_split('__FINISH__', '-')
+            entrant.update_split('', '-', True)
             entrant.undone()
         elif entrant and entrant.dnf:
             entrant.unforfeit()
