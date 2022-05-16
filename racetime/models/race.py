@@ -655,6 +655,13 @@ class Race(models.Model):
             'version': self.version,
         })
 
+    def broadcast_split(self, split):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(self.slug, {
+            'type': 'race.split',
+            'split': split,
+        })
+
     def increment_version(self):
         """
         Increment the race version number, to track new changes.
@@ -1955,6 +1962,17 @@ class Entrant(models.Model):
             )
         else:
             raise SafeException('Possible sync error. Refresh to continue.')
+
+    def update_split(self, split_name, split_time):
+        split = {
+            'split_name': split_name,
+            'split_time': split_time,
+            'is_undo': split_time == '-',
+            'is_finish': split_name == '__FINISH__',
+            'username': self.user.name
+        }
+
+        self.race.broadcast_split(split)
 
     def __str__(self):
         return str(self.user)

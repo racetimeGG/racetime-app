@@ -82,6 +82,7 @@ from .race_actions import (
     RequestInvite,
     SetTeam,
     Undone,
+    Split,
     Unforfeit,
     Unready,
 )
@@ -211,6 +212,7 @@ __all__ = [
     'Forfeit',
     'Join',
     'Leave',
+    'Split',
     'Message',
     'Ready',
     'RequestInvite',
