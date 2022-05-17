@@ -1969,7 +1969,7 @@ class Entrant(models.Model):
             'split_time': split_time,
             'is_undo': split_time == '-',
             'is_finish': is_finish,
-            'username': self.user.name
+            'username': str(self.user)
         }
 
         self.race.broadcast_split(split)
