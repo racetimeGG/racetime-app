@@ -128,6 +128,7 @@ urlpatterns = [
         path('unready', views.Unready.as_view(), name='unready'),
         path('done', views.Done.as_view(), name='done'),
         path('undone', views.Undone.as_view(), name='undone'),
+        path('split', views.Split.as_view(), name='split'),
         path('forfeit', views.Forfeit.as_view(), name='forfeit'),
         path('unforfeit', views.Unforfeit.as_view(), name='unforfeit'),
         path('add_comment', views.AddComment.as_view(), name='add_comment'),

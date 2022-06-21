@@ -179,6 +179,9 @@ class RaceConsumer(AsyncWebsocketConsumer):
         await self.deliver('race.data', race=event['race'], version=event['version'])
         await self.deliver('race.renders', renders=event['renders'], version=event['version'])
 
+    async def race_split(self, event):
+        await self.deliver(event['type'], split=event['split'])
+
     async def send_race(self):
         """
         Send pre-loaded race data (assuming we have it).

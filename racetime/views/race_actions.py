@@ -56,6 +56,10 @@ class Undone(race_actions.Undone, RaceAction):
     pass
 
 
+class Split(race_actions.Split, RaceAction):
+    pass
+
+
 class Forfeit(race_actions.Forfeit, RaceAction):
     pass
 
