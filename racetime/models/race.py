@@ -1964,8 +1964,11 @@ class Entrant(models.Model):
             raise SafeException('Possible sync error. Refresh to continue.')
 
     def update_split(self, split_name, split_time, is_finish):
+        """
+        Sends live split data to racers including undos and finishes.
+        """
         split = {
-            'split_name': split_name,
+            'split_name': split_name.lower(),
             'split_time': split_time,
             'is_undo': split_time == '-',
             'is_finish': is_finish,
