@@ -134,6 +134,14 @@ class BotRemoveMonitor(BotEntrantAction):
         race.remove_monitor(entrant.user, removed_by=bot)
 
 
+class BotOverrideStream(BotEntrantAction):
+    name = 'override_stream'
+
+    def action(self, race, bot, data):
+        entrant = self.get_entrant(race, data)
+        entrant.override_stream(overridden_by=bot)
+
+
 class BotSetInfo:
     name = 'setinfo'
 
@@ -172,6 +180,7 @@ actions = {
         BotRemoveEntrant,
         BotAddMonitor,
         BotRemoveMonitor,
+        BotOverrideStream,
         BotSetInfo,
     ]
 }
