@@ -9,7 +9,7 @@ setup(
         'channels>=3.0,<4.0',
         'Django>=3.2,<3.3',
         'django-admin-list-filter-dropdown',
-        'django-oauth-toolkit>=1.7,<2.0',
+        'django-oauth-toolkit>=1.7,<3.0',
         'django-recaptcha>=3.0,<3.1',
         'hashids>=1.3,<1.4',
         'mpmath>=1.2,<1.3',
