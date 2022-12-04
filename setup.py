@@ -6,7 +6,7 @@ setup(
     install_requires=[
         'asgiref>=3.5,<3.6',
         'beautifulsoup4>=4.11,<4.12',
-        'channels>=3.0,<4.0',
+        'channels>=3.0,<5.0',
         'Django>=3.2,<3.3',
         'django-admin-list-filter-dropdown',
         'django-oauth-toolkit>=1.7,<2.0',
