@@ -10,7 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Q
 from django.db.transaction import atomic
 from django.forms import model_to_dict
-from django.shortcuts import resolve_url
+from django.shortcuts import resolve_url, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -19,8 +19,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
-from oauth2_provider.models import get_access_token_model
-from oauth2_provider.views import ProtectedResourceView
+from oauth2_provider.models import get_access_token_model, get_application_model
+from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 
 from .base import UserMixin
 from .. import forms, models
@@ -542,6 +542,26 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
             )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class OAuthAuthorize(AuthorizationView):
+    """
+    Backwards compatibility fix for LiveSplit.
+
+    LiveSplit sends a PKCE code challenge but it's not implemented correctly.
+    So remove the challenge if the auth request comes from LiveSplit.
+    """
+    def get(self, request, *args, **kwargs):
+        if 'code_challenge' in request.GET or 'code_challenge_method' in request.GET:
+            application = get_object_or_404(get_application_model(), client_id=request.GET.get('client_id'))
+            if application.name == 'LiveSplit':
+                query = request.GET.copy()
+                if 'code_challenge' in query:
+                    del query['code_challenge']
+                if 'code_challenge_method' in query:
+                    del query['code_challenge_method']
+                return http.HttpResponseRedirect(self.request.path_info + '?' + query.urlencode())
+        return super().get(request, *args, **kwargs)
 
 
 class OAuthUserInfo(ProtectedResourceView):

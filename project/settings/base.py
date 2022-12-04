@@ -13,8 +13,6 @@ APPEND_SLASH = False
 
 # Application definition
 
-ASGI_APPLICATION = 'racetime.routing.application'
-
 INSTALLED_APPS = [
     'racetime',
     'django.contrib.admin',
@@ -66,6 +64,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'project.asgi.application'
 WSGI_APPLICATION = 'project.wsgi.application'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
@@ -134,8 +133,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'node_modules', 'jquery', 'dist'),
     os.path.join(BASE_DIR, 'node_modules', 'jquery-form', 'dist'),
     os.path.join(BASE_DIR, 'node_modules', 'jquery-ui-dist'),
-    os.path.join(BASE_DIR, 'node_modules', 'js-cookie', 'src'),
+    os.path.join(BASE_DIR, 'node_modules', 'js-cookie', 'dist'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 # Media files

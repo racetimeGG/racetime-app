@@ -7,6 +7,7 @@ from urllib.parse import quote
 class AppConfig(BaseAppConfig):
     name = 'racetime'
     verbose_name = 'racetime'
+    default_auto_field = 'django.db.models.AutoField'
 
     def ready(self):
         from . import signals  # noqa

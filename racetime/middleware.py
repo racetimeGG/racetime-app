@@ -5,7 +5,7 @@ from django.middleware.csrf import (
     CsrfViewMiddleware,
     REASON_NO_CSRF_COOKIE,
     REASON_BAD_TOKEN,
-    _compare_salted_tokens,
+    _compare_masked_tokens,
     _sanitize_token,
 )
 
@@ -20,7 +20,7 @@ class CsrfViewMiddlewareTwitch(CsrfViewMiddleware):
 
         request_csrf_token = request.GET.get('state', '')
         request_csrf_token = _sanitize_token(request_csrf_token)
-        if not _compare_salted_tokens(request_csrf_token, csrf_token):
+        if not _compare_masked_tokens(request_csrf_token, csrf_token):
             return self._reject(request, REASON_BAD_TOKEN)
 
         return self._accept(request)
@@ -58,12 +58,11 @@ class OAuth2TokenMiddleware(BaseMiddleware):
             return qs.get('token')[0]
         return None
 
-    def populate_scope(self, scope):
+    async def __call__(self, scope, receive, send):
+        scope = dict(scope)
         scope['oauth_token'] = (
             self.get_token_from_header(scope)
             or self.get_token_from_query(scope)
             or None
         )
-
-    async def resolve_scope(self, scope):
-        pass
+        return await self.inner(scope, receive, send)

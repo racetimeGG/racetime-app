@@ -1,5 +1,5 @@
 -e .
-channels_redis
+channels_redis>=3.4,<4.0
 django-cors-middleware
 django-extensions
 django-debug-toolbar
