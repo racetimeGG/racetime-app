@@ -10,18 +10,30 @@ from ... import models
 from ...utils import generate_race_slug
 
 category_names = [
-    ('Cadence of Hyrule: Crypt of the NecroDancer Featuring The Legend of Zelda', 'CoH', 'coh'),
-    ('Mario Kart 8', 'MK 8', 'mk8'),
-    ('The Binding of Isaac', 'BoI', 'tboi'),
-    ('The Legend of Zelda: A Link to the Past', 'ALttP', 'alttp'),
-    ('The Legend of Zelda: A Link to the Past Randomizer', 'ALttPR', 'alttpr'),
-    ('The Legend of Zelda: Majora\'s Mask Randomizer', 'MMR', 'mmr'),
-    ('The Legend of Zelda: Ocarina of Time', 'OoT', 'oot'),
-    ('The Legend of Zelda: Ocarina of Time Randomizer', 'OoTR', 'ootr'),
-    ('Super Mario 64', 'SM64', 'sm64'),
-    ('Super Mario Sunshine', 'SMS', 'sms'),
-    ('Super Metroid', 'SM', 'sm'),
-    ('Miscellane­ous (unlisted)', 'Misc', 'misc'),
+    ('Cadence of Hyrule: Crypt of the NecroDancer Featuring The Legend of Zelda', 'CoH', 'coh', ''),
+    ('Mario Kart 8', 'MK 8', 'mk8', ''),
+    ('The Binding of Isaac', 'BoI', 'tboi', ''),
+    ('The Legend of Zelda: A Link to the Past', 'ALttP', 'alttp', 'The Legend of Zelda A Link to the Past'),
+    ('The Legend of Zelda: A Link to the Past Randomizer', 'ALttPR', 'alttpr', 'The Legend of Zelda A Link to the Past Randomizer'),
+    ('The Legend of Zelda: Majora\'s Mask', 'MM', 'mm', 'The Legend of Zelda Majoras Mask'),
+    ('The Legend of Zelda: Majora\'s Mask Randomizer', 'MMR', 'mmr', 'The Legend of Zelda Majoras Mask Randomizer'),
+    ('The Legend of Zelda: Ocarina of Time', 'OoT', 'oot', 'The Legend of Zelda Ocarina of Time'),
+    ('The Legend of Zelda: Ocarina of Time Randomizer', 'OoTR', 'ootr', 'The Legend of Zelda Ocarina of Time Randomizer'),
+    ('The Legend of Zelda: The Wind Waker', 'TWW', 'tww', 'The Legend of Zelda The Wind Waker'),
+    ('The Legend of Zelda: The Wind Waker Randomizer', 'TWWR', 'twwr', 'The Legend of Zelda The Wind Waker Randomizer'),
+    ('The Legend of Zelda: The Minish Cap', 'TMC', 'tmc', 'The Legend of Zelda The Minish Cap'),
+    ('The Legend of Zelda: The Minish Cap Randomizer', 'TMCR', 'tmcr', 'The Legend of Zelda The Minish Cap Randomizer'),
+    ('Super Mario 64', 'SM64', 'sm64', ''),
+    ('Super Mario Sunshine', 'SMS', 'sms', ''),
+    ('Super Mario Odyssey', 'SMO', 'smo', ''),
+    ('Pokémon Red', 'PkmnR', 'pkmnred', 'Pokemon Red'),
+    ('Pokémon Blue', 'PkmnB', 'pkmnblue', 'Pokemon Blue'),
+    ('Pokémon Gold', 'PkmnG', 'pkmngold', 'Pokemon Gold'),
+    ('Pokémon Silver', 'PkmnS', 'pkmnsilver', 'Pokemon Silver'),
+    ('Pokémon Crystal', 'PkmnC', 'pkmncrystal', 'Pokemon Crystal'),
+    ('Dr. Mario', 'DM', 'drmario', 'Dr Mario'),
+    ('Super Metroid', 'SM', 'sm', ''),
+    ('Miscellaneous (unlisted)', 'Misc', 'misc', 'unlisted'),
 ]
 goal_names = [
     'any%',
@@ -128,11 +140,12 @@ class Command(BaseCommand):
                 name=name,
             ))
 
-        for name, short_name, slug in category_names:
+        for name, short_name, slug, search_name in category_names:
             cat = models.Category.objects.create(
                 name=name,
                 short_name=short_name,
                 slug=slug,
+                search_name=search_name,
             )
             cat.owners.add(random.choice(users))
             cat.moderators.add(*random.sample(users, random.randint(0, 3)))
