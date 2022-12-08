@@ -12,6 +12,7 @@ class RaceForm(forms.ModelForm):
             num_races=Count('race__id'),
         ).order_by('-num_races', 'name'),
         required=False,
+        blank=True,
         widget=forms.RadioSelect,
     )
 
