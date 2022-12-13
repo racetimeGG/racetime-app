@@ -389,6 +389,12 @@ class SafeException(Exception):
     """
     pass
 
+class SyncError(SafeException):
+    """
+    Used to indicate an exception caused by a state mismatch between the user and the server.
+    """
+    pass
+
 
 def chunkify(items, size=100):
     """

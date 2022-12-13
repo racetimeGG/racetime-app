@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from racetime import forms, models
-from racetime.utils import SafeException
+from racetime.utils import SafeException, SyncError
 
 
 class Join:
@@ -27,7 +27,7 @@ class Leave:
         if entrant:
             entrant.leave()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot leave this race because you are not an entrant anyway. Refresh to continue.')
 
 
 class RequestInvite:
@@ -45,7 +45,7 @@ class CancelInvite:
         if entrant:
             entrant.cancel_request()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You do not have a join request to cancel. Refresh to continue.')
 
 
 class AcceptInvite:
@@ -56,7 +56,7 @@ class AcceptInvite:
         if entrant:
             entrant.accept_invite()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You have not been invited to join this race. Refresh to continue.')
 
 
 class DeclineInvite:
@@ -67,7 +67,7 @@ class DeclineInvite:
         if entrant:
             entrant.decline_invite()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You have not been invited to join this race. Refresh to continue.')
 
 
 class SetTeam:
@@ -111,7 +111,7 @@ class Ready:
         if entrant:
             entrant.is_ready()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot ready up because you are not in this race. Refresh to continue.')
 
 
 class Unready:
@@ -122,7 +122,7 @@ class Unready:
         if entrant:
             entrant.not_ready()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot unready because you are not in this race. Refresh to continue.')
 
 
 class Done:
@@ -133,7 +133,7 @@ class Done:
         if entrant:
             entrant.done()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot finish because you are not in this race. Refresh to continue.')
 
 
 class Undone:
@@ -145,7 +145,7 @@ class Undone:
             entrant.update_split('', '-', True)
             entrant.undone()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot undo your finish because you are not in this race. Refresh to continue.')
 
 
 class Split:
@@ -159,7 +159,7 @@ class Split:
                 raise SafeException('Split name must not be empty')
             entrant.update_split(split_name, data.get('time', '-'), data.get('is_finish', False))
         else:
-            raise SafeException('Possible sync error. Refresh to contniue.')
+            raise SyncError('You cannot split because you are not in this race. Refresh to continue.')
 
 
 class Forfeit:
@@ -170,7 +170,7 @@ class Forfeit:
         if entrant:
             entrant.forfeit()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot forfeit because you are not in this race. Refresh to continue.')
 
 
 class Unforfeit:
@@ -181,7 +181,7 @@ class Unforfeit:
         if entrant:
             entrant.unforfeit()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot undo your forfeit because you are not in this race. Refresh to continue.')
 
 
 class LeaveOrForfeit:
@@ -195,7 +195,7 @@ class LeaveOrForfeit:
             else:
                 entrant.forfeit()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot leave/forfeit because you are not in this race. Refresh to continue.')
 
 
 class UndoneOrUnforfeit:
@@ -209,7 +209,7 @@ class UndoneOrUnforfeit:
         elif entrant and entrant.dnf:
             entrant.unforfeit()
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot undo your finish/forfeit because you are not in this race. Refresh to continue.')
 
 
 class AddComment:
@@ -222,10 +222,13 @@ class AddComment:
 
         entrant = race.in_race(user)
         comment = form.cleaned_data.get('comment', '').strip()
-        if entrant and comment:
-            entrant.add_comment(comment)
+        if entrant:
+            if comment:
+                entrant.add_comment(comment)
+            else:
+                raise SyncError('You cannot add a blank comment. Refresh to continue.')
         else:
-            raise SafeException('Possible sync error. Refresh to continue.')
+            raise SyncError('You cannot add a comment because you are not in this race. Refresh to continue.')
 
 
 class ShowGoal:
@@ -358,14 +361,12 @@ class Message:
 
                 try:
                     return race_action.action(race, user, {'comment': msg})
-                except SafeException as ex:
-                    if str(ex) == 'Possible sync error. Refresh to continue.':
-                        raise SafeException(
-                            f'You cannot .{command} at this time (is your stream live yet?).'
-                            if command == 'ready' and race.streaming_required else
-                            f'You cannot .{command} at this time (try reloading if you get stuck).'
-                        )
-                    raise
+                except SyncError:
+                    raise SafeException(
+                        f'You cannot .{command} at this time (is your stream live yet?).'
+                        if command == 'ready' and race.streaming_required else
+                        f'You cannot .{command} at this time (try reloading if you get stuck).'
+                    )
 
         self.assert_can_chat(race, user)
 
