@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "jquery": "^3.6.1",
+    "jquery": "^3.6.3",
     "jquery-form": "^4.3",
     "jquery-ui-dist": "^1.13",
     "js-cookie": "^3.0"
