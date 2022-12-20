@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 setup(
     name='racetime',
     install_requires=[
-        'asgiref>=3.5,<3.6',
+        'asgiref>=3.5,<3.7',
         'beautifulsoup4>=4.11,<4.12',
         'channels>=3.0,<4.0',
         'Django>=3.2,<3.3',
