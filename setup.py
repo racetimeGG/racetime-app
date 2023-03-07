@@ -12,7 +12,7 @@ setup(
         'django-oauth-toolkit>=1.7,<2.0',
         'django-recaptcha>=3.0,<3.1',
         'hashids>=1.3,<1.4',
-        'mpmath>=1.2,<1.3',
+        'mpmath>=1.2,<1.4',
         'Pillow>=9.3,<10.0',
         'requests>=2.28,<2.29',
         'trueskill==0.4.5',
