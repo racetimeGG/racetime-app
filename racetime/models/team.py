@@ -1,12 +1,16 @@
 import json
+import random
 
 from django.core import validators
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
+from django.db.transaction import atomic
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from .abstract import AbstractAuditLog
+from ..utils import generate_team_name
 from ..validators import UsernameValidator
 
 
@@ -170,6 +174,19 @@ class Team(models.Model):
             or user in self.all_owners
         )
 
+    @atomic
+    def dissolve(self):
+        self.name = generate_team_name()
+        self.slug = slugify(self.name) + '-' + '%04d' % random.choice(range(1, 9999))
+        self.profile = None
+        self.formal = False
+        self.avatar = None
+        self.save()
+
+        self.categories.clear()
+        self.teammember_set.filter(invite=True).delete()
+        self.teammember_set.all().update(owner=False)
+
     def get_absolute_url(self):
         """
         Returns the URL of this team's landing page.
@@ -223,4 +240,5 @@ class TeamAuditLog(AbstractAuditLog):
         ('owner_remove', 'demoted an owner'),
         ('member_add', 'invited a member'),
         ('member_remove', 'removed a member'),
+        ('dissolve', 'dissolved the team'),
     )

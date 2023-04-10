@@ -53,16 +53,16 @@
     </form>
     {% if team %}
         <h3 class="dangerous">
-            Delete team
+            Dissolve team
         </h3>
         <p class="help">
-            This will permanently delete your team. This action <b>cannot</b> be undone!
+            This will permanently dissolve your team. This action <b>cannot</b> be undone!
             Make sure you're really really sure you really want to do this. Really.
         </p>
         <form class="layout-form dangerous" action="{% url 'delete_team' team=team.slug %}" method="post">
             {% csrf_token %}
             <ul>{{ delete_form.as_ul }}</ul>
-            <button class="btn" type="submit">Delete team</button>
+            <button class="btn" type="submit">Dissolve team</button>
         </form>
     {% endif %}
 {% endblock %}

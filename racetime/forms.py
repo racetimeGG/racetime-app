@@ -650,7 +650,7 @@ class TeamDeleteForm(forms.ModelForm):
             'name',
         )
         help_texts = {
-            'name': 'Enter the name of your team to confirm deletion.',
+            'name': 'Enter the name of your team to confirm dissolution.',
         }
         model = models.Team
 

@@ -160,10 +160,15 @@ class DeleteTeam(ManageTeam, generic.UpdateView):
 
     def form_valid(self, form):
         team = self.object.name
-        self.object.delete()
+        self.object.dissolve()
+        models.TeamAuditLog.objects.create(
+            actor=self.user,
+            team=self.object,
+            action='dissolve',
+        )
         messages.success(
             self.request,
-            '%(team)s has been deleted.' % {'team': team},
+            '%(team)s has been dissolved.' % {'team': team},
         )
         return http.HttpResponseRedirect(reverse('edit_account_teams'))
 
