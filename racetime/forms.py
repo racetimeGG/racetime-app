@@ -356,7 +356,7 @@ class RaceForm(forms.ModelForm):
 class OAuthRaceForm(RaceForm):
     def __init__(self, category, can_moderate, *args, **kwargs):
         self.category = category
-        super().__init__(category, can_moderate, *args, **kwargs)
+        super().__init__(category, True, *args, **kwargs)
 
     def clean_goal(self):
         goal = self.cleaned_data.get('goal')
