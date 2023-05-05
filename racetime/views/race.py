@@ -431,6 +431,11 @@ class RaceFormMixin(RaceMixin, UserMixin):
         kwargs = super().get_form_kwargs()
         kwargs['category'] = self.get_category()
         kwargs['can_moderate'] = kwargs['category'].can_moderate(self.user)
+        for field in models.Race._meta.get_fields():
+            if field.name in self.request.GET:
+                kwargs['initial'][field.name] = self.request.GET[field.name]
+                if field.name == 'custom_goal':
+                    kwargs['initial']['goal'] = ''
         return kwargs
 
 
