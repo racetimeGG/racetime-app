@@ -431,11 +431,6 @@ class RaceFormMixin(RaceMixin, UserMixin):
         kwargs = super().get_form_kwargs()
         kwargs['category'] = self.get_category()
         kwargs['can_moderate'] = kwargs['category'].can_moderate(self.user)
-        for field in models.Race._meta.get_fields():
-            if field.name in self.request.GET:
-                kwargs['initial'][field.name] = self.request.GET[field.name]
-                if field.name == 'custom_goal':
-                    kwargs['initial']['goal'] = ''
         return kwargs
 
 
@@ -488,6 +483,15 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
         self.user.log_action('race_create', self.request)
 
         return http.HttpResponseRedirect(race.get_absolute_url())
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        for field in self.get_form_class()._meta.fields:
+            if field in self.request.GET:
+                kwargs['initial'][field] = self.request.GET[field]
+                if field == 'custom_goal':
+                    kwargs['initial']['goal'] = ''
+        return kwargs
 
     def test_func(self):
         if not self.user.is_authenticated:
