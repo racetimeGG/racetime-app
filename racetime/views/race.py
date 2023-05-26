@@ -484,6 +484,15 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
 
         return http.HttpResponseRedirect(race.get_absolute_url())
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        for field in self.get_form_class()._meta.fields:
+            if field in self.request.GET:
+                kwargs['initial'][field] = self.request.GET[field]
+                if field == 'custom_goal':
+                    kwargs['initial']['goal'] = ''
+        return kwargs
+
     def test_func(self):
         if not self.user.is_authenticated:
             return False
