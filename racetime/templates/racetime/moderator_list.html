@@ -17,10 +17,16 @@
     <h2>Moderators &amp; ownership</h2>
     <p>
         Set which users hold ownership, or can moderate this category.
+    </p><p>
         Category owners have full control over the category's details, can
-        add/remove other owners and moderators, manage goals and bots.
-        Moderators have the ability to record races, disqualify
-        entrants and can also perform any monitor actions.
+        add/remove other owners and moderators, manage goals and bots. You can
+        add other owners, but only racetime.gg staff can remove owners (other
+        than themselves). If you choose to remove yourself as owner, you will
+        <strong>immediately</strong> lose access to manage this category. Be careful!
+    </p><p>
+        Moderators have the ability to record races, disqualify entrants and
+        can also perform any monitor actions. You can add and remove as many
+        moderators as you like.
     </p>
     <div class="division">
         <h3>Owners</h3>
@@ -29,20 +35,25 @@
             this category, and can manage everything within.
         </p>
         <ul class="mod-list">
-            {% for user in owners %}
+            {% for owner in owners %}
                 <li>
-                    {% include 'racetime/pops/user.html' with hide_pronouns=True %}
-                    <form action="{% url 'category_owners_remove' category=category.slug %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="user" value="{{ user.hashid }}">
-                        <button class="btn dangerous" type="submit">Remove</button>
-                    </form>
+                    {% include 'racetime/pops/user.html' with user=owner hide_pronouns=True %}
+                    {% if owner == user or can_remove_owners %}
+                        <form action="{% url 'category_owners_remove' category=category.slug %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="user" value="{{ owner.hashid }}">
+                            <button class="btn dangerous" type="submit">
+                                {% if owner == user %}Leave{% else %}Remove{% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
         <h3>Add a new owner</h3>
         <p class="help">
             Start typing in a name to add an owner to the list above.
+            Remember that owners <strong>can only be removed by staff</strong>.
         </p>
         <form class="add-owner-form layout-form" action="{% url 'category_owners_add' category=category.slug %}" method="post">
             {% csrf_token %}
@@ -56,12 +67,12 @@
             Users with moderator permission within this category.
         </p>
         <ul class="mod-list">
-            {% for user in moderators %}
+            {% for mod in moderators %}
                 <li>
-                    {% include 'racetime/pops/user.html' with hide_pronouns=True %}
+                    {% include 'racetime/pops/user.html' with user=mod hide_pronouns=True %}
                     <form action="{% url 'category_mods_remove' category=category.slug %}" method="post">
                         {% csrf_token %}
-                        <input type="hidden" name="user" value="{{ user.hashid }}">
+                        <input type="hidden" name="user" value="{{ mod.hashid }}">
                         <button class="btn dangerous" type="submit">Remove</button>
                     </form>
                 </li>

@@ -465,6 +465,7 @@ class CategoryModerators(ModPageMixin, generic.TemplateView):
         return {
             **super().get_context_data(**kwargs),
             'add_form': forms.UserSelectForm(),
+            'can_remove_owners': self.request.user.is_staff,
             'category': self.category,
             'owners': self.category.all_owners,
             'moderators': self.category.all_moderators,
@@ -526,6 +527,12 @@ class RemoveOwner(ModPageMixin, generic.FormView):
     def form_valid(self, form):
         user = form.cleaned_data.get('user')
 
+        if user != self.request.user and not self.request.user.is_staff:
+            messages.error(
+                self.request,
+                'You do not have permission to remove that owner.'
+            )
+            return http.HttpResponseRedirect(self.success_url)
         if user not in self.category.all_owners:
             messages.error(
                 self.request,
