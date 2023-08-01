@@ -1,6 +1,20 @@
 {% extends 'racetime/base.html' %}
 {% load static %}
 
+{% block css %}
+    <style>
+    .home-search-mobile {
+        display: none;
+    }
+    @media only screen and (max-width: 600px) {
+        .home-search-mobile {
+            display: block;
+            margin-bottom: 5px;
+        }
+    }
+    </style>
+{% endblock %}
+
 {% block main %}
     {% if not user.is_authenticated %}
     <h3 style="margin-top: 0">Welcome</h3>
@@ -11,6 +25,9 @@
         started.
     </p>
     {% endif %}
+    <div class="home-search-mobile">
+        {% include 'racetime/forms/search.html' %}
+    </div>
     <div class="search-filter home-search">
         <ul>
             <li class="label">Sort by:</li>
