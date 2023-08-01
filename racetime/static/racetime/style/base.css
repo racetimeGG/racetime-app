@@ -629,6 +629,27 @@ a .timer {
     color: #8c898c;
 }
 
+.home-links ul {
+    font-size: 15px;
+    margin-top: 10px;
+}
+.home-links li {
+    margin-top: 5px;
+}
+.home-links li .material-icons {
+    font-size: 18px;
+    margin-right: 4px;
+}
+.home-links li a {
+    align-items: center;
+    display: flex;
+    flex: 0 1 auto;
+    text-decoration: none;
+}
+.home-links li a span {
+    text-decoration: underline;
+}
+
 .category-intro {
     display: flex;
     padding-bottom: 10px;

@@ -75,6 +75,16 @@
 {% block aside %}
     {% include 'racetime/forms/search.html' %}
     {% if user.is_authenticated %}
+        <div class="home-links">
+            <ul>
+                <li>
+                    <a href="{% url 'request_category' %}">
+                        <i class="material-icons">add_box</i>
+                        <span>Request a new game/category</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
         <h3>Past races</h3>
         <div class="race-list">
             <ol>
