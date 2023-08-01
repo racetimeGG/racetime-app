@@ -5,11 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    {% include 'racetime/category/manage_tabs.html' with current='category_teams' %}
     <ol class="breadcrumbs">
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+        <li><a href="{% url 'category_teams' category=category.slug %}">teams</a></li>
     </ol>
-    <h2>Manage team access</h2>
+    <h2>{{ category }}</h2>
+    {% include 'racetime/category/manage_tabs.html' with current='category_teams' %}
+    <h3>Manage team access</h3>
     <p>
         Control teams that have special access to this category. Teams that you
         select here will be able to bypass certain restrictions on the category,

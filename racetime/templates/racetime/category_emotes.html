@@ -10,11 +10,13 @@
 {% endblock %}
 
 {% block main %}
-    {% include 'racetime/category/manage_tabs.html' with current='category_emotes' %}
     <ol class="breadcrumbs">
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+        <li><a href="{% url 'category_emotes' category=category.slug %}">emotes</a></li>
     </ol>
-    <h2>Emotes</h2>
+    <h2>{{ category }}</h2>
+    {% include 'racetime/category/manage_tabs.html' with current='category_emotes' %}
+    <h3>Emotes</h3>
     <p>
         Manage emotes that can be used in this category. Any emotes you upload
         here must abide by our rules, be less than 16kb in size and below 54x54

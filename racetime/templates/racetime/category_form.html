@@ -5,11 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    {% include 'racetime/category/manage_tabs.html' with current='edit_category' %}
     <ol class="breadcrumbs">
         <li><a href="{{ category.get_absolute_url }}">{{ category.slug }}</a></li>
+        <li><a href="{% url 'edit_category' category=category.slug %}">edit</a></li>
     </ol>
-    <h2>Edit category</h2>
+    <h2>{{ category }}</h2>
+    {% include 'racetime/category/manage_tabs.html' with current='edit_category' %}
+    <h3>Edit category</h3>
     <p>
         With the form below, you can change basic details about this category,
         such as its cover image, info, and stream settings. For more details
