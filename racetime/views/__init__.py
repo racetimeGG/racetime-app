@@ -42,10 +42,8 @@ from .category import (
 )
 from .goal import (
     CreateGoal,
-    DeactivateGoal,
     EditGoal,
     GoalList,
-    ReactivateGoal,
 )
 from .home import Home
 from .race import (
@@ -180,10 +178,8 @@ __all__ = [
     'UnfavouriteCategory',
     # goal
     'CreateGoal',
-    'DeactivateGoal',
     'EditGoal',
     'GoalList',
-    'ReactivateGoal',
     # home
     'Home',
     # race

@@ -1,3 +1,5 @@
+import json
+
 from django import http
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -63,7 +65,7 @@ class GoalList(GoalPageMixin, generic.ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         return {
             **super().get_context_data(object_list=object_list, **kwargs),
-            'goal_form': forms.GoalForm(),
+            'goal_form': forms.GoalCreateForm(),
             'category': self.category,
         }
 
@@ -72,7 +74,7 @@ class GoalList(GoalPageMixin, generic.ListView):
 
 
 class CreateGoal(GoalPageMixin, generic.CreateView):
-    form_class = forms.GoalForm
+    form_class = forms.GoalCreateForm
     model = models.Goal
 
     def form_invalid(self, form):
@@ -98,6 +100,8 @@ class CreateGoal(GoalPageMixin, generic.CreateView):
 
         with atomic():
             goal.category = self.category
+            goal.streaming_required = self.category.streaming_required
+            goal.allow_stream_override = self.category.allow_stream_override
             goal.save()
             models.AuditLog.objects.create(
                 actor=self.user,
@@ -106,11 +110,18 @@ class CreateGoal(GoalPageMixin, generic.CreateView):
                 action='goal_add',
             )
 
-        return http.HttpResponseRedirect(self.success_url)
+        messages.success(
+            self.request,
+            'Goal created! You can edit the details further below.'
+        )
+        return http.HttpResponseRedirect(reverse('edit_category_goal', kwargs={
+            'goal': goal.hashid,
+            'category': self.category.slug,
+        }))
 
 
 class EditGoal(GoalPageMixin, generic.UpdateView):
-    form_class = forms.GoalForm
+    form_class = forms.GoalEditForm
     model = models.Goal
 
     def get_context_data(self, **kwargs):
@@ -137,83 +148,89 @@ class EditGoal(GoalPageMixin, generic.UpdateView):
             )
             return http.HttpResponseRedirect(self.success_url)
 
+        if 'active' in form.changed_data:
+            if goal.active and not self.available_goals:
+                messages.error(
+                    self.request,
+                    'You cannot reactivate this goal as there are no available '
+                    'slots. Deactivate an existing goal first or contact staff '
+                    'if you need more room.'
+                )
+                return http.HttpResponseRedirect(self.success_url)
+            if not goal.active and self.active_goals().count() < 2:
+                messages.error(
+                    self.request,
+                    'You must have at least one active goal. Please add or '
+                    'reactivate another goal before deactivating this one.'
+                )
+                return http.HttpResponseRedirect(self.success_url)
+
+        team_races = form.cleaned_data.pop('team_races')
+        if team_races == 'not_allowed':
+            goal.team_races_allowed = False
+            goal.team_races_required = False
+        elif team_races == 'allowed':
+            goal.team_races_allowed = True
+            goal.team_races_required = False
+        else:
+            goal.team_races_allowed = True
+            goal.team_races_required = True
+
+        goal.default_settings = {}
+        for key, value in form.cleaned_data.items():
+            if key.startswith(form.default_settings_prefix):
+                settings_key = key[len(form.default_settings_prefix):]
+                goal.default_settings[settings_key] = value
+
         if form.has_changed():
-            with atomic():
-                goal.save()
-                models.AuditLog.objects.create(
+            audit = []
+            changed_fields = {
+                'name',
+                'active',
+                'show_leaderboard',
+                'streaming_required',
+                'allow_stream_override',
+            } & set(form.changed_data)
+            for field in changed_fields:
+                audit.append(models.AuditLog(
                     actor=self.user,
                     category=self.category,
                     goal=goal,
-                    action='goal_rename',
-                    old_value=orig_goal.name,
-                    new_value=goal.name,
-                )
+                    action=f'goal_{field}_change',
+                    old_value=getattr(orig_goal, field),
+                    new_value=getattr(goal, field),
+                ))
+            for field in (
+                'team_races_allowed',
+                'team_races_required',
+                'default_settings',
+            ):
+                old_value = getattr(orig_goal, field)
+                new_value = getattr(goal, field)
+                if old_value != new_value:
+                    if field == 'default_settings':
+                        old_value = json.dumps(old_value)
+                        new_value = json.dumps(new_value)
+                    audit.append(models.AuditLog(
+                        actor=self.user,
+                        category=self.category,
+                        goal=goal,
+                        action=f'goal_{field}_change',
+                        old_value=old_value,
+                        new_value=new_value,
+                    ))
+
+            with atomic():
+                goal.save()
+                if audit:
+                    models.AuditLog.objects.bulk_create(audit)
+
                 messages.success(
                     self.request,
                     'Goal has been updated.'
                 )
 
-        return http.HttpResponseRedirect(self.success_url)
-
-
-class DeactivateGoal(GoalPageMixin, generic.View):
-    def post(self, request, *args, **kwargs):
-        if self.active_goals().count() < 2 and not self.user.is_staff:
-            messages.error(
-                request,
-                'You must have at least one active goal. Please add or '
-                'reactivate another goal before deactivating the existing one.'
-            )
-            return http.HttpResponseRedirect(self.success_url)
-
-        goal = self.get_goal()
-        if goal.active:
-            with atomic():
-                goal.active = False
-                goal.save()
-                models.AuditLog.objects.create(
-                    actor=self.user,
-                    category=self.category,
-                    goal=goal,
-                    action='goal_deactivate',
-                )
-
-            messages.success(
-                request,
-                'Goal "%(name)s" has been deactivated, and can no longer '
-                'be used for races.'
-                % {'name': goal.name}
-            )
-
-        return http.HttpResponseRedirect(self.success_url)
-
-
-class ReactivateGoal(GoalPageMixin, generic.View):
-    def post(self, request, *args, **kwargs):
-        if self.available_goals == 0:
-            messages.error(
-                request,
-                'You cannot add any more goals to this category.'
-            )
-            return http.HttpResponseRedirect(self.success_url)
-
-        goal = self.get_goal()
-        if not goal.active:
-            with atomic():
-                goal.active = True
-                goal.save()
-                models.AuditLog.objects.create(
-                    actor=self.user,
-                    category=self.category,
-                    goal=goal,
-                    action='goal_activate',
-                )
-
-            messages.success(
-                request,
-                'Goal "%(name)s" has been reactivated, and can once again '
-                'be raced against.'
-                % {'name': goal.name}
-            )
-
-        return http.HttpResponseRedirect(self.success_url)
+        return http.HttpResponseRedirect(reverse('edit_category_goal', kwargs={
+            'goal': goal.hashid,
+            'category': self.category.slug,
+        }))

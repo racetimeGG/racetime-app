@@ -41,11 +41,7 @@
                     <dd class="name">
                         <span>{{ goal.name }}</span>
                         <div class="actions">
-                            <a class="btn" href="{% url 'edit_category_goal' goal=goal.hashid category=category.slug %}">Rename</a>
-                            <form action="{% url 'deactivate_category_goal' goal=goal.hashid category=category.slug %}" method="post">
-                                {% csrf_token %}
-                                <button class="btn dangerous" type="submit">Deactivate</button>
-                            </form>
+                            <a class="btn" href="{% url 'edit_category_goal' goal=goal.hashid category=category.slug %}">Modify</a>
                         </div>
                     </dd>
                     <dt>Race statistics</dt>
@@ -70,10 +66,9 @@
                     <dt>Name</dt>
                     <dd class="name">
                         <span>{{ goal.name }}</span>
-                        <form action="{% url 'reactivate_category_goal' goal=goal.hashid category=category.slug %}" method="post">
-                            {% csrf_token %}
-                            <button class="btn" type="submit">Reactivate</button>
-                        </form>
+                        <div class="actions">
+                            <a class="btn" href="{% url 'edit_category_goal' goal=goal.hashid category=category.slug %}">Modify</a>
+                        </div>
                     </dd>
                 </dl>
             </li>

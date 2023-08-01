@@ -489,9 +489,16 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
         for field in self.get_form_class()._meta.fields:
             if field in self.request.GET:
                 kwargs['initial'][field] = self.request.GET[field]
+                if field == 'goal':
+                    kwargs['goal_id'] = self.request.GET[field]
                 if field == 'custom_goal':
                     kwargs['initial']['goal'] = ''
         return kwargs
+
+    def get_template_names(self):
+        if self.request.GET.get('bare'):
+            return ['racetime/bare_form.html']
+        return super().get_template_names()
 
     def test_func(self):
         if not self.user.is_authenticated:

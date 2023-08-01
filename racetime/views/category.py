@@ -190,7 +190,7 @@ class CategoryLeaderboards(Category):
         category = self.get_object()
         goals = models.Goal.objects.filter(
             category=category,
-            active=True,
+            show_leaderboard=True,
         )
         goals = goals.annotate(num_races=db_models.Count('race__id'))
         goals = goals.order_by('-num_races', 'name')

@@ -499,6 +499,33 @@ class Goal(models.Model):
         default=True,
         help_text='Allow new races to be created with this goal.'
     )
+    show_leaderboard = models.BooleanField(
+        default=True,
+        help_text='Leaderboard is publicly viewable.',
+    )
+    team_races_allowed = models.BooleanField(
+        default=True,
+    )
+    team_races_required = models.BooleanField(
+        default=False,
+    )
+    streaming_required = models.BooleanField(
+        default=True,
+        help_text=(
+            'Require entrants to be streaming when they join a race. '
+            'Moderators may override this for individual races.'
+        ),
+    )
+    allow_stream_override = models.BooleanField(
+        default=False,
+        help_text=(
+            'Allow race monitors to change the streaming requirements for '
+            'their race room. By default, only moderators can change this.'
+        ),
+    )
+    default_settings = models.JSONField(
+        default=dict,
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -608,12 +635,20 @@ class AuditLog(AbstractAuditLog):
         ('bot_activate', 're-activated a bot'),
         ('bot_deactivate', 'deactivated a bot'),
         ('goal_add', 'added a new goal'),
-        ('goal_activate', 're-activated a goal'),
-        ('goal_deactivate', 'deactivated a goal'),
-        ('goal_rename', 'renamed a goal'),
+        ('goal_name_change', 'updated a goal (name)'),
+        ('goal_active_change', 'updated a goal (active state)'),
+        ('goal_show_leaderboard_change', 'updated a goal (leaderboard visibility)'),
+        ('goal_team_races_allowed_change', 'updated a goal (team race allowed)'),
+        ('goal_team_races_required_change', 'updated a goal (team race required)'),
+        ('goal_streaming_required_change', 'updated a goal (streaming requirement)'),
+        ('goal_allow_stream_override_change', 'updated a goal (stream override)'),
+        ('goal_default_settings_change', 'updated a goal (default settings)'),
         ('emote_add', 'added an emote'),
         ('emote_remove', 'deleted an emote'),
         # No longer in use
+        ('goal_activate', 're-activated a goal'),
+        ('goal_deactivate', 'deactivated a goal'),
+        ('goal_rename', 'renamed a goal'),
         ('owner_change', 'transferred category ownership'),
     )
     hide_values = ('info_change', 'slug_words_change')

@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from datetime import timedelta
 
 from bs4 import BeautifulSoup
@@ -10,6 +11,8 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db.models import Count
+from django.forms.utils import pretty_name
+from django.http import Http404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.html import format_html
@@ -226,10 +229,73 @@ class CategoryTeamsForm(forms.ModelForm):
         model = models.Category
 
 
-class GoalForm(forms.ModelForm):
+class GoalCreateForm(forms.ModelForm):
     class Meta:
         fields = ('name',)
         model = models.Goal
+
+
+class GoalEditForm(forms.ModelForm):
+    team_races = forms.ChoiceField(
+        choices=(
+            ('not_allowed', 'Not allowed (no team races)'),
+            ('allowed', 'Allowed (races can be team or individuals)'),
+            ('required', 'Required (no individual races)'),
+        ),
+        help_text=(
+            'Choose whether team races are available, unavailable, or always '
+            'required for this goal.'
+        ),
+    )
+
+    default_settings_fields = (
+        'invitational',
+        'require_even_teams',
+        'start_delay',
+        'time_limit',
+        'time_limit_auto_complete',
+        'auto_start',
+        'allow_comments',
+        'hide_comments',
+        'allow_prerace_chat',
+        'allow_midrace_chat',
+        'allow_non_entrant_chat',
+        'chat_message_delay',
+    )
+    default_settings_prefix = 'default_settings__'
+
+    class Meta:
+        fields = (
+            'name',
+            'active',
+            'show_leaderboard',
+            'team_races',
+            'streaming_required',
+            'allow_stream_override',
+        )
+        model = models.Goal
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.team_races_allowed:
+            if self.instance.team_races_required:
+                self.fields['team_races'].initial = 'required'
+            else:
+                self.fields['team_races'].initial = 'allowed'
+        else:
+            self.fields['team_races'].initial = 'not_allowed'
+
+        for name in self.default_settings_fields:
+            prefixed_name = self.default_settings_prefix + name
+            self.fields[prefixed_name] = deepcopy(RaceCreationForm.base_fields[name])
+            if isinstance(self.fields[prefixed_name], SecondsDurationField):
+                self.fields[prefixed_name].return_delta = False
+            if self.fields[prefixed_name].label is None:
+                self.fields[prefixed_name].label = pretty_name(name)
+            self.fields[prefixed_name].label_suffix = ' [default setting]'
+            if name in self.instance.default_settings:
+                self.fields[prefixed_name].initial = self.instance.default_settings.get(name)
 
 
 class GoalWidget(forms.RadioSelect):
@@ -254,6 +320,7 @@ class SecondsDurationField(forms.IntegerField):
     widget = DurationWidget(unit_name='seconds')
 
     def __init__(self, *, max_value=None, min_value=None, **kwargs):
+        self.return_delta = True
         self.max_value, self.min_value = max_value, min_value
         # Skip calling IntegerField init() because it sets the wrong validators.
         super(forms.IntegerField, self).__init__(**kwargs)
@@ -267,6 +334,16 @@ class SecondsDurationField(forms.IntegerField):
                 validators.MinValueValidator(timedelta(seconds=min_value * self.unit))
             )
 
+    def clean(self, value):
+        value = self.to_python(value)
+        if isinstance(value, int):
+            value_delta = timedelta(seconds=value * self.unit)
+        else:
+            value_delta = value
+        self.validate(value_delta)
+        self.run_validators(value_delta)
+        return value
+
     def prepare_value(self, value):
         if isinstance(value, timedelta):
             return int(value.total_seconds() / self.unit)
@@ -274,7 +351,7 @@ class SecondsDurationField(forms.IntegerField):
 
     def to_python(self, value):
         value = super().to_python(value)
-        if isinstance(value, int):
+        if isinstance(value, int) and self.return_delta:
             return timedelta(seconds=value * self.unit)
         return value
 
@@ -316,17 +393,39 @@ class RaceForm(forms.ModelForm):
         help_text=models.Race._meta.get_field('chat_message_delay').help_text,
     )
 
-    def __init__(self, category, can_moderate, *args, **kwargs):
+    def __init__(self, category, can_moderate, goal_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if 'info_user' in self.fields:
-            self.fields['info_user'].widget = forms.TextInput()
         if 'goal' in self.fields and isinstance(self.fields['goal'], forms.ModelChoiceField):
             self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
                 category=category,
             )
+
+        if 'goal' in self.fields and goal_id:
+            try:
+                goal = self.fields['goal'].queryset.get(id=goal_id)
+            except models.Goal.DoesNotExist:
+                raise Http404
+        else:
+            goal = None
+
+        if goal:
+            for key, value in goal.default_settings.items():
+                if key in self.fields and key not in kwargs['initial']:
+                    self.fields[key].initial = value
+            if 'team_race' in self.fields:
+                if goal.team_races_required:
+                    self.initial['team_race'] = True
+                    self.fields['team_race'].disabled = True
+                elif not goal.team_races_allowed:
+                    self.initial['team_race'] = False
+                    self.fields['team_race'].disabled = True
+
+        if 'info_user' in self.fields:
+            self.fields['info_user'].widget = forms.TextInput()
         if 'streaming_required' in self.fields:
-            self.fields['streaming_required'].initial = category.streaming_required
-            if not category.allow_stream_override and not can_moderate:
+            goc = goal or category
+            self.fields['streaming_required'].initial = goc.streaming_required
+            if not goc.allow_stream_override and not can_moderate:
                 self.fields['streaming_required'].disabled = True
                 self.fields['streaming_required'].help_text += (
                     ' Only moderators can change this.'
