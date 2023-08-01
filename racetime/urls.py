@@ -62,6 +62,7 @@ urlpatterns = [
     ])),
 
     path('', views.Home.as_view(), name='home'),
+    path('search', views.Search.as_view(), name='search'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
     path('races.json', views.RaceListData.as_view()),

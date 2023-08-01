@@ -1,0 +1,69 @@
+{% extends 'racetime/base.html' %}
+{% load static %}
+
+{% block main %}
+    <h2 style="margin-top: 0">Search results</h2>
+    {% include 'racetime/forms/search.html' %}
+    <h3>Categories</h3>
+    {% if categories.count > max_results %}
+        <p>More than {{ max_results }} categories found. Narrow your search to refine results.</p>
+    {% endif %}
+    <ul class="home-categories search-categories">
+        {% for category in categories.items %}
+            {% include 'racetime/home/category.html' %}
+        {% empty %}
+            <li>None found</li>
+        {% endfor %}
+    </ul>
+    <h3>Races</h3>
+    {% if races.count > max_results %}
+        <p>More than {{ max_results }} races found. Narrow your search to refine results.</p>
+    {% endif %}
+    <div class="race-list">
+        <ol>
+            {% for race in races.items %}
+                <li>
+                    <span class="race-detail">
+                        <span class="title">
+                            <span class="slug">{{ race.slug }}</span>
+                        </span>
+                        <time class="datetime" datetime="{{ race.opened_at.isoformat }}" title="Date/time race opened at">
+                            {{ race.opened_at }}
+                        </time>
+                    </span>
+                    <span class="race-row">
+                        {% include 'racetime/pops/race_row.html' with nocontext=True %}
+                    </span>
+                </li>
+            {% empty %}
+                <li>None found</li>
+            {% endfor %}
+        </ol>
+    </div>
+    <h3>Teams</h3>
+    {% if teams.count > max_results %}
+        <p>More than {{ max_results }} teams found. Narrow your search to refine results.</p>
+    {% endif %}
+    <ul>
+        {% for team in teams.items %}
+            <li>
+                {% include 'racetime/pops/team.html' %}
+            </li>
+        {% empty %}
+            <li>None found</li>
+        {% endfor %}
+    </ul>
+    <h3>Users</h3>
+    {% if users.count > max_results %}
+        <p>More than {{ max_results }} users found. Narrow your search to refine results.</p>
+    {% endif %}
+    <ul>
+        {% for profile in users.items %}
+            <li>
+                {% include 'racetime/pops/user.html' with user=profile extra_class='inline' %}
+            </li>
+        {% empty %}
+            <li>None found</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

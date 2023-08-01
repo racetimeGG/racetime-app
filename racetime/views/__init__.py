@@ -104,6 +104,7 @@ from .race_monitor_actions import (
     Undisqualify,
     UnrecordRace,
 )
+from .search import Search
 from .team import (
     AddTeamMember,
     AddTeamOwner,
@@ -238,6 +239,8 @@ __all__ = [
     'RemoveMonitor',
     'Undisqualify',
     'UnrecordRace',
+    # search
+    'Search',
     # team
     'AddTeamMember',
     'AddTeamOwner',

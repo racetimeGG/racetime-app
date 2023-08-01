@@ -1,10 +1,6 @@
 {% extends 'racetime/base.html' %}
 {% load static %}
 
-{% block js %}
-    <script src="{% static 'racetime/script/home.js' %}"></script>
-{% endblock %}
-
 {% block main %}
     {% if not user.is_authenticated %}
     <h3 style="margin-top: 0">Welcome</h3>
@@ -16,7 +12,6 @@
     </p>
     {% endif %}
     <div class="search-filter home-search">
-        <input class="filter" placeholder="Filter categories…">
         <ul>
             <li class="label">Sort by:</li>
             <li>
@@ -75,4 +70,37 @@
         </li>
         {% endif %}
     </ol>
+{% endblock %}
+
+{% block aside %}
+    {% include 'racetime/forms/search.html' %}
+    {% if user.is_authenticated %}
+        <h3>Past races</h3>
+        <div class="race-list">
+            <ol>
+                {% for entrant in recent_entries %}
+                    <li>
+                        <span class="race-detail">
+                            <span class="title">
+                                <span class="slug">{{ entrant.race.slug }}</span>
+                            </span>
+                            <time class="datetime" datetime="{{ entrant.race.started_at.isoformat }}" title="Date/time race started at">
+                                {{ entrant.race.started_at }}
+                            </time>
+                        </span>
+                        <span class="race-row">
+                            {% include 'racetime/pops/race_row.html' with race=entrant.race aside=True nocontext=True %}
+                        </span>
+                    </li>
+                {% empty %}
+                    <li>
+                        No completed races.
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+    {% endif %}
+    {% if not user.is_authenticated %}
+        {{ super }}
+    {% endif %}
 {% endblock %}

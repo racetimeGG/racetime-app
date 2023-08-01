@@ -558,6 +558,9 @@ a .timer {
         flex: 0 1 20%;
     }
 }
+.home-categories.search-categories > li {
+    flex-basis: 14.285%;
+}
 .home-categories > li > a {
     display: flex;
     flex-direction: column;
@@ -1546,6 +1549,21 @@ footer > .tagline {
 .ui-menu .ui-state-active {
     color: #beebd1;
     margin: 0;
+}
+
+.search-form label {
+    display: flex;
+    align-items: center;
+
+}
+.search-form label .material-icons {
+    margin-right: 5px;
+}
+.search-form label input {
+    flex-grow: 1;
+}
+.search-form + h3 {
+    margin-top: 8px;
 }
 
 @media only screen and (max-width: 600px) {
