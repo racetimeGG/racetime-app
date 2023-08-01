@@ -40,6 +40,7 @@ urlpatterns = [
     ])),
 
     path('team/', include([
+        path('<str:team>.json', views.TeamData.as_view()),
         path('<str:team>', views.Team.as_view(), name='team'),
         path('<str:team>/', include([
             path('data', views.TeamData.as_view(), name='team_data'),
@@ -63,18 +64,23 @@ urlpatterns = [
     path('', views.Home.as_view(), name='home'),
     path('request_category', views.RequestCategory.as_view(), name='request_category'),
     path('races/data', views.RaceListData.as_view(), name='race_list_data'),
+    path('races.json', views.RaceListData.as_view()),
     path('user/search', views.AutocompleteUser.as_view(), name='autocomplete_user'),
     path('user/<str:user>', views.ViewProfile.as_view(), name='view_profile'),
+    path('user/<str:user>.json', views.UserProfileData.as_view()),
     path('user/<str:user>/', include([
         path('data', views.UserProfileData.as_view(), name='user_profile_data'),
         path('races/data', views.UserRaceData.as_view(), name='user_race_list_data'),
+        path('races.json', views.UserRaceData.as_view()),
     ])),
 
     path('categories/data', views.CategoryListData.as_view(), name='category_list_data'),
+    path('<str:category>.json', views.CategoryData.as_view()),
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
         path('races/data', views.CategoryRaceData.as_view(), name='category_race_list_data'),
+        path('races.json', views.CategoryRaceData.as_view()),
         path('manage/', include([
             path('edit', views.EditCategory.as_view(), name='edit_category'),
             path('deactivate', views.DeactivateCategory.as_view(), name='category_deactivate'),
@@ -101,12 +107,17 @@ urlpatterns = [
         ])),
         path('leaderboards', views.CategoryLeaderboards.as_view(), name='leaderboards'),
         path('leaderboards/data', views.CategoryLeaderboardsData.as_view(), name='leaderboards_data'),
+        path('leaderboards.json', views.CategoryLeaderboardsData.as_view()),
         path('emotes', views.CategoryEmotes.as_view(), name='category_list_emotes'),
         path('startrace', views.CreateRace.as_view(), name='create_race'),
         path('star', views.FavouriteCategory.as_view(), name='star'),
         path('unstar', views.UnfavouriteCategory.as_view(), name='unstar'),
     ])),
 
+    path('<str:category>/<str:race>.csv', views.RaceCSV.as_view()),
+    path('<str:category>/<str:race>.json', views.RaceData.as_view()),
+    path('<str:category>/<str:race>.log', views.RaceChatLog.as_view()),
+    path('<str:category>/<str:race>.txt', views.RaceChatLog.as_view()),
     path('<str:category>/<str:race>', views.Race.as_view(), name='race'),
     path('<str:category>/<str:race>/', include([
         path('csv', views.RaceCSV.as_view(), name='race_csv'),
