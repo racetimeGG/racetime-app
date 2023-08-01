@@ -768,6 +768,9 @@ a .timer {
     display: flex;
     margin: 5px;
 }
+aside .race-list > ol > li > .race-row {
+    margin: 0;
+}
 .race-list > ol > li > .race-row > .race {
     border: 5px solid #1a1c20;
     border-radius: 10px;
@@ -782,6 +785,11 @@ a .timer {
 }
 .race-list > ol > li > .race-row > .race > .main {
     display: flex;
+    align-items: stretch;
+}
+.race-list > ol > li > .race-row > .race > .main > img {
+    margin-right: 5px;
+    width: 50px;
 }
 .race-list > ol > li > .race-row > .race > .main > span {
     display: flex;
@@ -802,6 +810,18 @@ a .timer {
     overflow: hidden;
     word-break: break-word;
 }
+.race-list > ol > li > .race-row > .race .entrant-data {
+    align-items: center;
+    display: flex;
+    justify-content: right;
+}
+.race-list > ol > li > .race-row > .race .comment-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+.race-list > ol > li > .race-row > .race .comment-icon.no-comment {
+    color: #8c898c;
+}
 
 
 .race-list > ol > li > .race-row > .race .state > .recorded {
@@ -814,6 +834,7 @@ a .timer {
 .race-list > ol > li > .race-row > .race .state > .recorded::after {
     content: ')';
 }
+.race-list > ol > li > .race-row > .race .category,
 .race-list > ol > li > .race-row > .race > .info {
     color: #8c898c;
     font-size: 13px;
@@ -965,7 +986,8 @@ a .timer {
     text-align: right;
 }
 .entrant-row > .score,
-.entrant-row > .score-change {
+.entrant-row > .score-change,
+.entrant-data > .score-change {
     align-items: center;
     color: #8c898c;
     display: flex;
@@ -973,16 +995,20 @@ a .timer {
     font-size: 13px;
     justify-content: flex-end;
 }
-.entrant-row > .score-change.positive {
+.entrant-row > .score-change.positive,
+.entrant-data > .score-change.positive {
     color: #a0e9a0;
 }
-.entrant-row > .score-change.positive::before {
+.entrant-row > .score-change.positive::before,
+.entrant-data > .score-change.positive::before {
     content: '+';
 }
-.entrant-row > .score-change.negative {
+.entrant-row > .score-change.negative,
+.entrant-data > .score-change.negative {
     color: #f08080;
 }
-.entrant-row > .score-change.negative::before {
+.entrant-row > .score-change.negative::before,
+.entrant-data > .score-change.negative::before {
     content: '−';
 }
 .entrant-row > .monitor-actions {
