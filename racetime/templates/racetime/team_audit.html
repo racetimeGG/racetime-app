@@ -14,11 +14,13 @@
 {% endblock %}
 
 {% block main %}
-    {% include 'racetime/team/manage_tabs.html' with current='team_audit_log' %}
     <ol class="breadcrumbs">
         <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
+        <li><a href="{% url 'team_audit_log' team=team.slug %}">audit</a></li>
     </ol>
-    <h2>Audit log</h2>
+    <h2>{{ team }}</h2>
+    {% include 'racetime/team/manage_tabs.html' with current='team_audit_log' %}
+    <h3>Audit log</h3>
     <p>
         This page shows all actions, changes and updates to your team.
     </p>

@@ -38,11 +38,13 @@
 
 {% block main %}
     {% if team %}
-        {% include 'racetime/team/manage_tabs.html' with current='edit_team' %}
         <ol class="breadcrumbs">
             <li><a href="{{ team.get_absolute_url }}">{{ team.slug }}</a></li>
+            <li><a href="{% url 'edit_team' team=team.slug %}">edit</a></li>
         </ol>
-        <h2>Edit team</h2>
+        <h2>{{ team }}</h2>
+        {% include 'racetime/team/manage_tabs.html' with current='edit_team' %}
+        <h3>Edit team</h3>
     {% else %}
         <h2>Create new team</h2>
     {% endif %}
