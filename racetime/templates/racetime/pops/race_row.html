@@ -1,30 +1,51 @@
+{% load humanize %}
 <a class="race{% if not race.recorded and race.recordable %} recordable{% endif %}" href="{{ race.get_absolute_url }}">
     <span class="main">
+        {% if nocontext and race.category.image %}
+            <img src="{{ race.category.image.url }}" alt="">
+        {% endif %}
         <span class="left">
-            <span class="goal">
+            {% if not aside %}
+                <span class="goal">
+                    {% if nocontext %}
+                        {{ race.category.short_name }}
+                    {% endif %}
+                    {% if not short %}
+                        {{ race.goal|default:race.custom_goal }}
+                    {% endif %}
+                </span>
+            {% else %}
                 {% if nocontext %}
-                    {{ race.category.short_name }}
+                    <span class="category">{{ race.category.short_name }}</span>
                 {% endif %}
-                {% if not short %}
+                <span class="goal">
                     {{ race.goal|default:race.custom_goal }}
+                </span>
+            {% endif %}
+            {% if entrant %}
+                {% if entrant.place %}
+                    {{ entrant.place_ordinal }} place
+                {% else %}
+                    {{ entrant.summary.1 }}
                 {% endif %}
-            </span>
-            <span class="state">
-                {{ race.state_info.verbose_value }}
-                {% if race.state == 'finished' %}
-                    <span class="recorded">
-                        {% if race.recorded %}
-                            recorded
-                        {% else %}
-                            {% if race.recordable %}
-                                awaiting record
+            {% else %}
+                <span class="state">
+                    {{ race.state_info.verbose_value }}
+                    {% if race.state == 'finished' %}
+                        <span class="recorded">
+                            {% if race.recorded %}
+                                recorded
                             {% else %}
-                                not recorded
+                                {% if race.recordable %}
+                                    awaiting record
+                                {% else %}
+                                    not recorded
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                    </span>
-                {% endif %}
-            </span>
+                        </span>
+                    {% endif %}
+                </span>
+            {% endif %}
         </span>
         <span class="right">
             <span class="entrants">
@@ -38,6 +59,26 @@
                 <time class="timer">
                     {{ race.timer_html|safe }}
                 </time>
+            {% endif %}
+            {% if entrant %}
+                <span class="entrant-data">
+                    {% if entrant.rating_change %}
+                        {% if entrant.rating_change >= 0 %}
+                            <span class="score-change positive">
+                                {{ entrant.rating_change|intcomma }}
+                            </span>
+                        {% else %}
+                            <span class="score-change negative">
+                                {{ entrant.rating_change|intcomma|slice:'1:' }}
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                    {% if entrant.comment %}
+                        <i class="material-icons comment-icon" title="{{ entrant.comment }}">more</i>
+                    {% else %}
+                        <i class="material-icons comment-icon no-comment">more</i>
+                    {% endif %}
+                </span>
             {% endif %}
         </span>
     </span>
