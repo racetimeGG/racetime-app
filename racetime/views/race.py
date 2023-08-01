@@ -473,6 +473,12 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
         race.category = category
         race.slug = category.generate_race_slug()
 
+        if race.goal:
+            if race.goal.team_races_required:
+                race.team_race = True
+            elif not race.goal.team_races_allowed:
+                race.team_race = False
+
         if form.cleaned_data.get('invitational'):
             race.state = models.RaceStates.invitational.value
 
