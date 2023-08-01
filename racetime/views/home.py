@@ -4,7 +4,7 @@ from django.utils.functional import cached_property
 from django.views import generic
 
 from .base import UserMixin
-from ..models import Category, RaceStates
+from ..models import Category, Entrant, RaceStates
 
 
 class Home(UserMixin, generic.TemplateView):
@@ -27,8 +27,13 @@ class Home(UserMixin, generic.TemplateView):
         if self.user.is_authenticated:
             favourites = self.user.favourite_categories.all()
             categories = categories.exclude(id__in=[f.id for f in favourites])
+            recent_entries = Entrant.objects.filter(
+                user=self.user,
+                race__state=RaceStates.finished,
+            ).order_by('-race__ended_at')[:20]
         else:
             favourites = None
+            recent_entries = None
 
         context = super().get_context_data(**kwargs)
         context.update({
@@ -36,6 +41,7 @@ class Home(UserMixin, generic.TemplateView):
             'show_recordable': self.show_recordable,
             'categories': self.prep_categories(categories, sort),
             'favourites': self.prep_categories(favourites, sort) if favourites else None,
+            'recent_entries': recent_entries,
             'sort': sort,
         })
         return context
