@@ -261,7 +261,7 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
         )
 
         dl = (
-            self.request.GET.get('dl', 'true').lower()
+            self.request.GET.get('dl', 'false').lower()
             in ['true', 'yes', '1']
         )
         if dl:
