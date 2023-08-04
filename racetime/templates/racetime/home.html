@@ -93,6 +93,11 @@
         </li>
         {% endif %}
     </ol>
+    {% if sort != 'default' %}
+        {% include 'racetime/pops/paginator.html' with page=categories query='sort='|add:sort %}
+    {% else %}
+        {% include 'racetime/pops/paginator.html' with page=categories %}
+    {% endif %}
 {% endblock %}
 
 {% block aside %}
