@@ -17,6 +17,9 @@ class Search(generic.TemplateView):
         if len(query) < 2:
             messages.error(self.request, 'Search string must be 2 characters or more.')
             return HttpResponseRedirect(reverse('home'))
+        if len(query) > 50:
+            messages.error(self.request, 'Search string must be at most 50 characters.')
+            return HttpResponseRedirect(reverse('home'))
 
         context = self.get_context_data(query=query, **kwargs)
         return self.render_to_response(context)

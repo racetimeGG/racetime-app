@@ -1,6 +1,6 @@
 <form method="GET" action="{% url 'search' %}" class="search-form">
     <label>
         <i class="material-icons">search</i>
-        <input type="search" name="q" value="{{ query }}" placeholder="Search {{ site_info.title }}">
+        <input type="search" name="q" value="{{ query }}" placeholder="Search {{ site_info.title }}" maxlength="50">
     </label>
 </form>
