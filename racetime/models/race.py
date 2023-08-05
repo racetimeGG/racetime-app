@@ -445,8 +445,8 @@ class Race(models.Model):
     @property
     def info(self):
         return '\n'.join([
-            self.info_bot or '',
             self.info_user or '',
+            self.info_bot or '',
         ]).strip()
 
     @property
