@@ -16,6 +16,7 @@ body {
     flex: 1 1 0;
     margin: 0;
     max-width: 1280px;
+    width: 100%;
 }
 
 .container > .content > main {
@@ -416,7 +417,7 @@ main {
 }
 
 .race-stream-control {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
     padding-bottom: 10px;
 }
 
