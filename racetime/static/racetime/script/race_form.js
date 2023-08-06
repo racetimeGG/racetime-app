@@ -2,6 +2,7 @@ $(function() {
     var $submit = $('.race-form button[type="submit"]');
     var $goal = $('#id_goal').closest('li');
     var $customGoal = $goal.next();
+    var $prevGoalSelected = null;
 
     var changedFields = [];
 
@@ -27,11 +28,33 @@ $(function() {
             var $field = $('#' + name);
             data[$field.attr('name')] = $field.val();
         });
+        $('.race-form').addClass('is-loading');
         $('.race-form > ul input').prop('disabled', true);
-        $.get(window.location, data, function(html) {
-            var toggleOn = $('.toggle-additional .hide:visible').length > 0;
-            $('.race-form > ul').replaceWith(html);
-            setupForm(!goal_id, toggleOn);
+        $('.race-form .js-error').remove();
+        $.get({
+            url: window.location,
+            data: data,
+            success: function(html) {
+                var toggleOn = $('.toggle-additional .hide:visible').length > 0;
+                $('.race-form > ul').replaceWith(html);
+                setupForm(!goal_id, toggleOn);
+                $('.race-form').removeClass('is-loading');
+                $prevGoalSelected = $('#id_goal input:checked');
+            },
+            error: function() {
+                $('#id_goal input')
+                    .prop('checked', false)
+                    .prop('disabled', false);
+                if (!!$prevGoalSelected) {
+                    $prevGoalSelected.prop('checked', true);
+                }
+                $('#id_goal').parent().after(
+                    '<li class="js-error"><span class="errorlist">' +
+                    'Failed to load goal settings. Try again, or reload the page.' +
+                    '</span></li>'
+                );
+                $('.race-form').removeClass('is-loading');
+            }
         });
     }
 
