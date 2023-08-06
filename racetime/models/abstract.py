@@ -13,8 +13,9 @@ class AbstractAuditLog(models.Model):
     """
     actor = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='+',
+        null=True,
     )
     user = models.ForeignKey(
         'User',
@@ -78,4 +79,4 @@ class AbstractAuditLog(models.Model):
         return value
 
     def __str__(self):
-        return str(self.actor) + ' ' + self.action_display
+        return str(self.actor or '[Deleted user]') + ' ' + self.action_display

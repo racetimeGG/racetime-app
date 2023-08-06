@@ -1383,7 +1383,8 @@ class Race(models.Model):
 class Entrant(models.Model):
     user = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
     )
     team = models.ForeignKey(
         'Team',

@@ -3,7 +3,7 @@
     {% for entry in audit_log %}
         <li>
             <div class="summary">
-                {% if entry.actor.avatar %}
+                {% if entry.actor and entry.actor.avatar %}
                 <span class="avatar" style="background-image: url({{ entry.actor.avatar.url }})"></span>
                 {% endif %}
                 <span class="text">

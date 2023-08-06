@@ -373,7 +373,8 @@ class CategoryRequest(models.Model):
     )
     requested_by = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
         help_text='This user will own the category once accepted.',
     )
     reviewed_at = models.DateTimeField(
