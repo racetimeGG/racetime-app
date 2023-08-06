@@ -239,15 +239,13 @@ class UserActionAdmin(options.ModelAdmin):
         'date',
         'action',
     )
+    list_select_related = True
     ordering = ('-date',)
     search_fields = (
         'user__name',
         'ip_address',
         'user_agent',
     )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(user__is_superuser=False)
 
     def user_link(self, action):
         url = reverse('admin:racetime_user_change', args=[action.user.id])
