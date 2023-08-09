@@ -359,6 +359,10 @@ header > .current-race > a .goal {
     word-break: break-word;
 }
 
+header > .current-race > a img {
+    display: none;
+}
+
 header > .current-race > a .goal,
 header > .current-race > a .timer {
     font-weight: bold;
