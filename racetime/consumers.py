@@ -124,6 +124,18 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         await self.deliver(event['type'], message=event['message'])
 
+    async def chat_pin(self, event):
+        """
+        Handler for chat.pin type event.
+        """
+        await self.deliver(event['type'], message=event['message'])
+
+    async def chat_unpin(self, event):
+        """
+        Handler for chat.unpin type event.
+        """
+        await self.deliver(event['type'], message=event['message'])
+
     async def error(self, event):
         """
         Handler for error type event.

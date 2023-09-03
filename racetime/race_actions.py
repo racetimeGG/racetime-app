@@ -373,6 +373,7 @@ class Message:
         message.user = user
         message.race = race
         message.save()
+        message.broadcast()
 
     def assert_can_chat(self, race, user):
         can_moderate = race.category.can_moderate(user)

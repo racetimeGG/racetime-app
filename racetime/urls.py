@@ -35,6 +35,8 @@ urlpatterns = [
         path('userinfo', views.OAuthUserInfo.as_view(), name='oauth2_userinfo'),
         path('<str:category>/startrace', views.OAuthCreateRace.as_view(), name='oauth2_create_race'),
         path('<str:category>/<str:race>/edit', views.OAuthEditRace.as_view(), name='oauth2_edit_race'),
+        path('<str:category>/<str:race>/monitor/pin/<str:message>', views.OAuthRaceChatPin.as_view(), name='oauth2_chat_pin'),
+        path('<str:category>/<str:race>/monitor/unpin/<str:message>', views.OAuthRaceChatUnpin.as_view(), name='oauth2_chat_unpin'),
         path('<str:category>/<str:race>/monitor/purge/<str:message>', views.OAuthRaceChatPurge.as_view(), name='oauth2_chat_purge'),
         path('<str:category>/<str:race>/monitor/delete/<str:message>', views.OAuthRaceChatDelete.as_view(), name='oauth2_chat_delete'),
     ])),
@@ -156,6 +158,8 @@ urlpatterns = [
             path('record', views.RecordRace.as_view(), name='record_race'),
             path('unrecord', views.UnrecordRace.as_view(), name='unrecord_race'),
             path('rematch', views.Rematch.as_view(), name='rematch'),
+            path('pin/<str:message>', views.RaceChatPin.as_view(), name='chat_pin'),
+            path('unpin/<str:message>', views.RaceChatUnpin.as_view(), name='chat_unpin'),
             path('delete/<str:message>', views.RaceChatDelete.as_view(), name='chat_delete'),
             path('purge/<str:message>', views.RaceChatPurge.as_view(), name='chat_purge'),
 

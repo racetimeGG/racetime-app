@@ -64,6 +64,27 @@ class ChatForm(forms.ModelForm):
         model = models.Message
 
 
+class ChatBotForm(ChatForm):
+    class Meta:
+        fields = (
+            'message',
+            'actions',
+            'pinned',
+        )
+        model = models.Message
+
+    def clean_actions(self):
+        actions = self.cleaned_data.get('actions')
+        if not actions:
+            return {}
+        if len(actions) > models.Message.MAX_ACTIONS:
+            raise ValidationError(
+                'A message may only have up to %(max)d actions.'
+                % {'max': models.Message.MAX_ACTIONS}
+            )
+        return actions
+
+
 class CommentForm(forms.ModelForm):
     class Meta:
         fields = ('comment',)

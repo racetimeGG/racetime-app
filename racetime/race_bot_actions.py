@@ -1,7 +1,7 @@
 from django.db.models import F
 
 from racetime import forms, models
-from racetime.utils import SafeException
+from racetime.utils import SafeException, get_hashids
 from .race_actions import Message
 
 
@@ -29,7 +29,7 @@ class BotMessage(Message):
         if not self.guid_is_new(data.get('guid', '')):
             return
 
-        form = forms.ChatForm(data)
+        form = forms.ChatBotForm(data)
         if not form.is_valid():
             raise SafeException(form.errors)
 
@@ -39,12 +39,49 @@ class BotMessage(Message):
         message.bot = bot
         message.race = race
         message.save()
+        message.broadcast()
 
     def assert_can_chat(self, race, bot):
         if race.chat_is_closed:
             raise SafeException(
                 'This race chat is now closed. No new messages may be added.'
             )
+
+
+class BotPinMessage(Message):
+    name = 'pin_message'
+
+    def action(self, race, bot, data):
+        if race.chat_is_closed:
+            raise SafeException('This race chat is now closed.')
+        try:
+            msg_id, = get_hashids(models.Message).decode(data.get('message'))
+            message = models.Message.objects.get(
+                id=msg_id,
+                race=race,
+            )
+        except (ValueError, models.Message.DoesNotExist):
+            raise SafeException('Could not find a message with that ID.')
+
+        message.set_pin(True)
+
+
+class BotUnpinMessage(Message):
+    name = 'unpin_message'
+
+    def action(self, race, bot, data):
+        if race.chat_is_closed:
+            raise SafeException('This race chat is now closed.')
+        try:
+            msg_id, = get_hashids(models.Message).decode(data.get('message'))
+            message = models.Message.objects.get(
+                id=msg_id,
+                race=race,
+            )
+        except (ValueError, models.Message.DoesNotExist):
+            raise SafeException('Could not find a message with that ID.')
+
+        message.set_pin(False)
 
 
 class BotMakeOpen:
@@ -170,6 +207,8 @@ actions = {
     action.name: action
     for action in [
         BotMessage,
+        BotPinMessage,
+        BotUnpinMessage,
         BotMakeOpen,
         BotMakeInvitational,
         BotBeginRace,

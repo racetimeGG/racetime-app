@@ -2,6 +2,7 @@ import json
 import random
 from collections import OrderedDict, defaultdict
 from datetime import timedelta
+from itertools import chain
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -671,15 +672,18 @@ class Race(models.Model):
 
     def chat_history(self, last_message_id=None):
         """
-        Return the last 100 chat messages sent to this race room.
+        Return the last 100 chat messages, plus any pinned messages, sent to
+        this race room.
         """
-        messages = self.message_set.filter(deleted=False).order_by('-posted_at')
+        pinned = self.message_set.filter(pinned=True, deleted=False).order_by('posted_at')
+        pinned = pinned.prefetch_related('user', 'bot')
+        messages = self.message_set.filter(pinned=False, deleted=False).order_by('-posted_at')
         messages = messages.prefetch_related('user', 'bot')
         if last_message_id:
             messages = messages.filter(id__gt=last_message_id)
         return OrderedDict(
             (message.hashid, message.as_dict)
-            for message in reversed(messages[:100])
+            for message in chain(pinned, reversed(messages[:100]))
         )
 
     def dump_json_data(self):

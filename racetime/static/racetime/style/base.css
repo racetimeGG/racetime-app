@@ -1343,6 +1343,9 @@ footer > .tagline {
 .layout-form > ul > li > label + ul {
     margin-left: 5px;
 }
+.layout-form > ul > li > label > input {
+    margin-right: 6px;
+}
 
 .layout-form > button {
     margin-top: 10px;

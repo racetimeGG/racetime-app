@@ -1,5 +1,7 @@
 import re
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -42,6 +44,9 @@ class Message(models.Model):
     highlight = models.BooleanField(
         default=False,
     )
+    pinned = models.BooleanField(
+        default=False,
+    )
     deleted = models.BooleanField(
         default=False,
         db_index=True,
@@ -57,6 +62,12 @@ class Message(models.Model):
         null=True,
         default=None,
     )
+    actions = models.JSONField(
+        default={},
+        blank=True,
+    )
+
+    MAX_ACTIONS = 4
 
     class Meta:
         indexes = [
@@ -82,7 +93,9 @@ class Message(models.Model):
             'is_bot': self.is_bot,
             'is_monitor': self.is_monitor,
             'is_system': self.is_system,
+            'is_pinned': self.pinned,
             'delay': self.delay,
+            'actions': self.actions,
         }
 
     @property
@@ -131,3 +144,19 @@ class Message(models.Model):
         Returns the message text without formatting markers.
         """
         return re.sub(r'##(\w+?)##(.+?)##', '\\2', self.message)
+
+    def broadcast(self, event_type='chat.message'):
+        if self.deleted:
+            return
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(self.race.slug, {
+            'type': event_type,
+            'message': self.as_dict,
+        })
+
+    def set_pin(self, pinned):
+        if self.pinned == pinned or self.race.chat_is_closed:
+            return
+        self.pinned = pinned
+        self.save(update_fields={'pinned'})
+        self.broadcast('chat.pin' if pinned else 'chat.unpin')

@@ -79,6 +79,9 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
                     'chat': race.get_ws_url(),
                     'renders': race.get_renders_url(),
                     'available_teams': reverse('available_teams', args=(race.category.slug, race.slug)),
+                    'message': reverse('message', args=(race.category.slug, race.slug)),
+                    'pin': reverse('chat_pin', args=(race.category.slug, race.slug, '$0')),
+                    'unpin': reverse('chat_unpin', args=(race.category.slug, race.slug, '$0')),
                     'delete': reverse('chat_delete', args=(race.category.slug, race.slug, '$0')),
                     'purge': reverse('chat_purge', args=(race.category.slug, race.slug, '$0')),
                 },
@@ -147,6 +150,52 @@ class BotMixin:
             {'errors': form.errors},
             status=422,
         )
+
+
+class RaceChatPin(RaceChatMixin):
+    def post(self, request, *args, **kwargs):
+        race = self.get_object()
+        message = self.get_message(race)
+
+        if race.chat_is_closed:
+            return http.JsonResponse({
+                'errors': [
+                    'This race chat is now closed.'
+                ],
+            }, status=422)
+
+        message.set_pin(True)
+        return http.HttpResponse()
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthRaceChatPin(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
+    required_scopes = ['race_action']
+    def post(self, request, *args, **kwargs):
+        RaceChatPin.post(self, request, *args, **kwargs)
+
+
+class RaceChatUnpin(RaceChatMixin):
+    def post(self, request, *args, **kwargs):
+        race = self.get_object()
+        message = self.get_message(race)
+
+        if race.chat_is_closed:
+            return http.JsonResponse({
+                'errors': [
+                    'This race chat is now closed.'
+                ],
+            }, status=422)
+
+        message.set_pin(False)
+        return http.HttpResponse()
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class OAuthRaceChatUnpin(ScopedProtectedResourceView, BotMixin, RaceChatMixin):
+    required_scopes = ['race_action']
+    def post(self, request, *args, **kwargs):
+        RaceChatUnpin.post(self, request, *args, **kwargs)
 
 
 class RaceChatDelete(RaceChatMixin):

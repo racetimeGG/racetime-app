@@ -203,16 +203,24 @@ main {
     margin-right: 5px;
 }
 
-.race-chat > .messages {
+.race-chat > .messages.pinned {
+    box-shadow: 0 6px 3px -3px #212328;
+    margin: 8px 0 0;
+    position: relative;
+}
+.race-chat > .messages.regular {
     flex: 1 1 0;
     overflow-y: auto;
-    margin: 8px 0 0;
 }
 
 .race-chat > .messages > li {
     margin: 1px 0;
     padding: 2px;
     word-break: break-word;
+}
+
+.race-chat > .messages > li.pin-placeholder {
+    display: none;
 }
 
 .race-chat > .messages > li.system {
@@ -231,6 +239,18 @@ main {
     color: #a0ace8;
 }
 
+.race-chat > .messages.pinned > li::before {
+    content: 'push_pin';
+    display: inline-block;
+    font-family: 'Material Icons';
+    font-size: 14px;
+    line-height: 1;
+    -moz-font-feature-settings: 'liga';
+    -moz-osx-font-smoothing: grayscale;
+    margin: 3px 2px 0 0;
+    vertical-align: top;
+}
+
 .race-chat > .messages > li.mentioned {
     background-color: #1a1c20;
     border-radius: 4px;
@@ -240,6 +260,77 @@ main {
     color: #8c898c;
     font-size: 12px;
     margin-right: 2px;
+}
+
+.race-chat > .messages > li > .material-icons {
+    cursor: default;
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.race-chat > .messages > li > .bot-actions {
+    display: flex;
+    margin-top: 4px;
+}
+.race-chat > .messages > li > .bot-actions > li {
+    margin-right: 4px;
+}
+.race-chat > .messages > li > .bot-actions > li > .msg-action {
+    background-color: #4757aa;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1;
+    padding: 4px 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.race-chat > .messages > li > .bot-actions > li > .msg-action:hover {
+    background-color: #334293;
+}
+
+.race-chat > .messages > .bot-survey {
+    border: 1px solid #a0ace8;
+    border-radius: 4px;
+    margin-top: 6px;
+}
+.race-chat > .messages > .bot-survey,
+.race-chat > .messages > .bot-survey button,
+.race-chat > .messages > .bot-survey input,
+.race-chat > .messages > .bot-survey select {
+    font-size: 14px;
+}
+.race-chat > .messages > .bot-survey input {
+    border-color: #a0ace8;
+}
+.race-chat > .messages.pinned > .bot-survey::before {
+    content: none;
+}
+.race-chat > .messages > .bot-survey > span {
+    background: #212328;
+    color: #a0ace8;
+    cursor: default;
+    float: left;
+    margin: -10px 0 0 3px;
+    padding: 0 2px;
+}
+.race-chat > .messages > .bot-survey > ul {
+    clear: left;
+}
+.race-chat > .messages > .bot-survey > .btn-row {
+    margin: 5px;
+}
+.race-chat > .messages > .bot-survey > .btn-row button {
+    padding: 4px 6px;
+}
+.race-chat > .messages > .bot-survey > .btn-row .msg-action {
+    border-color: #a0ace8;
+}
+.race-chat > .messages > .bot-survey > .btn-row .msg-action:hover {
+    border-color: #334293;
+    color: #a0ace8;
 }
 
 .race-chat > .messages > li > .mod-actions {
@@ -259,6 +350,11 @@ main {
     line-height: 18px;
     text-align: center;
     width: 16px;
+}
+
+.race-chat > .messages.pinned > li > .mod-actions > .pin,
+.race-chat > .messages.regular > li > .mod-actions > .unpin {
+    display: none;
 }
 
 .race-chat > .messages > li > .name {

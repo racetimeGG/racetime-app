@@ -29,7 +29,7 @@ function Race() {
             $(document).on('click', '.race-chat .scrollwarning', function() {
                 self.scrollToBottom();
             });
-            $('.race-chat .messages').on('scroll', debounce(function() {
+            $('.race-chat .messages.regular').on('scroll', debounce(function() {
                 if (self.shouldScroll()) {
                     self.scrollToBottom();
                 }
@@ -119,14 +119,14 @@ Race.prototype.ajaxifyActionForm = function(form) {
 };
 
 Race.prototype.shouldScroll = function() {
-    var messages = $('.race-chat .messages')[0];
+    var messages = $('.race-chat .messages.regular')[0];
     var pos = messages.scrollHeight - (messages.scrollTop + messages.clientHeight);
     return pos < 20;
 };
 
 Race.prototype.scrollToBottom = function() {
     $('.race-chat').removeClass('scrollwarning');
-    var messages = $('.race-chat .messages')[0];
+    var messages = $('.race-chat .messages.regular')[0];
     messages.scrollTop = messages.scrollHeight;
 };
 
@@ -142,7 +142,7 @@ Race.prototype.addMessage = function(message, server_date, mute_notifications) {
         return true;
     }
 
-    var $messages = $('.race-chat .messages');
+    let $messages = $('.race-chat .messages.regular');
     if ($messages.length) {
         var shouldScroll = self.shouldScroll();
         $messages.append(self.createMessageItem(message, server_date, mute_notifications));
@@ -160,6 +160,10 @@ Race.prototype.addMessage = function(message, server_date, mute_notifications) {
     }
     if ($messages.children().length > 100) {
         $messages.children().first().remove();
+    }
+
+    if (message.is_pinned) {
+        this.pinMessage(message.id);
     }
 };
 
@@ -195,6 +199,29 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     }
     if (message.highlight) {
         $li.addClass('highlight')
+    }
+    if (message.actions) {
+        let $actions = $('<ul class="bot-actions"></ul>');
+        Object.entries(message.actions).forEach(item => {
+            const [label, action] = item;
+            let $button;
+            if (action.url) {
+                $button = $('<a class="msg-action" target="_blank"></a>');
+                $button.attr('href', action.url);
+            } else {
+                $button = $('<button class="msg-action"></button>');
+                $button.data('message', action.message);
+                $button.data('survey', action.survey);
+                $button.data('submit', action.submit);
+            }
+            $button.text(label);
+            if (action.help) {
+                $button.attr('title', action.help);
+            }
+            $('<li>').append($button).appendTo($actions);
+            $li.append($actions);
+        });
+        $actions.appendTo($li);
     }
     var $message = $li.children('.message');
     $message.text(message.message);
@@ -271,6 +298,8 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
 
     if (!message.is_system && this.vars.user.can_moderate) {
         var $modactions = $('<span class="mod-actions"></span>');
+        $modactions.append('<span class="material-icons pin" data-action="pin" title="Pin this message">location_on</span>');
+        $modactions.append('<span class="material-icons unpin" data-action="unpin" title="Unpin this message">location_off</span>');
         $modactions.append('<span class="material-icons" data-action="delete" title="Delete this message">delete</span>');
         if (!message.is_bot) {
             $modactions.append('<span class="material-icons" data-action="purge" title="Purge all messages">block</span>');
@@ -286,12 +315,33 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         $li.hide();
         setTimeout(function() {
             $li.show();
-            var $messages = $('.race-chat .messages');
+            var $messages = $('.race-chat .messages.regular');
             $messages[0].scrollTop = $messages[0].scrollHeight
         }, remaining_delay);
     }
 
     return $li;
+};
+
+Race.prototype.pinMessage = function(messageID) {
+    let $message = $('.race-chat .messages.regular').children('[data-id="' + messageID + '"]');
+    if (!$message.length) return;
+    let $placehholder = $('<li class="pin-placeholder"></li>').insertAfter($message);
+    $message.data('placeholder', $placehholder);
+    $('.race-chat .messages.pinned').append($message);
+};
+
+Race.prototype.unpinMessage = function(messageID) {
+    let $message = $('.race-chat .messages.pinned').children('[data-id="' + messageID + '"]');
+    if (!$message.length) return;
+    if ($message.data('placeholder').parent().length) {
+        $message.insertAfter($message.data('placeholder'));
+        $message.data('placeholder').remove();
+        $message.removeData('placeholder');
+    } else {
+        // Message is beyond the scrollback limit
+        $message.remove();
+    }
 };
 
 Race.prototype.deleteMessage = function(messageID, userID) {
@@ -453,6 +503,12 @@ Race.prototype.onSocketMessage = function(event) {
         case 'chat.message':
             this.addMessage(data.message, server_date, false);
             break;
+        case 'chat.pin':
+            this.pinMessage(data.message.id);
+            break;
+        case 'chat.unpin':
+            this.unpinMessage(data.message.id);
+            break;
         case 'chat.delete':
             this.deleteMessage(data.delete.id, null);
             if (this.vars.user.can_moderate) {
@@ -573,7 +629,7 @@ Race.prototype.reconnect = function() {
 };
 
 Race.prototype.whoops = function(message, cls = 'error', forceScroll = true) {
-    var $messages = $('.race-chat .messages');
+    var $messages = $('.race-chat .messages.regular');
     var date = new Date();
     var timestamp = ('00' + date.getHours()).slice(-2) + ':' + ('00' + date.getMinutes()).slice(-2);
     var $li = $(
@@ -674,6 +730,127 @@ $(function() {
         } else {
             $(this).height($(this)[0].scrollHeight - 12);
         }
+    });
+
+    $(document).on('click', '.race-chat button.msg-action', function() {
+        if ($(this).data('survey')) {
+            let $currentSurvey = $(this).closest('.bot-actions').closest('li').next('.bot-survey');
+            if ($currentSurvey.length) {
+                if ($currentSurvey.data('action') === this) {
+                    return false;
+                }
+                $currentSurvey.remove();
+            }
+            let $modal = $('<li class="bot-survey layout-form">' +
+                '<span></span>' +
+                '<ul></ul>' +
+                '<div class="btn-row">' +
+                  '<button class="btn msg-action" type="button">Submit</button>' +
+                  '<button class="btn close" type="button">Cancel</button>' +
+                '</div>' +
+              '</li>');
+            $modal.data('action', this);
+            $modal.find('span').text($(this).text());
+            if ($(this).data('submit')) {
+                $modal.find('.msg-action').text($(this).data('submit'));
+            }
+            $(this).data('survey').forEach(item => {
+                let $input;
+                switch (item.type) {
+                    case 'input':
+                        $input = $('<input type="text">');
+                        $input.attr('name', item.name);
+                        if (!!item.default) {
+                            $input.val(item.default);
+                        }
+                        if (!!item.placeholder) {
+                            $input.attr('placeholder', item.placeholder);
+                        }
+                        break;
+                    case 'bool':
+                        $input = $('<input type="checkbox" value="1">');
+                        $input.attr('name', item.name);
+                        if (!!item.default) {
+                            $input.prop('checked', true);
+                        }
+                        break;
+                    case 'radio':
+                        $input = $('<ul></ul>');
+                        Object.entries(item.options).forEach(option => {
+                            const [value, label] = option;
+                            let $opt = $('<li><label><input type="radio"><span></span></label></li>');
+                            $opt.find('span').text(label);
+                            $opt.find('input').attr('name', item.name)
+                                .attr('value', value);
+                            if (value === item.default) {
+                                $opt.find('input').prop('checked', true);
+                            }
+                            $opt.appendTo($input);
+                        });
+                        break;
+                    case 'select':
+                        $input = $('<select></select>');
+                        $input.attr('name', item.name);
+                        Object.entries(item.options).forEach(option => {
+                            const [value, label] = option;
+                            $('<option></option>')
+                                .attr('value', value)
+                                .text(label)
+                                .appendTo($input);
+                        });
+                        if (!!item.default) {
+                            $input.val(item.default);
+                        }
+                        break;
+                    default:
+                        return;
+                }
+                let $li = $('<li><label></label></li>');
+                $li.find('label').text(item.label);
+                if (item.type === 'bool') {
+                    $li.find('label').prepend($input);
+                } else {
+                    $input.appendTo($li);
+                }
+                if (item.help) {
+                    $('<span class="helptext"></span>').text(item.help).appendTo($li);
+                }
+                $modal.children('ul').append($li);
+            });
+
+            $modal.find('.msg-action').data('message', $(this).data('message'))
+            $modal.insertAfter($(this).closest('.bot-actions').closest('li'));
+            return false;
+        }
+        let data = {
+            'csrfmiddlewaretoken': Cookies.get('csrftoken'),
+            'message': $(this).data('message'),
+            'guid': race.guid()
+        }
+        let $modal = $(this).closest('.bot-survey');
+        if ($modal.length) {
+            let formData = $modal.find('input:not(:checkbox), select').serializeArray();
+            $modal.find('input:checkbox').each(function() {
+                formData.push({
+                    name: this.name,
+                    value: this.checked ? this.name : ''
+                });
+            });
+            formData.forEach(item => {
+                data.message = data.message.replace(`\${${item.name}}`, item.value);
+            });
+        }
+        $.post({
+            url: race.vars.urls.message,
+            data: data,
+            success: function() {
+                $modal.remove();
+            },
+            error: race.onError.bind(race),
+        });
+    });
+    $(document).on('click', '.race-chat .bot-survey .close', function() {
+        $(this).closest('.bot-survey').remove();
     });
 
     $(document).on('click', '.confirm .btn, .dangerous .btn', function() {

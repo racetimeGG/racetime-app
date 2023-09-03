@@ -1,7 +1,5 @@
 import random
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.db.models import signals
 from django.dispatch import receiver
@@ -45,14 +43,3 @@ def invalidate_caches(sender, instance, **kwargs):
         + [str(race) + '/renders' for race in races]
         + [category.slug + '/data' for category in set(race.category for race in races)]
     )
-
-
-@receiver(signals.post_save, sender=models.Message)
-def broadcast_message(sender, instance, **kwargs):
-    if instance.deleted:
-        return
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(instance.race.slug, {
-        'type': 'chat.message',
-        'message': instance.as_dict,
-    })

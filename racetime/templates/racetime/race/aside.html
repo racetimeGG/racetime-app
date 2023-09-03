@@ -30,7 +30,8 @@
             Chat paused due to scroll
         </span>
     </div>
-    <ol class="messages"></ol>
+    <ol class="messages pinned"></ol>
+    <ol class="messages regular"></ol>
     {% if user.is_active %}
     <form action="{% url 'message' category=race.category.slug race=race.slug %}" method="post">
         {% csrf_token %}
