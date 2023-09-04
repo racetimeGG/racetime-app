@@ -214,7 +214,7 @@ main {
 }
 
 .race-chat > .messages > li {
-    margin: 1px 0;
+    margin: 3px 0;
     padding: 2px;
     word-break: break-word;
 }
