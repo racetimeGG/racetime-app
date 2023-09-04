@@ -219,7 +219,6 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
                 $button.attr('title', action.help);
             }
             $('<li>').append($button).appendTo($actions);
-            $li.append($actions);
         });
         $actions.appendTo($li);
     }

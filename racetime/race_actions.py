@@ -296,11 +296,12 @@ class Random:
                 result = re.sub('#', lambda *args: random.choice(string.digits), pattern)
                 result = re.sub('\\*', lambda *args: random.choice(string.ascii_letters), result)
                 result = re.sub('\\?', lambda *args: random.choice(string.ascii_letters + string.digits), result)
-                models.Message.objects.create(
+                message = models.Message.objects.create(
                     user=user,
                     race=race,
                     message='.random %s' % comment,
                 )
+                message.broadcast()
                 race.add_message(
                     'Random string result: ##bot##%(result)s##'
                     % {'result': result}

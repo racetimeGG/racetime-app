@@ -635,10 +635,11 @@ class Race(models.Model):
         """
         Add a system-generated chat message for this race.
         """
-        self.message_set.create(
+        message = self.message_set.create(
             message=message,
             highlight=highlight,
         )
+        message.broadcast()
         if broadcast:
             self.broadcast_data()
 
