@@ -819,6 +819,9 @@ $(function() {
 
             $modal.find('.msg-action').data('message', $(this).data('message'))
             $modal.insertAfter($(this).closest('.bot-actions').closest('li'));
+            if (!$modal.next().length && $modal.closest('.messages.regular').length) {
+                race.scrollToBottom();
+            }
             return false;
         }
         let data = {
