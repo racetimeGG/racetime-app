@@ -200,7 +200,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     if (message.highlight) {
         $li.addClass('highlight')
     }
-    if (message.actions) {
+    if (Object.keys(message.actions).length) {
         let $actions = $('<ul class="bot-actions"></ul>');
         Object.entries(message.actions).forEach(item => {
             const [label, action] = item;
