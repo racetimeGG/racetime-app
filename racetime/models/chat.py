@@ -63,7 +63,7 @@ class Message(models.Model):
         default=None,
     )
     actions = models.JSONField(
-        default={},
+        default=dict,
         blank=True,
     )
 
