@@ -34,7 +34,7 @@ class Category(models.Model):
     model.
     """
     name = models.CharField(
-        max_length=255,
+        max_length=100,
         unique=True,
         help_text='The full name of this category, e.g. "Pokémon Emerald".',
     )
@@ -44,7 +44,7 @@ class Category(models.Model):
         help_text='An abbreviation or other short identifier, e.g. "PKMNE".',
     )
     search_name = models.CharField(
-        max_length=255,
+        max_length=100,
         null=True,
         blank=True,
         db_index=True,
@@ -53,7 +53,7 @@ class Category(models.Model):
         ),
     )
     slug = models.CharField(
-        max_length=255,
+        max_length=50,
         unique=True,
         help_text=(
             'A unique identifier for this category used in the URL, '
@@ -331,7 +331,7 @@ class CategoryRequest(models.Model):
     Represents a user request to add a new category.
     """
     name = models.CharField(
-        max_length=255,
+        max_length=100,
         help_text=(
             'The full name of this category, e.g. "Super Mario 64" or '
             '"Multiple Sonic Games".'
@@ -345,7 +345,7 @@ class CategoryRequest(models.Model):
         ),
     )
     slug = models.CharField(
-        max_length=255,
+        max_length=50,
         help_text=(
             'A unique identifier for this category used in the URL, '
             'e.g. "tetris-99". If in doubt, just put the game name in '
@@ -494,7 +494,7 @@ class Goal(models.Model):
         on_delete=models.CASCADE,
     )
     name = models.CharField(
-        max_length=255,
+        max_length=100,
         help_text='The win conditions for the race, e.g. "16 stars".',
     )
     active = models.BooleanField(
