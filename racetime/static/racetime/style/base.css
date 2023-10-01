@@ -1091,7 +1091,7 @@ aside .race-list > ol > li > .race-row {
 .entrant-row > .monitor-actions > ul > li:first-child {
     margin-top: 0;
 }
-.entrant-row > .monitor-actions > ul > li > form > .btn {
+.entrant-row > .monitor-actions > ul > li .btn {
     align-items: center;
     justify-content: flex-end;
     background: none;
@@ -1104,11 +1104,11 @@ aside .race-list > ol > li > .race-row {
     padding: 2px 5px;
     vertical-align: top;
 }
-.entrant-row > .monitor-actions > ul > li > form > .btn:hover {
+.entrant-row > .monitor-actions > ul > li .btn:hover {
     background-color: #3b4b47;
     color: white;
 }
-.entrant-row > .monitor-actions > ul > li > form > .btn > .material-icons {
+.entrant-row > .monitor-actions > ul > li .btn > .material-icons {
     height: 22px;
     line-height: 22px;
     margin-left: 5px;

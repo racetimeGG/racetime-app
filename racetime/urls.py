@@ -164,6 +164,7 @@ urlpatterns = [
             path('purge/<str:message>', views.RaceChatPurge.as_view(), name='chat_purge'),
 
             path('<str:entrant>/', include([
+                path('edit', views.EditRaceResult.as_view(), name='edit_race_result'),
                 path('accept_request', views.AcceptRequest.as_view(), name='accept_request'),
                 path('force_unready', views.ForceUnready.as_view(), name='force_unready'),
                 path('override_stream', views.OverrideStream.as_view(), name='override_stream'),

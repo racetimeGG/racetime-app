@@ -87,4 +87,12 @@
             </form>
         </li>
     {% endif %}
+    {% if can_edit and entrant.can_edit %}
+        <li>
+            <a class="btn" href="{% url 'edit_race_result' entrant=entrant.user.hashid race=race.slug category=race.category.slug %}">
+                <span>Edit result</span>
+                <i class="material-icons">edit</i>
+            </a>
+        </li>
+    {% endif %}
 {% endspaceless %}</ul>

@@ -1,0 +1,18 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Edit race result | {{ entrant.user }} | {{ entrant.race }} |
+{% endblock %}
+
+{% block main %}
+    <ol class="breadcrumbs">
+        <li><a href="{{ entrant.race.category.get_absolute_url }}">{{ entrant.race.category.slug }}</a></li>
+        <li><a href="{{ entrant.race.get_absolute_url }}">{{ entrant.race.slug }}</a></li>
+    </ol>
+    <h2>Edit result: {{ entrant.user }}</h2>
+    <form class="entrant-form layout-form" method="post">
+        {% csrf_token %}
+        <ul>{{ form.as_ul }}</ul>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+{% endblock %}

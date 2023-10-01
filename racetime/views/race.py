@@ -695,6 +695,74 @@ class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
         return http.HttpResponse()
 
 
+class EditRaceResult(UserMixin, generic.UpdateView):
+    form_class = forms.EntrantEditForm
+
+    def get_object(self, queryset=None):
+        entrant_hashid = self.kwargs.get('entrant')
+
+        try:
+            return models.Entrant.objects.get(
+                user=models.User.objects.get_by_hashid(entrant_hashid),
+                race__slug=self.kwargs.get('race'),
+            )
+        except (models.Entrant.DoesNotExist, models.User.DoesNotExist):
+            raise http.Http404('No entrant matches the given query.')
+
+    def form_valid(self, form):
+        entrant = form.save(commit=False)
+        self.update_entrant(entrant, form, self.user)
+        return http.HttpResponseRedirect(entrant.race.get_absolute_url())
+
+    def test_func(self):
+        if not self.user.is_authenticated:
+            return False
+        race = self.get_object().race
+        return race.is_done and not race.recorded and race.category.can_edit(self.user)
+
+    def update_entrant(self, entrant, form, who_changed):
+        if form.cleaned_data['result'] == 'done':
+            result_str = 'Done'
+            entrant.dnf = False
+            entrant.dq = False
+        elif form.cleaned_data['result'] == 'dnf':
+            result_str = 'DNF'
+            entrant.finish_time = None
+            entrant.dnf = True
+            entrant.dq = False
+        elif form.cleaned_data['result'] == 'dq':
+            result_str = 'DQ'
+            entrant.dnf = False
+            entrant.dq = True
+        else:
+            raise Exception('Unrecognised result')
+
+        if 'result' in form.changed_data:
+            entrant.race.add_message(
+                '%(user)s changed %(entrant)s result to %(result)s'
+                % {'user': who_changed, 'entrant': entrant.user, 'result': result_str}
+            )
+
+        if form.cleaned_data['result'] != 'dnf' and 'finish_time' in form.changed_data:
+            entrant.race.add_message(
+                '%(user)s changed finish time for %(entrant)s to %(finish_time)s'
+                % {'user': who_changed, 'entrant': entrant.user, 'finish_time': entrant.finish_time}
+            )
+
+        if 'comment' in form.changed_data:
+            entrant.race.add_message(
+                '%(user)s edited a comment left by %(entrant)s'
+                % {'user': who_changed, 'entrant': entrant.user}
+            )
+
+        with atomic():
+            entrant.save()
+            entrant.race.recalculate_places()
+            entrant.race.recalculate_state()
+
+        return http.HttpResponseRedirect(entrant.race.get_absolute_url())
+
+
 class RaceListData(generic.View):
     def get(self, request, *args, **kwargs):
         self.unlisted_filter = Q(unlisted=False)

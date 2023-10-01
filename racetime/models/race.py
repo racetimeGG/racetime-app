@@ -715,6 +715,7 @@ class Race(models.Model):
 
         These chunks include some that are context-sensitive to the given user.
         """
+        can_edit = self.category.can_edit(user)
         can_moderate = self.category.can_moderate(user)
         can_monitor = self.can_monitor(user)
         available_actions = self.available_actions(user)
@@ -739,11 +740,13 @@ class Race(models.Model):
         if can_monitor:
             from ..forms import InviteForm
             renders['entrants_monitor'] = render_to_string('racetime/race/entrants_monitor.html', {
+                'can_edit': can_edit,
                 'can_moderate': can_moderate,
                 'can_monitor': can_monitor,
                 'race': self,
             }, request)
             renders['monitor'] = render_to_string('racetime/race/monitor.html', {
+                'can_edit': can_edit,
                 'can_moderate': can_moderate,
                 'invite_form': InviteForm(),
                 'race': self,
@@ -1313,6 +1316,27 @@ class Race(models.Model):
 
         self.increment_version()
 
+    def recalculate_state(self):
+        """
+        Update the race state based on entrant results.
+
+        This should ONLY be called when a race is already done but not recorded.
+        """
+        if not self.entrant_set.filter(
+            finish_time__isnull=False,
+            dq=False,
+            dnf=False,
+        ) and not self.time_limit_auto_complete:
+            self.state = RaceStates.cancelled.value
+            self.cancelled_at = self.ended_at
+            self.recordable = False
+        else:
+            self.state = RaceStates.finished.value
+            self.cancelled_at = None
+            self.recordable = not self.custom_goal
+        self.version = F('version') + 1
+        self.save()
+
     def get_absolute_url(self):
         """
         Return the URL of this race room.
@@ -1453,6 +1477,15 @@ class Entrant(models.Model):
         Determine if this entrant can be promoted to race monitor.
         """
         return self.race.can_add_monitor(self.user)
+
+    @property
+    def can_edit(self):
+        return (
+            self.state == EntrantStates.joined.value
+            and self.race.is_done
+            and self.race.recordable
+            and not self.race.recorded
+        )
 
     @property
     def can_remove_monitor(self):

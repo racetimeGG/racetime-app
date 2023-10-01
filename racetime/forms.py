@@ -608,6 +608,41 @@ class RaceSetInfoForm(forms.ModelForm):
         model = models.Race
 
 
+class EntrantEditForm(forms.ModelForm):
+    result = forms.ChoiceField(
+        choices=(
+            ('done', 'Finished'),
+            ('dnf', 'DNF'),
+            ('dq', 'Disqualified'),
+        ),
+        widget=forms.RadioSelect,
+    )
+
+    class Meta:
+        fields = (
+            'result',
+            'finish_time',
+            'comment',
+        )
+        model = models.Entrant
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.dnf:
+            self.fields['result'].initial = 'dnf'
+        elif self.instance.dq:
+            self.fields['result'].initial = 'dq'
+        else:
+            self.fields['result'].initial = 'done'
+
+    def clean(self):
+        super().clean()
+        if self.cleaned_data['result'] == 'done' and not self.cleaned_data['finish_time']:
+            raise ValidationError('You must set a finish time.')
+        return self.cleaned_data
+
+
 class AuthenticationForm(auth_forms.AuthenticationForm):
     captcha = ReCaptchaField(
         label=False,
