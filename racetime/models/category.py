@@ -346,11 +346,6 @@ class CategoryRequest(models.Model):
     )
     slug = models.CharField(
         max_length=50,
-        help_text=(
-            'A unique identifier for this category used in the URL, '
-            'e.g. "tetris-99". If in doubt, just put the game name in '
-            'lowercase without spaces.'
-        ),
     )
     goals = models.TextField(
         default='Beat the game',
