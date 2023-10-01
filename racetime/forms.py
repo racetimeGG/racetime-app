@@ -202,7 +202,6 @@ class CategoryRequestForm(forms.ModelForm):
         fields = (
             'name',
             'short_name',
-            'slug',
             'goals',
         )
         model = models.CategoryRequest

@@ -277,6 +277,7 @@ class RequestCategory(LoginRequiredMixin, UserMixin, generic.CreateView):
         #    return self.form_invalid(form)
 
         self.object = form.save(commit=False)
+        self.object.slug = slugify(self.object.short_name)
         self.object.requested_by = self.user
         self.object.save()
         messages.info(
