@@ -463,7 +463,7 @@ def get_action_button(action, race_slug, category_slug):
         'done': {'label': 'Done', 'class': ''},
         'undone': {'label': 'Undo finish', 'class': 'dangerous'},
         'forfeit': {'label': 'Forfeit', 'class': 'dangerous'},
-        'unforfeit': {'label': 'Undo forfeit', 'class': ''},
+        'unforfeit': {'label': 'Undo forfeit', 'class': 'dangerous'},
     }
     button = race_action_buttons.get(action)
     if not button:
