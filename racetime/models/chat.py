@@ -71,7 +71,7 @@ class Message(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=('race', 'deleted')),
+            models.Index(fields=('race', 'deleted', 'pinned')),
         ]
 
     @property
