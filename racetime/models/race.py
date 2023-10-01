@@ -480,6 +480,17 @@ class Race(models.Model):
         return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
 
     @property
+    def is_unfinalized(self):
+        """
+        Determine if the race has completed but hasn't been finalized.
+        """
+        return (
+            self.is_done
+            and not self.recorded
+            and (self.ended_at or self.cancelled_at) >= timezone.now() - timedelta(hours=1)
+        )
+
+    @property
     def monitor_list(self):
         """
         Return a comma-separated string listing all race monitors.
@@ -593,6 +604,14 @@ class Race(models.Model):
         text.
         """
         return getattr(RaceStates, self.state)
+
+    @property
+    def time_limit_expired(self):
+        """
+        Determine if the time limit of this race has expired.
+        """
+        in_progress_for = timezone.now() - self.started_at
+        return in_progress_for >= self.time_limit
 
     @property
     def timer(self):
@@ -1009,6 +1028,19 @@ class Race(models.Model):
                 'This race has been cancelled due to all entrants forfeiting.',
                 highlight=True,
             )
+
+    def unfinish(self):
+        if not self.is_unfinalized:
+            raise SafeException('Cannot restart a race from this state.')
+
+        self.state = RaceStates.in_progress.value
+        self.ended_at = None
+        self.cancelled_at = None
+        self.recordable = not self.custom_goal
+        self.version = F('version') + 1
+        self.save()
+
+        self.add_message('Race timer restarted.', highlight=True)
 
     def record(self, recorded_by):
         """
@@ -1563,7 +1595,7 @@ class Entrant(models.Model):
                     actions.append('change_comment')
                 else:
                     actions.append('add_comment')
-            if self.race.is_in_progress:
+            if self.race.is_in_progress or self.race.is_unfinalized:
                 if not self.dq and not self.dnf:
                     actions.append('done' if not self.finish_time else 'undone')
                 if not self.dq and not self.finish_time:
@@ -1712,8 +1744,12 @@ class Entrant(models.Model):
         Undo the entrant's previous finish time and placing, putting them back
         in the race.
         """
+        if self.race.is_unfinalized and self.race.time_limit_expired:
+            raise SafeException(
+                'You cannot undo your finish as the race time limit has expired.'
+            )
         if self.state == EntrantStates.joined.value \
-                and self.race.is_in_progress \
+                and (self.race.is_in_progress or self.race.is_unfinalized) \
                 and self.ready \
                 and not self.dnf \
                 and not self.dq \
@@ -1728,6 +1764,8 @@ class Entrant(models.Model):
                 '%(user)s is no longer done.'
                 % {'user': self.user}
             )
+            if self.race.is_unfinalized:
+                self.race.unfinish()
             self.race.recalculate_places()
         else:
             raise SyncError('You cannot undo your finish at this time. Refresh to continue.')
@@ -1764,8 +1802,12 @@ class Entrant(models.Model):
         """
         Undo the previous race forfeit, putting the entrant back in the race.
         """
+        if self.race.is_unfinalized and self.race.time_limit_expired:
+            raise SafeException(
+                'You cannot undo your forfeit as the race time limit has expired.'
+            )
         if self.state == EntrantStates.joined.value \
-                and self.race.is_in_progress \
+                and (self.race.is_in_progress or self.race.is_unfinalized) \
                 and self.ready \
                 and self.dnf \
                 and not self.dq \
@@ -1779,6 +1821,8 @@ class Entrant(models.Model):
                 '%(user)s has un-forfeited from the race.'
                 % {'user': self.user}
             )
+            if self.race.is_unfinalized:
+                self.race.unfinish()
         else:
             raise SyncError('You cannot undo your forfeit at this time. Refresh to continue.')
 
