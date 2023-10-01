@@ -10,7 +10,7 @@ from websockets import ConnectionClosed
 
 from . import race_actions, race_bot_actions
 from .models import Bot, Race, Message
-from .utils import SafeException, exception_to_msglist, get_hashids, get_action_button
+from .utils import SafeException, exception_to_msglist, get_chat_history, get_hashids, get_action_button
 
 
 class OAuthConsumerMixin:
@@ -228,12 +228,7 @@ class RaceConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat_history(self, last_message_id=None):
-        try:
-            race = Race.objects.get(slug=self.state.get('race_slug'))
-        except Race.DoesNotExist:
-            return []
-        else:
-            return list(race.chat_history(last_message_id).values())
+        return list(get_chat_history(self.state.get('race_id'), last_message_id).values())
 
     @database_sync_to_async
     def load_race(self):
@@ -247,6 +242,7 @@ class RaceConsumer(AsyncWebsocketConsumer):
             self.state = {}
         else:
             self.state['category_slug'] = race.category.slug
+            self.state['race_id'] = race.id
             self.state['race_dict'] = race.as_dict
             self.state['race_renders'] = race.get_renders_stateless()
             self.state['race_slug'] = race.slug

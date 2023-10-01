@@ -1,15 +1,13 @@
 import json
 import random
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from datetime import timedelta
-from itertools import chain
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.apps import apps
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import ordinal
-from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -24,7 +22,10 @@ from django.utils.text import slugify
 
 from .choices import EntrantStates, RaceStates
 from ..rating import rate_race
-from ..utils import SafeException, SyncError, generate_team_name, get_action_button, timer_html, timer_str
+from ..utils import (
+    SafeException, SyncError, generate_team_name, get_action_button,
+    get_chat_history, timer_html, timer_str,
+)
 
 
 class Race(models.Model):
@@ -676,16 +677,7 @@ class Race(models.Model):
         Return the last 100 chat messages, plus any pinned messages, sent to
         this race room.
         """
-        pinned = self.message_set.filter(pinned=True, deleted=False).order_by('posted_at')
-        pinned = pinned.prefetch_related('user', 'bot')
-        messages = self.message_set.filter(pinned=False, deleted=False).order_by('-posted_at')
-        messages = messages.prefetch_related('user', 'bot')
-        if last_message_id:
-            messages = messages.filter(id__gt=last_message_id)
-        return OrderedDict(
-            (message.hashid, message.as_dict)
-            for message in chain(pinned, reversed(messages[:100]))
-        )
+        return get_chat_history(self.id, last_message_id)
 
     def dump_json_data(self):
         """

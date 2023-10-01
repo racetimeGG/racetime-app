@@ -1,8 +1,11 @@
 import json
 import random
+from collections import OrderedDict
+from itertools import chain
 from urllib.parse import urlencode
 
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
+from django.apps import apps
 from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.urls import reverse, NoReverseMatch
@@ -12,12 +15,14 @@ from hashids import Hashids
 __all__ = [
     'RedisChannelLayer',
     'SafeException',
+    'SyncError',
     'chunkify',
     'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
     'generate_team_name',
     'get_action_button',
+    'get_chat_history',
     'get_hashids',
     'notice_exception',
     'timer_html',
@@ -473,6 +478,22 @@ def get_action_button(action, race_slug, category_slug):
     except NoReverseMatch:
         url = None
     return action, url, button.get('label'), button.get('class')
+
+
+def get_chat_history(race_id, last_message_id=None):
+    if not race_id:
+        return OrderedDict()
+    Message = apps.get_model('racetime', 'Message')
+    pinned = Message.objects.filter(race_id=race_id, pinned=True, deleted=False).order_by('posted_at')
+    pinned = pinned.prefetch_related('user', 'bot')
+    messages = Message.objects.filter(race_id=race_id, pinned=False, deleted=False).order_by('-posted_at')
+    messages = messages.prefetch_related('user', 'bot')
+    if last_message_id:
+        messages = messages.filter(id__gt=last_message_id)
+    return OrderedDict(
+        (message.hashid, message.as_dict)
+        for message in chain(pinned, reversed(messages[:100]))
+    )
 
 
 def get_hashids(cls):
