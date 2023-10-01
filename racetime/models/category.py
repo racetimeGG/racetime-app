@@ -353,6 +353,7 @@ class CategoryRequest(models.Model):
         ),
     )
     goals = models.TextField(
+        default='Beat the game',
         help_text=(
             'Add goals, one per line, that people can race against. Goal '
             'names should be short, clear and simple, e.g. "Any%", "16 stars", '
