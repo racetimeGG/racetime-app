@@ -487,7 +487,7 @@ class Race(models.Model):
         return (
             self.is_done
             and not self.recorded
-            and (self.ended_at or self.cancelled_at) >= timezone.now() - timedelta(hours=1)
+            and (self.ended_at or self.cancelled_at) >= timezone.now() - timedelta(minutes=10)
         )
 
     @property
