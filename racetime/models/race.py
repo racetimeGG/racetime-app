@@ -691,12 +691,12 @@ class Race(models.Model):
         self.version = F('version') + 1
         self.save()
 
-    def chat_history(self, last_message_id=None):
+    def chat_history(self, user=None, last_message_id=None):
         """
         Return the last 100 chat messages, plus any pinned messages, sent to
         this race room.
         """
-        return get_chat_history(self.id, last_message_id)
+        return get_chat_history(self.id, user, last_message_id)
 
     def dump_json_data(self):
         """

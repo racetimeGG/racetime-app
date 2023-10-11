@@ -28,6 +28,7 @@ class UserSelectForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'autocomplete-user',
+            'data-field': 'user',
             'data-source': reverse_lazy('autocomplete_user'),
         }),
     )
@@ -53,20 +54,45 @@ class BotForm(forms.ModelForm):
 
 
 class ChatForm(forms.ModelForm):
+    direct_to = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput,
+    )
+    dm_searcher = forms.CharField(
+        required=False,
+        label='Send to:',
+        widget=forms.TextInput(attrs={
+            'class': 'autocomplete-user',
+            'data-field': 'direct_to',
+            'data-source': reverse_lazy('autocomplete_user'),
+            'placeholder': 'Click or start typing…',
+        }),
+    )
+
+    class Meta:
+        fields = ('direct_to', 'dm_searcher', 'message')
+        model = models.Message
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # This prevents browsers from showing "Please fill in this field" on mouseover.
         self.fields['message'].widget.attrs['title'] = ''
         self.fields['message'].widget.attrs['placeholder'] = 'Send a message'
 
-    class Meta:
-        fields = ('message',)
-        model = models.Message
+    def clean_direct_to(self):
+        hashid = self.cleaned_data.get('direct_to')
+        if not hashid:
+            return None
+        try:
+            return models.User.objects.get_by_hashid(hashid)
+        except models.User.DoesNotExist:
+            raise ValidationError('Unrecognised user')
 
 
 class ChatBotForm(ChatForm):
     class Meta:
         fields = (
+            'direct_to',
             'message',
             'actions',
             'pinned',
@@ -75,7 +101,7 @@ class ChatBotForm(ChatForm):
 
     def clean_actions(self):
         actions = self.cleaned_data.get('actions')
-        if not actions:
+        if not actions or self.cleaned_data.get('direct_to'):
             return {}
         if len(actions) > models.Message.MAX_ACTIONS:
             raise ValidationError(
@@ -83,6 +109,11 @@ class ChatBotForm(ChatForm):
                 % {'max': models.Message.MAX_ACTIONS}
             )
         return actions
+
+    def clean_pinned(self):
+        if self.cleaned_data.get('direct_to'):
+            return False
+        return self.cleaned_data.get('pinned')
 
 
 class CommentForm(forms.ModelForm):

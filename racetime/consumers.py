@@ -124,6 +124,17 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         await self.deliver(event['type'], message=event['message'])
 
+    async def chat_dm(self, event):
+        """
+        Handler for chat.dm type event.
+        """
+        await self.deliver(event['type'], **{
+            'message': event['message'],
+            'from_user': event['from_user'],
+            'from_bot': event['from_bot'],
+            'to': event['to'],
+        })
+
     async def chat_pin(self, event):
         """
         Handler for chat.pin type event.
@@ -228,7 +239,8 @@ class RaceConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat_history(self, last_message_id=None):
-        return list(get_chat_history(self.state.get('race_id'), last_message_id).values())
+        user = self.scope.get('user') if self.scope.get('user').is_authenticated else None
+        return list(get_chat_history(self.state.get('race_id'), user, last_message_id).values())
 
     @database_sync_to_async
     def load_race(self):

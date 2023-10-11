@@ -71,7 +71,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
             'invite_form': self.get_invite_form(),
             'meta_image': race.category.image.url if race.category.image else None,
             'js_vars': {
-                'chat_history': race.chat_history(),
+                'chat_history': race.chat_history(self.user),
                 'hide_comments': race.hide_comments,
                 'room': str(race),
                 'server_time_utc': timezone.now().isoformat(),
@@ -80,6 +80,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
                     'renders': race.get_renders_url(),
                     'available_teams': reverse('available_teams', args=(race.category.slug, race.slug)),
                     'message': reverse('message', args=(race.category.slug, race.slug)),
+                    'get_dm': reverse('chat_dm', args=(race.category.slug, race.slug, '$0')),
                     'pin': reverse('chat_pin', args=(race.category.slug, race.slug, '$0')),
                     'unpin': reverse('chat_unpin', args=(race.category.slug, race.slug, '$0')),
                     'delete': reverse('chat_delete', args=(race.category.slug, race.slug, '$0')),
@@ -150,6 +151,22 @@ class BotMixin:
             {'errors': form.errors},
             status=422,
         )
+
+
+class RaceChatDM(RaceChatMixin):
+    def get(self, request, *args, **kwargs):
+        race = self.get_object()
+        message = self.get_message(race)
+
+        if self.user not in (message.user, message.direct_to):
+            return self.handle_no_permission()
+
+        return http.JsonResponse({
+            'message': message.as_dict,
+        })
+
+    def test_func(self):
+        return self.user.is_authenticated
 
 
 class RaceChatPin(RaceChatMixin):
@@ -302,6 +319,15 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
         if not self.object.category.can_moderate(self.user):
             messages = messages.filter(deleted=False)
 
+        if self.user.is_authenticated:
+            messages = messages.filter(
+                Q(user=self.user)
+                | Q(direct_to__isnull=True)
+                | Q(direct_to=self.user)
+            )
+        else:
+            messages = messages.filter(direct_to__isnull=True)
+
         content = '\n'.join(self.message_to_str(msg) for msg in messages)
 
         resp = http.HttpResponse(
@@ -332,16 +358,19 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
                 timestamp,
                 msg.message_plain,
             )
+
+        qualifiers = [str(timestamp)]
         if msg.deleted:
-            return '[%s] [deleted by %s at %s] %s: %s' % (
-                timestamp,
+            qualifiers.append(
+                'deleted by %s at %s' % (
                 msg.deleted_by,
                 msg.deleted_at.replace(microsecond=0),
-                msg.user or msg.bot,
-                msg.message_plain,
-            )
-        return '[%s] %s: %s' % (
-            timestamp,
+            ))
+        if msg.direct_to:
+            qualifiers.append('DM @%s' % msg.direct_to)
+
+        return '%s %s: %s' % (
+            '[' + '] ['.join(qualifiers) + ']',
             msg.user or msg.bot,
             msg.message_plain,
         )

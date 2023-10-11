@@ -218,6 +218,7 @@ main {
 .race-chat > .messages > li {
     margin: 3px 0;
     padding: 2px;
+    position: relative;
     word-break: break-word;
 }
 
@@ -256,6 +257,35 @@ main {
 .race-chat > .messages > li.mentioned {
     background-color: #1a1c20;
     border-radius: 4px;
+}
+
+.race-chat > .messages > li.dm {
+    padding-top: 15px;
+}
+.race-chat > .messages > li.dm.mentioned {
+    background-color: #454037;
+}
+.race-chat > .messages > li.dm::after {
+    color: #8c898c;
+    content: 'visibility';
+    font-family: 'Material Icons';
+    font-size: 14px;
+    line-height: 1;
+    -moz-font-feature-settings: 'liga';
+    -moz-osx-font-smoothing: grayscale;
+    position: absolute;
+        top: 1px;
+        left: 2px;
+}
+.race-chat > .messages > li.dm > .dm-info {
+    color: #8c898c;
+    cursor: default;
+    font-variant: all-small-caps;
+    font-size: 12px;
+    position: absolute;
+        top: 0;
+        left: 19px;
+    user-select: none;
 }
 
 .race-chat > .messages > li > .timestamp {
@@ -365,6 +395,9 @@ main {
     display: inline-flex;
     vertical-align: top;
 }
+.race-chat.dm > .messages > li > .name {
+    cursor: pointer;
+}
 
 .race-chat > .messages > li > .name.supporter > span {
     background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
@@ -452,15 +485,39 @@ main {
 }
 
 .race-chat > form {
-    margin-top: 8px;
+    margin: 4px -4px -4px;
+    padding: 4px;
+    transition: box-shadow 0.1s;
+}
+.race-chat > form.dm {
+    box-shadow: 0 0 3px 0 #f0b132;
 }
 
 .race-chat > form label {
+    margin-right: 6px;
+}
+
+.race-chat > form label[for="id_message"] {
     display: none;
 }
 
+.race-chat > form li {
+    align-items: center;
+    display: flex;
+}
+
+.race-chat > form li:first-child {
+    display: none;
+    margin-bottom: 6px;
+}
+.race-chat > form.dm li:first-child {
+    display: flex;
+}
+
+.race-chat > form input,
 .race-chat > form textarea {
     caret-color: #1da674;
+    flex-grow: 1;
     font-size: 13px;
     height: 18px;
     min-height: 0;
@@ -469,11 +526,21 @@ main {
     padding: 6px;
     resize: none;
     vertical-align: top;
-    width: calc(100% - 12px);
+}
+
+.race-chat > form input {
+    flex: 0 0 50%;
 }
 
 .race-chat > form textarea:invalid {
     box-shadow: none;
+}
+
+.race-chat > form.dm input,
+.race-chat > form.dm textarea,
+.race-chat > form.dm button {
+    border-color: #f0b132;
+    caret-color: #f0b132;
 }
 
 .race-chat > form > .actions {
@@ -485,16 +552,26 @@ main {
 
 .race-chat > form > .actions > button {
     font-size: 13px;
+    width: 42px;
+}
+.race-chat > form > .actions > button .dm,
+.race-chat > form.dm > .actions > button .chat {
+    display: none;
+}
+.race-chat > form.dm > .actions > button .dm {
+    display: inline;
 }
 
 .race-chat > form > .actions > .moderation,
 .race-chat > form > .actions > .notifications,
+.race-chat > form > .actions > .send-dm,
 .race-chat > form > .actions > .popout {
     align-items: center;
     cursor: pointer;
     display: flex;
     margin-right: 5px;
     text-decoration: none;
+    transition: color 0.1s;
 }
 
 .race-chat > form > .actions > .moderation {
@@ -508,10 +585,13 @@ main {
     display: none;
 }
 
-
 .show-mod-actions .race-chat > form > .actions > .moderation > .on,
 .race-chat > form > .actions > .notifications.on > .on {
     display: initial;
+}
+
+.race-chat > form.dm > .actions > .send-dm {
+    color: #f0b132;
 }
 
 .race-stream-control {

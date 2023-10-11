@@ -102,7 +102,7 @@ $(function() {
                     $(self).closest('.user-pop')
                         .find('.avatar')
                         .css('background-image', ui.item.avatar ? 'url(' + ui.item.avatar + ')' : '');
-                    $(self).closest('form').find('[name="user"]').val(ui.item.id);
+                    $(self).closest('form').find(`[name="${$(this).data('field')}"]`).val(ui.item.id);
                     $(self).val(ui.item.full_name);
                     return false;
                 }

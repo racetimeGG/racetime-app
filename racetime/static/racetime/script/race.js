@@ -130,6 +130,15 @@ Race.prototype.scrollToBottom = function() {
     messages.scrollTop = messages.scrollHeight;
 };
 
+Race.prototype.fetchDM = function(message) {
+    var self = this;
+    var url = this.vars.urls.get_dm;
+    url = url.replace('$0', message);
+    $.get(url, '', function(data) {
+        self.addMessage(data.message, new Date(), false);
+    });
+};
+
 Race.prototype.addMessage = function(message, server_date, mute_notifications) {
     var self = this;
 
@@ -190,6 +199,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         );
     } else {
         $li.attr('data-userid', message.user.id);
+        $li.attr('data-username', message.user.name);
         var $user = $('<span class="name"></span>');
         $user.addClass(message.user.flair);
         $('<span />').text(message.user.name).appendTo($user);
@@ -199,6 +209,12 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     }
     if (message.highlight) {
         $li.addClass('highlight')
+    }
+    if (message.is_dm) {
+        $li.addClass('dm');
+        $('<span class="dm-info"></span>').text(
+            `Direct message @ ${message.direct_to.name}`
+        ).appendTo($li);
     }
     if (Object.keys(message.actions).length) {
         let $actions = $('<ul class="bot-actions"></ul>');
@@ -266,7 +282,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
                 }));
             });
         }
-        if (foundMention) {
+        if ((message.is_dm && message.direct_to.id === this.vars.user.id) || foundMention) {
             $li.addClass('mentioned');
             if (this.notify && !mute_notifications && (message.is_bot || message.user.id !== this.vars.user.id)) {
                 if (message.is_bot) {
@@ -295,7 +311,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
         }
     }
 
-    if (!message.is_system && this.vars.user.can_moderate) {
+    if (!message.is_system && !message.is_dm && this.vars.user.can_moderate) {
         var $modactions = $('<span class="mod-actions"></span>');
         $modactions.append('<span class="material-icons pin" data-action="pin" title="Pin this message">location_on</span>');
         $modactions.append('<span class="material-icons unpin" data-action="unpin" title="Unpin this message">location_off</span>');
@@ -310,7 +326,7 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     var ms_since_posted = Math.max(0, server_date - posted_date);
     var remaining_delay = (message.delay * 1000) - ms_since_posted;
 
-    if (remaining_delay > 0 && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
+    if (remaining_delay > 0 && !message.is_dm && !((message.user && this.vars.user.id === message.user.id) || this.vars.user.can_monitor)) {
         $li.hide();
         setTimeout(function() {
             $li.show();
@@ -502,6 +518,11 @@ Race.prototype.onSocketMessage = function(event) {
         case 'chat.message':
             this.addMessage(data.message, server_date, false);
             break;
+        case 'chat.dm':
+            if ((data.from_user && data.from_user.id === this.vars.user.id) || data.to.id === this.vars.user.id) {
+                this.fetchDM(data.message);
+            }
+            break;
         case 'chat.pin':
             this.pinMessage(data.message.id);
             break;
@@ -678,8 +699,12 @@ $(function() {
     var sending = null;
     $('.race-chat form').ajaxForm({
         beforeSubmit: function(data, $form) {
+            var direct_to = $form.find('[name="direct_to"]').val().trim();
             var message = $form.find('[name="message"]').val().trim();
             if (message === '' || message === sending) {
+                return false;
+            }
+            if ($form.hasClass('dm') && direct_to === '') {
                 return false;
             }
             data.push({ name: 'guid', value: guid });
@@ -691,7 +716,20 @@ $(function() {
         },
         error: race.onError.bind(race),
         success: function() {
+            $('.race-chat').removeClass('dm');
+            $('.race-chat form').removeClass('dm');
+            $('.race-chat form').find('input[name="dm_searcher"], input[name="direct_to"]').val('');
             $('.race-chat form textarea').val('').height(18);
+        }
+    });
+
+    $(document).on('click', '.entrant-row .user-pop, .race-chat > .messages > li > .name', function() {
+        let $form = $('.race-chat form');
+        let $li = $(this).closest('li');
+        if ($form.hasClass('dm') && $li.data('userid')) {
+            $form.find('input[name="dm_searcher"]').val($li.data('username'));
+            $form.find('input[name="direct_to"]').val($li.data('userid'));
+            return false;
         }
     });
 
@@ -868,6 +906,15 @@ $(function() {
 
     $(document).on('click', '.race-chat .moderation', function() {
         $('body').toggleClass('show-mod-actions');
+    });
+
+    $(document).on('click', '.race-chat .send-dm', function() {
+        let $form = $('.race-chat form');
+        if ($form.hasClass('dm')) {
+            $form.find('input[name="dm_searcher"], input[name="direct_to"]').val('');
+        }
+        $('.race-chat').toggleClass('dm');
+        $form.toggleClass('dm');
     });
 
     $(document).on('click', '.race-chat .notifications', function() {

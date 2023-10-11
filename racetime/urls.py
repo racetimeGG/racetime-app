@@ -130,6 +130,7 @@ urlpatterns = [
         path('spectate', views.RaceSpectate.as_view(), name='race_spectate'),
 
         path('message', views.Message.as_view(), name='message'),
+        path('get_dm/<str:message>', views.RaceChatDM.as_view(), name='chat_dm'),
         path('join', views.Join.as_view(), name='join'),
         path('leave', views.Leave.as_view(), name='leave'),
         path('request_invite', views.RequestInvite.as_view(), name='request_invite'),

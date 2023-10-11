@@ -34,6 +34,12 @@ class Message(models.Model):
         'Race',
         on_delete=models.CASCADE,
     )
+    direct_to = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+    )
     posted_at = models.DateTimeField(
         auto_now_add=True,
         db_index=True,
@@ -86,10 +92,12 @@ class Message(models.Model):
                 if self.user and not self.user.is_system else None
             ),
             'bot': self.bot.name if self.bot else None,
+            'direct_to': self.direct_to.api_dict_minimal() if self.direct_to else None,
             'posted_at': self.posted_at.isoformat(),
             'message': self.message,
             'message_plain': self.message_plain,
             'highlight': self.highlight,
+            'is_dm': self.direct_to is not None,
             'is_bot': self.is_bot,
             'is_monitor': self.is_monitor,
             'is_system': self.is_system,
@@ -149,13 +157,27 @@ class Message(models.Model):
         if self.deleted:
             return
         channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(self.race.slug, {
-            'type': event_type,
-            'message': self.as_dict,
-        })
+        if self.direct_to and event_type == 'chat.message':
+            async_to_sync(channel_layer.group_send)(self.race.slug, {
+                'type': 'chat.dm',
+                'from_user': (
+                    self.user.api_dict_minimal()
+                    if self.user and not self.user.is_system else None
+                ),
+                'from_bot': self.bot.name if self.bot else None,
+                'to': self.direct_to.api_dict_minimal(),
+                'message': self.hashid,
+            })
+        else:
+            async_to_sync(channel_layer.group_send)(self.race.slug, {
+                'type': event_type,
+                'message': self.as_dict,
+            })
 
     def set_pin(self, pinned):
         if self.pinned == pinned or self.race.chat_is_closed:
+            return
+        if self.direct_to:
             return
         self.pinned = pinned
         self.save(update_fields={'pinned'})

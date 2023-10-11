@@ -1,7 +1,6 @@
 import json
 import random
 from collections import OrderedDict
-from itertools import chain
 from urllib.parse import urlencode
 
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
@@ -480,19 +479,38 @@ def get_action_button(action, race_slug, category_slug):
     return action, url, button.get('label'), button.get('class')
 
 
-def get_chat_history(race_id, last_message_id=None):
+def get_chat_history(race_id, user=None, last_message_id=None):
     if not race_id:
         return OrderedDict()
+
     Message = apps.get_model('racetime', 'Message')
-    pinned = Message.objects.filter(race_id=race_id, pinned=True, deleted=False).order_by('posted_at')
-    pinned = pinned.prefetch_related('user', 'bot')
-    messages = Message.objects.filter(race_id=race_id, pinned=False, deleted=False).order_by('-posted_at')
-    messages = messages.prefetch_related('user', 'bot')
+
+    messages = Message.objects.filter(
+        race_id=race_id,
+        deleted=False,
+    ).order_by('posted_at')
+
     if last_message_id:
         messages = messages.filter(id__gt=last_message_id)
+
+    pin_ids = []
+    message_ids = []
+    for msg_id, user_id, direct_to_id, pinned in messages.values_list('id', 'user_id', 'direct_to_id', 'pinned'):
+        if not direct_to_id:
+            if pinned:
+                pin_ids.append(msg_id)
+            else:
+                message_ids.append(msg_id)
+        elif user and user.is_authenticated and user.id in (user_id, direct_to_id):
+            message_ids.append(msg_id)
+
+    msgs_to_query = [*pin_ids, *message_ids[-100:]]
+
     return OrderedDict(
         (message.hashid, message.as_dict)
-        for message in chain(pinned, reversed(messages[:100]))
+        for message in Message.objects.filter(
+            id__in=msgs_to_query,
+        ).order_by('pinned', 'posted_at').prefetch_related('user', 'bot')
     )
 
 

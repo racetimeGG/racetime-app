@@ -55,7 +55,13 @@
                     <i class="material-icons">insert_emoticon</i>
                 </a>
             {% endif %}
-            <button type="submit" class="btn">Chat</button>
+            <a class="send-dm" title="Direct message">
+                <i class="material-icons">mail</i>
+            </a>
+            <button type="submit" class="btn">
+                <span class="chat">Chat</span>
+                <span class="dm">Send</span>
+            </button>
         </div>
     </form>
     {% endif %}

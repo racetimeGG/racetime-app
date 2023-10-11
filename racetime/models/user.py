@@ -371,6 +371,14 @@ class User(AbstractBaseUser, PermissionsMixin):
             'can_moderate': can_moderate,
         }
 
+    def api_dict_minimal(self):
+        return {
+            'id': self.hashid,
+            'full_name': str(self),
+            'name': self.name,
+            'discriminator': self.discriminator if self.use_discriminator else None,
+        }
+
     def flair(self, can_moderate=False):
         """
         Return the user's flair as a space-separated string,

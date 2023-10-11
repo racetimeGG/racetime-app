@@ -1,6 +1,6 @@
 {% load humanize %}
 {% load static %}
-<li class="entrant-row" data-entrant="{{ index }}">
+<li class="entrant-row" data-entrant="{{ index }}" data-userid="{{ entrant.user.hashid }}" data-username="{{ entrant.user.name }}">
     <span class="place">
         {{ entrant.place|ordinal|default:'—' }}
     </span>
