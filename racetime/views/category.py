@@ -19,7 +19,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.views import generic
 
-from .base import UserMixin
+from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 
 
@@ -100,7 +100,7 @@ class Category(UserMixin, generic.DetailView):
         return queryset
 
 
-class CategoryData(Category):
+class CategoryData(Category, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('CategoryData', 0)
         content = cache.get_or_set(
@@ -114,14 +114,14 @@ class CategoryData(Category):
         )
         if age:
             resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+
+        return self.prepare_response(resp)
 
     def get_json_data(self):
         return self.get_object().dump_json_data()
 
 
-class CategoryListData(generic.View):
+class CategoryListData(generic.View, PublicAPIMixin):
     def get(self, request):
         age = settings.RT_CACHE_TIMEOUT.get('CategoryListData', 0)
         content = cache.get_or_set(
@@ -135,8 +135,7 @@ class CategoryListData(generic.View):
         )
         if age:
             resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
     def get_json_data(self):
         return json.dumps({
@@ -146,7 +145,7 @@ class CategoryListData(generic.View):
         })
 
 
-class CategoryRaceData(Category):
+class CategoryRaceData(Category, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         paginator = Paginator(self.past_races(), 10)
@@ -162,8 +161,7 @@ class CategoryRaceData(Category):
             'num_pages': paginator.num_pages,
             'races': [race.api_dict_summary(include_entrants=show_entrants) for race in page],
         })
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
 
 class CategoryLeaderboards(Category):
@@ -209,7 +207,7 @@ class CategoryLeaderboards(Category):
             yield goal, rankings[:1000]
 
 
-class CategoryLeaderboardsData(CategoryLeaderboards):
+class CategoryLeaderboardsData(CategoryLeaderboards, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         resp = http.HttpResponse(
@@ -218,8 +216,7 @@ class CategoryLeaderboardsData(CategoryLeaderboards):
             }, cls=DjangoJSONEncoder),
             content_type='application/json',
         )
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
     def leaderboards(self, sort='score'):
         for goal, rankings in super().leaderboards(sort):

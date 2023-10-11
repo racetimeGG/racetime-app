@@ -3,11 +3,26 @@ import re
 from django import http
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.utils.cache import patch_vary_headers
 from django.utils.functional import cached_property
 from django.views import generic
 
 from ..models import Race, User
 from ..utils import SafeException, exception_to_msglist
+
+
+class PublicAPIMixin:
+    def options(self, request, *args, **kwargs):
+        return self.prepare_response(super().options(request, *args, **kwargs))
+
+    def prepare_response(self, resp):
+        resp['X-Date-Exact'] = timezone.now().isoformat()
+        origin = self.request.headers.get('Origin')
+        if origin:
+            resp['Access-Control-Allow-Origin'] = origin
+            patch_vary_headers(resp, ('Origin',))
+        return resp
 
 
 class UserMixin:

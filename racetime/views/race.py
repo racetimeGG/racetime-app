@@ -21,7 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
 from oauth2_provider.views import ScopedProtectedResourceView
 
-from .base import CanModerateRaceMixin, CanMonitorRaceMixin, UserMixin
+from .base import CanModerateRaceMixin, CanMonitorRaceMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..utils import get_action_button, get_hashids, twitch_auth_url
 
@@ -357,7 +357,7 @@ class RaceAvailableTeams(RaceMixin, UserMixin, generic.View):
         })
 
 
-class RaceData(RaceMixin, generic.View):
+class RaceData(RaceMixin, PublicAPIMixin, generic.View):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('RaceData', 0)
         content = cache.get_or_set(
@@ -374,8 +374,7 @@ class RaceData(RaceMixin, generic.View):
         )
         if age:
             resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
     def get_json_data(self):
         return self.get_object().dump_json_data()
@@ -763,7 +762,7 @@ class EditRaceResult(UserMixin, generic.UpdateView):
         return http.HttpResponseRedirect(entrant.race.get_absolute_url())
 
 
-class RaceListData(generic.View):
+class RaceListData(generic.View, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.unlisted_filter = Q(unlisted=False)
         if self.request.user.is_authenticated:
@@ -782,8 +781,7 @@ class RaceListData(generic.View):
             )
             if age:
                 resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-            resp['X-Date-Exact'] = timezone.now().isoformat()
-            return resp
+            return self.prepare_response(resp)
 
     def current_races(self):
         return {

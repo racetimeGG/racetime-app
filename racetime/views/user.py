@@ -22,7 +22,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 
-from .base import UserMixin
+from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
 from ..utils import notice_exception, twitch_auth_url
@@ -120,7 +120,7 @@ class ViewProfile(generic.DetailView):
         }
 
 
-class UserRaceData(ViewProfile):
+class UserRaceData(ViewProfile, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         paginator = Paginator(self.get_entrances(), 10)
@@ -145,11 +145,10 @@ class UserRaceData(ViewProfile):
                 for entrance in page
             ],
         })
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
 
-class UserProfileData(ViewProfile):
+class UserProfileData(ViewProfile, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         user = self.object.api_dict_summary()
@@ -162,8 +161,7 @@ class UserProfileData(ViewProfile):
                 for team in self.get_teams()
             ],
         })
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
 
 class LoginRegister(generic.TemplateView):

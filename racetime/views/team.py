@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.views import generic
 
-from .base import UserMixin
+from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 
 
@@ -33,7 +33,7 @@ class Team(UserMixin, generic.DetailView):
         }
 
 
-class TeamData(Team):
+class TeamData(Team, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('TeamData', 0)
         content = cache.get_or_set(
@@ -47,8 +47,7 @@ class TeamData(Team):
         )
         if age:
             resp['Cache-Control'] = 'public, max-age=%d, must-revalidate' % age
-        resp['X-Date-Exact'] = timezone.now().isoformat()
-        return resp
+        return self.prepare_response(resp)
 
     def get_json_data(self):
         return self.get_object().dump_json_data()
