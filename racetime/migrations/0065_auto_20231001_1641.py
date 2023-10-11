@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveIndex(
-            model_name='message',
-            name='racetime_me_race_id_d38bb5_idx',
-        ),
         migrations.AlterField(
             model_name='category',
             name='name',
@@ -52,5 +48,9 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='message',
             index=models.Index(fields=['race', 'deleted', 'pinned'], name='racetime_me_race_id_ca500e_idx'),
+        ),
+        migrations.RemoveIndex(
+            model_name='message',
+            name='racetime_me_race_id_d38bb5_idx',
         ),
     ]
