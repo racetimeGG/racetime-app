@@ -119,6 +119,41 @@ class EntrantInline(admin.TabularInline):
         return False
 
 
+class MessageInline(admin.TabularInline):
+    can_delete = False
+    extra = 0
+    model = models.Message
+    verbose_name_plural = 'Direct messages'
+    exclude = (
+        'highlight',
+        'pinned',
+        'deleted',
+        'deleted_by',
+        'deleted_at',
+        'actions',
+    )
+    fields = (
+        'user',
+        'bot',
+        'direct_to',
+        'posted_at',
+        'message',
+    )
+    readonly_fields = fields
+    ordering = ('posted_at',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(
+            direct_to__isnull=False,
+        )
+
+    def has_add_permission(self, *args, **kwargs):
+        return False
+
+    def has_change_permission(self, *args, **kwargs):
+        return False
+
+
 class UserLogInline(admin.TabularInline):
     can_delete = False
     extra = 0

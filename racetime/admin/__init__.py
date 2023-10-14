@@ -127,6 +127,7 @@ class RaceAdmin(options.ModelAdmin):
     )
     inlines = [
         options.EntrantInline,
+        options.MessageInline,
     ]
     list_display = (
         '__str__',
