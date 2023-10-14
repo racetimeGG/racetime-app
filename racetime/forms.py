@@ -127,6 +127,7 @@ class InviteForm(UserSelectForm, forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={
             'class': 'autocomplete-user above',
+            'data-field': 'user',
             'data-source': reverse_lazy('autocomplete_user'),
             'placeholder': 'Invite user…'
         }),
