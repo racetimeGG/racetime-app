@@ -21,6 +21,7 @@ class PublicAPIMixin:
         origin = self.request.headers.get('Origin')
         if origin:
             resp['Access-Control-Allow-Origin'] = origin
+            resp['Access-Control-Expose-Headers'] = 'X-Date-Exact'
             patch_vary_headers(resp, ('Origin',))
         return resp
 
