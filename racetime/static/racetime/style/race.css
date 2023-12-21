@@ -337,6 +337,10 @@ main {
 .race-chat > .messages > .bot-survey input {
     border-color: #a0ace8;
 }
+.race-chat > .messages > .bot-survey select {
+    max-width: 284px;
+    max-width: calc(100% - 20px);
+}
 .race-chat > .messages.pinned > .bot-survey::before {
     content: none;
 }
