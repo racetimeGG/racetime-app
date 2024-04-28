@@ -23,7 +23,7 @@ services:
     volumes:
       - ".:/opt/racetime"
   racetime.db:
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --long_query_time=5 --innodb-concurrency-tickets=5000 --innodb-open-files=8192 --key-buffer-size=536870912 --max-heap-table-size=134217728 --tmp-table-size=134217728 --query_cache_type=ON --max_connect_errors=1000000  --back_log=1024 --max_allowed_packet=1073741824 --innodb-spin-wait-delay=0
     environment:
       - MYSQL_DATABASE=racetime
       - MYSQL_ROOT_PASSWORD=racetime
