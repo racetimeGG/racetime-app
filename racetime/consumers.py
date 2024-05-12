@@ -9,7 +9,7 @@ from oauth2_provider.settings import oauth2_settings
 from websockets import ConnectionClosed
 
 from . import race_actions, race_bot_actions
-from .models import Bot, Race, Message
+from .models import Bot, Category, Race, Message
 from .utils import SafeException, exception_to_msglist, get_chat_history, get_hashids, get_action_button
 
 
@@ -284,9 +284,20 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
     async def do_receive(self, message_data):
         action, data, action_class, scope = self.parse_data(message_data)
 
+        if action == 'authenticate':
+            self.scope['oauth_token'] = data.get('oauth_token')
+
         state = await self.get_oauth_state(scope)
 
-        if not action_class:
+        if action == 'authenticate':
+            if not state.user or not state.user.is_authenticated:
+                await self.whoops('Authentication failed, check your token is still valid.')
+            else:
+                await self.deliver(
+                    'authenticated',
+                    user=await self.get_user_summary(state.user),
+                )
+        elif not action_class:
             await self.whoops(
                 'Action is missing or not recognised. Check your '
                 'input and try again.'
@@ -301,6 +312,15 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
                 await self.call_race_action(action_class, state.user, data)
             except SafeException as ex:
                 await self.whoops(*exception_to_msglist(ex))
+
+    @database_sync_to_async
+    def get_user_summary(self, user):
+        category_slug = self.state.get('category_slug')
+        if category_slug:
+            category = Category.objects.get(slug=category_slug)
+        else:
+            category = None
+        return user.api_dict_summary(category=category)
 
 
 class BotRaceConsumer(RaceConsumer, OAuthConsumerMixin):
