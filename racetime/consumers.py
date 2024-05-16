@@ -160,41 +160,6 @@ class RaceConsumer(AsyncWebsocketConsumer):
         """
         Handler for race.update type event.
         """
-        user = self.scope.get('user') if self.scope.get('user').is_authenticated else None
-        if user:
-            entrant = next(filter(
-                lambda e: e.get('user', {}).get('id') == user.hashid,
-                event['race'].get('entrants'),
-            ), None)
-            if entrant:
-                if event['race']['status']['value'] == 'pending':
-                    event['renders']['actions'] = render_to_string('racetime/race/actions_pending.html')
-                elif entrant.get('actions'):
-                    event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
-                        'available_actions': [
-                            get_action_button(action, event['race']['slug'], event['race']['category']['slug'])
-                            for action in entrant.get('actions')
-                        ],
-                    })
-            elif event['race']['streaming_required'] and not user.twitch_channel:
-                event['renders']['actions'] = ''
-            elif event['race']['status']['value'] == 'open':
-                event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
-                    'available_actions': [
-                        get_action_button('join', event['race']['slug'], event['race']['category']['slug']),
-                    ],
-                })
-            elif event['race']['status']['value'] == 'invitational':
-                event['renders']['actions'] = render_to_string('racetime/race/actions.html', {
-                    'available_actions': [
-                        get_action_button('request_invite', event['race']['slug'], event['race']['category']['slug']),
-                    ],
-                })
-            else:
-                event['renders']['actions'] = ''
-        else:
-            event['renders']['actions'] = ''
-
         self.state['race_dict'] = event['race']
         self.state['race_renders'] = event['renders']
         self.state['race_version'] = event['version']
