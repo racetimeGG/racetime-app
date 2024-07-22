@@ -22,7 +22,7 @@ class OAuthConsumerMixin:
     scope = NotImplemented
 
     @database_sync_to_async
-    def get_oauth_state(self, *scopes):
+    def get_oauth_state(self, scopes=None):
         """
         Try and authenticate the user using their OAuth2 token.
         """
@@ -41,7 +41,7 @@ class OAuthConsumerMixin:
             return state
 
         validator = self.oauth2_validator_class()
-        validator.validate_bearer_token(token, scopes, state)
+        validator.validate_bearer_token(token, scopes or [], state)
 
         return state
 
@@ -268,26 +268,26 @@ class OauthRaceConsumer(RaceConsumer, OAuthConsumerMixin):
         """
         action = message_data.get('action')
         data = message_data.get('data')
+        scopes = set()
 
         if action == 'message':
             action_class = race_actions.Message
-            scope = 'chat_message'
+            scopes.add('chat_message')
         elif action in race_actions.commands:
             action_class = race_actions.commands[action]
-            scope = 'race_action'
+            scopes.add('race_action')
         else:
             action_class = None
-            scope = None
 
-        return action, data, action_class, scope
+        return action, data, action_class, scopes
 
     async def do_receive(self, message_data):
-        action, data, action_class, scope = self.parse_data(message_data)
+        action, data, action_class, scopes = self.parse_data(message_data)
 
         if action == 'authenticate':
             self.scope['oauth_token'] = data.get('oauth_token')
 
-        state = await self.get_oauth_state(scope)
+        state = await self.get_oauth_state(scopes)
 
         if action == 'authenticate':
             if not state.user or not state.user.is_authenticated:
