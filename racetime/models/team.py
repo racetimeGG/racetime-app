@@ -18,7 +18,7 @@ class Team(models.Model):
     name = models.CharField(
         max_length=50,
         null=True,
-        unique=True,
+        db_index=True,
         help_text=(
             'The name of your team. Must be unique and follow our naming '
             'guidelines.'

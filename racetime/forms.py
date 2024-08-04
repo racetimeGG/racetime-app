@@ -813,6 +813,18 @@ class TeamForm(forms.ModelForm):
             )
         return avatar
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        qs = models.Team.objects.filter(
+            name=name,
+            formal=True,
+        )
+        if self.instance.id:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
+            raise ValidationError('Team with this name already exists.')
+        return name
+
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
         if slug == 'new':
