@@ -199,7 +199,10 @@ class RaceConsumer(AsyncWebsocketConsumer):
         if not self.state.get('race_slug'):
             return
         action = action_class()
-        race = Race.objects.get(slug=self.state.get('race_slug'))
+        race = Race.objects.get(
+            slug=self.state.get('race_slug'),
+            category__slug=self.state.get('category_slug'),
+        )
         action.action(race, user, data)
 
     @database_sync_to_async
