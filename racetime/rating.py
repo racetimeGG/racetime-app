@@ -10,6 +10,7 @@ class UserRating:
     def __init__(self, entrant, race):
         UserRanking = apps.get_model('racetime', 'UserRanking')
 
+        self.race = race
         self.entrant = entrant
         self.user = entrant.user
         self.is_banned = entrant.user.is_banned_from_category(race.category)
@@ -46,6 +47,7 @@ class UserRating:
         self.ranking.confidence = rating.sigma
         self.ranking.rating = self.ranking.calculated_rating
         self.ranking.times_raced += 1
+        self.ranking.last_raced = self.race.opened_at.date()
         self.ranking.save()
 
         self.entrant.rating_change = self.ranking.calculated_rating - original_rating

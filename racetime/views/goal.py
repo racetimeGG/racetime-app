@@ -188,6 +188,7 @@ class EditGoal(GoalPageMixin, generic.UpdateView):
                 'name',
                 'active',
                 'show_leaderboard',
+                'leaderboard_hide_after',
                 'streaming_required',
                 'allow_stream_override',
             } & set(form.changed_data)

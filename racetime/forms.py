@@ -20,6 +20,74 @@ from django.utils.html import format_html
 from . import models
 
 
+class GoalWidget(forms.RadioSelect):
+    option_template_name = 'racetime/forms/goal_choice.html'
+
+
+class DurationWidget(forms.NumberInput):
+    template_name = 'racetime/forms/duration.html'
+
+    def __init__(self, unit_name, *args, **kwargs):
+        self.unit_name = unit_name
+        super().__init__(*args, **kwargs)
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['unit_name'] = self.unit_name
+        return context
+
+
+class SecondsDurationField(forms.IntegerField):
+    unit = 1
+    widget = DurationWidget(unit_name='seconds')
+
+    def __init__(self, *, max_value=None, min_value=None, **kwargs):
+        self.return_delta = True
+        self.max_value, self.min_value = max_value, min_value
+        # Skip calling IntegerField init() because it sets the wrong validators.
+        super(forms.IntegerField, self).__init__(**kwargs)
+
+        if max_value is not None:
+            self.validators.append(
+                validators.MaxValueValidator(timedelta(seconds=max_value * self.unit))
+            )
+        if min_value is not None:
+            self.validators.append(
+                validators.MinValueValidator(timedelta(seconds=min_value * self.unit))
+            )
+
+    def clean(self, value):
+        value = self.to_python(value)
+        if isinstance(value, int):
+            value_delta = timedelta(seconds=value * self.unit)
+        else:
+            value_delta = value
+        self.validate(value_delta)
+        self.run_validators(value_delta)
+        return value
+
+    def prepare_value(self, value):
+        if isinstance(value, timedelta):
+            return int(value.total_seconds() / self.unit)
+        return value
+
+    def to_python(self, value):
+        value = super().to_python(value)
+        if isinstance(value, int) and self.return_delta:
+            return timedelta(seconds=value * self.unit)
+        return value
+
+
+class HoursDurationField(SecondsDurationField):
+    unit = 3600
+    widget = DurationWidget(unit_name='hours')
+
+
+class DaysDurationField(SecondsDurationField):
+    unit = 86400
+    widget = DurationWidget(unit_name='days')
+
+
 class UserSelectForm(forms.Form):
     user = forms.CharField(
         widget=forms.HiddenInput,
@@ -288,6 +356,11 @@ class GoalCreateForm(forms.ModelForm):
 
 
 class GoalEditForm(forms.ModelForm):
+    leaderboard_hide_after = DaysDurationField(
+        required=False,
+        min_value=0,
+        help_text=models.Goal._meta.get_field('leaderboard_hide_after').help_text,
+    )
     team_races = forms.ChoiceField(
         choices=(
             ('not_allowed', 'Not allowed (no team races)'),
@@ -321,6 +394,7 @@ class GoalEditForm(forms.ModelForm):
             'name',
             'active',
             'show_leaderboard',
+            'leaderboard_hide_after',
             'team_races',
             'streaming_required',
             'allow_stream_override',
@@ -349,69 +423,11 @@ class GoalEditForm(forms.ModelForm):
             if name in self.instance.default_settings:
                 self.fields[prefixed_name].initial = self.instance.default_settings.get(name)
 
-
-class GoalWidget(forms.RadioSelect):
-    option_template_name = 'racetime/forms/goal_choice.html'
-
-
-class DurationWidget(forms.NumberInput):
-    template_name = 'racetime/forms/duration.html'
-
-    def __init__(self, unit_name, *args, **kwargs):
-        self.unit_name = unit_name
-        super().__init__(*args, **kwargs)
-
-    def get_context(self, name, value, attrs):
-        context = super().get_context(name, value, attrs)
-        context['unit_name'] = self.unit_name
-        return context
-
-
-class SecondsDurationField(forms.IntegerField):
-    unit = 1
-    widget = DurationWidget(unit_name='seconds')
-
-    def __init__(self, *, max_value=None, min_value=None, **kwargs):
-        self.return_delta = True
-        self.max_value, self.min_value = max_value, min_value
-        # Skip calling IntegerField init() because it sets the wrong validators.
-        super(forms.IntegerField, self).__init__(**kwargs)
-
-        if max_value is not None:
-            self.validators.append(
-                validators.MaxValueValidator(timedelta(seconds=max_value * self.unit))
-            )
-        if min_value is not None:
-            self.validators.append(
-                validators.MinValueValidator(timedelta(seconds=min_value * self.unit))
-            )
-
-    def clean(self, value):
-        value = self.to_python(value)
-        if isinstance(value, int):
-            value_delta = timedelta(seconds=value * self.unit)
-        else:
-            value_delta = value
-        self.validate(value_delta)
-        self.run_validators(value_delta)
-        return value
-
-    def prepare_value(self, value):
-        if isinstance(value, timedelta):
-            return int(value.total_seconds() / self.unit)
-        return value
-
-    def to_python(self, value):
-        value = super().to_python(value)
-        if isinstance(value, int) and self.return_delta:
-            return timedelta(seconds=value * self.unit)
-        return value
-
-
-class HoursDurationField(SecondsDurationField):
-    unit = 3600
-    widget = DurationWidget(unit_name='hours')
-
+    def clean_leaderboard_hide_after(self):
+        leaderboard_hide_after = self.cleaned_data.get('leaderboard_hide_after')
+        if leaderboard_hide_after == timedelta(0):
+            return None
+        return leaderboard_hide_after
 
 class RaceForm(forms.ModelForm):
     goal = forms.ModelChoiceField(

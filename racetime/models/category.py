@@ -500,6 +500,15 @@ class Goal(models.Model):
         default=True,
         help_text='Leaderboard is publicly viewable.',
     )
+    leaderboard_hide_after = models.DurationField(
+        null=True,
+        verbose_name='Inactivity threshold (days)',
+        help_text=(
+            'Number of days after which a user is considered inactive if they '
+            'have not been recorded in a race. Inactive players are not shown '
+            'on the leaderboard. Leave blank for no threshold.'
+        ),
+    )
     team_races_allowed = models.BooleanField(
         default=True,
     )
@@ -635,6 +644,7 @@ class AuditLog(AbstractAuditLog):
         ('goal_name_change', 'updated a goal (name)'),
         ('goal_active_change', 'updated a goal (active state)'),
         ('goal_show_leaderboard_change', 'updated a goal (leaderboard visibility)'),
+        ('goal_leaderboard_hide_after_change', 'updated a goal (leaderboard inactivity threshold)'),
         ('goal_team_races_allowed_change', 'updated a goal (team race allowed)'),
         ('goal_team_races_required_change', 'updated a goal (team race required)'),
         ('goal_streaming_required_change', 'updated a goal (streaming requirement)'),

@@ -198,6 +198,10 @@ class CategoryLeaderboards(Category):
                 goal=goal,
                 best_time__isnull=False,
             ).select_related('user')
+            if goal.leaderboard_hide_after:
+                rankings = rankings.filter(
+                    last_raced__gte=timezone.now().date() - goal.leaderboard_hide_after,
+                )
             if sort == 'best_time':
                 rankings = rankings.order_by('best_time', 'user__name')
             elif sort == 'times_raced':

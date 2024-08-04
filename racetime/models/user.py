@@ -494,6 +494,14 @@ class UserRanking(models.Model):
         default=0,
         db_index=True,
     )
+    last_raced = models.DateField(
+        null=True,
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=('category', 'goal', 'last_raced')),
+        ]
 
     @property
     def calculated_rating(self):
