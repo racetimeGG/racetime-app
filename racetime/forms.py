@@ -359,6 +359,7 @@ class GoalEditForm(forms.ModelForm):
     leaderboard_hide_after = DaysDurationField(
         required=False,
         min_value=0,
+        label=models.Goal._meta.get_field('leaderboard_hide_after').verbose_name,
         help_text=models.Goal._meta.get_field('leaderboard_hide_after').help_text,
     )
     team_races = forms.ChoiceField(
