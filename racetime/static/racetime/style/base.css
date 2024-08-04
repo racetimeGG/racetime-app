@@ -1234,6 +1234,29 @@ aside .race-list > ol > li > .race-row {
     color: #8c898c;
     font-size: 13px;
 }
+.race-status > .settings {
+    color: #8c898c;
+    display: flex;
+    font-size: 13px;
+    gap: 16px;
+    justify-content: center;
+    padding-bottom: 5px;
+}
+.race-status > .settings > span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.race-status > .settings > .checked {
+    color: #b8b4b8;
+}
+.race-status > .settings > span > .material-icons {
+    font-size: 16px;
+    pointer-events: none;
+}
+.race-status > .settings > span > span {
+    pointer-events: none;
+}
 
 .race-meta {
     margin: 0 10px;
