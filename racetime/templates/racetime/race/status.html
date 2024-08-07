@@ -15,7 +15,7 @@
     <div class="settings">
         <span class="{% if race.auto_start %}checked{% endif %}" title="{% if race.auto_start %}Race will begin when everyone is ready{% else %}Race will begin when started by a race monitor{% endif %}">
             <i class="material-icons">{% if race.auto_start %}check{% else %}close{% endif %}</i>
-	    <span>Auto start {% if race.auto_start %}on{% else %}off{% endif %}</span>
+	    <span>Auto-start {% if race.auto_start %}on{% else %}off{% endif %}</span>
         </span>
         <span class="{% if race.goal %}checked{% endif %}" title="{% if race.goal %}Race results can be recorded to this goal's leaderboard{% else %}Race is using a custom goal and will not be recorded{% endif %}">
             <i class="material-icons">{% if race.goal %}check{% else %}close{% endif %}</i>
