@@ -729,6 +729,7 @@ class UserEditForm(forms.ModelForm):
             'show_supporter',
             'custom_profile_slug',
             'detailed_timer',
+            'hide_avatars_while_racing',
         )
         widgets = {
             'pronouns': forms.RadioSelect,
