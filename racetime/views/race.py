@@ -153,6 +153,21 @@ class BotMixin:
         )
 
 
+class OAuthRaceMixin:
+    def get_form_kwargs(self):
+        # Set default values if they are missing from POST data.
+        kwargs = super().get_form_kwargs()
+        if self.request.method in ('POST', 'PUT'):
+            data = kwargs['data'].copy()
+            form_class = self.get_form_class()
+            model = self.model()
+            for name, field in form_class.base_fields.items():
+                if hasattr(model, name) and name not in data:
+                    data[name] = field.prepare_value(getattr(model, name))
+            kwargs['data'] = data
+        return kwargs
+
+
 class RaceChatDM(RaceChatMixin):
     def get(self, request, *args, **kwargs):
         race = self.get_object()
@@ -590,7 +605,7 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class OAuthCreateRace(ScopedProtectedResourceView, BotMixin, BaseCreateRace):
+class OAuthCreateRace(ScopedProtectedResourceView, BotMixin, OAuthRaceMixin, BaseCreateRace):
     form_class = forms.OAuthRaceCreationForm
     model = models.Race
     required_scopes = ['create_race']
@@ -696,7 +711,7 @@ class EditRace(CanMonitorRaceMixin, BaseEditRace):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class OAuthEditRace(ScopedProtectedResourceView, BotMixin, BaseEditRace):
+class OAuthEditRace(ScopedProtectedResourceView, BotMixin, OAuthRaceMixin, BaseEditRace):
     form_class = forms.OAuthRaceEditForm
     required_scopes = ['create_race']
 
