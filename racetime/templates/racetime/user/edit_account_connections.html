@@ -3,11 +3,11 @@
 
 {% block css %}
     <style>
-    .twitch-channel {
+    .twitch-channel, .patreon {
         display: inline-flex;
         vertical-align: middle;
     }
-    .twitch-channel > img {
+    .twitch-channel > img, .patreon > img {
         height: 22px;
         margin-right: 5px;
     }
@@ -52,6 +52,36 @@
         {% else %}
             <p>
                 <a href="{{ twitch_url }}" class="btn" target="_blank">Connect your Twitch.tv account</a>
+            </p>
+        {% endif %}
+    </div>
+    <div class="division">
+        <h3>Connect to Patreon</h3>
+        <p class="help">
+            If you're supporting us via Patreon, well, thanks! Connect your
+            account to receive the shiny benefits.
+        </p>
+        {% if user.patreon_name %}
+            <p>
+                Connected to
+                <span class="patreon">
+                    <img src="{% static 'racetime/image/social/patreon_white.svg' %}" alt="">
+                    {{ user.patreon_name }}
+                </span>
+            </p>
+            <p>
+                Supporter status: {% if user.is_supporter %}Active{% else %}Inactive{% endif %}
+            </p>
+            <p>
+                <a href="{{ patreon_url }}" class="btn" target="_blank">Connect to different Patreon account</a>
+            </p>
+            <form action="{% url 'patreon_disconnect' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn dangerous">Disconnect account</button>
+            </form>
+        {% else %}
+            <p>
+                <a href="{{ patreon_url }}" class="btn" target="_blank">Connect your Patreon account</a>
             </p>
         {% endif %}
     </div>

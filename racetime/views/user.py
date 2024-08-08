@@ -25,7 +25,7 @@ from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import notice_exception, twitch_auth_url
+from ..utils import notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
 
 
 class ViewProfile(generic.DetailView):
@@ -348,6 +348,7 @@ class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView
         return {
             **super().get_context_data(**kwargs),
             'authorized_tokens': self.get_authorized_tokens(),
+            'patreon_url': patreon_auth_url(self.request),
             'twitch_url': twitch_auth_url(self.request),
         }
 
@@ -538,6 +539,91 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
                 self.request,
                 'Your Twitch.tv account is no longer connected.'
             )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class PatreonAuth(LoginRequiredMixin, UserMixin, generic.View):
+    csrf_protect = decorator_from_middleware(CsrfViewMiddlewareTwitch)
+
+    @method_decorator(csrf_protect)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        code = request.GET.get('code')
+        if code:
+            user = self.user
+
+            try:
+                resp = requests.post('https://www.patreon.com/api/oauth2/token', data={
+                    'client_id': settings.PATREON_CLIENT_ID,
+                    'client_secret': settings.PATREON_CLIENT_SECRET,
+                    'code': code,
+                    'grant_type': 'authorization_code',
+                    'redirect_uri': settings.RT_SITE_URI + reverse('patreon_auth'),
+                }, timeout=3)
+                resp.raise_for_status()
+                token = resp.json().get('access_token')
+
+                resp = requests.get('https://www.patreon.com/api/oauth2/v2/identity', {
+                    'fields[user]': 'first_name,vanity',
+                }, headers={'Authorization': f'Bearer {token}'}, timeout=3)
+                if resp.status_code != 200:
+                    raise requests.RequestException
+            except requests.RequestException as ex:
+                notice_exception(ex)
+                messages.error(
+                    request,
+                    'Something went wrong with the Patreon API. Please try '
+                    'again later',
+                )
+            else:
+                try:
+                    data = resp.json().get('data')
+                except:
+                    data = {}
+                print(data)
+
+                if models.User.objects.filter(
+                    patreon_id=data.get('id'),
+                ).exclude(id=user.id).exists():
+                    messages.error(
+                        request,
+                        'Your Patreon account is already connected to another '
+                        'racetime.gg user account.',
+                    )
+                else:
+                    user.patreon_id = data.get('id')
+                    user.patreon_name = data.get('attributes').get('vanity') or data.get('attributes').get('first_name')
+                    user.save()
+                    user.log_action('patreon_auth', self.request)
+
+                    patreon_update_memberships()
+
+                    messages.success(
+                        self.request,
+                        'Thanks, you have successfully authorized your Patreon '
+                        'account.',
+                    )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class PatreonDisconnect(LoginRequiredMixin, UserMixin, generic.View):
+    def post(self, request):
+        user = self.user
+
+        user.patreon_id = None
+        user.patreon_name = None
+        user.is_supporter = False
+        user.save()
+        user.log_action('patreon_disconnect', self.request)
+
+        messages.success(
+            self.request,
+            'Your Patreon account is no longer connected.'
+        )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))
 

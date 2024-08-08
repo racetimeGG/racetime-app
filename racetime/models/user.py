@@ -222,12 +222,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         editable=False,
     )
+    patreon_id = models.PositiveIntegerField(
+        null=True,
+        editable=False,
+    )
+    patreon_name = models.CharField(
+        max_length=200,
+        null=True,
+        editable=False,
+    )
     favourite_categories = models.ManyToManyField(
         to='Category',
         related_name='+',
         limit_choices_to={'active': True},
         blank=True,
     )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=('is_supporter', 'patreon_id')),
+        ]
 
     objects = UserManager()
 

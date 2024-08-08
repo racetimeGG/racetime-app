@@ -172,39 +172,6 @@ class RaceAdmin(options.ModelAdmin):
             race.broadcast_data()
 
 
-class SupporterScheduleAdmin(options.ModelAdmin):
-    autocomplete_fields = (
-        'user',
-    )
-    actions = [
-        'delete_selected',
-    ]
-    list_display = (
-        'user',
-        'start_date',
-        'end_date',
-        'reason',
-    )
-    search_fields = (
-        'user__name',
-    )
-
-    def delete_model(self, request, obj):
-        obj.delete()
-        self.update_supporter_status(obj.user)
-
-    def save_model(self, request, obj, form, change):
-        obj.save()
-        self.update_supporter_status(obj.user)
-
-    @staticmethod
-    def update_supporter_status(user):
-        user.is_supporter = user.supporterschedule_set.filter(
-            start_date__lte=date.today(),
-            end_date__gte=date.today(),
-        ).exists()
-        user.save()
-
 
 class TeamAdmin(options.ModelAdmin):
     readonly_fields = (
@@ -268,6 +235,7 @@ class UserActionAdmin(options.ModelAdmin):
 class UserAdmin(options.ModelAdmin):
     actions = [
         'disconnect_twitch_account',
+        'disconnect_patreon_account',
         'purge_from_leaderboards',
     ]
     exclude = (
@@ -287,6 +255,7 @@ class UserAdmin(options.ModelAdmin):
         'date_joined',
         'is_supporter',
         'twitch_channel',
+        'patreon_name',
     )
     list_filter = (
         'active',
@@ -306,6 +275,34 @@ class UserAdmin(options.ModelAdmin):
         'twitch_login',
     )
     ordering = ('name', 'date_joined')
+
+    def disconnect_patreon_account(self, request, queryset):
+        for user in queryset:
+            if user.patreon_id:
+                patreon_name = user.patreon_name
+                self.log_change(
+                    request,
+                    user,
+                    'Disconnected %s (ID: %d)' % (user.patreon_name, user.patreon_id),
+                )
+                user.patreon_id = None
+                user.patreon_name = None
+                user.is_supporter = False
+                user.save()
+                self.message_user(
+                    request,
+                    'Disconnected %(patreon)s from %(user)s' % {
+                        'patreon': patreon_name,
+                        'user': user,
+                    },
+                    messages.SUCCESS,
+                )
+            else:
+                self.message_user(
+                    request,
+                    '%(user)s has no Patreon account.' % {'user': user},
+                    messages.INFO,
+                )
 
     def disconnect_twitch_account(self, request, queryset):
         for user in queryset:
@@ -382,7 +379,6 @@ admin.site.register(models.Bulletin, BulletinAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.CategoryRequest, CategoryRequestAdmin)
 admin.site.register(models.Race, RaceAdmin)
-admin.site.register(models.SupporterSchedule, SupporterScheduleAdmin)
 admin.site.register(models.Team, TeamAdmin)
 admin.site.register(models.UserAction, UserActionAdmin)
 admin.site.register(models.User, UserAdmin)

@@ -3,6 +3,7 @@ import random
 from collections import OrderedDict
 from urllib.parse import urlencode
 
+import requests
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
 from django.apps import apps
 from django.conf import settings
@@ -24,6 +25,8 @@ __all__ = [
     'get_chat_history',
     'get_hashids',
     'notice_exception',
+    'patreon_auth_url',
+    'patreon_update_memberships',
     'timer_html',
     'timer_str',
     'twitch_auth_url',
@@ -553,6 +556,42 @@ def _format_timer(delta, format_str):
         int(seconds),
         min(round(delta.microseconds / 100000), 9),
     )
+
+
+def patreon_auth_url(request):
+    return 'https://www.patreon.com/oauth2/authorize?' + urlencode({
+        'client_id': settings.PATREON_CLIENT_ID,
+        'redirect_uri': settings.RT_SITE_URI + reverse('patreon_auth'),
+        'response_type': 'code',
+        'scope': 'identity',
+        'state': request.META.get('CSRF_COOKIE'),
+    })
+
+
+def patreon_update_memberships():
+    try:
+        data = requests.get(
+            f'https://www.patreon.com/api/oauth2/v2/campaigns/{settings.PATREON_CAMPAIGN_ID}/members',
+            {'include': 'user', 'page[count]': 1000},
+            headers={'Authorization': f'Bearer {settings.PATREON_ACCESS_TOKEN}'},
+            timeout=3,
+        ).json().get('data')
+    except requests.RequestException:
+        return 0, 0
+
+    patreon_ids = []
+    for user in data:
+        user_id = user.get('relationships').get('user').get('data').get('id')
+        if user_id:
+            patreon_ids.append(user_id)
+
+    User = apps.get_model('racetime', 'User')
+    added = User.objects.filter(is_supporter=False, patreon_id__in=patreon_ids).update(is_supporter=True)
+    # For now, do not remove existing supporters
+    removed = User.objects.filter(is_supporter=True).exclude(patreon_id__in=patreon_ids)#.update(is_supporter=False)
+    removed = removed.count()
+
+    return added, removed
 
 
 def timer_html(delta, deciseconds=True):
