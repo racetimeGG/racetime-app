@@ -164,6 +164,7 @@ class RaceAdmin(options.ModelAdmin):
         if not race.recorded and (
             'goal' in form.changed_data
             or 'custom_goal' in form.changed_data
+            or 'ranked' in form.changed_data
         ):
             race.update_entrant_ratings()
         race.recalculate_places()

@@ -656,7 +656,7 @@ class BaseEditRace(RaceFormMixin, generic.UpdateView):
         race.version = F('version') + 1
         with atomic():
             race.save()
-            if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
+            if 'goal' in form.changed_data or 'custom_goal' in form.changed_data or 'ranked' in form.changed_data:
                 race.update_entrant_ratings()
 
         messaged = False

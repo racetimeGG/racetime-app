@@ -17,9 +17,9 @@
             <i class="material-icons">{% if race.auto_start %}check{% else %}close{% endif %}</i>
 	    <span>Auto-start {% if race.auto_start %}on{% else %}off{% endif %}</span>
         </span>
-        <span class="{% if race.goal %}checked{% endif %}" title="{% if race.goal %}Race results can be recorded to this goal's leaderboard{% else %}Race is using a custom goal and will not be recorded{% endif %}">
-            <i class="material-icons">{% if race.goal %}check{% else %}close{% endif %}</i>
-            <span>{% if race.goal %}Ranked{% else %}Unranked{% endif %}</span>
+        <span class="{% if race.recordable %}checked{% endif %}" title="{% if race.recordable %}Race results can be recorded to this goal's leaderboard{% else %}Race result will not be recorded{% endif %}">
+            <i class="material-icons">{% if race.recordable %}check{% else %}close{% endif %}</i>
+            <span>{% if race.recordable %}Ranked{% else %}Unranked{% endif %}</span>
         </span>
     </div>
 {% endif %}

@@ -39,6 +39,9 @@ class RaceForm(forms.ModelForm):
             if cleaned_data.get('goal') and cleaned_data.get('custom_goal'):
                 raise forms.ValidationError('The race must only have one goal.')
 
-        cleaned_data['recordable'] = not cleaned_data.get('custom_goal')
+        if cleaned_data.get('custom_goal'):
+            cleaned_data['recordable'] = False
+        else:
+            cleaned_data['recordable'] = cleaned_data.get('ranked')
 
         return cleaned_data

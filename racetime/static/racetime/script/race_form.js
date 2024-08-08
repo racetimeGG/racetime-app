@@ -5,17 +5,25 @@ $(function() {
     var $prevGoalSelected = null;
 
     var changedFields = [];
+    var rankedWasChecked = true;
 
     function updateFormByGoal(goal_id) {
         if ($('.race-edit-form').length > 0) {
             if (goal_id) {
                 $submit.prop('disabled', false);
                 $customGoal.hide().find('input').val('');
+                $('#id_ranked')
+                    .prop('checked', rankedWasChecked)
+                    .prop('disabled', false);
             } else {
                 if ($customGoal.find('input').val() === '') {
                     $submit.prop('disabled', true);
                 }
                 $customGoal.show();
+                rankedWasChecked = $('#id_ranked').prop('checked');
+                $('#id_ranked')
+                    .prop('checked', false)
+                    .prop('disabled', true);
             }
             return;
         }
@@ -71,6 +79,9 @@ $(function() {
                 $submit.prop('disabled', true);
             }
             $goal.next().show();
+            $('#id_ranked')
+                .prop('checked', false)
+                .prop('disabled', true);
         } else {
             $submit.prop('disabled', false);
             $goal.next().hide().find('input').val('');
@@ -91,6 +102,7 @@ $(function() {
         setupForm($selectedGoal.length > 0 && $selectedGoal.val() === '', false);
 
         if ($selectedGoal.length > 0) {
+            rankedWasChecked = $('#id_ranked').prop('checked');
             updateFormByGoal($selectedGoal.val() || null);
         } else {
             if ($customGoal.find('input').val() === '') {

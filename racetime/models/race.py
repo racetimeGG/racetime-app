@@ -107,6 +107,14 @@ class Race(models.Model):
             'the race can start (only applies to team races).'
         ),
     )
+    ranked = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'Untick this to prevent this race result being recorded. Races '
+            'with a custom goal are always unranked.'
+        ),
+    )
     unlisted = models.BooleanField(
         default=False,
         db_index=True,
@@ -355,6 +363,7 @@ class Race(models.Model):
             'started_at': self.started_at,
             'ended_at': self.ended_at,
             'cancelled_at': self.cancelled_at,
+            'ranked': self.ranked,
             'unlisted': self.unlisted,
             'time_limit': self.time_limit,
             'time_limit_auto_complete': self.time_limit_auto_complete,
@@ -1157,7 +1166,7 @@ class Race(models.Model):
         Returns the user's current leaderboard rating for the goal/category of
         this race.
         """
-        if self.goal:
+        if self.recordable:
             UserRanking = apps.get_model('racetime', 'UserRanking')
             try:
                 return UserRanking.objects.get(
@@ -1174,7 +1183,7 @@ class Race(models.Model):
         Update the rating field for all entrants. This needs to be done if the
         goal changes.
         """
-        if self.goal:
+        if self.recordable:
             entrant_ratings = {
                 values['id']: values['user__userranking__rating']
                 for values in self.entrant_set.filter(

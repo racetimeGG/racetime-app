@@ -375,6 +375,7 @@ class GoalEditForm(forms.ModelForm):
     )
 
     default_settings_fields = (
+        'ranked',
         'invitational',
         'require_even_teams',
         'start_delay',
@@ -516,7 +517,10 @@ class RaceForm(forms.ModelForm):
             if cleaned_data.get('goal') and cleaned_data.get('custom_goal'):
                 raise ValidationError('The race must only have one goal.')
 
-            cleaned_data['recordable'] = not cleaned_data.get('custom_goal')
+            if cleaned_data.get('custom_goal'):
+                cleaned_data['recordable'] = False
+            else:
+                cleaned_data['recordable'] = cleaned_data.get('ranked')
 
         return cleaned_data
 
@@ -549,6 +553,7 @@ class RaceCreationForm(RaceForm):
             'custom_goal',
             'team_race',
             'invitational',
+            'ranked',
             'unlisted',
             'info_user',
             'recordable',
@@ -589,6 +594,7 @@ class RaceEditForm(RaceForm):
         fields = (
             'goal',
             'custom_goal',
+            'ranked',
             'unlisted',
             'info_user',
             'recordable',
