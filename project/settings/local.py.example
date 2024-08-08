@@ -5,3 +5,10 @@
 
 TWITCH_CLIENT_ID = 'changeme'
 TWITCH_CLIENT_SECRET = 'changeme'
+
+# You should only need to set these if you are doing supporter stuff.
+
+PATREON_CLIENT_ID = 'changeme'
+PATREON_CLIENT_SECRET = 'changeme'
+PATREON_ACCESS_TOKEN = 'changeme'
+PATREON_CAMPAIGN_ID = 0
