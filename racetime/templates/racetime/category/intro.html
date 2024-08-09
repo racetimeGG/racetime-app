@@ -27,13 +27,27 @@
         <dt>Owners</dt>
         <dd class="meta-owner-list">
             {% for owner in category.all_owners %}
-                {% include 'racetime/pops/user.html' with user=owner extra_class='inline' hide_flair=True hide_pronouns=True %}
+                {% if forloop.counter > 5 and category.all_owners|length > 6 %}
+                    {% include 'racetime/pops/user.html' with user=owner extra_class='inline hidden' hide_flair=True hide_pronouns=True %}
+                {% else %}
+                    {% include 'racetime/pops/user.html' with user=owner extra_class='inline' hide_flair=True hide_pronouns=True %}
+                {% endif %}
+                {% if forloop.counter == 5 and category.all_owners|length > 6 %}
+                    <a href="#" class="see-more">see more…</a>
+                {% endif %}
             {% endfor %}
         </dd>
         <dt>Moderators</dt>
         <dd class="meta-user-list">
             {% for moderator in category.all_moderators %}
-                {% include 'racetime/pops/user.html' with user=moderator extra_class='inline' hide_avatar=True hide_flair=True hide_pronouns=True %}
+                {% if forloop.counter > 5 and category.all_moderators|length > 6 %}
+                    {% include 'racetime/pops/user.html' with user=moderator extra_class='inline hidden' hide_avatar=True hide_flair=True hide_pronouns=True %}
+                {% else %}
+                    {% include 'racetime/pops/user.html' with user=moderator extra_class='inline' hide_avatar=True hide_flair=True hide_pronouns=True %}
+                {% endif %}
+                {% if forloop.counter == 5 and category.all_moderators|length > 6 %}
+                    <a href="#" class="see-more">see more…</a>
+                {% endif %}
             {% empty %}
                 No-one
             {% endfor %}

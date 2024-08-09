@@ -732,6 +732,12 @@ a .timer {
 .meta-owner-list, .meta-user-list {
     white-space: normal;
 }
+.meta-owner-list .hidden, .meta-user-list .hidden {
+    display: none;
+}
+.meta-owner-list .hidden, .meta-user-list .see-more::after {
+    content: none;
+}
 .meta-user-list {
     font-size: 13px;
 }

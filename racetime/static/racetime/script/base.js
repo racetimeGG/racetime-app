@@ -239,4 +239,10 @@ $(function() {
     };
 
     $('.emotes-enabled').each(window.displayEmotes);
+
+    $(document).on('click', '.see-more', function() {
+        $(this).nextAll().removeClass('hidden');
+        $(this).remove();
+        return false;
+    });
 });
