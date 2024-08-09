@@ -1744,9 +1744,29 @@ class Entrant(models.Model):
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
                 % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str}
             )
+            self.check_for_pb()
             self.race.finish_if_none_remaining()
         else:
             raise SyncError('You cannot finish at this time. Refresh to continue.')
+
+    def check_for_pb(self):
+        if not self.race.recordable or not self.finish_time:
+            return False
+        UserRanking = apps.get_model('racetime', 'UserRanking')
+        try:
+            best_time = UserRanking.objects.get(
+                user=self.user,
+                category=self.race.category,
+                goal=self.race.goal,
+            ).best_time
+        except UserRanking.DoesNotExist:
+            return False
+        if best_time - self.finish_time > timedelta(seconds=1):
+            verbs = ('bagged', 'just cooked up', 'landed', 'notched up', 'scored', 'snagged')
+            self.race.add_message(
+                '%(user)s %(verb)s a new personal best time for "%(goal)s"!'
+                % {'user': self.user, 'verb': random.choice(verbs), 'goal': self.race.goal_str}
+            )
 
     def undone(self):
         """
