@@ -78,6 +78,7 @@ urlpatterns = [
         path('races/data', views.UserRaceData.as_view(), name='user_race_list_data'),
         path('races.json', views.UserRaceData.as_view()),
     ])),
+    path('user/<str:user>/<str:name>', views.ViewProfile.as_view(), name='view_profile'),
 
     path('categories/data', views.CategoryListData.as_view(), name='category_list_data'),
     path('<str:category>.json', views.CategoryData.as_view()),

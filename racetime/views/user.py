@@ -34,9 +34,10 @@ class ViewProfile(generic.DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        using_custom_url = self.kwargs.get('user') == self.object.custom_profile_slug
-        if bool(self.object.has_custom_url) != bool(using_custom_url):
-            return http.HttpResponseRedirect(self.object.get_absolute_url())
+        canoncial_url = self.object.get_absolute_url()
+        if request.path != canoncial_url:
+            return http.HttpResponseRedirect(canoncial_url)
+
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 

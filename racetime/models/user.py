@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from .choices import EntrantStates, RaceStates
 from ..utils import determine_ip, get_hashids, timer_html
@@ -323,6 +324,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email == self.SYSTEM_USER
 
     @property
+    def name_slug(self):
+        return slugify(self.name) or None
+
+    @property
     def pronouns_display(self):
         """
         Format user's pronouns for display.
@@ -419,6 +424,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_absolute_url(self):
         if self.has_custom_url:
             return reverse('view_profile', args=(self.custom_profile_slug,))
+        name_slug = self.name_slug
+        if name_slug and name_slug != 'data':  # yay edge cases
+            return reverse('view_profile', args=(self.hashid, name_slug))
         return reverse('view_profile', args=(self.hashid,))
 
     def get_full_name(self):
