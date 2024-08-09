@@ -149,6 +149,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             ('they/them', 'they/them'),
             ('she/they', 'she/they'),
             ('he/they', 'he/they'),
+            ('any/all', 'any/all'),
             ('other/ask!', 'other/ask!'),
         ),
         help_text='Select which pronouns appear next to your name on the site.',
