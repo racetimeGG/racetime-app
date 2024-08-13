@@ -1761,7 +1761,7 @@ class Entrant(models.Model):
             ).best_time
         except UserRanking.DoesNotExist:
             return False
-        if best_time - self.finish_time > timedelta(seconds=1):
+        if best_time and best_time - self.finish_time > timedelta(seconds=1):
             verbs = ('bagged', 'just cooked up', 'landed', 'notched up', 'scored', 'snagged')
             self.race.add_message(
                 '%(user)s %(verb)s a new personal best time for "%(goal)s"!'
