@@ -143,7 +143,7 @@ class RaceBot:
 
     def handle_in_progress_race(self, race):
         self.check_time_limit(race)
-        race.finish_if_none_remaining()
+        race['object'].finish_if_none_remaining()
 
     def check_countdown(self, race):
         time_to_start = timezone.now() - race['object'].started_at
