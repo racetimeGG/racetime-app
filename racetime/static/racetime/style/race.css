@@ -208,6 +208,8 @@ main {
 .race-chat > .messages.pinned {
     box-shadow: 0 6px 3px -3px #212328;
     margin: 8px 0 0;
+    max-height: 50%;
+    overflow-y: auto;
     position: relative;
 }
 .race-chat > .messages.regular {
