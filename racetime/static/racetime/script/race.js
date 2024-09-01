@@ -219,7 +219,10 @@ Race.prototype.createMessageItem = function(message, server_date, mute_notificat
     if (Object.keys(message.actions).length) {
         let $actions = $('<ul class="bot-actions"></ul>');
         Object.entries(message.actions).forEach(item => {
-            const [label, action] = item;
+            let [label, action] = item;
+            if (action.survey && !(label.endsWith('…') || label.endsWith('..'))) {
+                label += '…';
+            }
             let $button;
             if (action.url) {
                 $button = $('<a class="msg-action" target="_blank"></a>');
