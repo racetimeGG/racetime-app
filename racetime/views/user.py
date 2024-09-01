@@ -2,7 +2,7 @@ import requests
 from django import http
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -225,6 +225,21 @@ class CreateAccount(generic.CreateView):
             require_https=self.request.is_secure(),
         )
         return redirect_to if url_is_safe else ''
+
+
+class DeleteAccount(LoginRequiredMixin, UserMixin, generic.TemplateView):
+    template_name = 'racetime/user/delete_account.html'
+
+    def post(self, request, *args, **kwargs):
+        if self.user.active_race_entrant:
+            messages.error(request, 'We are unable to delete your account while you are participating in a race.')
+            return http.HttpResponseRedirect(reverse('edit_account'))
+
+        user = self.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your racetime.gg account has been deleted.')
+        return http.HttpResponseRedirect(reverse('home'))
 
 
 class EditAccount(LoginRequiredMixin, UserMixin, generic.FormView):

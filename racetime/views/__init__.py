@@ -125,6 +125,7 @@ from .team import (
 from .user import (
     AccountStanding,
     CreateAccount,
+    DeleteAccount,
     EditAccount,
     EditAccountConnections,
     EditAccountSecurity,
@@ -266,6 +267,7 @@ __all__ = [
     # user
     'AccountStanding',
     'CreateAccount',
+    'DeleteAccount',
     'EditAccount',
     'EditAccountConnections',
     'EditAccountSecurity',

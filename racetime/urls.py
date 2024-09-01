@@ -17,6 +17,7 @@ urlpatterns = [
         path('login', views.Login.as_view(), name='login'),
         path('logout', views.Logout.as_view(), name='logout'),
         path('create', views.CreateAccount.as_view(), name='create_account'),
+        path('delete', views.DeleteAccount.as_view(), name='delete_account'),
         path('twitch_auth', views.TwitchAuth.as_view(), name='twitch_auth'),
         path('twitch_disconnect', views.TwitchDisconnect.as_view(), name='twitch_disconnect'),
         path('patreon_auth', views.PatreonAuth.as_view(), name='patreon_auth'),

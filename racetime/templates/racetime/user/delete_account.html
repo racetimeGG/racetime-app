@@ -1,0 +1,23 @@
+{% extends 'racetime/base.html' %}
+
+{% block title %}
+    Account settings |
+{% endblock %}
+
+{% block main %}
+    <h2>Delete account</h2>
+    <p>
+        Are you sure you want to delete your account? If you do so, all your
+        data will be immediately and <strong>permanently</strong> erased.
+        This action cannot be undone.
+    </p>
+    <ul style="margin: 1em">
+        <li>Account name: <strong>{{ user.name }}</strong></li>
+        <li>Account email: <strong>{{ user.email }}</strong></li>
+    </ul>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn dangerous" type="submit" name="allow">Yes, delete my account</button>
+        <a class="btn" href="{% url 'edit_account' %}">Cancel</a>
+    </form>
+{% endblock %}
