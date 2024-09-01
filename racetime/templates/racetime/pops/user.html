@@ -20,12 +20,8 @@
     {% else %}
     </span>
     {% endif %}
-{% elif user and not user.active %}
-    <span class="user-pop {{ extra_class }}">
-        <span class="name">(Inactive/Deleted user)</span>
-    </span>
 {% else %}
     <span class="user-pop {{ extra_class }}">
-        <span class="name">No-one</span>
+        <span class="name"><em>(deleted user)</em></span>
     </span>
 {% endif %}
