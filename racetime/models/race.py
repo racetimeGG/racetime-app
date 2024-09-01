@@ -304,7 +304,7 @@ class Race(models.Model):
     def entrants_dicts(self):
         return [
             {
-                'user': entrant.user.api_dict_summary(race=self),
+                'user': entrant.user.api_dict_summary(race=self) if entrant.user else None,
                 'team': entrant.team.api_dict_summary() if entrant.team else None,
                 'status': {
                     'value': entrant.summary[0],
