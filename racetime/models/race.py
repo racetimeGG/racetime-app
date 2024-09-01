@@ -1745,7 +1745,6 @@ class Entrant(models.Model):
                 % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str}
             )
             self.check_for_pb()
-            self.race.finish_if_none_remaining()
         else:
             raise SyncError('You cannot finish at this time. Refresh to continue.')
 
@@ -1823,7 +1822,6 @@ class Entrant(models.Model):
                 '%(user)s has ##bad##forfeited## from the race.'
                 % {'user': self.user}
             )
-            self.race.finish_if_none_remaining()
         else:
             raise SyncError('You cannot forfeit at this time. Refresh to continue.')
 
@@ -2004,8 +2002,6 @@ class Entrant(models.Model):
             )
             if self.finish_time:
                 self.race.recalculate_places()
-            if self.race.is_in_progress:
-                self.race.finish_if_none_remaining()
         else:
             raise SyncError('You cannot disqualify ths entrant at this time. Refresh to continue.')
 
