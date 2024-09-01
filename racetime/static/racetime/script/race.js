@@ -790,7 +790,7 @@ $(function() {
                 '</div>' +
               '</li>');
             $modal.data('action', this);
-            $modal.find('span').text($(this).text());
+            $modal.find('span').text($(this).text().replace(/(\.+|…)$/, ''));
             if ($(this).data('submit')) {
                 $modal.find('.msg-action').text($(this).data('submit'));
             }
