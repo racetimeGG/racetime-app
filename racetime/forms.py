@@ -736,9 +736,6 @@ class UserEditForm(forms.ModelForm):
             'custom_profile_slug',
             'detailed_timer',
         )
-        widgets = {
-            'pronouns': forms.RadioSelect,
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
