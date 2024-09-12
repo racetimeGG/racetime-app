@@ -124,7 +124,11 @@ class ViewProfile(generic.DetailView):
 class UserRaceData(ViewProfile, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        paginator = Paginator(self.get_entrances(), 10)
+        try:
+            per_page = min(int(self.request.GET.get('per_page', 10)), 100)
+        except ValueError:
+            per_page = 10
+        paginator = Paginator(self.get_entrances(), per_page)
         try:
             page = paginator.page(self.request.GET.get('page', 1))
         except PageNotAnInteger:

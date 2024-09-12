@@ -148,7 +148,11 @@ class CategoryListData(generic.View, PublicAPIMixin):
 class CategoryRaceData(Category, PublicAPIMixin):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        paginator = Paginator(self.past_races(), 10)
+        try:
+            per_page = min(int(self.request.GET.get('per_page', 10)), 100)
+        except ValueError:
+            per_page = 10
+        paginator = Paginator(self.past_races(), per_page)
         try:
             page = paginator.page(self.request.GET.get('page', 1))
         except PageNotAnInteger:
