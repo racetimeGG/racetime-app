@@ -48,6 +48,7 @@ class Category(models.Model):
         null=True,
         blank=True,
         db_index=True,
+        blank=True,
         help_text=(
             'A searchable name for the category, e.g. "Pokemon Emerald".'
         ),
