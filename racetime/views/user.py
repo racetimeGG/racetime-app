@@ -28,7 +28,7 @@ from ..middleware import CsrfViewMiddlewareTwitch
 from ..utils import notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
 
 
-class ViewProfile(generic.DetailView):
+class ViewProfile(UserMixin, generic.DetailView):
     context_object_name = 'profile'
     model = models.User
 
@@ -65,6 +65,9 @@ class ViewProfile(generic.DetailView):
                 raise http.Http404
 
         if not obj.active or obj.is_system:
+            raise http.Http404
+
+        if not obj.can_show_profile and self.user != obj and not self.user.is_staff:
             raise http.Http404
 
         return obj

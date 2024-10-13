@@ -271,6 +271,30 @@ class User(AbstractBaseUser, PermissionsMixin):
             return None
 
     @property
+    def can_show_profile(self):
+        """
+        Determine if this user can have a public profile page.
+
+        User must be active and have either:
+          * staff status
+          * a connected Twitch or Patreon account
+          * participated in at least one recorded race
+          * category owner or moderator status
+        """
+        return (
+            self.is_active
+            and not self.is_system
+            and (
+                self.is_staff
+                or self.twitch_id
+                or self.patreon_id
+                or self.entrant_set.filter(race__recorded=True).exists()
+                or self.owned_categories.exists()
+                or self.mod_categories.exists()
+            )
+        )
+
+    @property
     def current_bans(self):
         """
         Return a queryset of bans applied to this user that are currently

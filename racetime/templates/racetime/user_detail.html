@@ -18,6 +18,16 @@
     {% endif %}
 {% endblock %}
 
+{% block precontent %}
+    {% if user.is_staff and not profile.can_show_profile %}
+        <div class="messages">
+            <ul>
+                <li class="error">This profile page is currently publicly hidden.</li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
+
 {% block main %}
     <h3>View user profile</h3>
     <div class="user-profile">
