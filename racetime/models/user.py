@@ -157,6 +157,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_bio = models.TextField(
         null=True,
         blank=True,
+        max_length=2000,
         help_text=(
             'Add some information to your public profile. Plug your Discord '
             'server, stream schedule, or anything else you like.'

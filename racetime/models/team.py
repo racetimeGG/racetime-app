@@ -47,6 +47,7 @@ class Team(models.Model):
     profile = models.TextField(
         null=True,
         blank=True,
+        max_length=2000,
         help_text=(
             'Add some information to your team\'s public profile. It can '
             'include anything you like.'
