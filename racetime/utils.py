@@ -622,7 +622,7 @@ def patreon_update_memberships():
     User = apps.get_model('racetime', 'User')
     added = User.objects.filter(is_supporter=False, patreon_id__in=patreon_ids).update(is_supporter=True)
     # For now, do not remove existing supporters
-    removed = User.objects.filter(is_supporter=True).exclude(patreon_id__in=patreon_ids)#.update(is_supporter=False)
+    removed = User.objects.filter(is_supporter=True).exclude(patreon_id__in=patreon_ids).update(is_supporter=False)
     removed = removed.count()
 
     return added, removed
