@@ -22,6 +22,7 @@ urlpatterns = [
         path('twitch_disconnect', views.TwitchDisconnect.as_view(), name='twitch_disconnect'),
         path('patreon_auth', views.PatreonAuth.as_view(), name='patreon_auth'),
         path('patreon_disconnect', views.PatreonDisconnect.as_view(), name='patreon_disconnect'),
+        path('patreon_refresh', views.PatreonRefresh.as_view(), name='patreon_refresh'),
         path('derp', views.PasswordResetView.as_view(), name='password_reset'),
         path('derp/done', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
         path('reset/<uidb64>/<token>', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),

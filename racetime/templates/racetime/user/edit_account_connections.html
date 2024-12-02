@@ -75,6 +75,13 @@
             <p>
                 <a href="{{ patreon_url }}" class="btn" target="_blank">Connect to different Patreon account</a>
             </p>
+            <form action="{% url 'patreon_refresh' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn cancel">Refresh supporter status</button>
+                <p class="help" style="margin-top: 0">
+                    Click this if you've recently supported us, but your supporter status hasn't updated yet.
+                </p>
+            </form>
             <form action="{% url 'patreon_disconnect' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn dangerous">Disconnect account</button>

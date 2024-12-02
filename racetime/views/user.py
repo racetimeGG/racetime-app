@@ -622,13 +622,28 @@ class PatreonAuth(LoginRequiredMixin, UserMixin, generic.View):
                     user.save()
                     user.log_action('patreon_auth', self.request)
 
-                    patreon_update_memberships()
+                    patreon_update_memberships(id=user.id)
 
                     messages.success(
                         self.request,
                         'Thanks, you have successfully authorized your Patreon '
                         'account.',
                     )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class PatreonRefresh(LoginRequiredMixin, UserMixin, generic.View):
+    def post(self, request):
+        user = self.user
+        patreon_update_memberships(id=user.id)
+        user.log_action('patreon_refresh', self.request)
+
+        messages.success(
+            self.request,
+            'Your Patreon status has been refreshed. If your subscription '
+            'status is still incorrect, contact us via hello@racetime.gg'
+        )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))
 

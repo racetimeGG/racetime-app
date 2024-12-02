@@ -602,7 +602,7 @@ def patreon_auth_url(request):
     })
 
 
-def patreon_update_memberships():
+def patreon_update_memberships(**user_filter):
     try:
         data = requests.get(
             f'https://www.patreon.com/api/oauth2/v2/campaigns/{settings.PATREON_CAMPAIGN_ID}/members',
@@ -620,8 +620,9 @@ def patreon_update_memberships():
             patreon_ids.append(user_id)
 
     User = apps.get_model('racetime', 'User')
-    added = User.objects.filter(is_supporter=False, patreon_id__in=patreon_ids).update(is_supporter=True)
-    removed = User.objects.filter(is_supporter=True).exclude(patreon_id__in=patreon_ids).update(is_supporter=False)
+    user_qs = User.objects.filter(**user_filter)
+    added = user_qs.filter(is_supporter=False, patreon_id__in=patreon_ids).update(is_supporter=True)
+    removed = user_qs.filter(is_supporter=True).exclude(patreon_id__in=patreon_ids).update(is_supporter=False)
 
     return added, removed
 
