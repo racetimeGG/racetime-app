@@ -163,7 +163,7 @@ class Split:
 
 
 class Forfeit:
-    commands = ['forfeit']
+    commands = ['forfeit', 'ff']
 
     def action(self, race, user, data):
         entrant = race.in_race(user)
