@@ -123,6 +123,7 @@ class RaceAdmin(options.ModelAdmin):
         'started_at',
         'ended_at',
         'cancelled_at',
+        'recordable',
         'bot_pid',
     )
     inlines = [
