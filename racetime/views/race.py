@@ -393,11 +393,14 @@ class RaceChatLog(RaceMixin, UserMixin, generic.View):
 
 class RaceAvailableTeams(RaceMixin, UserMixin, generic.View):
     def get(self, request, *args, **kwargs):
-        if not self.user:
+        if not self.user or not self.user.is_authenticated:
             return http.HttpResponseForbidden()
+        race = self.get_object()
+        if not race.team_race:
+            return http.HttpResponseBadRequest()
         return http.JsonResponse({
             team.slug: team.name
-            for team in self.get_object().get_available_teams(self.user).values()
+            for team in race.get_available_teams(self.user).values()
         })
 
 
