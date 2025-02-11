@@ -58,21 +58,23 @@
                 </header>
             {% endblock %}
             <div class="container">
-                {% if bulletins %}
-                    <div class="bulletins">
-                        {% for bulletin in bulletins %}
-                        <div id="{{ bulletin.hashid }}" class="bulletin hidden {{ bulletin.class_names }}">
-                            <div class="message">
-                                <time class="onlydate" datetime="{{ bulletin.visible_from.isoformat }}">
-                                    {{ bulletin.visible_from|date }}
-                                </time>
-                                <span>{{ bulletin.message|safe }}</span>
+                {% block bulletins %}
+                    {% if bulletins %}
+                        <div class="bulletins">
+                            {% for bulletin in bulletins %}
+                            <div id="{{ bulletin.hashid }}" class="bulletin hidden {{ bulletin.class_names }}">
+                                <div class="message">
+                                    <time class="onlydate" datetime="{{ bulletin.visible_from.isoformat }}">
+                                        {{ bulletin.visible_from|date }}
+                                    </time>
+                                    <span>{{ bulletin.message|safe }}</span>
+                                </div>
+                                <i class="close action-close material-icons" title="Hide this message">close</i>
                             </div>
-                            <i class="close action-close material-icons" title="Hide this message">close</i>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                    {% endif %}
+                {% endblock %}
                 {% if messages %}
                 <div class="messages">
                     <ul>
