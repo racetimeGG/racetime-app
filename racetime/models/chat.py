@@ -86,7 +86,7 @@ class Message(models.Model):
             'id': self.hashid,
             'user': (
                 self.user.api_dict_summary(race=self.race)
-                if self.user and not self.user.is_system else None
+                if self.user else None
             ),
             'bot': self.bot.name if self.bot else None,
             'direct_to': self.direct_to.api_dict_minimal() if self.direct_to else None,
@@ -138,10 +138,7 @@ class Message(models.Model):
         """
         Determine if this is a system message.
         """
-        return (
-            (self.user is None and self.bot is None)
-            or (self.user and self.user.is_system)
-        )
+        return self.user is None and self.bot is None
 
     @property
     def message_plain(self):
@@ -159,7 +156,7 @@ class Message(models.Model):
                 'type': 'chat.dm',
                 'from_user': (
                     self.user.api_dict_minimal()
-                    if self.user and not self.user.is_system else None
+                    if self.user else None
                 ),
                 'from_bot': self.bot.name if self.bot else None,
                 'to': self.direct_to.api_dict_minimal(),
