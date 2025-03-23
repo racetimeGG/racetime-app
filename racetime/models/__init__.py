@@ -7,7 +7,6 @@ from .race import Entrant, Race
 from .team import Team, TeamAuditLog, TeamMember
 from .user import (
     Ban,
-    SupporterSchedule,
     User,
     UserAction,
     UserLog,
@@ -39,7 +38,6 @@ __all__ = [
     'TeamMember',
     # user
     'Ban',
-    'SupporterSchedule',
     'User',
     'UserAction',
     'UserLog',

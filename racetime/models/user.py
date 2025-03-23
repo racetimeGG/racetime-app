@@ -566,40 +566,6 @@ class UserRanking(models.Model):
         return timer_html(self.best_time, False) if self.best_time else None
 
 
-class SupporterSchedule(models.Model):
-    """
-    A supporter schedule entry. Determines which users have supporter status at
-    any given time.
-    """
-    user = models.ForeignKey(
-        'User',
-        on_delete=models.CASCADE,
-    )
-    start_date = models.DateField(
-        help_text='Start/End dates are inclusive.',
-    )
-    end_date = models.DateField(
-        help_text='Start/End dates are inclusive.',
-    )
-    reason = models.CharField(
-        max_length=255,
-        choices=(
-            ('manual', 'Manually applied'),
-        ),
-        default='manual',
-    )
-
-    class Meta:
-        verbose_name_plural = 'Supporters'
-
-    def __str__(self):
-        return '%s: %s – %s' % (
-            self.user,
-            self.start_date.strftime('%Y-%m-%d'),
-            self.end_date.strftime('%Y-%m-%d'),
-        )
-
-
 class Ban(models.Model):
     """
     A user ban. There are many like it but this one is theirs.
