@@ -1,6 +1,7 @@
 import json
 import random
 from collections import OrderedDict
+from datetime import datetime
 from urllib.parse import urlencode
 
 import requests
@@ -11,7 +12,8 @@ from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
-from django.urls import reverse, NoReverseMatch
+from django.urls import NoReverseMatch, reverse
+from django.utils import timezone
 from django.utils.module_loading import import_string
 from hashids import Hashids
 
@@ -476,6 +478,34 @@ def delete_user(request, user, protect=True):
         for message_link in MessageLink.objects.filter(user=user).select_related('message'):
             message_link.message.message = message_link.anonymised_message
             message_link.message.save()
+
+        # Anonymise older system messages
+        MESSAGE_LINK_MIGRATION = datetime(2025, 3, 25, tzinfo=timezone.utc)
+        Message = apps.get_model('racetime', 'Message')
+        UserLog = apps.get_model('racetime', 'UserLog')
+
+        name_map = OrderedDict()
+        for user_log in UserLog.objects.filter(
+            user=user,
+            changed_at__lte=MESSAGE_LINK_MIGRATION,
+        ).order_by('changed_at'):
+            name_map[user_log.changed_at] = user_log.user_str
+        name_map[MESSAGE_LINK_MIGRATION] = str(user)
+
+        date_from = None
+        for date_to, name in name_map.items():
+            messages = Message.objects.filter(
+                user=None,
+                bot=None,
+                posted_at__lte=date_to,
+                message__contains=name,
+            )
+            if date_from:
+                messages = messages.filter(posted_at__gte=date_from)
+            for message in messages:
+                message.message = message.message.replace(name, '(deleted user)')
+                message.save()
+            date_from = date_to
 
         user.delete()
 

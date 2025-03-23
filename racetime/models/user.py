@@ -649,6 +649,16 @@ class UserLog(models.Model):
         default=False,
     )
 
+    @property
+    def use_discriminator(self):
+        return self.discriminator != '0000'
+
+    @property
+    def user_str(self):
+        if self.use_discriminator:
+            return self.name + '#' + self.discriminator
+        return self.name
+
 
 class UserAction(models.Model):
     """
