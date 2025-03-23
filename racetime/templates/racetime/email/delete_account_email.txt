@@ -1,0 +1,12 @@
+Hello {{ name }},
+
+This email is to confirm that per your instruction, your {{ site_info.title }}
+account has now been deleted.
+
+All information we hold on you will be removed or anonymised to protect your
+identity.
+
+Farewell,
+
+The {{ site_info.title }} team
+{{ home_url }}

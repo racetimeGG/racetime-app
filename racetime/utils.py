@@ -7,7 +7,10 @@ import requests
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
 from django.apps import apps
 from django.conf import settings
+from django.core.mail import send_mail
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.transaction import atomic
+from django.template.loader import render_to_string
 from django.urls import reverse, NoReverseMatch
 from django.utils.module_loading import import_string
 from hashids import Hashids
@@ -17,6 +20,7 @@ __all__ = [
     'SafeException',
     'SyncError',
     'chunkify',
+    'delete_user',
     'determine_ip',
     'exception_to_msglist',
     'generate_race_slug',
@@ -448,6 +452,40 @@ def chunkify(items, size=100):
             break
         yield chunk
         n += size
+
+
+def delete_user(request, user, protect=True):
+    if protect and (user.is_system or user.is_superuser or user.is_staff):
+        raise Exception('Cannot delete protected user.')
+    if user.active_race_entrant:
+        raise Exception('User is currently racing.')
+
+    user_email = user.email
+    email_context = {
+        'home_url': settings.RT_SITE_URI + reverse('home'),
+        'name': user.name,
+    }
+
+    with atomic():
+        # Delete comments
+        Entrant = apps.get_model('racetime', 'Entrant')
+        Entrant.objects.filter(user=user).update(comment=None)
+
+        # Anonymise system messages that mention the user
+        MessageLink = apps.get_model('racetime', 'MessageLink')
+        for message_link in MessageLink.objects.filter(user=user).select_related('message'):
+            message_link.message.message = message_link.anonymised_message
+            message_link.message.save()
+
+        user.delete()
+
+    send_mail(
+        subject=render_to_string('racetime/email/delete_account_subject.txt', email_context, request),
+        message=render_to_string('racetime/email/delete_account_email.txt', email_context, request),
+        html_message=render_to_string('racetime/email/delete_account_email.html', email_context, request),
+        from_email=settings.EMAIL_FROM,
+        recipient_list=[user_email],
+    )
 
 
 def determine_ip(request):

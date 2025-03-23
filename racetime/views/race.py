@@ -681,13 +681,17 @@ class BaseEditRace(RaceFormMixin, generic.UpdateView):
         if 'goal' in form.changed_data or 'custom_goal' in form.changed_data:
             race.add_message(
                 '%(user)s set a new goal: %(goal)s'
-                % {'user': who_changed, 'goal': race.goal_str}
+                % {'user': who_changed, 'goal': race.goal_str},
+                user=who_changed,
+                anonymised_message='(deleted user) set a new goal: %(goal)s' % {'goal': race.goal_str},
             )
             messaged = True
         if 'info_user' in form.changed_data:
             race.add_message(
                 '%(user)s updated the race information.'
-                % {'user': who_changed}
+                % {'user': who_changed},
+                user=who_changed,
+                anonymised_message='(deleted user) updated the race information.',
             )
             messaged = True
         if 'streaming_required' in form.changed_data:
@@ -786,19 +790,25 @@ class EditRaceResult(UserMixin, generic.UpdateView):
         if 'result' in form.changed_data:
             entrant.race.add_message(
                 '%(user)s changed %(entrant)s result to %(result)s'
-                % {'user': who_changed, 'entrant': entrant.user, 'result': result_str}
+                % {'user': who_changed, 'entrant': entrant.user, 'result': result_str},
+                user=[who_changed, entrant.user],
+                anonymised_message='A moderator changed a result to %(result)s' % {'result': result_str},
             )
 
         if form.cleaned_data['result'] != 'dnf' and 'finish_time' in form.changed_data:
             entrant.race.add_message(
                 '%(user)s changed finish time for %(entrant)s to %(finish_time)s'
-                % {'user': who_changed, 'entrant': entrant.user, 'finish_time': entrant.finish_time}
+                % {'user': who_changed, 'entrant': entrant.user, 'finish_time': entrant.finish_time},
+                user=[who_changed, entrant.user],
+                anonymised_message='A moderator changed a finish time to %(finish_time)s' % {'finish_time': entrant.finish_time},
             )
 
         if 'comment' in form.changed_data:
             entrant.race.add_message(
                 '%(user)s edited a comment left by %(entrant)s'
-                % {'user': who_changed, 'entrant': entrant.user}
+                % {'user': who_changed, 'entrant': entrant.user},
+                user=[who_changed, entrant.user],
+                anonymised_message='A moderator edited a comment',
             )
 
         with atomic():

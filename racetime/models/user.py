@@ -690,7 +690,8 @@ class UserAction(models.Model):
     """
     user = models.ForeignKey(
         'User',
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
     )
     date = models.DateTimeField(
         auto_now_add=True,

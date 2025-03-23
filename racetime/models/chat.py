@@ -16,9 +16,6 @@ class Message(models.Model):
     meaning it's a status message like "Mario joins the race". As such, each
     message object will either have a user, a bot, or both fields will be None
     in which case it's a system message.
-
-    Messages are automatically broadcast to the race's WebSocket consumers when
-    saved (see signals.py).
     """
     user = models.ForeignKey(
         'User',
@@ -36,7 +33,7 @@ class Message(models.Model):
     )
     direct_to = models.ForeignKey(
         'User',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name='+',
         null=True,
     )
@@ -182,3 +179,17 @@ class Message(models.Model):
         self.pinned = pinned
         self.save(update_fields={'pinned'})
         self.broadcast('chat.pin' if pinned else 'chat.unpin')
+
+
+class MessageLink(models.Model):
+    message = models.ForeignKey(
+        'Message',
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+    )
+    anonymised_message = models.TextField(
+        max_length=1000,
+    )

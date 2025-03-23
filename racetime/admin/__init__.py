@@ -2,6 +2,7 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib import admin, messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse, set_urlconf
 from django.utils.safestring import mark_safe
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
@@ -199,8 +200,8 @@ class UserActionAdmin(options.ModelAdmin):
         'user_agent',
     )
     list_display = (
-        'user_link',
         'date',
+        'user_link',
         'action',
         'ip_address',
         'user_agent',
@@ -209,7 +210,6 @@ class UserActionAdmin(options.ModelAdmin):
         'date',
         'action',
     )
-    list_select_related = True
     ordering = ('-date',)
     search_fields = (
         'user__name',
@@ -218,8 +218,12 @@ class UserActionAdmin(options.ModelAdmin):
     )
 
     def user_link(self, action):
-        url = reverse('admin:racetime_user_change', args=[action.user.id])
-        link = '<a href="%s">%s</a>' % (url, action.user)
+        try:
+            user = action.user
+        except ObjectDoesNotExist:
+            return f'Deleted user #{action.user_id}'
+        url = reverse('admin:racetime_user_change', args=[user.id])
+        link = '<a href="%s">%s</a>' % (url, user)
         return mark_safe(link)
     user_link.short_description = 'User'
 

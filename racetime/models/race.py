@@ -660,14 +660,26 @@ class Race(models.Model):
             except AttributeError:
                 pass
 
-    def add_message(self, message, highlight=False, broadcast=True):
+    def add_message(self, message, highlight=False, broadcast=True, user=None, anonymised_message=None):
         """
         Add a system-generated chat message for this race.
         """
+        User = apps.get_model('racetime', 'User')
         message = self.message_set.create(
             message=message,
             highlight=highlight,
         )
+        if user:
+            if not isinstance(user, list):
+                user = [user]
+            if not anonymised_message:
+                raise ValueError('Must provide an anonymised message.')
+            for user_ in user:
+                if isinstance(user_, User):
+                    message.messagelink_set.create(
+                        user=user_,
+                        anonymised_message=anonymised_message,
+                    )
         message.broadcast()
         if broadcast:
             self.broadcast_data()
@@ -848,7 +860,9 @@ class Race(models.Model):
 
             self.add_message(
                 '%(added_by)s promoted %(user)s to race monitor.'
-                % {'added_by': added_by, 'user': user}
+                % {'added_by': added_by, 'user': user},
+                user=[added_by, user],
+                anonymised_message='A user was promoted to race monitor.',
             )
 
     def can_remove_monitor(self, user):
@@ -867,7 +881,9 @@ class Race(models.Model):
                 self.monitors.remove(user)
             self.add_message(
                 '%(removed_by)s demoted %(user)s from race monitor.'
-                % {'removed_by': removed_by, 'user': user}
+                % {'removed_by': removed_by, 'user': user},
+                user=[removed_by, user],
+                anonymised_message='A user was demoted from race monitor.',
             )
 
     def in_race(self, user):
@@ -895,6 +911,8 @@ class Race(models.Model):
 
         self.add_message(
             '%(by)s sets the race to be open. Anyone may now join.' % {'by': by},
+            user=by,
+            anonymised_message='(deleted user) sets the race to be open. Anyone may now join.',
         )
 
     def make_invitational(self, by):
@@ -912,6 +930,8 @@ class Race(models.Model):
 
         self.add_message(
             '%(by)s sets the race to be invite only.' % {'by': by},
+            user=by,
+            anonymised_message='(deleted user) sets the race to be invite only.',
         )
 
     @property
@@ -974,6 +994,8 @@ class Race(models.Model):
                 '%(begun_by)s has initiated the race. The race will begin in %(delta)d seconds!'
                 % {'begun_by': begun_by, 'delta': self.start_delay.seconds},
                 highlight=True,
+                user=begun_by,
+                anonymised_message='(deleted user) has initiated the race. The race will begin in %(delta)d seconds!' % {'delta': self.start_delay.seconds},
             )
 
     def cancel(self, cancelled_by=None):
@@ -1001,6 +1023,8 @@ class Race(models.Model):
             self.add_message(
                 'This race has been cancelled by %(cancelled_by)s.'
                 % {'cancelled_by': cancelled_by},
+                user=cancelled_by,
+                anonymised_message='This race has been cancelled by (deleted user).',
             )
 
     def finish(self):
@@ -1068,6 +1092,8 @@ class Race(models.Model):
             self.add_message(
                 'Race result recorded by %(recorded_by)s'
                 % {'recorded_by': recorded_by},
+                user=recorded_by,
+                anonymised_message='Race result recorded by (deleted user)',
             )
         else:
             raise SafeException('Race is not recordable or already recorded.')
@@ -1085,6 +1111,8 @@ class Race(models.Model):
             self.add_message(
                 'Race set to not recorded by %(unrecorded_by)s'
                 % {'unrecorded_by': unrecorded_by},
+                user=unrecorded_by,
+                anonymised_message='Race set to not recorded by (deleted user)',
             )
         else:
             raise SafeException('Race is not recordable or already recorded.')
@@ -1146,11 +1174,17 @@ class Race(models.Model):
             else:
                 self.rematch.join(user)
 
+        race_url = settings.RT_SITE_URI + self.rematch.get_absolute_url()
         self.add_message(
             '%(user)s wants to rematch! Please visit the new race room to '
             'accept your invitation: %(race)s'
-            % {'user': user, 'race': settings.RT_SITE_URI + self.rematch.get_absolute_url()},
+            % {'user': user, 'race': race_url},
             highlight=True,
+            user=user,
+            anonymised_message=(
+                '(deleted user) wants to rematch! Please visit the new race '
+                'room to accept your invitation: %(race)s' % {'race': race_url}
+            ),
         )
 
     def finish_if_none_remaining(self):
@@ -1213,7 +1247,11 @@ class Race(models.Model):
                     rating=self.get_rating(user),
                 )
                 self.increment_version()
-            self.add_message('%(user)s joins the race.' % {'user': user})
+            self.add_message(
+                '%(user)s joins the race.' % {'user': user},
+                user=user,
+                anonymised_message='(deleted user) joins the race.',
+            )
         else:
             raise SafeException('You are not eligible to join this race.')
 
@@ -1234,7 +1272,11 @@ class Race(models.Model):
                     rating=self.get_rating(user),
                 )
                 self.increment_version()
-            self.add_message('%(user)s requests to join the race.' % {'user': user})
+            self.add_message(
+                '%(user)s requests to join the race.' % {'user': user},
+                user=user,
+                anonymised_message='(deleted user) requests to join the race.',
+            )
         else:
             raise SafeException('You are not eligible to join this race.')
 
@@ -1252,7 +1294,9 @@ class Race(models.Model):
                 self.increment_version()
             self.add_message(
                 '%(invited_by)s invites %(user)s to join the race.'
-                % {'invited_by': invited_by, 'user': user}
+                % {'invited_by': invited_by, 'user': user},
+                user=[invited_by, user],
+                anonymised_message='A user invites someone to join the race.',
             )
         else:
             raise SafeException('User is not eligible to join this race.')
@@ -1300,7 +1344,9 @@ class Race(models.Model):
         self.increment_version()
         self.add_message(
             '%(user)s joins %(team)s.'
-            % {'user': user, 'team': team}
+            % {'user': user, 'team': team},
+            user=user,
+            anonymised_message='(deleted user) joins %(team)s.' % {'team': team},
         )
 
     def leave_team(self, entrant):
@@ -1308,6 +1354,8 @@ class Race(models.Model):
             '%(user)s leaves %(team)s.'
             % {'user': entrant.user, 'team': entrant.team},
             broadcast=False,
+            user=entrant.user,
+            anonymised_message='(deleted user) leaves %(team)s.' % {'team': entrant.team},
         )
         if not entrant.team.formal:
             entrant.team.teammember_set.filter(user=entrant.user).delete()
@@ -1621,7 +1669,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s withdraws a request to join.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) withdraws a request to join.',
             )
         else:
             raise SyncError('You do not have a join request to cancel. Refresh to continue.')
@@ -1637,7 +1687,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s accepts an invitation to join.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) accepts an invitation to join.',
             )
         else:
             raise SyncError('You have not been invited to join this race. Refresh to continue.')
@@ -1652,7 +1704,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s declines an invitation to join.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) declines an invitation to join.',
             )
         else:
             raise SyncError('You have not been invited to join this race. Refresh to continue.')
@@ -1671,7 +1725,9 @@ class Entrant(models.Model):
                     self.race.increment_version()
                 self.race.add_message(
                     '%(user)s quits the race.'
-                    % {'user': self.user}
+                    % {'user': self.user},
+                    user=self.user,
+                    anonymised_message='(deleted user) quits the race.',
                 )
             else:
                 raise SyncError('You cannot leave this race because the race has already started. Refresh to continue.')
@@ -1699,7 +1755,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is ready! (%(remaining)d remaining)'
-                % {'user': self.user, 'remaining': self.race.num_unready}
+                % {'user': self.user, 'remaining': self.race.num_unready},
+                user=self.user,
+                anonymised_message='(deleted user) is ready! (%(remaining)d remaining)' % {'remaining': self.race.num_unready},
             )
         else:
             raise SyncError('You cannot ready up at this time. Refresh to continue.')
@@ -1715,7 +1773,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is not ready. (%(remaining)d remaining)'
-                % {'user': self.user, 'remaining': self.race.num_unready}
+                % {'user': self.user, 'remaining': self.race.num_unready},
+                user=self.user,
+                anonymised_message='(deleted user) is not ready. (%(remaining)d remaining)' % {'remaining': self.race.num_unready},
             )
         else:
             raise SyncError('You cannot unready at this time. Refresh to continue.')
@@ -1742,7 +1802,12 @@ class Entrant(models.Model):
             self.refresh_from_db()
             self.race.add_message(
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
-                % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str}
+                % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str},
+                user=self.user,
+                anonymised_message=(
+                    '(deleted user) has ##good##finished## in %(place)s place with a time of %(time)s!'
+                    % {'place': self.place_ordinal, 'time': self.finish_time_str}
+                ),
             )
             self.check_for_pb()
         else:
@@ -1761,10 +1826,15 @@ class Entrant(models.Model):
         except UserRanking.DoesNotExist:
             return False
         if best_time and best_time - self.finish_time > timedelta(seconds=1):
-            verbs = ('bagged', 'just cooked up', 'landed', 'notched up', 'scored', 'snagged')
+            verb = random.choice(('bagged', 'just cooked up', 'landed', 'notched up', 'scored', 'snagged'))
             self.race.add_message(
                 '%(user)s %(verb)s a new personal best time for "%(goal)s"!'
-                % {'user': self.user, 'verb': random.choice(verbs), 'goal': self.race.goal_str}
+                % {'user': self.user, 'verb': verb, 'goal': self.race.goal_str},
+                user=self.user,
+                anonymised_message=(
+                    '(deleted user) %(verb)s a new personal best time for "%(goal)s"!'
+                    % {'verb': verb, 'goal': self.race.goal_str},
+                ),
             )
 
     def undone(self):
@@ -1790,7 +1860,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is no longer done.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) is no longer done.',
             )
             if self.race.is_unfinalized:
                 self.race.unfinish()
@@ -1820,7 +1892,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has ##bad##forfeited## from the race.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) has ##bad##forfeited## from the race.',
             )
         else:
             raise SyncError('You cannot forfeit at this time. Refresh to continue.')
@@ -1846,7 +1920,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has un-forfeited from the race.'
-                % {'user': self.user}
+                % {'user': self.user},
+                user=self.user,
+                anonymised_message='(deleted user) has un-forfeited from the race.',
             )
             if self.race.is_unfinalized:
                 self.race.unfinish()
@@ -1890,10 +1966,14 @@ class Entrant(models.Model):
                 self.race.increment_version()
             if previous_comment:
                 msg = '%(user)s changed their comment.'
+                msg_anon = '(deleted user) changed their comment.'
             else:
                 msg = '%(user)s added a comment.'
+                msg_anon = '(deleted user) added a comment.'
             self.race.add_message(
-                msg % {'user': self.user, 'comment': comment}
+                msg % {'user': self.user, 'comment': comment},
+                user=self.user,
+                anonymised_message=msg_anon,
             )
         else:
             raise SyncError('You cannot add a comment at this time. Refresh to continue.')
@@ -1917,7 +1997,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(accepted_by)s accepts a request to join from %(user)s.'
-                % {'accepted_by': accepted_by, 'user': self.user}
+                % {'accepted_by': accepted_by, 'user': self.user},
+                user=[accepted_by, self.user],
+                anonymised_message='A user accepts a request to join.',
             )
         else:
             raise SyncError('This user has not requested to join this race. Refresh to continue.')
@@ -1944,7 +2026,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(forced_by)s unreadies %(user)s.'
-                % {'forced_by': forced_by, 'user': self.user}
+                % {'forced_by': forced_by, 'user': self.user},
+                user=[forced_by, self.user],
+                anonymised_message='An entrant was unreadied by a race monitor.',
             )
         else:
             raise SyncError('You cannot force this entrant to unready at this time. Refresh to continue.')
@@ -1967,7 +2051,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(removed_by)s removes %(user)s from the race.'
-                % {'removed_by': removed_by, 'user': self.user}
+                % {'removed_by': removed_by, 'user': self.user},
+                user=[removed_by, self.user],
+                anonymised_message='An entrant was removed from the race by a race monitor.',
             )
         else:
             raise SyncError('You cannot remove this entrant at this time. Refresh to continue.')
@@ -1998,7 +2084,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been disqualified from the race by %(disqualified_by)s.'
-                % {'disqualified_by': disqualified_by, 'user': self.user}
+                % {'disqualified_by': disqualified_by, 'user': self.user},
+                user=[disqualified_by, self.user],
+                anonymised_message='An entrant has been disqualified from the race.',
             )
             if self.finish_time:
                 self.race.recalculate_places()
@@ -2029,7 +2117,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been un-disqualified from the race by %(undisqualified_by)s.'
-                % {'undisqualified_by': undisqualified_by, 'user': self.user}
+                % {'undisqualified_by': undisqualified_by, 'user': self.user},
+                user=[undisqualified_by, self.user],
+                anonymised_message='An entrant has been un-disqualified from the race.',
             )
             if self.finish_time:
                 self.race.recalculate_places()
@@ -2061,7 +2151,9 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(overridden_by)s sets a stream override for %(user)s.'
-                % {'overridden_by': overridden_by, 'user': self.user}
+                % {'overridden_by': overridden_by, 'user': self.user},
+                user=[overridden_by, self.user],
+                anonymised_message='A race moderator set a stream override for an entrant.',
             )
         else:
             raise SyncError('You cannot set a stream override for this entrant at this time. Refresh to continue.')

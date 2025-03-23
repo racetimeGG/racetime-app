@@ -25,7 +25,7 @@ from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
+from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
 
 
 class ViewProfile(UserMixin, generic.DetailView):
@@ -244,7 +244,7 @@ class DeleteAccount(LoginRequiredMixin, UserMixin, generic.TemplateView):
 
         user = self.user
         logout(request)
-        user.delete()
+        delete_user(request, user)
         messages.success(request, 'Your racetime.gg account has been deleted.')
         return http.HttpResponseRedirect(reverse('home'))
 
