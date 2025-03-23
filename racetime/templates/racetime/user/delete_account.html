@@ -9,12 +9,20 @@
     <p>
         Are you sure you want to delete your account? If you do so, all your
         data will be immediately and <strong>permanently</strong> erased.
+    </p>
+    <p>
         This action cannot be undone.
     </p>
     <ul style="margin: 1em">
         <li>Account name: <strong>{{ user.name }}</strong></li>
         <li>Account email: <strong>{{ user.email }}</strong></li>
     </ul>
+    <p>
+        Deleting your account may take a while to process if you have a lot of
+        data. We will email you once the deletion is completed. If you
+        encounter an error and do <em>not</em> recieve this email, contact us
+        via <a href="mailto:hello@racetime.gg">hello@racetime.gg</a> for further support.
+    </p>
     <form method="post">
         {% csrf_token %}
         <button class="btn dangerous" type="submit" name="allow">Yes, delete my account</button>
