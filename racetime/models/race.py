@@ -377,6 +377,7 @@ class Race(models.Model):
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
             'allow_comments': self.allow_comments,
             'hide_comments': self.hide_comments,
+            'chat_restricted': self.chat_restricted,
             'allow_prerace_chat': self.allow_prerace_chat,
             'allow_midrace_chat': self.allow_midrace_chat,
             'allow_non_entrant_chat': self.allow_non_entrant_chat,
@@ -402,6 +403,17 @@ class Race(models.Model):
             not self.recordable
             and (self.ended_at or self.cancelled_at) <= timezone.now() - timedelta(hours=1)
         ))
+
+    @property
+    def chat_restricted(self):
+        """
+        Determine if chat is currently allowed in the race's present state.
+        """
+        return (
+            (self.hide_entrants and not self.is_done)
+            or (not self.allow_prerace_chat and self.is_preparing)
+            or (not self.allow_midrace_chat and (self.is_pending or self.is_in_progress))
+        )
 
     @property
     def comments_visible(self):

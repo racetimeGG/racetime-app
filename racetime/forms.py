@@ -142,10 +142,15 @@ class ChatForm(forms.ModelForm):
         model = models.Message
 
     def __init__(self, *args, **kwargs):
+        chat_restricted = kwargs.pop('chat_restricted', False)
         super().__init__(*args, **kwargs)
         # This prevents browsers from showing "Please fill in this field" on mouseover.
-        self.fields['message'].widget.attrs['title'] = ''
-        self.fields['message'].widget.attrs['placeholder'] = 'Send a message'
+        if not chat_restricted:
+            self.fields['message'].widget.attrs['title'] = ''
+            self.fields['message'].widget.attrs['placeholder'] = 'Send a message'
+        else:
+            self.fields['message'].widget.attrs['title'] = 'Only commands (e.g. ".done") may be used unless you have permission to chat.'
+            self.fields['message'].widget.attrs['placeholder'] = 'Send a message [chat restricted]'
 
     def clean_direct_to(self):
         hashid = self.cleaned_data.get('direct_to')

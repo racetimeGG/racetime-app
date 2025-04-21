@@ -40,8 +40,8 @@ class RaceMixin(SingleObjectMixin):
 
 
 class Race(RaceMixin, UserMixin, generic.DetailView):
-    def get_chat_form(self):
-        return forms.ChatForm()
+    def get_chat_form(self, race):
+        return forms.ChatForm(chat_restricted=race.chat_restricted)
 
     def get_invite_form(self):
         return forms.InviteForm()
@@ -57,7 +57,7 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
 
         return {
             **super().get_context_data(**kwargs),
-            'chat_form': self.get_chat_form(),
+            'chat_form': self.get_chat_form(race),
             'available_actions': [
                 get_action_button(action, race.slug, race.category.slug)
                 for action in race.available_actions(self.user)
