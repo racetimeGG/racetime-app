@@ -21,7 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
 from oauth2_provider.views import ScopedProtectedResourceView
 
-from .base import CanModerateRaceMixin, CanMonitorRaceMixin, PublicAPIMixin, UserMixin
+from .base import BotMixin, CanModerateRaceMixin, CanMonitorRaceMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..utils import get_action_button, get_hashids, twitch_auth_url
 
@@ -130,27 +130,6 @@ class RaceChatMixin(CanModerateRaceMixin, RaceMixin, generic.View):
             )
         except models.Message.DoesNotExist:
             raise http.Http404
-
-
-class BotMixin:
-    """
-    Mixin for views accessible by category bots.
-
-    TODO: This should live somewhere more central, probably.
-    """
-    def get_bot(self, category):
-        _, oauth_request = self.verify_request(self.request)
-        return models.Bot.objects.filter(
-            application=oauth_request.client,
-            category=category,
-            active=True,
-        ).first()
-
-    def form_invalid(self, form):
-        return http.JsonResponse(
-            {'errors': form.errors},
-            status=422,
-        )
 
 
 class OAuthRaceMixin:

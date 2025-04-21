@@ -19,7 +19,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.views import generic
 
-from .base import PublicAPIMixin, UserMixin
+from .base import BotMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
 
 

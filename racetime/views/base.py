@@ -8,8 +8,27 @@ from django.utils.cache import patch_vary_headers
 from django.utils.functional import cached_property
 from django.views import generic
 
-from ..models import Race, User
+from ..models import Bot, Race, User
 from ..utils import SafeException, exception_to_msglist
+
+
+class BotMixin:
+    """
+    Mixin for views accessible by category bots.
+    """
+    def get_bot(self, category):
+        _, oauth_request = self.verify_request(self.request)
+        return Bot.objects.filter(
+            application=oauth_request.client,
+            category=category,
+            active=True,
+        ).first()
+
+    def form_invalid(self, form):
+        return http.JsonResponse(
+            {'errors': form.errors},
+            status=422,
+        )
 
 
 class PublicAPIMixin:
