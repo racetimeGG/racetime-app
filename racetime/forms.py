@@ -238,6 +238,8 @@ class CategoryForm(forms.ModelForm):
             'streaming_required',
             'allow_stream_override',
             'allow_unlisted',
+            'allow_partitionable',
+            'allow_hide_entrants',
             'slug_words',
         )
         model = models.Category
@@ -436,6 +438,7 @@ class GoalEditForm(forms.ModelForm):
             return None
         return leaderboard_hide_after
 
+
 class RaceForm(forms.ModelForm):
     goal = forms.ModelChoiceField(
         empty_label='Custom',
@@ -505,8 +508,12 @@ class RaceForm(forms.ModelForm):
                 self.fields['streaming_required'].help_text += (
                     ' Only moderators can change this.'
                 )
+        if 'hide_entrants' in self.fields and not category.allow_hide_entrants:
+            del self.fields['hide_entrants']
         if 'unlisted' in self.fields and not category.allow_unlisted and not can_moderate:
             del self.fields['unlisted']
+        if 'partitionable' in self.fields and not category.allow_partitionable:
+            del self.fields['partitionable']
         if 'unlisted' in self.fields and category.unlisted_by_default:
             self.fields['unlisted'].initial = True
         if 'require_even_teams' in self.fields and self.instance.pk and not self.instance.team_race:
@@ -526,6 +533,20 @@ class RaceForm(forms.ModelForm):
                 cleaned_data['recordable'] = False
             else:
                 cleaned_data['recordable'] = cleaned_data.get('ranked')
+
+        if cleaned_data.get('team_race'):
+            if 'hide_entrants' in self.fields and cleaned_data.get('hide_entrants'):
+                raise ValidationError('Team races are not compatible with hidden entrants.')
+            if 'partitionable' in self.fields and cleaned_data.get('partitionable'):
+                raise ValidationError('Team races are not compatible with 1v1 ladder races.')
+
+        if 'hide_entrants' in self.fields and cleaned_data.get('hide_entrants'):
+            if 'allow_prerace_chat' in cleaned_data:
+                cleaned_data['allow_prerace_chat'] = False
+            if 'allow_midrace_chat' in cleaned_data:
+                cleaned_data['allow_midrace_chat'] = False
+            if 'allow_non_entrant_chat' in cleaned_data:
+                cleaned_data['allow_non_entrant_chat'] = False
 
         return cleaned_data
 
@@ -563,6 +584,8 @@ class RaceCreationForm(RaceForm):
             'invitational',
             'ranked',
             'unlisted',
+            'partitionable',
+            'hide_entrants',
             'info_user',
             'recordable',
             'require_even_teams',
@@ -624,6 +647,13 @@ class RaceEditForm(RaceForm):
             'recordable': forms.HiddenInput,
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.hide_entrants:
+            del self.fields['allow_prerace_chat']
+            del self.fields['allow_midrace_chat']
+            del self.fields['allow_non_entrant_chat']
+
 
 class OAuthRaceEditForm(RaceEditForm, OAuthRaceForm):
     goal = forms.CharField(
@@ -654,6 +684,12 @@ class StartedRaceEditForm(RaceForm):
             'chat_message_delay',
         )
         model = models.Race
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.hide_entrants:
+            del self.fields['allow_midrace_chat']
+            del self.fields['allow_non_entrant_chat']
 
 
 class RaceSetInfoForm(forms.ModelForm):

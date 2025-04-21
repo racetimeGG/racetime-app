@@ -12,6 +12,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
+
 from racetime.models.abstract import AbstractAuditLog
 
 from .choices import RaceStates
@@ -107,6 +109,24 @@ class Category(models.Model):
             'Races in this category will be unlisted by default, assuming '
             'the user starting the race has permission to create an unlisted '
             'race.'
+        ),
+    )
+    allow_partitionable = models.BooleanField(
+        default=False,
+        verbose_name='Allow 1v1 ladder races',
+        help_text=(
+            mark_safe('<strong>Beta:</strong>')
+            + ' Allow users to create 1v1 ladder races '
+            + mark_safe('<a href="https://github.com/racetimeGG/racetime-app/wiki/Category-management-and-moderation#beta-features" target="_blank">(read more)</a>')
+        ),
+    )
+    allow_hide_entrants = models.BooleanField(
+        default=False,
+        verbose_name='Allow hidden entrants',
+        help_text=(
+            mark_safe('<strong>Beta:</strong>')
+            + ' Allow races in this category to be anonymised '
+            + mark_safe('<a href="https://github.com/racetimeGG/racetime-app/wiki/Category-management-and-moderation#beta-features" target="_blank">(read more)</a>')
         ),
     )
     active = models.BooleanField(

@@ -1,21 +1,33 @@
 {% load humanize %}
 {% load static %}
-<li class="entrant-row" data-entrant="{{ index }}" data-userid="{{ entrant.user.hashid }}" data-username="{{ entrant.user.name }}">
+<li class="entrant-row" data-entrant="{{ index }}" data-userid="{{ entrant.user_display.hashid }}" data-username="{{ entrant.user_display.name }}">
     <span class="place">
         {{ entrant.place|ordinal|default:'—' }}
     </span>
     <span class="user">
-        {% include 'racetime/pops/user.html' with user=entrant.user extra_class='inline' %}
+        {% include 'racetime/pops/user.html' with user=entrant.user_display extra_class='inline' %}
         {% if not race.is_done and entrant.user.twitch_channel %}
             <span class="stream">
                 {% if entrant.stream_live %}
-                    <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream online">
-                        <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
-                    </a>
+                    {% if not race.is_anonymous %}
+                        <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream online">
+                            <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
+                        </a>
+                    {% else %}
+                        <span title="Stream online">
+                            <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
+                        </span>
+                    {% endif %}
                 {% else %}
-                    <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream offline">
-                        <img src="{% static 'racetime/image/twitch_offline.svg' %}" alt="Twitch.tv">
-                    </a>
+                    {% if not race.is_anonymous %}
+                        <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream offline">
+                            <img src="{% static 'racetime/image/twitch_offline.svg' %}" alt="Twitch.tv">
+                        </a>
+                    {% else %}
+                        <span title="Stream offline">
+                            <img src="{% static 'racetime/image/twitch_offline.svg' %}"  alt="Twitch.tv">
+                        </span>
+                    {% endif %}
                 {% endif %}
             </span>
         {% endif %}
@@ -51,12 +63,16 @@
                 {{ entrant.rating_change|intcomma|slice:'1:' }}
             </span>
         {% endif %}
-    {% elif entrant.rating %}
+    {% elif entrant.rating and not race.is_anonymous %}
         <span class="score" title="Leaderboard score for {{ race.goal_str }}">
             {{ entrant.rating|intcomma }}
         </span>
     {% elif race.recordable %}
-        <span class="score" title="Not ranked">n/a</span>
+        {% if not race.is_anonymous %}
+            <span class="score" title="Not ranked">n/a</span>
+        {% else %}
+            <span class="score" title="Score unavailable">???</span>
+        {% endif %}
     {% endif %}
     {% if can_monitor %}
         <div class="monitor-actions"></div>

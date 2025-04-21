@@ -42,6 +42,7 @@ class EntrantStates(metaclass=ChoiceSet):
         Choice('invited', 'Invited to join', 'User has been invited to join this race'),
         Choice('declined', 'Declined invitation', 'User has refused their invitation'),
         Choice('joined', 'Joined', 'User has entered the race'),
+        Choice('partitioned', 'Partitioned', 'User has been partitioned into a separate race'),
     )
 
 
@@ -56,6 +57,7 @@ class RaceStates(metaclass=ChoiceSet):
         Choice('in_progress', 'In progress', 'Race is in progress'),
         Choice('finished', 'Finished', 'This race has been completed'),
         Choice('cancelled', 'Cancelled', 'This race has been cancelled'),
+        Choice('partitioned', 'Partitioned', 'Race has been partitioned into separate 1v1 races'),
     )
     current = all[:4]
     past = all[4:]

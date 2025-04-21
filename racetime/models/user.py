@@ -267,6 +267,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             ).exclude(race__state__in=[
                 RaceStates.finished.value,
                 RaceStates.cancelled.value,
+                RaceStates.partitioned.value,
             ]).order_by('race__opened_at').get()
         except self.entrant_set.model.DoesNotExist:
             return None

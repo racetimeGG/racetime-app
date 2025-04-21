@@ -204,6 +204,9 @@ table th {
     width: 32px;
     margin-right: 5px;
 }
+.user-pop.anonymous > .avatar {
+    background-image: radial-gradient(#1a1c20, #000);
+}
 .user-pop > .name,
 .team-pop > .name {
     white-space: nowrap;
@@ -237,6 +240,7 @@ table th {
     vertical-align: top;
 }
 .user-pop.inline > .avatar,
+.user-pop.inline > .avatar svg,
 .team-pop.inline > .avatar {
     height: 22px;
     width: 22px;
@@ -890,6 +894,10 @@ aside .race-list > ol > li > .race-row {
     text-decoration: none;
     white-space: nowrap;
 }
+.race-list > ol > li > .race-row > .watch-live.disabled {
+    color: #666;
+    cursor: default;
+}
 .race-list > ol > li > .race-row > .watch-live > .material-icons {
     font-size: 27.5px;
 }
@@ -965,11 +973,16 @@ aside .race-list > ol > li > .race-row {
 .entrant-row > .user > .user-pop {
     height: 22px;
 }
-.entrant-row > .user > .stream > a {
+.entrant-row > .user > .user-pop.anonymous {
+    font-style: italic;
+}
+.entrant-row > .user > .stream > a,
+.entrant-row > .user > .stream > span {
     display: block;
     margin-left: 5px;
 }
-.entrant-row > .user > .stream > a > img {
+.entrant-row > .user > .stream > a > img,
+.entrant-row > .user > .stream > span > img {
     height: 22px;
     position: relative;
         top: 1px;

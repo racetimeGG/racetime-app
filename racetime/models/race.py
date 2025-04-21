@@ -19,12 +19,13 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
+from trueskill import Rating, TrueSkill, quality_1vs1
 
 from .choices import EntrantStates, RaceStates
 from ..rating import rate_race
 from ..utils import (
-    SafeException, SyncError, generate_team_name, get_action_button,
-    get_chat_history, timer_html, timer_str,
+    SafeException, ShieldedUser, SyncError, generate_team_name,
+    get_action_button, get_chat_history, timer_html, timer_str,
 )
 
 
@@ -124,6 +125,14 @@ class Race(models.Model):
             'when the room closes.'
         ),
     )
+    partitionable = models.BooleanField(
+        default=False,
+        verbose_name='1v1 ladder race',
+        help_text=(
+            'Before the race begins, partition entrants into separate, '
+            'anonymised 1v1 race rooms.'
+        ),
+    )
     recordable = models.BooleanField(
         default=True,
         help_text=(
@@ -183,6 +192,13 @@ class Race(models.Model):
             'monitor must use the "Force start" action to begin the race.'
         ),
     )
+    disqualify_unready = models.BooleanField(
+        default=False,
+        help_text=(
+            'When the race starts, entrants that have not readied up are DQed '
+            'instead of removed. Also prevents entrants from quitting.'
+        ),
+    )
     allow_comments = models.BooleanField(
         default=True,
         help_text='Allow race entrants to add a glib remark after they finish.',
@@ -192,6 +208,13 @@ class Race(models.Model):
         help_text=(
             'Do not show comments until the race has finished. Has no effect '
             'if comments are not enabled (duh!).'
+        ),
+    )
+    hide_entrants = models.BooleanField(
+        default=False,
+        help_text=(
+            'Hide entrant identities until the race is finished. '
+            + mark_safe('<strong>Pre-race and mid-race chat will be disabled.</strong>')
         ),
     )
     allow_prerace_chat = models.BooleanField(
@@ -304,7 +327,7 @@ class Race(models.Model):
     def entrants_dicts(self):
         return [
             {
-                'user': entrant.user.api_dict_summary(race=self) if entrant.user else None,
+                'user': entrant.user_display.api_dict_summary(race=self) if entrant.user_display else None,
                 'team': entrant.team.api_dict_summary() if entrant.team else None,
                 'status': {
                     'value': entrant.summary[0],
@@ -375,8 +398,10 @@ class Race(models.Model):
             'recordable': self.recordable,
             'recorded': self.recorded,
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
+            'disqualify_unready': self.disqualify_unready,
             'allow_comments': self.allow_comments,
             'hide_comments': self.hide_comments,
+            'hide_entrants': self.hide_entrants,
             'chat_restricted': self.chat_restricted,
             'allow_prerace_chat': self.allow_prerace_chat,
             'allow_midrace_chat': self.allow_midrace_chat,
@@ -473,6 +498,10 @@ class Race(models.Model):
         ]).strip()
 
     @property
+    def is_anonymous(self):
+        return self.hide_entrants and not self.is_done
+
+    @property
     def is_preparing(self):
         """
         Determine if the race is in a preparation state (open or invitational).
@@ -498,7 +527,14 @@ class Race(models.Model):
         """
         Determine if the race has been completed (finished or cancelled).
         """
-        return self.state in [RaceStates.finished.value, RaceStates.cancelled.value]
+        return self.state in [RaceStates.finished.value, RaceStates.cancelled.value, RaceStates.partitioned.value]
+
+    @property
+    def is_partitioned(self):
+        """
+        Determine if the race has been partitioned.
+        """
+        return self.state == RaceStates.partitioned.value
 
     @property
     def is_unfinalized(self):
@@ -672,7 +708,7 @@ class Race(models.Model):
             except AttributeError:
                 pass
 
-    def add_message(self, message, highlight=False, broadcast=True, user=None, anonymised_message=None):
+    def add_message(self, message, highlight=False, broadcast=True, user=None, anonymised_message=None, pinned=False):
         """
         Add a system-generated chat message for this race.
         """
@@ -680,6 +716,7 @@ class Race(models.Model):
         message = self.message_set.create(
             message=message,
             highlight=highlight,
+            pinned=pinned,
         )
         if user:
             if not isinstance(user, list):
@@ -695,6 +732,23 @@ class Race(models.Model):
         message.broadcast()
         if broadcast:
             self.broadcast_data()
+
+    def add_partition_message(self):
+        """
+        Add a message explaining the partitioning system.
+
+        Called when the race is created.
+        """
+        self.add_message(
+            'This is a 1v1 ladder race. Pairings will be picked automatically '
+            'when the room is partitioned by a bot or monitor.',
+            highlight=True,
+            pinned=True,
+        )
+        self.add_message(
+            'Once pairings are decided, you ##bad##cannot## quit this race, '
+            'so do not join unless you are willing to participate.'
+        )
 
     def broadcast_data(self):
         """
@@ -716,6 +770,22 @@ class Race(models.Model):
             'type': 'race.split',
             'split': split,
         })
+
+    def deanonymise(self):
+        """
+        If race has hidden entrants, un-hide them and update prior system
+        messages to reveal entrants' identities.
+        """
+        if self.hide_entrants:
+            name_map = {
+                str(entrant.user_display): str(entrant.user)
+                for entrant in self.entrant_set.select_related('user')
+            }
+            for message in self.message_set.filter(user=None, bot=None):
+                for old, new in name_map.items():
+                    message.message = message.message.replace(old, new)
+                message.save(update_fields={'message'})
+            self.hide_entrants = False
 
     def increment_version(self):
         """
@@ -954,13 +1024,26 @@ class Race(models.Model):
         A race can begin once all entrants who have joined the race are ready,
         and there are at least 2 active race entrants.
         """
+        entrants = self.entrant_set.filter(
+            state=EntrantStates.joined.value,
+        )
+        if not self.disqualify_unready:
+            entrants = entrants.filter(ready=True)
         return (
             self.is_preparing
-            and self.entrant_set.filter(
-                state=EntrantStates.joined.value,
-                ready=True,
-            ).count() >= 2
+            and entrants.count() >= 2
             and (not self.team_race or self.teams_set)
+        )
+
+    @property
+    def can_partition(self):
+        entrants = self.entrant_set.filter(
+            state=EntrantStates.joined.value,
+        )
+        return (
+            self.partitionable
+            and self.is_preparing
+            and entrants.count() >= 2
         )
 
     @property
@@ -988,18 +1071,39 @@ class Race(models.Model):
         """
         Begin the race, triggering the countdown.
         """
+        if self.partitionable:
+            return self.partition()
+
         if not self.can_begin:
             raise SafeException('Race cannot be started yet.')
 
         with atomic():
+            unready_entrants = self.entrant_set.filter(
+                ~Q(state=EntrantStates.joined.value) | Q(ready=False)
+            )
+            if not self.disqualify_unready:
+                for entrant in unready_entrants:
+                    self.add_message(
+                        '%(user)s is removed from the race.'
+                        % {'user': entrant.user_display},
+                        user=entrant.user,
+                        anonymised_message='An entrant was removed from the race.',
+                    )
+                unready_entrants.delete()
+            else:
+                for entrant in unready_entrants:
+                    self.add_message(
+                        '%(user)s has been disqualified from the race.'
+                        % {'user': entrant.user_display},
+                        user=entrant.user,
+                        anonymised_message='An entrant has been disqualified from the race.',
+                    )
+                unready_entrants.update(dq=True)
+
             self.state = RaceStates.pending.value
             self.started_at = timezone.now() + self.start_delay
             self.version = F('version') + 1
             self.save()
-
-            self.entrant_set.filter(
-                ~Q(state=EntrantStates.joined.value) | Q(ready=False)
-            ).delete()
 
         if begun_by:
             self.add_message(
@@ -1021,6 +1125,7 @@ class Race(models.Model):
             )
 
         with atomic():
+            self.deanonymise()
             self.state = RaceStates.cancelled.value
             self.unlisted = False
             self.recordable = False
@@ -1028,6 +1133,7 @@ class Race(models.Model):
             if self.started_at:
                 self.ended_at = self.cancelled_at
                 self.__dnf_remaining_entrants()
+            self.update_entrant_ratings()
             self.version = F('version') + 1
             self.save()
 
@@ -1039,6 +1145,151 @@ class Race(models.Model):
                 anonymised_message='This race has been cancelled by (deleted user).',
             )
 
+    def partition(self):
+        if not self.can_partition:
+            raise SafeException('Race cannot be partitioned yet.')
+
+        entrants = list(self.entrant_set.filter(
+            state=EntrantStates.joined.value,
+        ).select_related('user').order_by('id'))
+
+        # Remove most recent joiner if we have an odd number
+        if len(entrants) % 2 == 1:
+            entrant = entrants.pop()
+            user = entrant.user
+            user_display = entrant.user_display
+            with atomic():
+                entrant.delete()
+                self.increment_version()
+                self.add_message(
+                    '%(user)s is removed from the race (uneven partition state).'
+                    % {'user': user_display},
+                    user=user,
+                    anonymised_message='An entrant was removed from the race (uneven partition state).',
+                )
+
+        # Collect existing ratings
+        if self.recordable:
+            UserRanking = apps.get_model('racetime', 'UserRanking')
+            ratings = {
+                ranking.user_id: Rating(mu=ranking.score, sigma=ranking.confidence)
+                for ranking in UserRanking.objects.filter(
+                    user_id__in=(entrant.user_id for entrant in entrants),
+                )
+            }
+        else:
+            # Not a ranked race so we'll just pick at random
+            ratings = {}
+
+        # Sort entrants by their current score (and randomly shuffle anyone
+        # on the same score)
+        ranked_entrants = sorted([
+            {
+                'entrant_id': entrant.id,
+                'rating': ratings.get(entrant.user_id, Rating()),
+                'random': random.random(),
+            }
+            for entrant in entrants
+        ], key=lambda x: (x['rating'], x['random']))
+
+        # Determine matchup quality for each potential opponent
+        env = TrueSkill(backend='mpmath')
+        for i, entrant in enumerate(ranked_entrants):
+            entrant['matchups'] = {
+                quality_1vs1(entrant['rating'], opponent['rating'], env): opponent['entrant_id']
+                for opponent in ranked_entrants[max(0, i-3):i+4]
+                if opponent['entrant_id'] != entrant['entrant_id']
+            }
+            entrant['best_match'] = max(entrant['matchups'].keys())
+
+        # Go through each entrant in turn, starting with the one who has the
+        # worst best_match score. Give each entrant the best opponent possible
+        # that has not yet been picked
+        remaining_entrants = {entrant.id: entrant for entrant in entrants}
+        pairings = []
+        for entrant in sorted(ranked_entrants, key=lambda x: x['best_match']):
+            if entrant['entrant_id'] not in remaining_entrants:
+                continue
+            opponent_id = None
+            for quality, potential_opponent_id in sorted(entrant['matchups'].items(), key=lambda x: x[0], reverse=True):
+                if potential_opponent_id in remaining_entrants:
+                    opponent_id = potential_opponent_id
+                    break
+            if not opponent_id:
+                continue
+            entrant = remaining_entrants.pop(entrant['entrant_id'])
+            opponent = remaining_entrants.pop(opponent_id)
+            pairings.append((entrant, opponent))
+
+        # Randomly assign pairings for anyone who couldn't be matched
+        if remaining_entrants:
+            remaining_entrants = list(remaining_entrants.values())
+            random.shuffle(remaining_entrants)
+            for i in range(0, len(remaining_entrants), 2):
+                pairings.append(tuple(remaining_entrants[i:i + 2]))
+
+        # Close this race
+        with atomic():
+            self.deanonymise()
+            self.entrant_set.all().update(state=EntrantStates.partitioned.value)
+            self.state = RaceStates.partitioned.value
+            self.unlisted = False
+            self.recordable = False
+            self.cancelled_at = timezone.now()
+            self.update_entrant_ratings()
+            self.version = F('version') + 1
+            self.save()
+
+        # Open race rooms for each pairing
+        parent_race_url = settings.RT_SITE_URI + self.get_absolute_url()
+        for pairing in pairings:
+            race = Race.objects.create(
+                category=self.category,
+                goal=self.goal,
+                custom_goal=self.custom_goal,
+                info_bot=self.info_bot,
+                info_user=self.info_user,
+                slug=self.category.generate_race_slug(),
+                state=RaceStates.open.value,
+                team_race=self.team_race,
+                require_even_teams=self.require_even_teams,
+                ranked=self.ranked,
+                unlisted=True,
+                recordable=not (self.custom_goal or not self.ranked),
+                start_delay=self.start_delay,
+                time_limit=self.time_limit,
+                time_limit_auto_complete=self.time_limit_auto_complete,
+                streaming_required=self.streaming_required,
+                auto_start=self.auto_start,
+                disqualify_unready=True,
+                allow_comments=self.allow_comments,
+                hide_comments=self.hide_comments,
+                hide_entrants=True,
+                allow_prerace_chat=False,
+                allow_midrace_chat=False,
+                allow_non_entrant_chat=False,
+                chat_message_delay=self.chat_message_delay,
+            )
+            race.monitors.set(self.monitors.all())
+            race.add_message(f'Race partitioned from {parent_race_url}')
+            race_url = settings.RT_SITE_URI + race.get_absolute_url()
+            for entrant in pairing:
+                race.join(entrant.user)
+                message = self.message_set.create(
+                    direct_to=entrant.user,
+                    message=f'This is your race room: {race_url}',
+                )
+                message.broadcast()
+            race.state = RaceStates.invitational.value
+            race.version = F('version') + 1
+            race.save()
+
+        self.add_message(
+            'Race has been partitioned. Entrants, follow the link in your DM '
+            'to continue.',
+            highlight=True,
+        )
+
     def finish(self):
         """
         Finish the race.
@@ -1047,6 +1298,7 @@ class Race(models.Model):
             raise SafeException('Cannot finish a race that has not been started.')
 
         with atomic():
+            self.deanonymise()
             self.state = RaceStates.finished.value
             self.ended_at = timezone.now()
             if not self.entrant_set.filter(
@@ -1057,8 +1309,10 @@ class Race(models.Model):
                 # Nobody finished, so race should be cancelled.
                 self.state = RaceStates.cancelled.value
                 self.cancelled_at = self.ended_at
-                self.unlisted = False
                 self.recordable = False
+                self.update_entrant_ratings()
+            if not self.recordable:
+                self.unlisted = False
             self.version = F('version') + 1
             self.save()
             self.__dnf_remaining_entrants()
@@ -1254,13 +1508,13 @@ class Race(models.Model):
             and self.can_monitor(user)
         )):
             with atomic():
-                self.entrant_set.create(
+                entrant = self.entrant_set.create(
                     user=user,
                     rating=self.get_rating(user),
                 )
                 self.increment_version()
             self.add_message(
-                '%(user)s joins the race.' % {'user': user},
+                '%(user)s joins the race.' % {'user': entrant.user_display},
                 user=user,
                 anonymised_message='(deleted user) joins the race.',
             )
@@ -1278,14 +1532,14 @@ class Race(models.Model):
             return self.join(user)
         if self.can_join(user) and self.state == RaceStates.invitational.value:
             with atomic():
-                self.entrant_set.create(
+                entrant = self.entrant_set.create(
                     user=user,
                     state=EntrantStates.requested.value,
                     rating=self.get_rating(user),
                 )
                 self.increment_version()
             self.add_message(
-                '%(user)s requests to join the race.' % {'user': user},
+                '%(user)s requests to join the race.' % {'user': entrant.user_display},
                 user=user,
                 anonymised_message='(deleted user) requests to join the race.',
             )
@@ -1298,7 +1552,7 @@ class Race(models.Model):
         """
         if self.can_join(user) and self.is_preparing:
             with atomic():
-                self.entrant_set.create(
+                entrant = self.entrant_set.create(
                     user=user,
                     state=EntrantStates.invited.value,
                     rating=self.get_rating(user),
@@ -1306,7 +1560,7 @@ class Race(models.Model):
                 self.increment_version()
             self.add_message(
                 '%(invited_by)s invites %(user)s to join the race.'
-                % {'invited_by': invited_by, 'user': user},
+                % {'invited_by': invited_by, 'user': entrant.user_display},
                 user=[invited_by, user],
                 anonymised_message='A user invites someone to join the race.',
             )
@@ -1356,7 +1610,7 @@ class Race(models.Model):
         self.increment_version()
         self.add_message(
             '%(user)s joins %(team)s.'
-            % {'user': user, 'team': team},
+            % {'user': entrant.user_display, 'team': team},
             user=user,
             anonymised_message='(deleted user) joins %(team)s.' % {'team': team},
         )
@@ -1364,7 +1618,7 @@ class Race(models.Model):
     def leave_team(self, entrant):
         self.add_message(
             '%(user)s leaves %(team)s.'
-            % {'user': entrant.user, 'team': entrant.team},
+            % {'user': entrant.user_display, 'team': entrant.team},
             broadcast=False,
             user=entrant.user,
             anonymised_message='(deleted user) leaves %(team)s.' % {'team': entrant.team},
@@ -1383,11 +1637,12 @@ class Race(models.Model):
                 team__formal=False,
             ).select_related('team')
         }
-        for member in user.teammember_set.filter(
-            team__formal=True,
-            invite=False,
-        ).select_related('team'):
-            teams[member.team.slug] = member.team
+        if not self.hide_entrants:
+            for member in user.teammember_set.filter(
+                team__formal=True,
+                invite=False,
+            ).select_related('team'):
+                teams[member.team.slug] = member.team
         return teams
 
     @atomic
@@ -1435,6 +1690,7 @@ class Race(models.Model):
             self.state = RaceStates.finished.value
             self.cancelled_at = None
             self.recordable = not self.custom_goal
+        self.update_entrant_ratings()
         self.version = F('version') + 1
         self.save()
 
@@ -1577,6 +1833,8 @@ class Entrant(models.Model):
         """
         Determine if this entrant can be promoted to race monitor.
         """
+        if self.race.is_anonymous:
+            return False
         return self.race.can_add_monitor(self.user)
 
     @property
@@ -1593,6 +1851,8 @@ class Entrant(models.Model):
         """
         Determine if this entrant can be demoted from race monitor.
         """
+        if self.race.is_anonymous:
+            return False
         return self.race.can_remove_monitor(self.user)
 
     @property
@@ -1627,6 +1887,8 @@ class Entrant(models.Model):
             return 'invited', 'Invited', 'Invited to join the race.'
         if self.state == EntrantStates.declined.value:
             return 'declined', 'Declined', 'Declined invitation to join.'
+        if self.state == EntrantStates.partitioned.value:
+            return 'partitioned', 'Partitioned', 'Moved to partitioned race room.'
         if self.dnf:
             return 'dnf', 'DNF', 'Did not finish the race.'
         if self.dq:
@@ -1638,6 +1900,12 @@ class Entrant(models.Model):
         if self.ready:
             return 'ready', 'Ready', 'Ready to begin the race.'
         return 'not_ready', 'Not ready', 'Not ready to begin yet.'
+
+    @cached_property
+    def user_display(self):
+        if self.race.is_anonymous:
+            return ShieldedUser(self.race, self.id)
+        return self.user
 
     @property
     def available_actions(self):
@@ -1652,8 +1920,11 @@ class Entrant(models.Model):
                 if not self.ready:
                     if self.race.team_race and not self.team:
                         actions.append('set_team')
-                    elif not self.race.streaming_required or self.stream_live or self.stream_override:
-                        actions.append('ready')
+                    elif not self.race.streaming_required or self.race.partitionable or self.stream_live or self.stream_override:
+                        if self.race.partitionable:
+                            actions.append('partition')
+                        else:
+                            actions.append('ready')
                     else:
                         actions.append('not_live')
                 else:
@@ -1676,12 +1947,13 @@ class Entrant(models.Model):
         Withdraw this entry if it is in join request state.
         """
         if self.state == EntrantStates.requested.value:
+            user_display = self.user_display
             with atomic():
                 self.delete()
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s withdraws a request to join.'
-                % {'user': self.user},
+                % {'user': user_display},
                 user=self.user,
                 anonymised_message='(deleted user) withdraws a request to join.',
             )
@@ -1699,7 +1971,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s accepts an invitation to join.'
-                % {'user': self.user},
+                % {'user': self.user_display},
                 user=self.user,
                 anonymised_message='(deleted user) accepts an invitation to join.',
             )
@@ -1711,12 +1983,15 @@ class Entrant(models.Model):
         Withdraw this entry if it is in invited state.
         """
         if self.state == EntrantStates.invited.value:
+            if self.race.disqualify_unready:
+                raise SafeException('You are not allowed to quit this race.')
+            user_display = self.user_display
             with atomic():
                 self.delete()
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s declines an invitation to join.'
-                % {'user': self.user},
+                % {'user': user_display},
                 user=self.user,
                 anonymised_message='(deleted user) declines an invitation to join.',
             )
@@ -1729,20 +2004,22 @@ class Entrant(models.Model):
         begun).
         """
         if self.state == EntrantStates.joined.value:
-            if self.race.is_preparing:
-                with atomic():
-                    if self.team:
-                        self.race.leave_team(self)
-                    self.delete()
-                    self.race.increment_version()
-                self.race.add_message(
-                    '%(user)s quits the race.'
-                    % {'user': self.user},
-                    user=self.user,
-                    anonymised_message='(deleted user) quits the race.',
-                )
-            else:
+            if not self.race.is_preparing:
                 raise SyncError('You cannot leave this race because the race has already started. Refresh to continue.')
+            if self.race.disqualify_unready:
+                raise SafeException('You are not allowed to quit this race.')
+            user_display = self.user_display
+            with atomic():
+                if self.team:
+                    self.race.leave_team(self)
+                self.delete()
+                self.race.increment_version()
+            self.race.add_message(
+                '%(user)s quits the race.'
+                % {'user': user_display},
+                user=self.user,
+                anonymised_message='(deleted user) quits the race.',
+            )
         else:
             raise SyncError('You cannot leave this race because you are not an entrant anyway. Refresh to continue.')
 
@@ -1756,6 +2033,7 @@ class Entrant(models.Model):
         if (
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
+            and not self.race.partitionable
             and not self.ready
             and (not self.race.streaming_required or self.stream_live or self.stream_override)
         ):
@@ -1767,7 +2045,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is ready! (%(remaining)d remaining)'
-                % {'user': self.user, 'remaining': self.race.num_unready},
+                % {'user': self.user_display, 'remaining': self.race.num_unready},
                 user=self.user,
                 anonymised_message='(deleted user) is ready! (%(remaining)d remaining)' % {'remaining': self.race.num_unready},
             )
@@ -1785,7 +2063,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is not ready. (%(remaining)d remaining)'
-                % {'user': self.user, 'remaining': self.race.num_unready},
+                % {'user': self.user_display, 'remaining': self.race.num_unready},
                 user=self.user,
                 anonymised_message='(deleted user) is not ready. (%(remaining)d remaining)' % {'remaining': self.race.num_unready},
             )
@@ -1814,7 +2092,7 @@ class Entrant(models.Model):
             self.refresh_from_db()
             self.race.add_message(
                 '%(user)s has ##good##finished## in %(place)s place with a time of %(time)s!'
-                % {'user': self.user, 'place': self.place_ordinal, 'time': self.finish_time_str},
+                % {'user': self.user_display, 'place': self.place_ordinal, 'time': self.finish_time_str},
                 user=self.user,
                 anonymised_message=(
                     '(deleted user) has ##good##finished## in %(place)s place with a time of %(time)s!'
@@ -1841,7 +2119,7 @@ class Entrant(models.Model):
             verb = random.choice(('bagged', 'just cooked up', 'landed', 'notched up', 'scored', 'snagged'))
             self.race.add_message(
                 '%(user)s %(verb)s a new personal best time for "%(goal)s"!'
-                % {'user': self.user, 'verb': verb, 'goal': self.race.goal_str},
+                % {'user': self.user_display, 'verb': verb, 'goal': self.race.goal_str},
                 user=self.user,
                 anonymised_message=(
                     '(deleted user) %(verb)s a new personal best time for "%(goal)s"!'
@@ -1872,7 +2150,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s is no longer done.'
-                % {'user': self.user},
+                % {'user': self.user_display},
                 user=self.user,
                 anonymised_message='(deleted user) is no longer done.',
             )
@@ -1904,7 +2182,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has ##bad##forfeited## from the race.'
-                % {'user': self.user},
+                % {'user': self.user_display},
                 user=self.user,
                 anonymised_message='(deleted user) has ##bad##forfeited## from the race.',
             )
@@ -1932,7 +2210,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has un-forfeited from the race.'
-                % {'user': self.user},
+                % {'user': self.user_display},
                 user=self.user,
                 anonymised_message='(deleted user) has un-forfeited from the race.',
             )
@@ -1983,7 +2261,7 @@ class Entrant(models.Model):
                 msg = '%(user)s added a comment.'
                 msg_anon = '(deleted user) added a comment.'
             self.race.add_message(
-                msg % {'user': self.user, 'comment': comment},
+                msg % {'user': self.user_display, 'comment': comment},
                 user=self.user,
                 anonymised_message=msg_anon,
             )
@@ -2009,7 +2287,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(accepted_by)s accepts a request to join from %(user)s.'
-                % {'accepted_by': accepted_by, 'user': self.user},
+                % {'accepted_by': accepted_by, 'user': self.user_display},
                 user=[accepted_by, self.user],
                 anonymised_message='A user accepts a request to join.',
             )
@@ -2038,7 +2316,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(forced_by)s unreadies %(user)s.'
-                % {'forced_by': forced_by, 'user': self.user},
+                % {'forced_by': forced_by, 'user': self.user_display},
                 user=[forced_by, self.user],
                 anonymised_message='An entrant was unreadied by a race monitor.',
             )
@@ -2058,12 +2336,13 @@ class Entrant(models.Model):
         Remove the entrant from the race.
         """
         if self.can_remove:
+            user_display = self.user_display
             with atomic():
                 self.delete()
                 self.race.increment_version()
             self.race.add_message(
                 '%(removed_by)s removes %(user)s from the race.'
-                % {'removed_by': removed_by, 'user': self.user},
+                % {'removed_by': removed_by, 'user': user_display},
                 user=[removed_by, self.user],
                 anonymised_message='An entrant was removed from the race by a race monitor.',
             )
@@ -2096,7 +2375,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been disqualified from the race by %(disqualified_by)s.'
-                % {'disqualified_by': disqualified_by, 'user': self.user},
+                % {'disqualified_by': disqualified_by, 'user': self.user_display},
                 user=[disqualified_by, self.user],
                 anonymised_message='An entrant has been disqualified from the race.',
             )
@@ -2129,7 +2408,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(user)s has been un-disqualified from the race by %(undisqualified_by)s.'
-                % {'undisqualified_by': undisqualified_by, 'user': self.user},
+                % {'undisqualified_by': undisqualified_by, 'user': self.user_display},
                 user=[undisqualified_by, self.user],
                 anonymised_message='An entrant has been un-disqualified from the race.',
             )
@@ -2148,6 +2427,7 @@ class Entrant(models.Model):
             self.state == EntrantStates.joined.value
             and self.race.is_preparing
             and self.race.streaming_required
+            and not self.race.partitionable
             and not self.stream_live
             and not self.stream_override
         )
@@ -2163,7 +2443,7 @@ class Entrant(models.Model):
                 self.race.increment_version()
             self.race.add_message(
                 '%(overridden_by)s sets a stream override for %(user)s.'
-                % {'overridden_by': overridden_by, 'user': self.user},
+                % {'overridden_by': overridden_by, 'user': self.user_display},
                 user=[overridden_by, self.user],
                 anonymised_message='A race moderator set a stream override for an entrant.',
             )
@@ -2179,10 +2459,10 @@ class Entrant(models.Model):
             'split_time': split_time,
             'is_undo': split_time == '-',
             'is_finish': is_finish,
-            'user_id': self.user.hashid,
+            'user_id': self.user_display.hashid,
         }
 
         self.race.broadcast_split(split)
 
     def __str__(self):
-        return str(self.user)
+        return str(self.user_display)

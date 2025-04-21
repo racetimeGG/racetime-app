@@ -64,6 +64,7 @@ class Category(UserMixin, generic.DetailView):
         queryset = self.object.race_set.exclude(state__in=[
             models.RaceStates.finished,
             models.RaceStates.cancelled,
+            models.RaceStates.partitioned,
         ]).annotate(
             state_sort=db_models.Case(
                 # Open/Invitational

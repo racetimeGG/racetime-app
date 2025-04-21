@@ -22,6 +22,14 @@
             </form>
         </li>
     {% endif %}
+    {% if race.can_partition %}
+        <li class="dangerous force-start">
+            <form class="race-action-form" action="{% url 'begin_race' race=race.slug category=race.category.slug %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn">Partition</button>
+            </form>
+        </li>
+    {% endif %}
     {% if not race.is_done %}
         <li class="dangerous cancel">
             <form class="race-action-form" action="{% url 'cancel_race' race=race.slug category=race.category.slug %}" method="post">

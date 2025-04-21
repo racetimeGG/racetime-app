@@ -114,6 +114,12 @@ class RaceLiveSplit(Race):
 class RaceSpectate(Race):
     template_name_suffix = '_spectate'
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.partitionable or self.object.hide_entrants:
+            return http.HttpResponseForbidden('Spectating is not allowed on this race.')
+        return super().get(request, *args, **kwargs)
+
 
 class RaceChatMixin(CanModerateRaceMixin, RaceMixin, generic.View):
     def get_message(self, race):
@@ -524,6 +530,7 @@ class BaseCreateRace(RaceFormMixin, generic.CreateView):
             state__in=[
                 models.RaceStates.finished.value,
                 models.RaceStates.cancelled.value,
+                models.RaceStates.partitioned.value,
             ],
         ).exists()
 
@@ -559,6 +566,7 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
         race.opened_by = self.user
 
         race.save()
+        race.add_partition_message()
 
         self.user.log_action('race_create', self.request)
 
@@ -624,6 +632,7 @@ class OAuthCreateRace(ScopedProtectedResourceView, BotMixin, OAuthRaceMixin, Bas
             race.opened_by = user
 
         race.save()
+        race.add_partition_message()
 
         if bot:
             race.add_message(
@@ -828,6 +837,7 @@ class RaceListData(generic.View, PublicAPIMixin):
                 ).filter(self.unlisted_filter).exclude(state__in=[
                     models.RaceStates.finished,
                     models.RaceStates.cancelled,
+                    models.RaceStates.partitioned,
                 ]).distinct()
             ]
         }

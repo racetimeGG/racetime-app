@@ -136,6 +136,10 @@ Race.prototype.fetchDM = function(message) {
     url = url.replace('$0', message);
     $.get(url, '', function(data) {
         self.addMessage(data.message, new Date(), false);
+        const partitionMsg = 'This is your race room: '
+        if (data.message.is_system && data.message.is_dm && data.message.message.indexOf(partitionMsg) === 0) {
+            window.location = data.message.message.substring(partitionMsg.length);
+        }
     });
 };
 
@@ -470,6 +474,22 @@ Race.prototype.onSocketMessage = function(event) {
     switch (data.type) {
         case 'race.data':
             this.vars.hide_comments = data.race.hide_comments;
+            if (this.vars.hide_entrants && !data.race.hide_entrants) {
+                // Reload chat history to de-anonymise it
+                this.messageIDs = [];
+                $('.race-chat .messages').children().remove();
+                this.chatSocket.send(JSON.stringify({
+                    'action': 'gethistory'
+                }));
+            }
+            this.vars.hide_entrants = data.race.hide_entrants;
+            if (!data.race.chat_restricted) {
+                $('#id_message').attr('title', '')
+                    .attr('placeholder', 'Send a message');
+            } else {
+                $('#id_message').attr('title', 'Only commands (e.g. ".done") may be used unless you have permission to chat.')
+                    .attr('placeholder', 'Send a message [chat restricted]');
+            }
             if (this.vars.user.id) {
                 var entrant = data.race.entrants.filter(e => e.user.id === this.vars.user.id)[0]
                 if (entrant) {

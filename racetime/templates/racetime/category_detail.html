@@ -43,10 +43,17 @@
                     </span>
                     <span class="race-row">
                         {% include 'racetime/pops/race_row.html' %}
-                        <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
-                            <i class="material-icons">videocam</i>
-                            <span>Watch live</span>
-                        </a>
+                        {% if not race.partitionable and not race.hide_entrants %}
+                            <a class="watch-live" href="{% url 'race_spectate' category=race.category.slug race=race.slug %}">
+                                <i class="material-icons">videocam</i>
+                                <span>Watch live</span>
+                            </a>
+                        {% else %}
+                            <span class="watch-live disabled" title="This race's entrants are hidden until the race ends.">
+                                <i class="material-icons">videocam_off</i>
+                                <span>Watch live</span>
+                            </span>
+                        {% endif %}
                     </span>
                 </li>
             {% empty %}

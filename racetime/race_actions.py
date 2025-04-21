@@ -383,6 +383,9 @@ class Message:
             team__categories=race.category,
         ).exists()
 
+        if not can_moderate and (race.hide_entrants and not race.is_done):
+            raise SafeException('Chat is disabled for anonymised races.')
+
         if (
             not can_monitor
             and not race.allow_prerace_chat

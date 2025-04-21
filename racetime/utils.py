@@ -1,3 +1,4 @@
+import colorsys
 import json
 import random
 from collections import OrderedDict
@@ -20,6 +21,7 @@ from hashids import Hashids
 __all__ = [
     'RedisChannelLayer',
     'SafeException',
+    'ShieldedUser',
     'SyncError',
     'chunkify',
     'delete_user',
@@ -413,6 +415,85 @@ team_names = [
     'zoomers',
 ]
 
+shielded_forenames = [
+    'Agent',
+    'Arthur',
+    'Athena',
+    'Banjo',
+    'Baron',
+    'Barry',
+    'Captain',
+    'Cerberus',
+    'Cloud',
+    'Disco',
+    'Doctor',
+    'Donkey',
+    'Falco',
+    'Fox',
+    'Fuzzy',
+    'Ganondorf',
+    'Hythlodaeus',
+    'Leroy',
+    'Lonk',
+    'M.',
+    'Marco',
+    'Miles',
+    'Montblanc',
+    'Obi-Wan',
+    'Phoenix',
+    'Professor',
+    'Reggie',
+    'Resident',
+    'Samus',
+    'Samwise',
+    'Skelly',
+    'Solid',
+    'Sonic',
+    'Spartacus',
+    'Tifa',
+    'Zagreus',
+]
+shielded_surnames = [
+    '& Knuckles',
+    ', Attorney-at-law',
+    ', Ladder Technician (BSc)',
+    '-Kazooie',
+    'Aran',
+    'Bomberman',
+    'Crackers',
+    'Dragmire',
+    'E. Gadd',
+    'Edgeworth',
+    'Eggman',
+    'Falcon',
+    'Jenkins',
+    'Kenobi',
+    'Kong',
+    'Layton',
+    'LikeandSubscribe',
+    'Lockheart',
+    'Lombardi',
+    'M.D., Esq.',
+    'McCloud',
+    'Morgan',
+    'Pickles',
+    'Polo',
+    'Prower',
+    'Rasmodius',
+    'Shepard',
+    'Snake',
+    'Spartacus',
+    'Strife',
+    'Von Rosenburg',
+    'Wright',
+    'from Pennsylvania',
+    'of Dalmasca',
+    'of Ronka',
+    'the Brave',
+    'the Hedgehog',
+    'the Numpty',
+    'the Third',
+]
 
 class RedisChannelLayer(BaseRedisChannelLayer):
     """
@@ -428,6 +509,50 @@ class RedisChannelLayer(BaseRedisChannelLayer):
         if self.crypter:
             message = self.crypter.decrypt(message, self.expiry + 10)
         return json.loads(message)
+
+
+class ShieldedUser:
+    active = True
+    is_shielded = True
+    pronouns = None
+    use_discriminator = False
+
+    def __init__(self, race, entrant_id):
+        seeded_random = random.Random(f'r{race.id}e{entrant_id}')
+        forename = seeded_random.choice(shielded_forenames)
+        surname = seeded_random.choice(shielded_surnames)
+        self.name = ''.join([
+            forename, ' ' if not surname.startswith((',', '-')) else '', surname
+        ])
+
+        h, s, l = seeded_random.random(), 0.5 + seeded_random.random() / 2.0, 0.4 + seeded_random.random() / 5.0
+        rgb = [int(256 * i) for i in colorsys.hls_to_rgb(h, l, s)]
+        self.colour = 'rgb(' + ','.join([str(x) for x in rgb]) + ')'
+
+        self.race = race
+
+    @property
+    def hashid(self):
+        return get_hashids(self.__class__).encode(self.name, self.race.id)
+
+    def api_dict_summary(self, category=None, race=None):
+        return {
+            'id': self.hashid,
+            'full_name': self.name,
+            'name': self.name,
+            'discriminator': None,
+            'url': None,
+            'avatar': None,
+            'pronouns': None,
+            'flair': '',
+            'twitch_name': None,
+            'twitch_display_name': None,
+            'twitch_channel': None,
+            'can_moderate': False,
+        }
+
+    def __str__(self):
+        return self.name
 
 
 class SafeException(Exception):
@@ -564,6 +689,7 @@ def get_action_button(action, race_slug, category_slug):
         'decline_invite': {'label': 'Decline invite', 'class': ''},
         'set_team': {'label': 'Choose team…', 'class': ''},
         'ready': {'label': 'Ready', 'class': ''},
+        'partition': {'label': 'Ready', 'class': ''},
         'not_live': {'label': 'Not live', 'class': ''},
         'unready': {'label': 'Not ready', 'class': ''},
         'leave': {'label': 'Quit', 'class': ''},
