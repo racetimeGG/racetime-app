@@ -251,10 +251,16 @@ class Category(models.Model):
             and (self.allow_user_races or self.can_moderate(user))
         )
 
-    def dump_json_data(self):
+    def dump_json_data(self, allow_unlisted=False):
         """
         Return category data as a JSON string.
         """
+        races = self.race_set.exclude(
+            state__in=[RaceStates.finished, RaceStates.cancelled, RaceStates.partitioned],
+        )
+        if not allow_unlisted:
+            races = races.filter(unlisted=False)
+
         value = json.dumps({
             **self.api_dict_summary(),
             'info': self.info,
@@ -273,11 +279,7 @@ class Category(models.Model):
             ],
             'current_races': [
                 race.api_dict_summary()
-                for race in self.race_set.filter(
-                    unlisted=False,
-                ).exclude(
-                    state__in=[RaceStates.finished, RaceStates.cancelled],
-                )
+                for race in races
             ],
             'emotes': {
                 emote.name: emote.image.url

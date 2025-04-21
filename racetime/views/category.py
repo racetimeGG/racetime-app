@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.serializers.json import DjangoJSONEncoder
@@ -18,6 +19,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.views import generic
+from oauth2_provider.views import ScopedProtectedResourceView
 
 from .base import BotMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
@@ -101,10 +103,11 @@ class Category(UserMixin, generic.DetailView):
 
 
 class CategoryData(Category, PublicAPIMixin):
+    cache_key = '%s/data'
     def get(self, request, *args, **kwargs):
         age = settings.RT_CACHE_TIMEOUT.get('CategoryData', 0)
         content = cache.get_or_set(
-            '%s/data' % slugify(self.kwargs.get('category')),
+            self.cache_key % slugify(self.kwargs.get('category')),
             self.get_json_data,
             age,
         )
@@ -119,6 +122,17 @@ class CategoryData(Category, PublicAPIMixin):
 
     def get_json_data(self):
         return self.get_object().dump_json_data()
+
+
+class OAuthCategoryData(ScopedProtectedResourceView, BotMixin, CategoryData):
+    cache_key = 'o/%s/data'
+    required_scopes = []
+
+    def get_json_data(self):
+        category = self.get_object()
+        if not self.get_bot(category):
+            raise PermissionDenied
+        return category.dump_json_data(allow_unlisted=True)
 
 
 class CategoryListData(generic.View, PublicAPIMixin):
