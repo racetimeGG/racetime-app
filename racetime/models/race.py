@@ -739,6 +739,8 @@ class Race(models.Model):
 
         Called when the race is created.
         """
+        if not self.partitionable:
+            return
         self.add_message(
             'This is a 1v1 ladder race. Pairings will be picked automatically '
             'when the room is partitioned by a bot or monitor.',
