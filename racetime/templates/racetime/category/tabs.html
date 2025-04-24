@@ -7,7 +7,7 @@
     {% if can_moderate %}
     <li{% if current == 'record' %} class="current"{% endif %}>
         <a href="{% url 'category_record' category=category.slug %}">
-            Race recorder
+            Race recorder ({{ recordable_race_count }})
         </a>
     </li>
     {% endif %}
