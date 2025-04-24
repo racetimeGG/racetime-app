@@ -97,12 +97,12 @@ class UnrecordRace(ModeratorRaceAction):
         race.unrecord(unrecorded_by=user)
 
 
-class HoldRace(ModeratorRaceAction):
+class HoldRace(MonitorRaceAction):
     def action(self, race, user, data):
         race.add_hold(held_by=user)
 
 
-class UnholdRace(ModeratorRaceAction):
+class UnholdRace(MonitorRaceAction):
     def action(self, race, user, data):
         race.remove_hold(unheld_by=user)
 
