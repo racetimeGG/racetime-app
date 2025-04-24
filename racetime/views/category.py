@@ -98,7 +98,7 @@ class Category(UserMixin, generic.DetailView):
         return queryset
 
 
-class CategoryRecorder(Category, UserPassesTestMixin):
+class CategoryRecorder(UserPassesTestMixin, Category):
     template_name = 'racetime/category_recorder.html'
 
     def get_context_data(self, **kwargs):
