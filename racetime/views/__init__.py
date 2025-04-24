@@ -29,6 +29,7 @@ from .category import (
     CategoryManageEmotes,
     CategoryModerators,
     CategoryRaceData,
+    CategoryRecorder,
     CategoryTeams,
     DeactivateCategory,
     EditCategory,
@@ -98,6 +99,7 @@ from .race_monitor_actions import (
     CancelRace,
     Disqualify,
     ForceUnready,
+    HoldRace,
     InviteToRace,
     MakeInvitational,
     MakeOpen,
@@ -107,6 +109,7 @@ from .race_monitor_actions import (
     Remove,
     RemoveMonitor,
     Undisqualify,
+    UnholdRace,
     UnrecordRace,
 )
 from .search import Search
@@ -177,6 +180,7 @@ __all__ = [
     'CategoryManageEmotes',
     'CategoryModerators',
     'CategoryRaceData',
+    'CategoryRecorder',
     'CategoryTeams',
     'DeactivateCategory',
     'EditCategory',
@@ -243,6 +247,7 @@ __all__ = [
     'CancelRace',
     'Disqualify',
     'ForceUnready',
+    'HoldRace',
     'InviteToRace',
     'MakeInvitational',
     'MakeOpen',
@@ -252,6 +257,7 @@ __all__ = [
     'Remove',
     'RemoveMonitor',
     'Undisqualify',
+    'UnholdRace',
     'UnrecordRace',
     # search
     'Search',

@@ -140,6 +140,10 @@ class Race(models.Model):
             'if a custom goal is set.'
         ),
     )
+    hold = models.BooleanField(
+        default=False,
+        help_text='Temporarily prevents race from being recorded when enabled.',
+    )
     recorded = models.BooleanField(
         default=False,
     )
@@ -1349,7 +1353,14 @@ class Race(models.Model):
         Record the race, finalising the ratings and updating the category
         leaderboards.
         """
+        if self.hold:
+            raise SafeException('Race cannot be finalized, it is on hold.')
         if self.recordable and not self.recorded:
+            if not all([entrant.user_id for entrant in self.entrant_set.all()]):
+                raise SafeException(
+                    'This race cannot be recorded because one or more entrants have '
+                    'deleted their account. Please set this race to "Do not record".'
+                )
             self.recorded = True
             self.recorded_by = recorded_by
             self.unlisted = False
@@ -1372,6 +1383,8 @@ class Race(models.Model):
         Mark a finished race as not recordable, meaning its result will not
         count towards the leaderboards.
         """
+        if self.hold:
+            raise SafeException('Race cannot be finalized, it is on hold.')
         if self.recordable and not self.recorded:
             self.recordable = False
             self.unlisted = False
@@ -1385,6 +1398,36 @@ class Race(models.Model):
             )
         else:
             raise SafeException('Race is not recordable or already recorded.')
+
+    def add_hold(self, held_by):
+        if self.recordable and not self.recorded and not self.hold:
+            self.hold = True
+            self.version = F('version') + 1
+            self.save()
+
+            self.add_message(
+                'Race result placed on hold by %(held_by)s'
+                % {'held_by': held_by},
+                user=held_by,
+                anonymised_message='Race result placed on hold by (deleted user)',
+            )
+        else:
+            raise SafeException('Race hold cannot be changed now.')
+
+    def remove_hold(self, unheld_by):
+        if self.recordable and not self.recorded and self.hold:
+            self.hold = False
+            self.version = F('version') + 1
+            self.save()
+
+            self.add_message(
+                'Race result taken off hold by %(unheld_by)s'
+                % {'unheld_by': unheld_by},
+                user=unheld_by,
+                anonymised_message='Race result taken off hold by (deleted user)',
+            )
+        else:
+            raise SafeException('Race hold cannot be changed now.')
 
     @property
     def can_rematch(self):

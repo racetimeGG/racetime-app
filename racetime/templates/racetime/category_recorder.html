@@ -1,0 +1,106 @@
+{% extends 'racetime/base.html' %}
+{% load humanize %}
+{% load static %}
+
+{% block js %}
+    {{ js_vars|json_script:"race-vars" }}
+    <script src="{% static 'racetime/script/recorder.js' %}"></script>
+{% endblock %}
+
+{% block title %}
+    Record races | {{ category.name }} |
+{% endblock %}
+
+{% block main %}
+    {% include 'racetime/category/intro.html' %}
+    {% include 'racetime/category/tabs.html' with current='record' %}
+    <p class="help">
+        Use this page to quickly record race results. Recorded races will
+        update leaderboard scores and best times. Once recorded, a race cannot
+        be edited and chat will be closed.
+    <p class="help" style="margin-bottom: 0">
+        <strong>Tip</strong>: Use <strong>R</strong> to record the topmost race.
+        Use <strong>D</strong> to not record, and <strong>S</strong> to skip it.
+        Skipped races can be brought back by reloading the page.
+    </p>
+    <div class="category-races race-list recorder">
+        {% include 'racetime/pops/paginator.html' with page=past_races %}
+        <ol>
+            {% for race in past_races %}
+                <li>
+                    <ul class="actions">
+                        <li class="record">
+                            <form class="race-action-form" action="{% url 'record_race' race=race.slug category=race.category.slug %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn {% if race.hold %}on-hold{% endif %}" {% if race.hold %}disabled title="This race is on hold."{% endif %}>Record race result</button>
+                            </form>
+                        </li>
+                        <li class="dangerous cancel">
+                            <form class="race-action-form" action="{% url 'unrecord_race' race=race.slug category=race.category.slug %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn {% if race.hold %}on-hold{% endif %}" {% if race.hold %}disabled title="This race is on hold."{% endif %}>Do not record</button>
+                            </form>
+                        </li>
+                        <li class="skip">
+                            <button type="button" class="btn">Skip (do nothing)</button>
+                        </li>
+                    </ul>
+                    <span class="race-detail">
+                        <span class="title">
+                            <span class="slug">{{ race.slug }}</span>
+                            {% if race.unlisted %}
+                                <span class="unlisted" title="Only moderators can see this. Users may access an unlisted race if they have the direct link.">(unlisted)</span>
+                            {% endif %}
+                        </span>
+                        <time class="datetime" datetime="{{ race.started_at.isoformat }}" title="Date/time race started at">
+                            {{ race.started_at }}
+                        </time>
+                    </span>
+                    <span class="race-row">
+                        {% include 'racetime/pops/race_row.html' %}
+                    </span>
+                    <ol class="race-entrants">
+                        {% for entrant in race.ordered_entrants %}
+                            <li class="entrant-row">
+                                <span class="place">
+                                    {{ entrant.place|ordinal|default:'—' }}
+                                </span>
+                                <span class="user">
+                                    {% include 'racetime/pops/user.html' with user=entrant.user extra_class='inline' %}
+                                    {% if entrant.comment %}
+                                        <span class="comment">
+                                            <i class="material-icons">more</i>
+                                            <span class="text">{{ entrant.comment }}</span>
+                                        </span>
+                                    {% endif %}
+                                </span>
+                                <span class="status {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
+                                    {{ entrant.summary.1 }}
+                                </span>
+                                <time class="finish-time">{{ entrant.finish_time_html|safe|default:'—' }}</time>
+                                {% if entrant.rating %}
+                                    <span class="score" title="Leaderboard score for {{ race.goal_str }}">
+                                        {{ entrant.rating|intcomma }}
+                                    </span>
+                                {% else %}
+                                    <span class="score" title="Not ranked">n/a</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </li>
+            {% empty %}
+                <li>
+                    There are no races awaiting moderation.
+                </li>
+            {% endfor %}
+        </ol>
+        {% include 'racetime/pops/paginator.html' with page=past_races %}
+    </div>
+{% endblock %}
+
+{% block aside %}
+    <div class="category-races race-list recorder finalized">
+        <ol></ol>
+    </div>
+{% endblock %}

@@ -64,33 +64,8 @@
         </ol>
     </div>
     <h3 id="past">Past races</h3>
-    {% if can_moderate %}
-        <div class="search-filter" style="margin-top: 10px">
-            <ul>
-            <li class="label">Show:</li>
-                <li>
-                    {% if not filter_by %}
-                        <span>All past races</span>
-                    {% else %}
-                        <a href="{% url 'category' category=category.slug %}#past">All past races</a>
-                    {% endif %}
-                </li>
-                <li>
-                    {% if filter_by == 'recordable' %}
-                        <span>Recordable</span>
-                    {% else %}
-                        <a href="{% url 'category' category=category.slug %}?filter=recordable#past">Recordable</a>
-                    {% endif %}
-                </li>
-            </ul>
-        </div>
-    {% endif %}
     <div class="category-races race-list past">
-        {% if filter_by %}
-            {% include 'racetime/pops/paginator.html' with page=past_races query='filter='|add:filter_by fragment='past' %}
-        {% else %}
-            {% include 'racetime/pops/paginator.html' with page=past_races fragment='past' %}
-        {% endif %}
+        {% include 'racetime/pops/paginator.html' with page=past_races fragment='past' %}
         <ol>
             {% for race in past_races %}
                 <li>
@@ -119,11 +94,7 @@
                 </li>
             {% endfor %}
         </ol>
-        {% if filter_by %}
-            {% include 'racetime/pops/paginator.html' with page=past_races query='filter='|add:filter_by fragment='past' %}
-        {% else %}
-            {% include 'racetime/pops/paginator.html' with page=past_races fragment='past' %}
-        {% endif %}
+        {% include 'racetime/pops/paginator.html' with page=past_races fragment='past' %}
     </div>
 {% endblock %}
 

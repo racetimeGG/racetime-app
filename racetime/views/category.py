@@ -34,13 +34,8 @@ class Category(UserMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         can_moderate = self.object.can_moderate(self.user)
-        req_filter = self.request.GET.get('filter')
-        if req_filter == 'recordable' and can_moderate:
-            filter_by = 'recordable'
-        else:
-            filter_by = None
 
-        paginator = Paginator(self.past_races(filter_by, can_moderate), 10)
+        paginator = Paginator(self.past_races(can_moderate=can_moderate), 10)
         return {
             **super().get_context_data(**kwargs),
             'can_edit': self.object.can_edit(self.user),
@@ -51,7 +46,6 @@ class Category(UserMixin, generic.DetailView):
                 emote.name: emote.image.url
                 for emote in self.object.emote_set.all().order_by('name')
             },
-            'filter_by': filter_by,
             'is_favourite': (
                 self.user.is_authenticated
                 and self.object in self.user.favourite_categories.all()
@@ -89,18 +83,33 @@ class Category(UserMixin, generic.DetailView):
             queryset = queryset.filter(unlisted=False)
         return queryset
 
-    def past_races(self, filter_by=None, can_moderate=False):
+    def past_races(self, can_moderate=False, filter_recordable=False):
         queryset = self.object.race_set.filter(state__in=[
             models.RaceStates.finished,
         ]).order_by('-ended_at')
-        if filter_by == 'recordable':
+        if filter_recordable:
             queryset = queryset.filter(
                 recordable=True,
                 recorded=False,
-            )
+            ).order_by('ended_at')
         if not can_moderate:
             queryset = queryset.filter(unlisted=False)
         return queryset
+
+
+class CategoryRecorder(Category, UserPassesTestMixin):
+    template_name = 'racetime/category_recorder.html'
+
+    def get_context_data(self, **kwargs):
+        paginator = Paginator(self.past_races(can_moderate=True, filter_recordable=True), 50)
+        return {
+            **super().get_context_data(**kwargs),
+            'can_moderate': True,
+            'past_races': paginator.get_page(self.request.GET.get('page')),
+        }
+
+    def test_func(self):
+        return self.get_object().can_moderate(self.user)
 
 
 class CategoryData(Category, PublicAPIMixin):

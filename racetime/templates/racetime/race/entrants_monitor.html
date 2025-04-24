@@ -1,3 +1,5 @@
 {% for entrant in race.ordered_entrants %}
-    {% include 'racetime/pops/entrant_monitor.html' with index=forloop.counter0 %}
+    {% if entrant.user %}
+        {% include 'racetime/pops/entrant_monitor.html' with index=forloop.counter0 %}
+    {% endif %}
 {% endfor %}

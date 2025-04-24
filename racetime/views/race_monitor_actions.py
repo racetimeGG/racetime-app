@@ -97,6 +97,16 @@ class UnrecordRace(ModeratorRaceAction):
         race.unrecord(unrecorded_by=user)
 
 
+class HoldRace(ModeratorRaceAction):
+    def action(self, race, user, data):
+        race.add_hold(held_by=user)
+
+
+class UnholdRace(ModeratorRaceAction):
+    def action(self, race, user, data):
+        race.remove_hold(unheld_by=user)
+
+
 class Rematch(ModeratorRaceAction):
     def action(self, race, user, data):
         race.make_rematch(user)

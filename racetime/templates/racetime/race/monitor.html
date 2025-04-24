@@ -42,14 +42,33 @@
         <li class="record">
             <form class="race-action-form" action="{% url 'record_race' race=race.slug category=race.category.slug %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn">Record race result</button>
+                <button type="submit" class="btn" {% if race.hold %}disabled{% endif %}>Record race result</button>
             </form>
         </li>
         <li class="dangerous cancel">
             <form class="race-action-form" action="{% url 'unrecord_race' race=race.slug category=race.category.slug %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn">Do not record</button>
+                <button type="submit" class="btn" {% if race.hold %}disabled{% endif %}>Do not record</button>
             </form>
+        </li>
+        <li class="hold">
+            {% if not race.hold %}
+                <form class="race-action-form" action="{% url 'hold_race' race=race.slug category=race.category.slug %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" title="Temporarily prevent this race from being finalized. Tick to disable record actions.">
+                        <i class="material-icons">check_box_outline_blank</i>
+                        <span>Hold recording</span>
+                    </button>
+                </form>
+            {% else %}
+                <form class="race-action-form" action="{% url 'unhold_race' race=race.slug category=race.category.slug %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" title="Temporarily prevent this race from being finalized. Untick to re-enable record actions.">
+                        <i class="material-icons">check_box</i>
+                        <span>Hold recording</span>
+                    </button>
+                </form>
+            {% endif %}
         </li>
     {% endif %}
     {% comment "Temporarily removed due to LiveSplit incompatibility" %}

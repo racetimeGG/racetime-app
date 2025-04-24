@@ -491,7 +491,7 @@ Race.prototype.onSocketMessage = function(event) {
                     .attr('placeholder', 'Send a message [chat restricted]');
             }
             if (this.vars.user.id) {
-                var entrant = data.race.entrants.filter(e => e.user.id === this.vars.user.id)[0]
+                var entrant = data.race.entrants.filter(e => e.user?.id === this.vars.user.id)[0]
                 if (entrant) {
                     this.vars.user.in_race = [
                         'requested',
