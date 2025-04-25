@@ -9,6 +9,7 @@ from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.core import validators
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from django.core.mail import send_mail
 from django.db.models import Count
 from django.forms.utils import pretty_name
@@ -273,6 +274,8 @@ class CategoryForm(forms.ModelForm):
             raise ValidationError(
                 'Unable to determine image size, upload was possibly corrupted.'
             )
+        if isinstance(image, UploadedFile):
+            image.name = re.sub(r'^.+\.', self.instance.slug + '.', image.name)
         return image
 
     def clean_slug_words(self):
@@ -800,6 +803,8 @@ class UserEditForm(forms.ModelForm):
                 'Unable to determine avatar image size, upload was possibly '
                 'corrupted.'
             )
+        if isinstance(avatar, UploadedFile):
+            avatar.name = re.sub(r'^.+\.', self.instance.hashid + '.', avatar.name)
         return avatar
 
     def clean_custom_profile_slug(self):
@@ -875,6 +880,8 @@ class TeamForm(forms.ModelForm):
             raise ValidationError(
                 'Unable to determine avatar size, upload was possibly corrupted.'
             )
+        if isinstance(avatar, UploadedFile):
+            avatar.name = re.sub(r'^.+\.', self.cleaned_data.get('slug', self.instance.slug) + '.', avatar.name)
         return avatar
 
     def clean_name(self):
