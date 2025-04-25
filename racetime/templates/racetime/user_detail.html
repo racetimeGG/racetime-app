@@ -103,7 +103,7 @@
                                 <span class="status {{ entrant.summary.0 }}" title="{{ entrant.summary.2 }}">
                                     {{ entrant.summary.1 }}
                                 </span>
-                                <time class="finish-time">{{ entrant.finish_time_html|safe|default:'—' }}</time>
+                                <time class="finish-time">{{ entrant.finish_time_html|default:'—'|safe }}</time>
                                 {% if entrant.rating_change %}
                                     {% if entrant.rating_change >= 0 %}
                                         <span class="score-change positive">
