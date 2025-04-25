@@ -24,18 +24,20 @@ const ajaxifyActionForm = function(form) {
         success: function() {
             $('.race-action-form button:not(.on-hold)').prop('disabled', false);
             const $li = $($(form).parents('li')[1]);
-            let $state;
-            if ($(form).parent().hasClass('record')) {
-                $li.addClass('finalized recorded');
-                $state = $('<span class="state">(recorded)</span>');
-            } else {
-                $li.addClass('finalized not-recorded');
-                $state = $('<span class="state">(not recorded)</span>');
-            }
-            const $a = $li.find('a').first();
-            $a.empty().append($li.find('.slug'));
-            $li.empty().append($a, $state);
-            $li.prependTo('.recorder.finalized > ol');
+            $li.slideUp(250, () => {
+                let $state;
+                if ($(form).parent().hasClass('record')) {
+                    $li.addClass('finalized recorded');
+                    $state = $('<span class="state">(recorded)</span>');
+                } else {
+                    $li.addClass('finalized not-recorded');
+                    $state = $('<span class="state">(not recorded)</span>');
+                }
+                const $a = $li.find('a').first();
+                $a.empty().append($li.find('.slug'));
+                $li.empty().append($a, $state);
+                $li.prependTo('.recorder.finalized > ol').slideDown(250);
+            })
         }
     });
 };
@@ -46,12 +48,14 @@ $(function() {
     });
     $('.recorder .skip button').on('click', function() {
         const $li = $($(this).parents('li')[1]);
-        $li.addClass('finalized skipped');
-        const $state = $('<span class="state">(skipped)</span>');
-        const $a = $li.find('a').first();
-        $a.empty().append($li.find('.slug'));
-        $li.empty().append($a, $state);
-        $li.prependTo('.recorder.finalized > ol');
+        $li.slideUp(250, () => {
+            $li.addClass('finalized skipped');
+            const $state = $('<span class="state">(skipped)</span>');
+            const $a = $li.find('a').first();
+            $a.empty().append($li.find('.slug'));
+            $li.empty().append($a, $state);
+            $li.prependTo('.recorder.finalized > ol').slideDown(250);
+        });
     });
 
     let keypressDebounce = false;
