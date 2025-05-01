@@ -911,6 +911,15 @@ aside .race-list > ol > li > .race-row {
     text-align: center;
     width: 100%;
 }
+.race-list.recorder > ol > li {
+    border-top: 10px solid #1a1c20;
+    border-radius: 2px;
+    margin: 0 -10px;
+    padding: 0 10px;
+}
+.race-list.recorder > ol > li:first-child {
+    border-top: 0;
+}
 .race-list.recorder > ol > li > .race-row {
     margin-bottom: 0;
 }
@@ -947,7 +956,7 @@ aside .race-list > ol > li > .race-row {
     border-radius: 0 0 10px 10px;
     box-sizing: border-box;
     flex: 1 0 100%;
-    margin: 0 5px 5px 5px;
+    margin: 0 5px 15px 5px;
 }
 .recorder .entrant-row {
     border-top: 1px solid #1a1c20;
