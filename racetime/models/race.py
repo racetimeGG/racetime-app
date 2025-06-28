@@ -1261,7 +1261,7 @@ class Race(models.Model):
                 require_even_teams=self.require_even_teams,
                 ranked=self.ranked,
                 unlisted=True,
-                partitionable=self.partitionable,
+                partitionable=False,
                 recordable=not (self.custom_goal or not self.ranked),
                 start_delay=self.start_delay,
                 time_limit=self.time_limit,
