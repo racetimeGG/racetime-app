@@ -2182,6 +2182,8 @@ class Entrant(models.Model):
             raise SafeException(
                 'You cannot undo your finish as the race time limit has expired.'
             )
+        if self.user.active_race_entrant:
+            raise SafeException('You cannot undo your finish as you have joined another race.')
         if self.state == EntrantStates.joined.value \
                 and (self.race.is_in_progress or self.race.is_unfinalized) \
                 and self.ready \
@@ -2243,6 +2245,8 @@ class Entrant(models.Model):
             raise SafeException(
                 'You cannot undo your forfeit as the race time limit has expired.'
             )
+        if self.user.active_race_entrant:
+            raise SafeException('You cannot undo your forfeit as you have joined another race.')
         if self.state == EntrantStates.joined.value \
                 and (self.race.is_in_progress or self.race.is_unfinalized) \
                 and self.ready \
