@@ -81,6 +81,12 @@ class Race(models.Model):
         related_name='opened_races',
         null=True,
     )
+    opened_by_bot = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text='Name of the bot that opened this race, if any.',
+    )
     opened_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -312,10 +318,11 @@ class Race(models.Model):
             'info': self.info,
             'entrants_count': self.entrants_count,
             'entrants_count_finished': self.entrants_count_finished,
-            'entrants_count_inactive': self.entrants_count_inactive,
-            'opened_at': self.opened_at,
-            'started_at': self.started_at,
-            'time_limit': self.time_limit,
+                    'entrants_count_inactive': self.entrants_count_inactive,
+        'opened_at': self.opened_at,
+        'started_at': self.started_at,
+        'time_limit': self.time_limit,
+        'opened_by_bot': self.opened_by_bot,
         }
         if include_category:
             summary['category'] = self.category.api_dict_summary()
@@ -397,8 +404,9 @@ class Race(models.Model):
             'require_even_teams': self.require_even_teams,
             'streaming_required': self.streaming_required,
             'auto_start': self.auto_start,
-            'opened_by': self.opened_by.api_dict_summary(race=self) if self.opened_by else None,
-            'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
+                    'opened_by': self.opened_by.api_dict_summary(race=self) if self.opened_by else None,
+        'opened_by_bot': self.opened_by_bot,
+        'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
             'recordable': self.recordable,
             'recorded': self.recorded,
             'recorded_by': self.recorded_by.api_dict_summary(race=self) if self.recorded_by else None,
@@ -1276,6 +1284,7 @@ class Race(models.Model):
                 allow_midrace_chat=False,
                 allow_non_entrant_chat=False,
                 chat_message_delay=self.chat_message_delay,
+                opened_by_bot=self.opened_by_bot,
             )
             race.monitors.set(self.monitors.all())
             race.add_message(f'Race partitioned from {parent_race_url}')
@@ -1463,6 +1472,7 @@ class Race(models.Model):
                 custom_goal=self.custom_goal,
                 slug=self.category.generate_race_slug(),
                 opened_by=user,
+                opened_by_bot=self.opened_by_bot,
                 unlisted=self.unlisted,
                 recordable=not self.custom_goal,
                 start_delay=self.start_delay,

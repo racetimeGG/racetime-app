@@ -7,3 +7,5 @@ __pycache__
 /node_modules
 /project/settings/local.py
 /static
+
+venv/
