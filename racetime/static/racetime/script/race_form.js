@@ -73,9 +73,11 @@ $(function() {
         var $revealAt = $('#id_reveal_at').closest('li');
         var $customGoal = $('#id_custom_goal');
         var isUnlisted = $unlisted.is(':checked');
-        var isUnranked = !$ranked.is(':checked') || $customGoal.val() !== '';
+        var hasCustomGoal = $customGoal.val() !== '';
+        var isRanked = $ranked.is(':checked');
+        var isNotRecordable = hasCustomGoal || !isRanked;
         
-        if (isUnlisted && isUnranked) {
+        if (isUnlisted && isNotRecordable) {
             $revealAt.show();
         } else {
             $revealAt.hide();
@@ -148,6 +150,7 @@ $(function() {
             } else {
                 $submit.prop('disabled', false);
             }
+            updateRevealAtVisibility();
         });
         $(document).on('change input keyup', '.race-form input', function () {
             if ($(this).attr('name') === 'goal') return;
