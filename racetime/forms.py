@@ -521,6 +521,8 @@ class RaceForm(forms.ModelForm):
             self.fields['unlisted'].initial = True
         if 'require_even_teams' in self.fields and self.instance.pk and not self.instance.team_race:
             del self.fields['require_even_teams']
+        if 'reveal_at' in self.fields and self.instance.pk and self.instance.ranked:
+            del self.fields['reveal_at']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -587,6 +589,7 @@ class RaceCreationForm(RaceForm):
             'invitational',
             'ranked',
             'unlisted',
+            'reveal_at',
             'partitionable',
             'hide_entrants',
             'info_user',
@@ -630,6 +633,7 @@ class RaceEditForm(RaceForm):
             'custom_goal',
             'ranked',
             'unlisted',
+            'reveal_at',
             'info_user',
             'recordable',
             'require_even_teams',

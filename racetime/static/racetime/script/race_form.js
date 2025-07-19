@@ -3,6 +3,8 @@ $(function() {
     var $goal = $('#id_goal').closest('li');
     var $customGoal = $goal.next();
     var $prevGoalSelected = null;
+    var $unlisted = $('#id_unlisted');
+    var $ranked = $('#id_ranked');
 
     var changedFields = [];
     var rankedWasChecked = true;
@@ -25,6 +27,7 @@ $(function() {
                     .prop('checked', false)
                     .prop('disabled', true);
             }
+            updateRevealAtVisibility();
             return;
         }
         var data = {
@@ -64,6 +67,19 @@ $(function() {
                 $('.race-form').removeClass('is-loading');
             }
         });
+    }
+
+    function updateRevealAtVisibility() {
+        var $revealAt = $('#id_reveal_at').closest('li');
+        var isUnlisted = $unlisted.is(':checked');
+        var isUnranked = !$ranked.is(':checked');
+        
+        if (isUnlisted && isUnranked) {
+            $revealAt.show();
+        } else {
+            $revealAt.hide();
+            $('#id_reveal_at').val('');
+        }
     }
 
     function setupForm(custom, toggleOn) {
@@ -136,6 +152,9 @@ $(function() {
             if (changedFields.indexOf($(this).attr('id')) === -1) {
                 changedFields.push($(this).attr('id'));
             }
+        });
+        $(document).on('change', '.race-form [name="unlisted"]', function () {
+            updateRevealAtVisibility();
         });
     }
 });
