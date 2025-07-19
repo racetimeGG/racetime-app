@@ -131,6 +131,8 @@ $(function() {
             updateRevealAtVisibility();
         }
 
+        // Ensure reveal_at visibility is correct on page load
+        updateRevealAtVisibility();
 
         $(document).on('click', '.race-form .toggle-additional', function () {
             $(this).nextAll().toggle();
@@ -159,6 +161,9 @@ $(function() {
             }
         });
         $(document).on('change', '.race-form [name="unlisted"]', function () {
+            updateRevealAtVisibility();
+        });
+        $(document).on('change', '.race-form [name="ranked"]', function () {
             updateRevealAtVisibility();
         });
     }

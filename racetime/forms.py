@@ -521,7 +521,7 @@ class RaceForm(forms.ModelForm):
             self.fields['unlisted'].initial = True
         if 'require_even_teams' in self.fields and self.instance.pk and not self.instance.team_race:
             del self.fields['require_even_teams']
-        if 'reveal_at' in self.fields and self.instance.pk and self.instance.ranked:
+        if 'reveal_at' in self.fields and self.instance.pk and (not self.instance.unlisted or self.instance.recordable):
             del self.fields['reveal_at']
 
     def clean(self):
