@@ -22,7 +22,6 @@ class Command(BaseCommand):
             race.reveal_at = None
             race.save()
             
-            # Add a message to the race
             race.add_message(
                 'This race has been automatically revealed as scheduled.',
                 highlight=True,
