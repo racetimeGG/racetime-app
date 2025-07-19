@@ -35,4 +35,4 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f'Successfully revealed {revealed_count} race(s)')
             )
         else:
-            self.stdout.write('No races to reveal at this time.') 
+            self.stdout.write('No races to reveal at this time.')
