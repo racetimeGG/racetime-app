@@ -135,8 +135,8 @@ class Race(models.Model):
         null=True,
         blank=True,
         help_text=(
-            'When this hidden unranked race should be revealed. Only applies '
-            'to unlisted races that are not recordable.'
+            'When this hidden unranked race should be revealed. '
+            'Enter in your local timezone.'
         ),
     )
     partitionable = models.BooleanField(

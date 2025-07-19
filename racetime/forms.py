@@ -553,6 +553,19 @@ class RaceForm(forms.ModelForm):
             if 'allow_non_entrant_chat' in cleaned_data:
                 cleaned_data['allow_non_entrant_chat'] = False
 
+        if cleaned_data.get('reveal_at') and self.data.get('timezone_offset'):
+            try:
+                from datetime import timedelta
+                timezone_offset = int(self.data.get('timezone_offset', 0))
+                if timezone_offset < -840 or timezone_offset > 840:
+                    timezone_offset = 0
+             
+                local_time = cleaned_data['reveal_at']
+                utc_time = local_time + timedelta(minutes=timezone_offset)
+                cleaned_data['reveal_at'] = utc_time
+            except (ValueError, TypeError) as e:
+                pass
+
         return cleaned_data
 
 
@@ -580,6 +593,11 @@ class RaceCreationForm(RaceForm):
             'decline.'
         ),
     )
+    timezone_offset = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput,
+        help_text='User timezone offset in minutes (UTC)',
+    )
 
     class Meta:
         fields = (
@@ -606,6 +624,7 @@ class RaceCreationForm(RaceForm):
             'allow_midrace_chat',
             'allow_non_entrant_chat',
             'chat_message_delay',
+            'timezone_offset',
         )
         model = models.Race
         widgets = {
@@ -631,6 +650,12 @@ class OAuthRaceCreationForm(RaceCreationForm, OAuthRaceForm):
 
 
 class RaceEditForm(RaceForm):
+    timezone_offset = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput,
+        help_text='User timezone offset in minutes (UTC)',
+    )
+
     class Meta:
         fields = (
             'goal',
@@ -652,6 +677,7 @@ class RaceEditForm(RaceForm):
             'allow_midrace_chat',
             'allow_non_entrant_chat',
             'chat_message_delay',
+            'timezone_offset',
         )
         model = models.Race
         widgets = {

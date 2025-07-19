@@ -2,38 +2,67 @@ $(function() {
     var $submit = $('.race-form button[type="submit"]');
     var $goal = $('#id_goal').closest('li');
     var $customGoal = $goal.next();
-    var $prevGoalSelected = null;
-    var $unlisted = $('#id_unlisted');
-    var $ranked = $('#id_ranked');
-
     var changedFields = [];
-    var rankedWasChecked = true;
+    var additionalSectionCollapsed = false;
+    var timezoneOffset = new Date().getTimezoneOffset();
+    $('#id_timezone_offset, input[name="timezone_offset"]').val(timezoneOffset);
 
-    function updateFormByGoal(goal_id) {
+    function convertRevealAtToLocal() {
+        var $revealAtField = $('#id_reveal_at');
+        if ($revealAtField.length && $revealAtField.val() && $('.race-edit-form').length > 0 && !$revealAtField.attr('data-converted')) {
+            var utcTime = new Date($revealAtField.val());
+            var localTime = new Date(utcTime.getTime() - (timezoneOffset * 60000));
+            
+            var year = localTime.getFullYear();
+            var month = String(localTime.getMonth() + 1).padStart(2, '0');
+            var day = String(localTime.getDate()).padStart(2, '0');
+            var hours = String(localTime.getHours()).padStart(2, '0');
+            var minutes = String(localTime.getMinutes()).padStart(2, '0');
+            var localTimeString = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            
+            $revealAtField.val(localTimeString);
+            $revealAtField.attr('data-converted', 'true');
+        }
+    }
+
+    function updateRevealAtEnabled() {
+        var $revealAtField = $('#id_reveal_at');
+        var isUnlisted = $('#id_unlisted').is(':checked');
+        var hasCustomGoal = $customGoal.length > 0 && $customGoal.val() !== '';
+        var isRanked = $('#id_ranked').is(':checked');
+        var shouldEnable = isUnlisted && !isRanked;
+
+        $revealAtField.prop('disabled', !shouldEnable);
+        if (!shouldEnable) {
+            $revealAtField.val('');
+            $revealAtField.addClass('disabled');
+        } else {
+            $revealAtField.removeClass('disabled');
+        }
+    }
+
+    function handleGoalChange(goal_id) {
         if ($('.race-edit-form').length > 0) {
             if (goal_id) {
                 $submit.prop('disabled', false);
                 $customGoal.hide().find('input').val('');
-                $('#id_ranked')
-                    .prop('checked', rankedWasChecked)
-                    .prop('disabled', false);
+                $('#id_ranked').prop('checked', true).prop('disabled', false);
             } else {
                 if ($customGoal.find('input').val() === '') {
                     $submit.prop('disabled', true);
                 }
                 $customGoal.show();
-                rankedWasChecked = $('#id_ranked').prop('checked');
-                $('#id_ranked')
-                    .prop('checked', false)
-                    .prop('disabled', true);
+                $('#id_ranked').prop('checked', false).prop('disabled', true);
             }
-            updateRevealAtVisibility();
+            setTimeout(updateRevealAtEnabled, 10);
             return;
         }
+
         var data = {
             'bare': 1,
-            'goal': goal_id
-        }
+            'goal': goal_id,
+            'timezone_offset': timezoneOffset
+        };
         changedFields.forEach(function(name) {
             if (name === 'id_custom_goal' && goal_id) return;
             var $field = $('#' + name);
@@ -50,47 +79,22 @@ $(function() {
                 $('.race-form > ul').replaceWith(html);
                 setupForm(!goal_id, toggleOn);
                 $('.race-form').removeClass('is-loading');
-                $prevGoalSelected = $('#id_goal input:checked');
-                updateRevealAtVisibility();
+                additionalSectionCollapsed = false;
+                setTimeout(updateRevealAtEnabled, 10);
             },
             error: function() {
-                $('#id_goal input')
-                    .prop('checked', false)
-                    .prop('disabled', false);
-                if (!!$prevGoalSelected) {
-                    $prevGoalSelected.prop('checked', true);
-                }
+                $('#id_goal input').prop('checked', false).prop('disabled', false);
+                $('.race-form').removeClass('is-loading');
                 $('#id_goal').parent().after(
                     '<li class="js-error"><span class="errorlist">' +
                     'Failed to load goal settings. Try again, or reload the page.' +
                     '</span></li>'
                 );
-                $('.race-form').removeClass('is-loading');
             }
         });
     }
 
-    function updateRevealAtVisibility() {
-        var $revealAt = $('#id_reveal_at').closest('li');
-        var $customGoal = $('#id_custom_goal');
-        var $currentUnlisted = $('#id_unlisted');
-        var $currentRanked = $('#id_ranked');
-        
-        var isUnlisted = $currentUnlisted.is(':checked');
-        var hasCustomGoal = $customGoal.length > 0 && $customGoal.val() !== '';
-        var isRanked = $currentRanked.is(':checked');
-        var isNotRecordable = hasCustomGoal || !isRanked;
-        
-        if (isUnlisted && isNotRecordable) {
-            $revealAt.show();
-        } else {
-            $revealAt.hide();
-            $('#id_reveal_at').val('');
-        }
-    }
-
     function setupForm(custom, toggleOn) {
-        var $goal = $('#id_goal').closest('li');
         var $lastMain = $('#id_invitational').closest('li');
         $lastMain.nextAll().hide();
         var $toggle = $('<li class="toggle-additional">' +
@@ -102,9 +106,7 @@ $(function() {
                 $submit.prop('disabled', true);
             }
             $goal.next().show();
-            $('#id_ranked')
-                .prop('checked', false)
-                .prop('disabled', true);
+            $('#id_ranked').prop('checked', false).prop('disabled', true);
         } else {
             $submit.prop('disabled', false);
             $goal.next().hide().find('input').val('');
@@ -121,24 +123,24 @@ $(function() {
         }
 
         var $selectedGoal = $goal.find(':checked');
-
         setupForm($selectedGoal.length > 0 && $selectedGoal.val() === '', false);
 
         if ($selectedGoal.length > 0) {
-            rankedWasChecked = $('#id_ranked').prop('checked');
-            updateFormByGoal($selectedGoal.val() || null);
+            handleGoalChange($selectedGoal.val() || null);
         } else {
             if ($customGoal.find('input').val() === '') {
                 $submit.prop('disabled', true);
             }
             $goal.nextAll().hide();
         }
-        updateRevealAtVisibility();
+        updateRevealAtEnabled();
 
         $(document).on('click', '.race-form .toggle-additional', function () {
+            var isHiding = $(this).children('.hide').is(':visible');
             $(this).nextAll().toggle();
             $(this).children('.hide, .show').toggle();
-            updateRevealAtVisibility();
+            additionalSectionCollapsed = isHiding;
+            setTimeout(updateRevealAtEnabled, 10);
         });
 
         if ($('.race-form').hasClass('race-edit-form')) {
@@ -146,15 +148,11 @@ $(function() {
         }
 
         $(document).on('change', '.race-form [name="goal"]', function () {
-            updateFormByGoal($(this).val());
+            handleGoalChange($(this).val());
         });
         $(document).on('change input keyup', '.race-form [name="custom_goal"]', function () {
-            if ($(this).val() === '') {
-                $submit.prop('disabled', true);
-            } else {
-                $submit.prop('disabled', false);
-            }
-            updateRevealAtVisibility();
+            $submit.prop('disabled', $(this).val() === '');
+            updateRevealAtEnabled();
         });
         $(document).on('change input keyup', '.race-form input', function () {
             if ($(this).attr('name') === 'goal') return;
@@ -163,10 +161,15 @@ $(function() {
             }
         });
         $(document).on('change', '.race-form [name="unlisted"]', function () {
-            updateRevealAtVisibility();
+            updateRevealAtEnabled();
         });
         $(document).on('change', '.race-form [name="ranked"]', function () {
-            updateRevealAtVisibility();
+            updateRevealAtEnabled();
+        });
+        $(document).on('click', '.race-form [name="ranked"]', function () {
+            setTimeout(updateRevealAtEnabled, 10);
         });
     }
+    // Convert reveal_at time after DOM is ready
+    setTimeout(convertRevealAtToLocal, 50);
 });
