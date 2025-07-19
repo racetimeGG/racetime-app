@@ -71,8 +71,9 @@ $(function() {
 
     function updateRevealAtVisibility() {
         var $revealAt = $('#id_reveal_at').closest('li');
+        var $customGoal = $('#id_custom_goal');
         var isUnlisted = $unlisted.is(':checked');
-        var isUnranked = !$ranked.is(':checked');
+        var isUnranked = !$ranked.is(':checked') || $customGoal.val() !== '';
         
         if (isUnlisted && isUnranked) {
             $revealAt.show();
@@ -125,6 +126,7 @@ $(function() {
                 $submit.prop('disabled', true);
             }
             $goal.nextAll().hide();
+            updateRevealAtVisibility();
         }
 
 

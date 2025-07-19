@@ -610,6 +610,10 @@ class RaceCreationForm(RaceForm):
         model = models.Race
         widgets = {
             'recordable': forms.HiddenInput,
+            'reveal_at': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
         }
 
 
@@ -652,6 +656,10 @@ class RaceEditForm(RaceForm):
         model = models.Race
         widgets = {
             'recordable': forms.HiddenInput,
+            'reveal_at': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
         }
 
     def __init__(self, *args, **kwargs):
