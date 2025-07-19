@@ -148,6 +148,7 @@ class RaceAdmin(options.ModelAdmin):
         'slug',
         'state',
         'opened_by',
+        'opened_by_bot',
         'recorded',
         'recorded_by',
         'version',

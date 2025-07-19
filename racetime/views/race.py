@@ -630,6 +630,8 @@ class OAuthCreateRace(ScopedProtectedResourceView, BotMixin, OAuthRaceMixin, Bas
 
         if user:
             race.opened_by = user
+        elif bot:
+            race.opened_by_bot = bot.name
 
         race.save()
         race.add_partition_message()
