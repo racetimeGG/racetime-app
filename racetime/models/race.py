@@ -1284,7 +1284,6 @@ class Race(models.Model):
                 allow_midrace_chat=False,
                 allow_non_entrant_chat=False,
                 chat_message_delay=self.chat_message_delay,
-                opened_by_bot=self.opened_by_bot,
             )
             race.monitors.set(self.monitors.all())
             race.add_message(f'Race partitioned from {parent_race_url}')
