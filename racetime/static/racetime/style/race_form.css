@@ -50,6 +50,17 @@
     vertical-align: top;
 }
 
+#id_reveal_at.disabled {
+    opacity: 0.5;
+    background-color: #2a2b30;
+    cursor: not-allowed;
+}
+
+#id_reveal_at::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
 @media only screen and (max-width: 600px) {
     #id_goal > li {
         flex-basis: 50%;
