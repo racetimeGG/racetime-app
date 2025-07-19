@@ -51,6 +51,7 @@ $(function() {
                 setupForm(!goal_id, toggleOn);
                 $('.race-form').removeClass('is-loading');
                 $prevGoalSelected = $('#id_goal input:checked');
+                updateRevealAtVisibility();
             },
             error: function() {
                 $('#id_goal input')
@@ -72,9 +73,12 @@ $(function() {
     function updateRevealAtVisibility() {
         var $revealAt = $('#id_reveal_at').closest('li');
         var $customGoal = $('#id_custom_goal');
-        var isUnlisted = $unlisted.is(':checked');
-        var hasCustomGoal = $customGoal.val() !== '';
-        var isRanked = $ranked.is(':checked');
+        var $currentUnlisted = $('#id_unlisted');
+        var $currentRanked = $('#id_ranked');
+        
+        var isUnlisted = $currentUnlisted.is(':checked');
+        var hasCustomGoal = $customGoal.length > 0 && $customGoal.val() !== '';
+        var isRanked = $currentRanked.is(':checked');
         var isNotRecordable = hasCustomGoal || !isRanked;
         
         if (isUnlisted && isNotRecordable) {
@@ -128,15 +132,13 @@ $(function() {
                 $submit.prop('disabled', true);
             }
             $goal.nextAll().hide();
-            updateRevealAtVisibility();
         }
-
-        // Ensure reveal_at visibility is correct on page load
         updateRevealAtVisibility();
 
         $(document).on('click', '.race-form .toggle-additional', function () {
             $(this).nextAll().toggle();
             $(this).children('.hide, .show').toggle();
+            updateRevealAtVisibility();
         });
 
         if ($('.race-form').hasClass('race-edit-form')) {
