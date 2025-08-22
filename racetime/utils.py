@@ -1,12 +1,13 @@
+import datetime
 import colorsys
 import json
 import random
 from collections import OrderedDict
-from datetime import datetime
 from urllib.parse import urlencode
 
 import requests
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
+from channels_redis.serializers import JSONSerializer as BaseJSONSerializer, registry
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import send_mail
@@ -14,7 +15,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.transaction import atomic
 from django.template.loader import render_to_string
 from django.urls import NoReverseMatch, reverse
-from django.utils import timezone
 from django.utils.module_loading import import_string
 from hashids import Hashids
 
@@ -535,20 +535,25 @@ shielded_surnames = [
     'the Third',
 ]
 
+
+class JSONSerializer(BaseJSONSerializer):
+    def as_bytes(self, message, *args, **kwargs):
+        message = json.dumps(message, cls=DjangoJSONEncoder)
+        return message.encode('utf-8')
+
+    from_bytes = staticmethod(json.loads)
+
+
+registry.register_serializer('json', JSONSerializer)
+
+
 class RedisChannelLayer(BaseRedisChannelLayer):
     """
     Custom channel layer that correctly serializes Django-ey data.
     """
-    def serialize(self, message):
-        value = json.dumps(message, cls=DjangoJSONEncoder)
-        if self.crypter:
-            value = self.crypter.encrypt(value)
-        return value
-
-    def deserialize(self, message):
-        if self.crypter:
-            message = self.crypter.decrypt(message, self.expiry + 10)
-        return json.loads(message)
+    def __init__(self, *args, **kwargs):
+        kwargs['serializer_format'] = 'json'
+        super().__init__(*args, **kwargs)
 
 
 class ShieldedUser:
@@ -645,7 +650,7 @@ def delete_user(request, user, protect=True):
             message_link.message.save()
 
         # Anonymise older system messages
-        MESSAGE_LINK_MIGRATION = datetime(2025, 3, 25, tzinfo=timezone.utc)
+        MESSAGE_LINK_MIGRATION = datetime.datetime(2025, 3, 25, tzinfo=datetime.timezone.utc)
         Message = apps.get_model('racetime', 'Message')
         UserLog = apps.get_model('racetime', 'UserLog')
 

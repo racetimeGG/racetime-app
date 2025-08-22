@@ -14,6 +14,7 @@ APPEND_SLASH = False
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'racetime',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'debug_toolbar',
-    'captcha',
+    'django_recaptcha',
     'channels',
     'corsheaders',
     'django.forms',
@@ -69,7 +70,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 CHANNEL_LAYERS = {
     'default': {
@@ -188,6 +189,7 @@ LOGGING = {
 
 OAUTH2_PROVIDER = {
     'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600,
+    'PKCE_REQUIRED': False,
     'SCOPES': {
         'read': 'See your name, Twitch username and basic user information.',
         'chat_message': 'Send chat messages to race rooms on your behalf.',

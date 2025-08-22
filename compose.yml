@@ -27,10 +27,10 @@ services:
       - MYSQL_ROOT_PASSWORD=racetime
       - MYSQL_USER=racetime
       - MYSQL_PASSWORD=racetime
-    image: mariadb:10.4
+    image: mariadb
     volumes:
       - db-data:/var/lib/mysql
   racetime.redis:
-    image: redis:5-alpine
+    image: redis
 volumes:
   db-data:

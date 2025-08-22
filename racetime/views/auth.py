@@ -16,18 +16,7 @@ class Login(base.LoginView):
 
 
 class Logout(base.LogoutView):
-    get = base.LogoutView.http_method_not_allowed
-
-    def dispatch(self, request, *args, **kwargs):
-        return super(base.LogoutView, self).dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        logout(request)
-        next_page = self.get_next_page()
-        if next_page:
-            return HttpResponseRedirect(next_page)
-        context = self.get_context_data(**kwargs)
-        return self.render_to_response(context)
+    pass
 
 
 class PasswordResetView(base.PasswordResetView):

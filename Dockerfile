@@ -1,4 +1,4 @@
-FROM python:3.8 AS base
+FROM python:3.12 AS base
 
 RUN useradd -d /opt/racetime app
 RUN install -d -g app -o app /opt/racetime

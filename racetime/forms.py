@@ -3,8 +3,8 @@ from copy import deepcopy
 from datetime import timedelta
 
 from bs4 import BeautifulSoup
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.core import validators
@@ -42,9 +42,9 @@ class SecondsDurationField(forms.IntegerField):
     unit = 1
     widget = DurationWidget(unit_name='seconds')
 
-    def __init__(self, *, max_value=None, min_value=None, **kwargs):
+    def __init__(self, *, max_value=None, min_value=None, step_size=None, **kwargs):
         self.return_delta = True
-        self.max_value, self.min_value = max_value, min_value
+        self.max_value, self.min_value, self.step_size = max_value, min_value, step_size
         # Skip calling IntegerField init() because it sets the wrong validators.
         super(forms.IntegerField, self).__init__(**kwargs)
 
@@ -746,7 +746,6 @@ class EntrantEditForm(forms.ModelForm):
 
 class AuthenticationForm(auth_forms.AuthenticationForm):
     captcha = ReCaptchaField(
-        label=False,
         widget=ReCaptchaV2Checkbox(attrs={'data-theme': 'dark'})
     )
 

@@ -106,7 +106,7 @@ class BaseRaceAction(UserMixin, generic.View):
                 name = re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
                 self.user.log_action('race_' + name, self.request)
 
-        if self.request.is_ajax():
+        if self.request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
             return http.HttpResponse()
         return http.HttpResponseRedirect(self.get_race().get_absolute_url())
 

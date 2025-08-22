@@ -1,27 +1,25 @@
 from urllib.parse import parse_qs
 
 from channels.middleware import BaseMiddleware
-from django.middleware.csrf import (
-    CsrfViewMiddleware,
-    REASON_NO_CSRF_COOKIE,
-    REASON_BAD_TOKEN,
-    _compare_masked_tokens,
-    _sanitize_token,
-)
+from django.middleware import csrf
 
 
-class CsrfViewMiddlewareTwitch(CsrfViewMiddleware):
+class CsrfViewMiddlewareTwitch(csrf.CsrfViewMiddleware):
     def process_view(self, request, callback, callback_args, callback_kwargs):
-        referer = request.META.get('HTTP_REFERER')
-
-        csrf_token = request.META.get('CSRF_COOKIE')
-        if csrf_token is None:
-            return self._reject(request, REASON_NO_CSRF_COOKIE)
+        try:
+            csrf_secret = self._get_secret(request)
+        except csrf.InvalidTokenFormat as exc:
+            return self._reject(request, f'CSRF cookie {exc.reason}.')
 
         request_csrf_token = request.GET.get('state', '')
-        request_csrf_token = _sanitize_token(request_csrf_token)
-        if not _compare_masked_tokens(request_csrf_token, csrf_token):
-            return self._reject(request, REASON_BAD_TOKEN)
+
+        try:
+            csrf._check_token_format(request_csrf_token)
+        except csrf.InvalidTokenFormat as exc:
+            return self._reject(request, f'CSRF token {exc.reason}.')
+
+        if not csrf._does_token_match(request_csrf_token, csrf_secret):
+            self._reject(request, 'CSRF token incorrect.')
 
         return self._accept(request)
 

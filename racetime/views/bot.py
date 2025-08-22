@@ -43,6 +43,7 @@ class BotPageMixin(UserPassesTestMixin, UserMixin):
             client_type=model.CLIENT_CONFIDENTIAL,
             authorization_grant_type=model.GRANT_CLIENT_CREDENTIALS,
             name='%s (%s)' % (bot.name, bot.category.short_name),
+            hash_client_secret=False,
         )
 
     def active_bots(self):

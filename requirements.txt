@@ -1,6 +1,6 @@
 -e .
-channels_redis>=3.4,<4.0
-django-cors-middleware
+channels_redis>=4.0,<5.0
+django-cors-headers
 django-extensions
 django-debug-toolbar
 mysqlclient
