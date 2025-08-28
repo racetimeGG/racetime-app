@@ -1163,21 +1163,6 @@ class Race(models.Model):
             state=EntrantStates.joined.value,
         ).select_related('user').order_by('id'))
 
-        # Remove most recent joiner if we have an odd number
-        if len(entrants) % 2 == 1:
-            entrant = entrants.pop()
-            user = entrant.user
-            user_display = entrant.user_display
-            with atomic():
-                entrant.delete()
-                self.increment_version()
-                self.add_message(
-                    '%(user)s is removed from the race (uneven partition state).'
-                    % {'user': user_display},
-                    user=user,
-                    anonymised_message='An entrant was removed from the race (uneven partition state).',
-                )
-
         # Collect existing ratings
         if self.recordable:
             UserRanking = apps.get_model('racetime', 'UserRanking')
@@ -1229,14 +1214,18 @@ class Race(models.Model):
                 continue
             entrant = remaining_entrants.pop(entrant['entrant_id'])
             opponent = remaining_entrants.pop(opponent_id)
-            pairings.append((entrant, opponent))
+            pairings.append([entrant, opponent])
 
         # Randomly assign pairings for anyone who couldn't be matched
         if remaining_entrants:
             remaining_entrants = list(remaining_entrants.values())
             random.shuffle(remaining_entrants)
             for i in range(0, len(remaining_entrants), 2):
-                pairings.append(tuple(remaining_entrants[i:i + 2]))
+                if i == len(remaining_entrants) - 1:
+                    # Only one entrant left
+                    random.choice(pairings).append(remaining_entrants[i])
+                else:
+                    pairings.append(tuple(remaining_entrants[i:i + 2]))
 
         # Close this race
         with atomic():
