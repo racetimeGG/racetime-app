@@ -266,6 +266,9 @@ class Race(models.Model):
         ),
         blank=True,
     )
+    bot_meta = models.JSONField(
+        default=dict,
+    )
     bot_pid = models.PositiveIntegerField(
         null=True,
         db_index=True,
@@ -411,6 +414,7 @@ class Race(models.Model):
             'allow_midrace_chat': self.allow_midrace_chat,
             'allow_non_entrant_chat': self.allow_non_entrant_chat,
             'chat_message_delay': self.chat_message_delay,
+            'bot_meta': self.bot_meta,
         }
 
     @cached_property
@@ -1260,7 +1264,7 @@ class Race(models.Model):
                 team_race=self.team_race,
                 require_even_teams=self.require_even_teams,
                 ranked=self.ranked,
-                unlisted=True,
+                unlisted=self.unlisted,
                 partitionable=False,
                 recordable=not (self.custom_goal or not self.ranked),
                 start_delay=self.start_delay,

@@ -1,3 +1,6 @@
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F
 
 from racetime import forms, models
@@ -203,6 +206,23 @@ class BotSetInfo:
         )
 
 
+class BotSetMeta:
+    name = 'setmeta'
+
+    def action(self, race, bot, data):
+        race.bot_meta = {**race.bot_meta, **data}
+
+        try:
+            json_data = json.dumps({'bot_meta': race.bot_meta}, cls=DjangoJSONEncoder)
+        except ValueError:
+            raise SafeException('Data provided is not serializable.')
+        if len(json_data) > 2048:
+            raise SafeException('Data provided is too large to save.')
+
+        race.version = F('version') + 1
+        race.save()
+
+
 actions = {
     action.name: action
     for action in [
@@ -221,6 +241,7 @@ actions = {
         BotRemoveMonitor,
         BotOverrideStream,
         BotSetInfo,
+        BotSetMeta,
     ]
 }
 
