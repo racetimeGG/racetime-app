@@ -81,6 +81,12 @@ class Race(models.Model):
         related_name='opened_races',
         null=True,
     )
+    opened_by_bot = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+        help_text='Name of the bot that opened this race, if any.',
+    )
     opened_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -319,6 +325,7 @@ class Race(models.Model):
             'opened_at': self.opened_at,
             'started_at': self.started_at,
             'time_limit': self.time_limit,
+            'opened_by_bot': self.opened_by_bot,
         }
         if include_category:
             summary['category'] = self.category.api_dict_summary()
@@ -401,6 +408,7 @@ class Race(models.Model):
             'streaming_required': self.streaming_required,
             'auto_start': self.auto_start,
             'opened_by': self.opened_by.api_dict_summary(race=self) if self.opened_by else None,
+            'opened_by_bot': self.opened_by_bot,
             'monitors': [user.api_dict_summary(race=self) for user in self.monitors.all()],
             'recordable': self.recordable,
             'recorded': self.recorded,
@@ -1456,6 +1464,7 @@ class Race(models.Model):
                 custom_goal=self.custom_goal,
                 slug=self.category.generate_race_slug(),
                 opened_by=user,
+                opened_by_bot=self.opened_by_bot,
                 unlisted=self.unlisted,
                 recordable=not self.custom_goal,
                 start_delay=self.start_delay,
