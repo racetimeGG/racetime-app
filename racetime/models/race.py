@@ -274,6 +274,7 @@ class Race(models.Model):
     )
     bot_meta = models.JSONField(
         default=dict,
+        blank=True,
     )
     bot_pid = models.PositiveIntegerField(
         null=True,
