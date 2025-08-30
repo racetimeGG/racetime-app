@@ -1,7 +1,7 @@
 #!/bin/sh
 
 for host in $WAITFOR; do
-    ./.docker/wait-for $host
+    ./.docker/wait-for-it.sh $host
 done
 
 if [ -n "$RUNMIGRATIONS" ]; then
