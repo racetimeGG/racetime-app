@@ -51,13 +51,11 @@ environment, so it's probably better to use something like
 
 #### Binding a different port number
 
-The `docker-compose.yml` file attaches the web container to port 8000 by
-default. If you need to override this, create a `docker-compose.override.yml`
+The `compose.yml` file attaches the web container to port 8000 by
+default. If you need to override this, create a `compose.override.yml`
 file with the following contents:
 
 ```yaml
-version: '3.6'
-
 services:
   racetime.web:
     ports:
@@ -69,12 +67,10 @@ Replace `<LOCAL>` with whatever port number you'd like.
 #### Expose the database port
 
 If you'd like to use a fancy client app to browse the database, you can set up
-a `docker-compose.override.yml` file to expose the database port to your local
+a `compose.override.yml` file to expose the database port to your local
 machine:
 
 ```yaml
-version: '3.6'
-
 services:
   racetime.db:
     ports:
