@@ -1,8 +1,10 @@
 import random
+from datetime import timedelta
 
 from django.core.cache import cache
 from django.db.models import signals
 from django.dispatch import receiver
+from django.utils import timezone
 
 from . import models
 
@@ -27,12 +29,16 @@ def set_discriminator(sender, instance, **kwargs):
 
 @receiver(signals.post_save)
 def invalidate_caches(sender, instance, **kwargs):
+    cache_window = timezone.now() - timedelta(days=1)
     if sender == models.Category:
-        races = instance.race_set.all()
+        races = instance.race_set.filter(opened_at__gte=cache_window).select_related('category')
     elif sender == models.Entrant:
         races = [instance.race]
     elif sender == models.Goal:
-        races = instance.category.race_set.filter(goal=instance).all()
+        races = instance.category.race_set.filter(
+            goal=instance,
+            opened_at__gte=cache_window,
+        ).select_related('category')
     elif sender == models.Race:
         races = [instance]
     else:
