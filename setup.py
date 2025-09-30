@@ -5,7 +5,7 @@ setup(
     name='racetime',
     install_requires=[
         'asgiref>=3.5,<4.0',
-        'beautifulsoup4>=4.11,<4.14',
+        'beautifulsoup4>=4.11,<4.15',
         'channels[daphne]>=4.0,<5.0',
         'Django>=5.2,<5.3',
         'django-admin-list-filter-dropdown',
