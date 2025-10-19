@@ -887,3 +887,15 @@ def twitch_auth_url(request):
         'force_verify': 'true',
         'state': request.META.get('CSRF_COOKIE'),
     })
+
+
+def youtube_auth_url(request):
+    return 'https://accounts.google.com/o/oauth2/v2/auth?' + urlencode({
+        'client_id': settings.YOUTUBE_CLIENT_ID,
+        'redirect_uri': settings.RT_SITE_URI + reverse('youtube_auth'),
+        'response_type': 'code',
+        'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+        'access_type': 'offline',
+        'prompt': 'consent',
+        'state': request.META.get('CSRF_COOKIE'),
+    })

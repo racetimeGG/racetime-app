@@ -25,7 +25,7 @@ from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
+from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url, youtube_auth_url
 
 
 class ViewProfile(UserMixin, generic.DetailView):
@@ -373,6 +373,7 @@ class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView
             'authorized_tokens': self.get_authorized_tokens(),
             'patreon_url': patreon_auth_url(self.request),
             'twitch_url': twitch_auth_url(self.request),
+            'youtube_url': youtube_auth_url(self.request),
         }
 
 
@@ -561,6 +562,125 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
             messages.success(
                 self.request,
                 'Your Twitch.tv account is no longer connected.'
+            )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class YouTubeAuth(LoginRequiredMixin, UserMixin, generic.View):
+    csrf_protect = decorator_from_middleware(CsrfViewMiddlewareTwitch)
+
+    @method_decorator(csrf_protect)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        if self.user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot change your YouTube account whilst entered '
+                'in an active race.'
+            )
+        else:
+            code = request.GET.get('code')
+            if code:
+                user = self.user
+
+                try:
+                    # Exchange authorization code for tokens
+                    resp = requests.post('https://oauth2.googleapis.com/token', data={
+                        'client_id': settings.YOUTUBE_CLIENT_ID,
+                        'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                        'code': code,
+                        'grant_type': 'authorization_code',
+                        'redirect_uri': settings.RT_SITE_URI + reverse('youtube_auth'),
+                    })
+                    
+                    if resp.status_code != 200:
+                        raise requests.RequestException(f"Token exchange failed: {resp.status_code}")
+                    
+                    token_data = resp.json()
+                    access_token = token_data.get('access_token')
+                    
+                    if not access_token:
+                        raise ValueError("No access token in response")
+                    
+                    # Store the full token response
+                    user.youtube_token_data = token_data
+                    
+                    # Get channel info using the YouTube Data API v3
+                    resp = requests.get('https://www.googleapis.com/youtube/v3/channels', params={
+                        'part': 'id,snippet',
+                        'mine': 'true',
+                        'access_token': access_token,
+                    })
+                    
+                    if resp.status_code != 200:
+                        raise requests.RequestException(f"YouTube API returned {resp.status_code}")
+
+                except requests.RequestException as ex:
+                    notice_exception(ex)
+                    messages.error(
+                        request,
+                        'Something went wrong with the YouTube API. Please try '
+                        'again later',
+                    )
+                else:
+                    try:
+                        data = resp.json().get('items', [])
+                        if not data:
+                            raise ValueError("No channel found")
+                        channel_data = data[0]
+                    except (ValueError, KeyError, IndexError):
+                        messages.error(
+                            request,
+                            'Unable to retrieve your YouTube channel information. '
+                            'Please make sure you have a YouTube channel.',
+                        )
+                        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+                    channel_id = channel_data.get('id')
+                    if models.User.objects.filter(
+                        youtube_id=channel_id,
+                    ).exclude(id=user.id).exists():
+                        messages.error(
+                            request,
+                            'Your YouTube account is already connected to another '
+                            'racetime.gg user account.',
+                        )
+                    else:
+                        user.youtube_id = channel_id
+                        user.save()
+                        user.log_action('youtube_auth', self.request)
+
+                        messages.success(
+                            self.request,
+                            'Thanks, you have successfully authorized your YouTube '
+                            'account. You can now join races that require streaming.',
+                        )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class YouTubeDisconnect(LoginRequiredMixin, UserMixin, generic.View):
+    def post(self, request):
+        user = self.user
+
+        if user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot disconnect your YouTube account whilst '
+                'entered in an active race.'
+            )
+        else:
+            user.youtube_token_data = None
+            user.youtube_id = None
+            user.save()
+            user.log_action('youtube_disconnect', self.request)
+
+            messages.success(
+                self.request,
+                'Your YouTube account has been disconnected.',
             )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))

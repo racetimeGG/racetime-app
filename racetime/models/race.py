@@ -909,7 +909,7 @@ class Race(models.Model):
         entrant = self.in_race(user)
         if entrant:
             return entrant.available_actions
-        elif self.is_preparing and (not self.streaming_required or user.twitch_channel):
+        elif self.is_preparing and (not self.streaming_required or user.twitch_channel or user.youtube_channel):
             actions = []
             if self.state == RaceStates.open.value:
                 actions.append('join')
@@ -926,7 +926,7 @@ class Race(models.Model):
             user.is_authenticated
             and not user.is_banned_from_category(self.category)
             and not self.in_race(user)
-            and (not self.streaming_required or user.twitch_channel)
+            and (not self.streaming_required or user.twitch_channel or user.youtube_channel)
             and not user.active_race_entrant
         )
 

@@ -31,6 +31,31 @@
                 {% endif %}
             </span>
         {% endif %}
+        {% if not race.is_done and entrant.user.youtube_channel %}
+            <span class="stream">
+                {% if entrant.stream_live %}
+                    {% if not race.is_anonymous %}
+                        <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream online">
+                            <img src="{% static 'racetime/image/youtube.svg' %}" alt="YouTube">
+                        </a>
+                    {% else %}
+                        <span title="Stream online">
+                            <img src="{% static 'racetime/image/youtube.svg' %}" alt="YouTube">
+                        </span>
+                    {% endif %}
+                {% else %}
+                    {% if not race.is_anonymous %}
+                        <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream offline">
+                            <img src="{% static 'racetime/image/youtube_offline.svg' %}" alt="YouTube">
+                        </a>
+                    {% else %}
+                        <span title="Stream offline">
+                            <img src="{% static 'racetime/image/youtube_offline.svg' %}" alt="YouTube">
+                        </span>
+                    {% endif %}
+                {% endif %}
+            </span>
+        {% endif %}
         {% if entrant.comment %}
             <span class="comment {% if not race.comments_visible %}hidden{% endif %}">
                 <i class="material-icons">more</i>

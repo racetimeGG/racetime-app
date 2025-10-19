@@ -1,3 +1,4 @@
+import json
 import requests
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -234,6 +235,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         editable=False,
     )
+    youtube_id = models.CharField(
+        max_length=50,
+        null=True,
+        editable=False,
+        help_text='YouTube channel ID'
+    )
+    youtube_code = models.TextField(
+        null=True,
+        editable=False,
+        help_text='YouTube OAuth token data (JSON)'
+    )
     favourite_categories = models.ManyToManyField(
         to='Category',
         related_name='+',
@@ -382,6 +394,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         if self.twitch_login:
             return f'https://www.twitch.tv/{self.twitch_login}'
+
+    @property
+    def youtube_channel(self):
+        """
+        Return the full URI of the user's YouTube channel, or none if they have
+        no connected account.
+        """
+        if self.youtube_id:
+            return f'https://www.youtube.com/channel/{self.youtube_id}'
         return None
 
     @property
@@ -414,6 +435,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'twitch_name': self.twitch_login,
             'twitch_display_name': self.twitch_name,
             'twitch_channel': self.twitch_channel,
+            'youtube_channel': self.youtube_channel,
             'can_moderate': can_moderate,
         }
 
@@ -497,6 +519,45 @@ class User(AbstractBaseUser, PermissionsMixin):
             'redirect_uri': settings.RT_SITE_URI + reverse('twitch_auth'),
         })
         return resp.json().get('access_token')
+
+    @property
+    def youtube_token_data(self):
+        """Get YouTube token data as a dictionary."""
+        if not self.youtube_code:
+            return None
+        try:
+            if isinstance(self.youtube_code, dict):
+                return self.youtube_code
+            return json.loads(self.youtube_code)
+        except (json.JSONDecodeError, TypeError):
+            return None
+    
+    @youtube_token_data.setter
+    def youtube_token_data(self, value):
+        """Set YouTube token data, converting to JSON string."""
+        if value is None:
+            self.youtube_code = None
+        elif isinstance(value, dict):
+            self.youtube_code = json.dumps(value)
+        else:
+            self.youtube_code = str(value)
+
+    def youtube_access_token(self):
+        """
+        Get the stored YouTube access token, refreshing if necessary.
+        """
+        token_data = self.youtube_token_data
+        if not token_data or not isinstance(token_data, dict):
+            return None
+            
+        access_token = token_data.get('access_token')
+        
+        if not access_token:
+            return None
+            
+        # For now, return the stored access token
+        # TODO: Add token expiration checking and refresh logic
+        return access_token
 
     def __str__(self):
         if self.use_discriminator:
