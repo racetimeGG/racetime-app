@@ -713,6 +713,44 @@ class Race(models.Model):
         """
         return timer_html(self.timer)
 
+    def validate_youtube_streaming(self, user):
+        """
+        Validate and refresh YouTube streaming connection for a user.
+        
+        Returns True if YouTube was disconnected due to token issues.
+        Raises SafeException if user cannot participate due to streaming requirements.
+        """
+        if not (self.streaming_required and user.youtube_channel):
+            return False
+            
+        youtube_was_disconnected = False
+        
+        if not user.youtube_refresh_token_valid():
+            # Disconnect expired YouTube connection
+            user.disconnect_youtube()
+            youtube_was_disconnected = True
+            
+            # If they don't have Twitch either, prevent accepting
+            if not user.twitch_channel:
+                raise SafeException(
+                    'The user\'s YouTube connection has expired and has been disconnected. '
+                    'They need to reconnect their YouTube account to join races that require streaming.'
+                )
+        else:
+            # Refresh access token immediately to ensure it's fresh for racebot
+            access_token = user.youtube_access_token()
+            if not access_token:
+                user.disconnect_youtube()
+                youtube_was_disconnected = True
+                
+                # If they don't have Twitch either, prevent accepting
+                if not user.twitch_channel:
+                    raise SafeException(
+                        'The user\'s YouTube connection has expired. They need to reconnect their YouTube account to join this race.'
+                    )
+        
+        return youtube_was_disconnected
+
     def refresh(self):
         """
         Refresh this race object, fetching new data and clearing cached
@@ -1578,33 +1616,7 @@ class Race(models.Model):
             self.state == RaceStates.invitational.value
             and self.can_monitor(user)
         )):
-            youtube_was_disconnected = False
-            
-            # If streaming is required and user has YouTube, refresh token immediately
-            if self.streaming_required and user.youtube_channel:
-                if not user.youtube_refresh_token_valid():
-                    # Disconnect expired YouTube connection
-                    user.disconnect_youtube()
-                    youtube_was_disconnected = True
-                    
-                    # If they don't have Twitch either, prevent joining
-                    if not user.twitch_channel:
-                        raise SafeException(
-                            'Your YouTube connection has expired and has been disconnected. '
-                            'Please reconnect your YouTube account to join races that require streaming.'
-                        )
-                else:
-                    # Refresh access token immediately to ensure it's fresh for racebot
-                    access_token = user.youtube_access_token()
-                    if not access_token:
-                        user.disconnect_youtube()
-                        youtube_was_disconnected = True
-                        
-                        # If they don't have Twitch either, prevent joining
-                        if not user.twitch_channel:
-                            raise SafeException(
-                                'Your YouTube connection has expired. Please reconnect your YouTube account to join this race.'
-                            )
+            youtube_was_disconnected = self.validate_youtube_streaming(user)
             
             with atomic():
                 entrant = self.entrant_set.create(
@@ -2072,33 +2084,7 @@ class Entrant(models.Model):
         Accept this entry if it is in invited state.
         """
         if self.state == EntrantStates.invited.value:
-            youtube_was_disconnected = False
-            
-            # If streaming is required and user has YouTube, validate and refresh token
-            if self.race.streaming_required and self.user.youtube_channel:
-                if not self.user.youtube_refresh_token_valid():
-                    # Disconnect expired YouTube connection
-                    self.user.disconnect_youtube()
-                    youtube_was_disconnected = True
-                    
-                    # If they don't have Twitch either, prevent accepting
-                    if not self.user.twitch_channel:
-                        raise SafeException(
-                            'Your YouTube connection has expired and has been disconnected. '
-                            'Please reconnect your YouTube account to join races that require streaming.'
-                        )
-                else:
-                    # Refresh access token immediately to ensure it's fresh for racebot
-                    access_token = self.user.youtube_access_token()
-                    if not access_token:
-                        self.user.disconnect_youtube()
-                        youtube_was_disconnected = True
-                        
-                        # If they don't have Twitch either, prevent accepting
-                        if not self.user.twitch_channel:
-                            raise SafeException(
-                                'Your YouTube connection has expired. Please reconnect your YouTube account to join this race.'
-                            )
+            youtube_was_disconnected = self.race.validate_youtube_streaming(self.user)
             
             with atomic():
                 self.state = EntrantStates.joined.value
@@ -2430,33 +2416,7 @@ class Entrant(models.Model):
         Accept a join request.
         """
         if self.state == EntrantStates.requested.value:
-            youtube_was_disconnected = False
-            
-            # If streaming is required and user has YouTube, validate and refresh token
-            if self.race.streaming_required and self.user.youtube_channel:
-                if not self.user.youtube_refresh_token_valid():
-                    # Disconnect expired YouTube connection
-                    self.user.disconnect_youtube()
-                    youtube_was_disconnected = True
-                    
-                    # If they don't have Twitch either, prevent accepting
-                    if not self.user.twitch_channel:
-                        raise SafeException(
-                            'The user\'s YouTube connection has expired and has been disconnected. '
-                            'They need to reconnect their YouTube account to join races that require streaming.'
-                        )
-                else:
-                    # Refresh access token immediately to ensure it's fresh for racebot
-                    access_token = self.user.youtube_access_token()
-                    if not access_token:
-                        self.user.disconnect_youtube()
-                        youtube_was_disconnected = True
-                        
-                        # If they don't have Twitch either, prevent accepting
-                        if not self.user.twitch_channel:
-                            raise SafeException(
-                                'The user\'s YouTube connection has expired. They need to reconnect their YouTube account to join this race.'
-                            )
+            youtube_was_disconnected = self.race.validate_youtube_streaming(self.user)
             
             self.state = EntrantStates.joined.value
             with atomic():

@@ -1,4 +1,3 @@
-import json
 import requests
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -241,7 +240,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         editable=False,
         help_text='YouTube channel ID'
     )
-    youtube_code = models.TextField(
+    youtube_code = models.JSONField(
         null=True,
         editable=False,
         help_text='YouTube OAuth token data (JSON)'
@@ -520,36 +519,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         })
         return resp.json().get('access_token')
 
-    @property
-    def youtube_token_data(self):
-        """Get YouTube token data as a dictionary."""
-        if not self.youtube_code:
-            return None
-        try:
-            return json.loads(self.youtube_code)
-        except (json.JSONDecodeError, TypeError):
-            return None
-    
-    @youtube_token_data.setter
-    def youtube_token_data(self, value):
-        """Set YouTube token data, converting to JSON string."""
-        if value is None:
-            self.youtube_code = None
-        else:
-            self.youtube_code = json.dumps(value)
-
     def youtube_access_token(self):
         """
         Get a valid YouTube access token, refreshing if necessary.
         Returns None if refresh token is expired or invalid.
         """
-        token_data = self.youtube_token_data
-        if not token_data:
+        if not self.youtube_code:
             return None
             
-        access_token = token_data.get('access_token')
-        refresh_token = token_data.get('refresh_token')
-        expires_at = token_data.get('expires_at')
+        access_token = self.youtube_code.get('access_token')
+        refresh_token = self.youtube_code.get('refresh_token')
+        expires_at = self.youtube_code.get('expires_at')
         
         if not access_token or not refresh_token:
             return None
@@ -574,19 +554,18 @@ class User(AbstractBaseUser, PermissionsMixin):
                 
                 if new_access_token:
                     # Update token data with new access token
-                    token_data['access_token'] = new_access_token
+                    self.youtube_code['access_token'] = new_access_token
                     
                     # Update expiration timestamps if provided
                     if 'expires_in' in new_token_data:
-                        token_data['expires_at'] = current_time + new_token_data['expires_in']
+                        self.youtube_code['expires_at'] = current_time + new_token_data['expires_in']
                     
                     # Update refresh token and its expiration if provided (though usually not provided in refresh response)
                     if 'refresh_token' in new_token_data:
-                        token_data['refresh_token'] = new_token_data['refresh_token']
+                        self.youtube_code['refresh_token'] = new_token_data['refresh_token']
                         if 'refresh_token_expires_in' in new_token_data:
-                            token_data['refresh_token_expires_at'] = current_time + new_token_data['refresh_token_expires_in']
+                            self.youtube_code['refresh_token_expires_at'] = current_time + new_token_data['refresh_token_expires_in']
                     
-                    self.youtube_token_data = token_data
                     self.save(update_fields=['youtube_code'])
                     
                     return new_access_token
@@ -607,16 +586,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         Google provides refresh_token_expires_in in their OAuth response,
         so we can check the timestamp to see if it's still valid.
         """
-        token_data = self.youtube_token_data
-        if not token_data:
+        if not self.youtube_code:
             return False
             
-        refresh_token = token_data.get('refresh_token')
+        refresh_token = self.youtube_code.get('refresh_token')
         if not refresh_token:
             return False
         
         # Check if refresh token has expired or is within 10 minutes of expiring
-        refresh_expires_at = token_data.get('refresh_token_expires_at')
+        refresh_expires_at = self.youtube_code.get('refresh_token_expires_at')
         if refresh_expires_at:
             current_time = timezone.now().timestamp()
             # Add 10 minute buffer (600 seconds) to prevent race conditions
