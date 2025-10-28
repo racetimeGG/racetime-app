@@ -605,6 +605,13 @@ class YouTubeAuth(LoginRequiredMixin, UserMixin, generic.View):
                     if not access_token:
                         raise ValueError("No access token in response")
                     
+                    # Add expiration timestamps for both access and refresh tokens
+                    current_time = timezone.now().timestamp()
+                    if 'expires_in' in token_data:
+                        token_data['expires_at'] = current_time + token_data['expires_in']
+                    if 'refresh_token_expires_in' in token_data:
+                        token_data['refresh_token_expires_at'] = current_time + token_data['refresh_token_expires_in']
+                    
                     # Store the full token response
                     user.youtube_token_data = token_data
                     

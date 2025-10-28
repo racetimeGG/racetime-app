@@ -346,23 +346,23 @@ class RaceBot:
 
     def get_youtube_access_token(self, user):
         """Get a valid YouTube access token for the user."""
+        if not user.youtube_code:
+            return None
+        
+        # Get token using the updated method (will refresh if needed)
+        # Note: Token should be fresh since it was refreshed when user joined the race
         try:
-            if not user.youtube_code:
+            token = user.youtube_access_token()
+            if token:
+                return token
+            else:
+                # Token couldn't be refreshed, disconnect user
+                self.logger.warning(f'[YouTube] Could not refresh token for user {user.name}, disconnecting')
+                user.disconnect_youtube()
                 return None
-            
-            # Get token using the updated method
-            try:
-                token = user.youtube_access_token()
-                if token:
-                    return token
-                else:
-                    return None
-            except Exception as token_ex:
-                self.logger.warning(f'[YouTube] Error getting access token for user {user.name}: {token_ex}')
-                return None
-            
         except Exception as ex:
-            self.logger.warning(f'[YouTube] Failed to get access token for user {user.name}: {ex}')
+            self.logger.warning(f'[YouTube] Error getting access token for user {user.name}: {ex}')
+            user.disconnect_youtube()
             return None
 
     def check_youtube_user_live_status(self, user):
@@ -388,10 +388,11 @@ class RaceBot:
             data = resp.json()
             items = data.get("items", [])
             
-            # Filter for live broadcasts (lifeCycleStatus = "live")
+            # Filter for live broadcasts that are public (lifeCycleStatus = "live" and privacy = "public")
             live_broadcasts = [
                 item for item in items 
-                if item.get("status", {}).get("lifeCycleStatus") == "live"
+                if (item.get("status", {}).get("lifeCycleStatus") == "live" and
+                    item.get("status", {}).get("privacyStatus") == "public")
             ]
             
             is_live = len(live_broadcasts) > 0
@@ -412,20 +413,15 @@ class RaceBot:
         entrants = {}
 
         # Get all entrants with YouTube IDs and token data
-        try:
-            entrants_query = models.Entrant.objects.filter(
-                race__in=[race['object'] for race in self.races],
-                user__youtube_id__isnull=False,
-                user__youtube_code__isnull=False,  # Must have token data
-                state=models.EntrantStates.joined.value,
-            ).select_related('user')
-            
-            for entrant in entrants_query:
-                entrants[entrant.user.youtube_id] = entrant
-        except Exception as ex:
-            # This will happen if youtube_id or youtube_code fields don't exist yet
-            self.logger.debug(f'[YouTube] YouTube fields not yet added to User model: {ex}')
-            return
+        entrants_query = models.Entrant.objects.filter(
+            race__in=[race['object'] for race in self.races],
+            user__youtube_id__isnull=False,
+            user__youtube_code__isnull=False,  # Must have token data
+            state=models.EntrantStates.joined.value,
+        ).select_related('user')
+        
+        for entrant in entrants_query:
+            entrants[entrant.user.youtube_id] = entrant
 
         if not entrants:
             self.logger.debug('[YouTube] No entrants to check.')
