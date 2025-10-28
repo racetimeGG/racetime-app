@@ -6,55 +6,47 @@
     </span>
     <span class="user">
         {% include 'racetime/pops/user.html' with user=entrant.user_display extra_class='inline' %}
-        {% if not race.is_done and entrant.user.twitch_channel %}
-            <span class="stream">
-                {% if entrant.stream_live %}
-                    {% if not race.is_anonymous %}
-                        <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream online">
-                            <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
-                        </a>
-                    {% else %}
+        {% if not race.is_done and (entrant.user.twitch_channel or entrant.user.youtube_channel) %}
+            {% if race.is_anonymous %}
+                <span class="stream">
+                    {% if entrant.stream_live %}
                         <span title="Stream online">
-                            <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
+                            <i class="material-icons">hangout_video</i>
                         </span>
-                    {% endif %}
-                {% else %}
-                    {% if not race.is_anonymous %}
-                        <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream offline">
-                            <img src="{% static 'racetime/image/twitch_offline.svg' %}" alt="Twitch.tv">
-                        </a>
                     {% else %}
                         <span title="Stream offline">
-                            <img src="{% static 'racetime/image/twitch_offline.svg' %}"  alt="Twitch.tv">
+                            <i class="material-icons">hangout_video_off</i>
                         </span>
                     {% endif %}
+                </span>
+            {% else %}
+                {% if entrant.user.twitch_channel %}
+                    <span class="stream">
+                        {% if entrant.stream_live %}
+                            <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream online">
+                                <img src="{% static 'racetime/image/twitch.svg' %}" alt="Twitch.tv">
+                            </a>
+                        {% else %}
+                            <a href="{{ entrant.user.twitch_channel }}" target="_blank" title="Stream offline">
+                                <img src="{% static 'racetime/image/twitch_offline.svg' %}" alt="Twitch.tv">
+                            </a>
+                        {% endif %}
+                    </span>
                 {% endif %}
-            </span>
-        {% endif %}
-        {% if not race.is_done and entrant.user.youtube_channel %}
-            <span class="stream">
-                {% if entrant.stream_live %}
-                    {% if not race.is_anonymous %}
-                        <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream online">
-                            <img src="{% static 'racetime/image/youtube.svg' %}" alt="YouTube">
-                        </a>
-                    {% else %}
-                        <span title="Stream online">
-                            <img src="{% static 'racetime/image/youtube.svg' %}" alt="YouTube">
-                        </span>
-                    {% endif %}
-                {% else %}
-                    {% if not race.is_anonymous %}
-                        <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream offline">
-                            <img src="{% static 'racetime/image/youtube_offline.svg' %}" alt="YouTube">
-                        </a>
-                    {% else %}
-                        <span title="Stream offline">
-                            <img src="{% static 'racetime/image/youtube_offline.svg' %}" alt="YouTube">
-                        </span>
-                    {% endif %}
+                {% if entrant.user.youtube_channel %}
+                    <span class="stream">
+                        {% if entrant.stream_live %}
+                            <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream online">
+                                <img src="{% static 'racetime/image/youtube.svg' %}" alt="YouTube">
+                            </a>
+                        {% else %}
+                            <a href="{{ entrant.user.youtube_channel }}" target="_blank" title="Stream offline">
+                                <img src="{% static 'racetime/image/youtube_offline.svg' %}" alt="YouTube">
+                            </a>
+                        {% endif %}
+                    </span>
                 {% endif %}
-            </span>
+            {% endif %}
         {% endif %}
         {% if entrant.comment %}
             <span class="comment {% if not race.comments_visible %}hidden{% endif %}">
