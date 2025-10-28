@@ -647,6 +647,44 @@ class YouTubeAuth(LoginRequiredMixin, UserMixin, generic.View):
                         return http.HttpResponseRedirect(reverse('edit_account_connections'))
 
                     channel_id = channel_data.get('id')
+                    
+                    # Check if the channel is allowed to stream (YouTube 24-hour holding period check)
+                    livestream_resp = requests.get('https://www.googleapis.com/youtube/v3/liveBroadcasts', params={
+                        'part': 'id,status',
+                        'mine': 'true',
+                        'maxResults': 1,
+                        'access_token': access_token,
+                    })
+                    
+                    if livestream_resp.status_code == 403:
+                        # Check the specific error to see if it's due to streaming restrictions
+                        error_data = livestream_resp.json()
+                        error_reason = error_data.get('error', {}).get('errors', [{}])[0].get('reason', '')
+                        
+                        if error_reason == 'liveStreamingNotEnabled':
+                            messages.error(
+                                request,
+                                'Your YouTube channel is not enabled for live streaming. '
+                                'You must enable live streaming on your YouTube channel and wait '
+                                'for the 24-hour verification period before connecting your account.',
+                            )
+                            return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                        elif error_reason == 'insufficientPermissions':
+                            messages.error(
+                                request,
+                                'Your YouTube channel does not have sufficient permissions for live streaming. '
+                                'Please ensure your channel meets YouTube\'s live streaming requirements.',
+                            )
+                            return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                    elif livestream_resp.status_code != 200:
+                        # Some other API error occurred
+                        messages.error(
+                            request,
+                            'Unable to verify your YouTube streaming capability. '
+                            'Please try again later or contact support if the problem persists.',
+                        )
+                        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                    
                     if models.User.objects.filter(
                         youtube_id=channel_id,
                     ).exclude(id=user.id).exists():
