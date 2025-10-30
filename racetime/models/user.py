@@ -405,6 +405,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         return None
 
     @property
+    def any_channel(self):
+        """
+        Return True if the user has any connected streaming channel.
+        """
+        return bool(self.twitch_channel or self.youtube_channel)
+
+    @property
     def use_discriminator(self):
         """
         Determine if the user's discriminator should be displayed.

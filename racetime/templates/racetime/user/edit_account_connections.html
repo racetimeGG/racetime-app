@@ -11,6 +11,9 @@
         height: 22px;
         margin-right: 5px;
     }
+    .division h4:not(:first-of-type) {
+        margin-top: 20px;
+    }
     </style>
 {% endblock %}
 {% block title %}
@@ -43,7 +46,7 @@
                 </p>
                 <form action="{% url 'twitch_disconnect' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn dangerous">Disconnect account</button>
+                    <button type="submit" class="btn dangerous">Disconnect Twitch account</button>
                 </form>
             {% else %}
                 <p class="help">
@@ -71,7 +74,7 @@
                 </p>
                 <form action="{% url 'youtube_disconnect' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn dangerous">Disconnect account</button>
+                    <button type="submit" class="btn dangerous">Disconnect YouTube account</button>
                 </form>
             {% else %}
                 <p class="help">
@@ -114,7 +117,7 @@
             </form>
             <form action="{% url 'patreon_disconnect' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn dangerous">Disconnect account</button>
+                <button type="submit" class="btn dangerous">Disconnect Patreon account</button>
             </form>
         {% else %}
             <p>

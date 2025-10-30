@@ -733,8 +733,8 @@ class Race(models.Model):
             # If they don't have Twitch either, prevent accepting
             if not user.twitch_channel:
                 raise SafeException(
-                    'The user\'s YouTube connection has expired and has been disconnected. '
-                    'They need to reconnect their YouTube account to join races that require streaming.'
+                    'Your YouTube connection has expired and has been disconnected. '
+                    'You need to reconnect your YouTube account to join races that require streaming.'
                 )
         else:
             # Refresh access token immediately to ensure it's fresh for racebot
@@ -1632,11 +1632,11 @@ class Race(models.Model):
             
             # If YouTube was disconnected, inform the user
             if youtube_was_disconnected:
-                self.add_message(
-                    'Your YouTube connection has expired and has been disconnected.',
-                    user=user,
+                message = self.message_set.create(
                     direct_to=user,
+                    message='Your YouTube connection has expired and has been disconnected. Visit Settings to re-connect your account.',
                 )
+                message.broadcast()
         else:
             raise SafeException('You are not eligible to join this race.')
 

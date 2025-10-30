@@ -16,6 +16,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import decorator_from_middleware, method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.safestring import mark_safe
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -664,9 +665,12 @@ class YouTubeAuth(LoginRequiredMixin, UserMixin, generic.View):
                         if error_reason == 'liveStreamingNotEnabled':
                             messages.error(
                                 request,
-                                'Your YouTube channel is not enabled for live streaming. '
-                                'You must enable live streaming on your YouTube channel and wait '
-                                'for the 24-hour verification period before connecting your account.',
+                                mark_safe(
+                                    'Your YouTube channel is not enabled for live streaming. '
+                                    'You must enable live streaming on your YouTube channel and wait '
+                                    'for the 24-hour verification period before connecting your account. '
+                                    'You can verify your channel at <a href="https://www.youtube.com/verify" target="_blank" rel="noopener">https://www.youtube.com/verify</a>.'
+                                ),
                             )
                             return http.HttpResponseRedirect(reverse('edit_account_connections'))
                         elif error_reason == 'insufficientPermissions':

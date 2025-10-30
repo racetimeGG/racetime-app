@@ -6,7 +6,7 @@
     </span>
     <span class="user">
         {% include 'racetime/pops/user.html' with user=entrant.user_display extra_class='inline' %}
-        {% if not race.is_done and (entrant.user.twitch_channel or entrant.user.youtube_channel) %}
+        {% if not race.is_done and entrant.user.any_channel %}
             {% if race.is_anonymous %}
                 <span class="stream">
                     {% if entrant.stream_live %}
