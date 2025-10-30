@@ -4,6 +4,3 @@ django-cors-headers
 django-extensions
 django-debug-toolbar
 mysqlclient
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib

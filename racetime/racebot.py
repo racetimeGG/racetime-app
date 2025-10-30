@@ -8,9 +8,6 @@ import requests
 from django.conf import settings
 from django.db.models import F
 from django.utils import timezone
-from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
-import google.oauth2.credentials
 
 from . import models
 from .utils import chunkify, notice_exception
