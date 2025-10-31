@@ -358,6 +358,8 @@ class Race(models.Model):
                 'comment': entrant.comment if self.comments_visible else None,
                 'has_comment': bool(entrant.comment),
                 'stream_live': entrant.stream_live,
+                'twitch_live': entrant.twitch_live,
+                'youtube_live': entrant.youtube_live,
                 'stream_override': entrant.stream_override,
                 'actions': entrant.available_actions,
             }
@@ -1931,6 +1933,12 @@ class Entrant(models.Model):
     stream_live = models.BooleanField(
         default=False,
     )
+    twitch_live = models.BooleanField(
+        default=False,
+    )
+    youtube_live = models.BooleanField(
+        default=False,
+    )
     stream_override = models.BooleanField(
         default=False,
     )
@@ -1991,6 +1999,52 @@ class Entrant(models.Model):
     @property
     def place_ordinal(self):
         return ordinal(self.place) if self.place else None
+
+    @property
+    def preferred_stream_info(self):
+        """
+        Return information about the preferred streaming platform to display.
+        
+        Priority logic:
+        1. If either platform is live, prioritize Twitch if both are live
+        2. If neither is live, prioritize Twitch if available, otherwise YouTube
+        
+        Returns dict with keys: platform ('twitch' or 'youtube'), is_live (bool), url (str)
+        Returns None if user has no streaming channels.
+        """
+        if not (self.user.twitch_channel or self.user.youtube_channel):
+            return None
+            
+        # If either platform is live, prioritize Twitch if both are live
+        if self.twitch_live or self.youtube_live:
+            if self.twitch_live and self.user.twitch_channel:
+                return {
+                    'platform': 'twitch',
+                    'is_live': True,
+                    'url': self.user.twitch_channel
+                }
+            elif self.youtube_live and self.user.youtube_channel:
+                return {
+                    'platform': 'youtube',
+                    'is_live': True,
+                    'url': self.user.youtube_channel
+                }
+        
+        # Neither platform is live, prioritize Twitch if available
+        if self.user.twitch_channel:
+            return {
+                'platform': 'twitch',
+                'is_live': False,
+                'url': self.user.twitch_channel
+            }
+        elif self.user.youtube_channel:
+            return {
+                'platform': 'youtube',
+                'is_live': False,
+                'url': self.user.youtube_channel
+            }
+        
+        return None
 
     @property
     def summary(self):

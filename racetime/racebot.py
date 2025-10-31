@@ -310,8 +310,11 @@ class RaceBot:
                     entrant_is_live = twitch_id in live_users
                     if entrant:
                         user = entrant.user
-                        if entrant.stream_live != entrant_is_live:
-                            entrant.stream_live = entrant_is_live
+                        # Update twitch_live field and combined stream_live field
+                        if entrant.twitch_live != entrant_is_live:
+                            entrant.twitch_live = entrant_is_live
+                            # Update combined stream_live to be true if either platform is live
+                            entrant.stream_live = entrant_is_live or entrant.youtube_live
                             entrants_to_update.append(entrant)
                             if entrant.race not in races_to_reload:
                                 races_to_reload.append(entrant.race)
@@ -328,7 +331,7 @@ class RaceBot:
         if entrants_to_update:
             models.Entrant.objects.bulk_update(
                 entrants_to_update,
-                ['stream_live'],
+                ['stream_live', 'twitch_live'],
             )
             self.logger.info(
                 '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
@@ -435,8 +438,11 @@ class RaceBot:
             if is_live:
                 any_streams_live = True
                 
-            if entrant.stream_live != is_live:
-                entrant.stream_live = is_live
+            # Update youtube_live field and combined stream_live field
+            if entrant.youtube_live != is_live:
+                entrant.youtube_live = is_live
+                # Update combined stream_live to be true if either platform is live
+                entrant.stream_live = entrant.twitch_live or is_live
                 entrants_to_update.append(entrant)
                 if entrant.race not in races_to_reload:
                     races_to_reload.append(entrant.race)
@@ -447,7 +453,7 @@ class RaceBot:
         if entrants_to_update:
             models.Entrant.objects.bulk_update(
                 entrants_to_update,
-                ['stream_live'],
+                ['stream_live', 'youtube_live'],
             )
             self.logger.info(
                 '[YouTube] Updated %(entrants)d entrant(s) in %(races)d race(s).'
