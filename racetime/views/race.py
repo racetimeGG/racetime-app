@@ -23,7 +23,7 @@ from oauth2_provider.views import ScopedProtectedResourceView
 
 from .base import BotMixin, CanModerateRaceMixin, CanMonitorRaceMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
-from ..utils import get_action_button, get_hashids, twitch_auth_url
+from ..utils import get_action_button, get_hashids, twitch_auth_url, youtube_auth_url
 
 
 class RaceMixin(SingleObjectMixin):
@@ -100,6 +100,9 @@ class Race(RaceMixin, UserMixin, generic.DetailView):
 
     def twitch_auth_url(self):
         return twitch_auth_url(self.request)
+
+    def youtube_auth_url(self):
+        return youtube_auth_url(self.request)
 
 
 class RaceMini(Race):

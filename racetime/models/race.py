@@ -358,6 +358,8 @@ class Race(models.Model):
                 'comment': entrant.comment if self.comments_visible else None,
                 'has_comment': bool(entrant.comment),
                 'stream_live': entrant.stream_live,
+                'twitch_live': entrant.twitch_live,
+                'youtube_live': entrant.youtube_live,
                 'stream_override': entrant.stream_override,
                 'actions': entrant.available_actions,
             }
@@ -713,6 +715,44 @@ class Race(models.Model):
         """
         return timer_html(self.timer)
 
+    def validate_youtube_streaming(self, user):
+        """
+        Validate and refresh YouTube streaming connection for a user.
+        
+        Returns True if YouTube was disconnected due to token issues.
+        Raises SafeException if user cannot participate due to streaming requirements.
+        """
+        if not (self.streaming_required and user.youtube_channel):
+            return False
+            
+        youtube_was_disconnected = False
+        
+        if not user.youtube_refresh_token_valid():
+            # Disconnect expired YouTube connection
+            user.disconnect_youtube()
+            youtube_was_disconnected = True
+            
+            # If they don't have Twitch either, prevent accepting
+            if not user.twitch_channel:
+                raise SafeException(
+                    'Your YouTube connection has expired and has been disconnected. '
+                    'You need to reconnect your YouTube account to join races that require streaming.'
+                )
+        else:
+            # Refresh access token immediately to ensure it's fresh for racebot
+            access_token = user.youtube_access_token()
+            if not access_token:
+                user.disconnect_youtube()
+                youtube_was_disconnected = True
+                
+                # If they don't have Twitch either, prevent accepting
+                if not user.twitch_channel:
+                    raise SafeException(
+                        'The user\'s YouTube connection has expired. They need to reconnect their YouTube account to join this race.'
+                    )
+        
+        return youtube_was_disconnected
+
     def refresh(self):
         """
         Refresh this race object, fetching new data and clearing cached
@@ -909,7 +949,7 @@ class Race(models.Model):
         entrant = self.in_race(user)
         if entrant:
             return entrant.available_actions
-        elif self.is_preparing and (not self.streaming_required or user.twitch_channel):
+        elif self.is_preparing and (not self.streaming_required or user.twitch_channel or user.youtube_channel):
             actions = []
             if self.state == RaceStates.open.value:
                 actions.append('join')
@@ -922,13 +962,35 @@ class Race(models.Model):
         """
         Determine if the user is allowed to join this race.
         """
-        return (
+        # Basic eligibility checks
+        if not (
             user.is_authenticated
             and not user.is_banned_from_category(self.category)
             and not self.in_race(user)
-            and (not self.streaming_required or user.twitch_channel)
             and not user.active_race_entrant
-        )
+        ):
+            return False
+        
+        # If streaming is not required, user can join
+        if not self.streaming_required:
+            return True
+        
+        # Check if user has valid streaming connections
+        has_valid_streaming = False
+        
+        # Check Twitch connection
+        if user.twitch_channel:
+            has_valid_streaming = True
+        
+        # Check YouTube connection and token validity
+        if user.youtube_channel:
+            # First check if refresh token is valid
+            if user.youtube_refresh_token_valid():
+                has_valid_streaming = True
+            # Note: If YouTube token is invalid, it will be handled in the action methods
+            # which will disconnect it and show appropriate warnings or errors
+        
+        return has_valid_streaming
 
     def can_monitor(self, user):
         """
@@ -1556,6 +1618,8 @@ class Race(models.Model):
             self.state == RaceStates.invitational.value
             and self.can_monitor(user)
         )):
+            youtube_was_disconnected = self.validate_youtube_streaming(user)
+            
             with atomic():
                 entrant = self.entrant_set.create(
                     user=user,
@@ -1567,6 +1631,14 @@ class Race(models.Model):
                 user=user,
                 anonymised_message='(deleted user) joins the race.',
             )
+            
+            # If YouTube was disconnected, inform the user
+            if youtube_was_disconnected:
+                message = self.message_set.create(
+                    direct_to=user,
+                    message='Your YouTube connection has expired and has been disconnected. Visit Settings to re-connect your account.',
+                )
+                message.broadcast()
         else:
             raise SafeException('You are not eligible to join this race.')
 
@@ -1861,6 +1933,12 @@ class Entrant(models.Model):
     stream_live = models.BooleanField(
         default=False,
     )
+    twitch_live = models.BooleanField(
+        default=False,
+    )
+    youtube_live = models.BooleanField(
+        default=False,
+    )
     stream_override = models.BooleanField(
         default=False,
     )
@@ -1921,6 +1999,52 @@ class Entrant(models.Model):
     @property
     def place_ordinal(self):
         return ordinal(self.place) if self.place else None
+
+    @property
+    def preferred_stream_info(self):
+        """
+        Return information about the preferred streaming platform to display.
+        
+        Priority logic:
+        1. If either platform is live, prioritize Twitch if both are live
+        2. If neither is live, prioritize Twitch if available, otherwise YouTube
+        
+        Returns dict with keys: platform ('twitch' or 'youtube'), is_live (bool), url (str)
+        Returns None if user has no streaming channels.
+        """
+        if not (self.user.twitch_channel or self.user.youtube_channel):
+            return None
+            
+        # If either platform is live, prioritize Twitch if both are live
+        if self.twitch_live or self.youtube_live:
+            if self.twitch_live and self.user.twitch_channel:
+                return {
+                    'platform': 'twitch',
+                    'is_live': True,
+                    'url': self.user.twitch_channel
+                }
+            elif self.youtube_live and self.user.youtube_channel:
+                return {
+                    'platform': 'youtube',
+                    'is_live': True,
+                    'url': self.user.youtube_channel
+                }
+        
+        # Neither platform is live, prioritize Twitch if available
+        if self.user.twitch_channel:
+            return {
+                'platform': 'twitch',
+                'is_live': False,
+                'url': self.user.twitch_channel
+            }
+        elif self.user.youtube_channel:
+            return {
+                'platform': 'youtube',
+                'is_live': False,
+                'url': self.user.youtube_channel
+            }
+        
+        return None
 
     @property
     def summary(self):
@@ -2014,16 +2138,28 @@ class Entrant(models.Model):
         Accept this entry if it is in invited state.
         """
         if self.state == EntrantStates.invited.value:
+            youtube_was_disconnected = self.race.validate_youtube_streaming(self.user)
+            
             with atomic():
                 self.state = EntrantStates.joined.value
                 self.save()
                 self.race.increment_version()
+            
+            # Main acceptance message
             self.race.add_message(
                 '%(user)s accepts an invitation to join.'
                 % {'user': self.user_display},
                 user=self.user,
                 anonymised_message='(deleted user) accepts an invitation to join.',
             )
+            
+            # If YouTube was disconnected, inform the user
+            if youtube_was_disconnected:
+                self.race.add_message(
+                    'Your YouTube connection has expired and has been disconnected.',
+                    user=self.user,
+                    direct_to=self.user,
+                )
         else:
             raise SyncError('You have not been invited to join this race. Refresh to continue.')
 
@@ -2334,16 +2470,28 @@ class Entrant(models.Model):
         Accept a join request.
         """
         if self.state == EntrantStates.requested.value:
+            youtube_was_disconnected = self.race.validate_youtube_streaming(self.user)
+            
             self.state = EntrantStates.joined.value
             with atomic():
                 self.save()
                 self.race.increment_version()
+            
+            # Main acceptance message
             self.race.add_message(
                 '%(accepted_by)s accepts a request to join from %(user)s.'
                 % {'accepted_by': accepted_by, 'user': self.user_display},
                 user=[accepted_by, self.user],
                 anonymised_message='A user accepts a request to join.',
             )
+            
+            # If YouTube was disconnected, inform the user
+            if youtube_was_disconnected:
+                self.race.add_message(
+                    'Your YouTube connection has expired and has been disconnected.',
+                    user=self.user,
+                    direct_to=self.user,
+                )
         else:
             raise SyncError('This user has not requested to join this race. Refresh to continue.')
 

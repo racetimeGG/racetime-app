@@ -241,6 +241,7 @@ class UserActionAdmin(options.ModelAdmin):
 class UserAdmin(options.ModelAdmin):
     actions = [
         'disconnect_twitch_account',
+        'disconnect_youtube_account',
         'disconnect_patreon_account',
         'purge_from_leaderboards',
     ]
@@ -261,6 +262,7 @@ class UserAdmin(options.ModelAdmin):
         'date_joined',
         'is_supporter',
         'twitch_channel',
+        'youtube_channel',
         'patreon_name',
     )
     list_filter = (
@@ -343,6 +345,40 @@ class UserAdmin(options.ModelAdmin):
                 self.message_user(
                     request,
                     '%(user)s has no Twitch account.' % {'user': user},
+                    messages.INFO,
+                )
+
+    def disconnect_youtube_account(self, request, queryset):
+        for user in queryset:
+            if user.active_race_entrant:
+                self.message_user(
+                    request,
+                    '%(user)s is currently racing, cannot change their YouTube account.'
+                    % {'user': user},
+                    messages.ERROR,
+                )
+            elif user.youtube_channel:
+                youtube_id = user.youtube_id
+                self.log_change(
+                    request,
+                    user,
+                    'Disconnected YouTube channel (ID: %s)' % user.youtube_id,
+                )
+                user.youtube_code = None
+                user.youtube_id = None
+                user.save()
+                self.message_user(
+                    request,
+                    'Disconnected YouTube channel %(youtube)s from %(user)s' % {
+                        'youtube': youtube_id,
+                        'user': user,
+                    },
+                    messages.SUCCESS,
+                )
+            else:
+                self.message_user(
+                    request,
+                    '%(user)s has no YouTube account.' % {'user': user},
                     messages.INFO,
                 )
 

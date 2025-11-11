@@ -3,13 +3,16 @@
 
 {% block css %}
     <style>
-    .twitch-channel, .patreon {
+    .twitch-channel, .youtube-channel, .patreon {
         display: inline-flex;
         vertical-align: middle;
     }
-    .twitch-channel > img, .patreon > img {
+    .twitch-channel > img, .youtube-channel > img, .patreon > img {
         height: 22px;
         margin-right: 5px;
+    }
+    .division h4:not(:first-of-type) {
+        margin-top: 20px;
     }
     </style>
 {% endblock %}
@@ -21,12 +24,14 @@
     {% include 'racetime/user/tabs.html' with current='edit_account_connections' %}
     <h2>Account connections</h2>
     <div class="division">
-        <h3>Connect to Twitch</h3>
+        <h3>Streaming platforms</h3>
         <p class="help">
             To join races where streaming is required, you must have an active
             <a href="https://www.twitch.tv" target="_blank" rel="nofollow">Twitch.tv</a>
+            or <a href="https://www.youtube.com" target="_blank" rel="nofollow">YouTube</a>
             account.
         </p>
+        <h4>Twitch</h4>
         {% if user.twitch_name %}
             <p>
                 Connected to
@@ -41,7 +46,7 @@
                 </p>
                 <form action="{% url 'twitch_disconnect' %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn dangerous">Disconnect account</button>
+                    <button type="submit" class="btn dangerous">Disconnect Twitch account</button>
                 </form>
             {% else %}
                 <p class="help">
@@ -52,6 +57,34 @@
         {% else %}
             <p>
                 <a href="{{ twitch_url }}" class="btn" target="_blank">Connect your Twitch.tv account</a>
+            </p>
+        {% endif %}
+        <h4>YouTube</h4>
+        {% if user.youtube_id %}
+            <p>
+                Connected to
+                <a class="youtube-channel" href="{{ user.youtube_channel }}" target="_blank">
+                    <img src="{% static 'racetime/image/youtube.svg' %}" alt="">
+                    YouTube ({{ user.youtube_id|truncatechars:12 }})
+                </a>
+            </p>
+            {% if not user.active_race_entrant %}
+                <p>
+                    <a href="{{ youtube_url }}" class="btn" target="_blank">Connect to different YouTube account</a>
+                </p>
+                <form action="{% url 'youtube_disconnect' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn dangerous">Disconnect YouTube account</button>
+                </form>
+            {% else %}
+                <p class="help">
+                    You cannot change your YouTube account while actively
+                    participating in a race.
+                </p>
+            {% endif %}
+        {% else %}
+            <p>
+                <a href="{{ youtube_url }}" class="btn" target="_blank">Connect your YouTube account</a>
             </p>
         {% endif %}
     </div>
@@ -84,7 +117,7 @@
             </form>
             <form action="{% url 'patreon_disconnect' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn dangerous">Disconnect account</button>
+                <button type="submit" class="btn dangerous">Disconnect Patreon account</button>
             </form>
         {% else %}
             <p>
