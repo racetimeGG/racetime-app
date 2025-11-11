@@ -250,7 +250,7 @@ class CategoryForm(forms.ModelForm):
             return True
         if any(k for k in el.attrs.keys() if k not in self.ALLOWED_TAGS[el.name]):
             return True
-        if el.name.lower() == 'a' and el.attrs.get('href', '').startswith('javascript:'):
+        if el.name.lower() == 'a' and el.attrs.get('href', '').lower().startswith('javascript:'):
             return True
         return False
 
