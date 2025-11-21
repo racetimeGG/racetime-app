@@ -11,9 +11,9 @@ ENV PYTHONUNBUFFERED 1
 USER app
 WORKDIR /opt/racetime
 
-FROM base as racebot
+FROM base AS racebot
 ENTRYPOINT ["./.docker/start", "racebot"]
 
-FROM base as web
+FROM base AS web
 EXPOSE 8000
 ENTRYPOINT ["./.docker/start", "runserver", "0.0.0.0:8000"]
