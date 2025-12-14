@@ -781,6 +781,7 @@ class UserEditForm(forms.ModelForm):
             'show_supporter',
             'custom_profile_slug',
             'detailed_timer',
+            'hide_avatars_while_racing',
         )
 
     def __init__(self, *args, **kwargs):
