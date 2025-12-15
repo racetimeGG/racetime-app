@@ -1,0 +1,58 @@
+// For format details, see https://containers.dev/implementors/json_reference/. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/postgres
+{
+    "name": "Python 3.12 & MySQL",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "forwardPorts": [
+        8000, // Django
+        3306, // MySQL
+        6379 // Redis
+    ],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    // Use 'postStartCommand' to run commands each time the container starts
+    "postStartCommand": "bash .devcontainer/post-start.sh",
+    // Configure tool-specific properties.
+    "customizations": {
+        // JetBrains IDEs ignore vscode specific settings.
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.debugpy",
+                "batisteo.vscode-django",
+                "mtxr.sqltools",
+                "mtxr.sqltools-driver-mysql",
+                "eamodio.gitlens",
+                "mhutchie.git-graph",
+                "editorconfig.editorconfig",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.linting.pylintEnabled": false,
+                "python.formatting.provider": "black",
+                "python.testing.pytestEnabled": true,
+                "python.testing.unittestEnabled": false,
+                "editor.formatOnSave": true,
+                "files.trimTrailingWhitespace": true,
+                "files.insertFinalNewline": true,
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.python",
+                    "editor.tabSize": 4
+                },
+                "[javascript]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode",
+                    "editor.tabSize": 2
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "esbenp.prettier-vscode"
+                }
+            }
+        }
+    }
+}
