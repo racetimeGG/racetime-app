@@ -4,6 +4,13 @@
             Live races
         </a>
     </li>
+    {% if show_my_races %}
+    <li{% if current == 'my-races' %} class="current"{% endif %}>
+        <a href="{% url 'category_my_races' category=category.slug %}">
+            My races
+        </a>
+    </li>
+    {% endif %}
     {% if can_moderate %}
     <li{% if current == 'record' %} class="current"{% endif %}>
         <a href="{% url 'category_record' category=category.slug %}">

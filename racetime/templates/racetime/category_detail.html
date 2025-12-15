@@ -26,7 +26,7 @@
 
 {% block main %}
     {% include 'racetime/category/intro.html' %}
-    {% include 'racetime/category/tabs.html' with current='category' %}
+    {% include 'racetime/category/tabs.html' with current=current_tab %}
     <h3>Current races</h3>
     {% include 'racetime/category/buttons.html' %}
     <div class="category-races race-list current">
