@@ -63,22 +63,10 @@ def _sort_key(group):
     finish_times = [entrant.finish_time for entrant in entrants]
     return sum(finish_times, timedelta(0)) / len(finish_times)
 
-
-def rate_race(race):
-    entrants = race.ordered_entrants
-    users = [
-        UserRating(entrant, race)
-        for entrant in entrants
-    ]
-    if not race.team_race:
-        groups = [(user,) for user in users]
-    else:
-        groups = defaultdict(list)
-        for user in users:
-            groups[user.entrant.team_id].append(user)
-        groups = list(groups.values())
-        groups.sort(key=_sort_key)
-
+def build_rating_groups_by_rank(groups):
+    """
+    Build TrueSkill rating groups and ranks from pre-ranked entrant groups.
+    """
     rating_groups = []
     ranks = []
     current_rank = 0
@@ -88,9 +76,23 @@ def rate_race(race):
         ranks.append(current_rank)
         if sort_key < timedelta.max:
             current_rank += 1
+    return rating_groups, ranks
+
+def rate_race(race):
+    entrants = race.ordered_entrants
+    if not race.team_race:
+        groups = [(user,) for user in entrants]
+    else:
+        groups = defaultdict(list)
+        for user in entrants:
+            groups[user.entrant.team_id].append(user)
+        groups = list(groups.values())
+        groups.sort(key=_sort_key)
+
+    rating_groups, ranks = build_rating_groups_by_rank(groups=groups)
 
     env = TrueSkill(backend='mpmath')
-    rated = env.rate(rating_groups, ranks)
+    rated = env.rate(rating_groups=rating_groups, ranks=ranks)
 
     with atomic():
         for ratings, group in zip(rated, groups):
