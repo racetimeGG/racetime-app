@@ -5,6 +5,12 @@
     <link rel="stylesheet" href="{% static 'racetime/style/race.css' %}">
 {% endblock %}
 
+{% block site_head %}
+    {% for emote in emotes %}
+        <link rel="preload" href="{% emote.image.url %}" as="image">
+    {% endfor %}
+{% endblock %}
+
 {% block js %}
     {{ js_vars|json_script:"race-vars" }}
     <script src="{% static 'racetime/script/race.js' %}"></script>
