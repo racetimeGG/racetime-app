@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block site_head %}
-    {% for emote in emotes %}
-        <link rel="preload" href="{% emote.image.url %}" as="image">
+    {% for emote_url in emotes.values %}
+        <link rel="preload" href="{{ emote_url }}" as="image">
     {% endfor %}
 {% endblock %}
 
