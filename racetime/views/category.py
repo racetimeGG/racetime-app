@@ -35,6 +35,9 @@ class Category(UserMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         can_moderate = self.object.can_moderate(self.user)
 
+        # `My races` reflects participation, not moderation scope.
+        has_participated = self.past_races(can_moderate=False).exists()
+
         paginator = Paginator(self.past_races(can_moderate=can_moderate), 10)
         return {
             **super().get_context_data(**kwargs),
@@ -42,6 +45,7 @@ class Category(UserMixin, generic.DetailView):
             'can_moderate': can_moderate,
             'can_start_race': self.object.can_start_race(self.user),
             'current_races': self.current_races(can_moderate),
+            'current_tab': 'category',
             'emotes': {
                 emote.name: emote.image.url
                 for emote in self.object.emote_set.all().order_by('name')
@@ -53,6 +57,7 @@ class Category(UserMixin, generic.DetailView):
             'meta_image': self.object.image.url if self.object.image else None,
             'recordable_race_count': self.past_races(True, True).count() if can_moderate else 0,
             'past_races': paginator.get_page(self.request.GET.get('page')),
+            'show_my_races': self.user.is_authenticated and has_participated,
         }
 
     def current_races(self, can_moderate=False):
@@ -96,6 +101,32 @@ class Category(UserMixin, generic.DetailView):
         if not can_moderate:
             queryset = queryset.filter(unlisted=False)
         return queryset
+
+class CategoryMyRaces(LoginRequiredMixin, Category):
+    '''
+    Filtered view of Category showing only past races the logged-in user participated in.
+    '''
+
+    def current_races(self, can_moderate=False):
+        # Intentionally not filtered by user: current races are actionable,
+        # and users may want to join races they haven't entered yet.
+        return super().current_races(can_moderate)
+
+    def past_races(self, can_moderate=False, filter_recordable=False):
+        queryset = super().past_races(
+            can_moderate=can_moderate,
+            filter_recordable=filter_recordable,
+        ).filter(
+            entrant__user=self.user,
+            entrant__state=models.EntrantStates.joined.value,
+        ).distinct()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_tab'] = 'my-races'
+        context['show_my_races'] = True # current view
+        return context
 
 
 class CategoryRecorder(UserPassesTestMixin, Category):
@@ -201,6 +232,7 @@ class CategoryLeaderboards(Category):
         paginator = Paginator(list(self.leaderboards(sort)), 2)
         return {
             **super().get_context_data(**kwargs),
+            'current_tab': 'leaderboards',
             'leaderboards': paginator.get_page(self.request.GET.get('page')),
             'sort': sort,
         }

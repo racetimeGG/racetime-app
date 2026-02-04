@@ -85,6 +85,7 @@ urlpatterns = [
 
     path('categories/data', views.CategoryListData.as_view(), name='category_list_data'),
     path('<str:category>.json', views.CategoryData.as_view()),
+    path('<str:category>/me/', views.CategoryMyRaces.as_view(), name='category_my_races'),
     path('<str:category>', views.Category.as_view(), name='category'),
     path('<str:category>/', include([
         path('data', views.CategoryData.as_view(), name='category_data'),
