@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspaces/racetime-app:cached
+    command: sleep infinity
+    depends_on:
+      - db
+      - redis
+    networks:
+      - racetime-network
+
+  db:
+    image: mariadb
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: racetime
+      MYSQL_DATABASE: racetime
+      MYSQL_USER: racetime
+      MYSQL_PASSWORD: racetime
+    networks:
+      racetime-network:
+        aliases:
+          - racetime.db
+
+  redis:
+    image: redis
+    restart: unless-stopped
+    networks:
+      racetime-network:
+        aliases:
+          - racetime.redis
+
+networks:
+  racetime-network:
+
+volumes:
+  mysql-data:
