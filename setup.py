@@ -16,7 +16,7 @@ setup(
         'Pillow>=11.0,<12.0',
         'requests>=2.28,<3.0',
         'trueskill==0.4.5',
-        'websockets>=15.0,<16.0',
+        'websockets>=15.0,<17.0',
     ],
     packages=find_packages(include=('racetime', 'racetime.*')),
 )
