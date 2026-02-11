@@ -578,7 +578,13 @@ class CreateRace(UserPassesTestMixin, BaseCreateRace):
             if field in self.request.GET:
                 kwargs['initial'][field] = self.request.GET[field]
                 if field == 'goal':
-                    kwargs['goal_id'] = self.request.GET[field]
+                    if self.request.GET.get('bare', '0') == '1':
+                        kwargs['goal_id'] = self.request.GET[field]
+                    else:
+                        kwargs['initial']['goal'] = kwargs['goal_id'] = self.get_category().goal_set.filter(
+                            active=True,
+                            name=self.request.GET[field],
+                        ).first().id
                 if field == 'custom_goal':
                     kwargs['initial']['goal'] = ''
         return kwargs
