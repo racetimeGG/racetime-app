@@ -16,6 +16,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import decorator_from_middleware, method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.safestring import mark_safe
 from django.views import generic
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
@@ -25,7 +26,7 @@ from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
+from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url, youtube_auth_url
 
 
 class ViewProfile(UserMixin, generic.DetailView):
@@ -373,6 +374,7 @@ class EditAccountConnections(LoginRequiredMixin, UserMixin, generic.TemplateView
             'authorized_tokens': self.get_authorized_tokens(),
             'patreon_url': patreon_auth_url(self.request),
             'twitch_url': twitch_auth_url(self.request),
+            'youtube_url': youtube_auth_url(self.request),
         }
 
 
@@ -561,6 +563,173 @@ class TwitchDisconnect(LoginRequiredMixin, UserMixin, generic.View):
             messages.success(
                 self.request,
                 'Your Twitch.tv account is no longer connected.'
+            )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class YouTubeAuth(LoginRequiredMixin, UserMixin, generic.View):
+    csrf_protect = decorator_from_middleware(CsrfViewMiddlewareTwitch)
+
+    @method_decorator(csrf_protect)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request):
+        if self.user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot change your YouTube account whilst entered '
+                'in an active race.'
+            )
+        else:
+            code = request.GET.get('code')
+            if code:
+                user = self.user
+
+                try:
+                    # Exchange authorization code for tokens
+                    resp = requests.post('https://oauth2.googleapis.com/token', data={
+                        'client_id': settings.YOUTUBE_CLIENT_ID,
+                        'client_secret': settings.YOUTUBE_CLIENT_SECRET,
+                        'code': code,
+                        'grant_type': 'authorization_code',
+                        'redirect_uri': settings.RT_SITE_URI + reverse('youtube_auth'),
+                    })
+                    
+                    if resp.status_code != 200:
+                        raise requests.RequestException(f"Token exchange failed: {resp.status_code}")
+                    
+                    token_data = resp.json()
+                    access_token = token_data.get('access_token')
+                    
+                    if not access_token:
+                        raise ValueError("No access token in response")
+                    
+                    # Add expiration timestamps for both access and refresh tokens
+                    current_time = timezone.now().timestamp()
+                    if 'expires_in' in token_data:
+                        token_data['expires_at'] = current_time + token_data['expires_in']
+                    if 'refresh_token_expires_in' in token_data:
+                        token_data['refresh_token_expires_at'] = current_time + token_data['refresh_token_expires_in']
+                    
+                    # Store the full token response
+                    user.youtube_token_data = token_data
+                    
+                    # Get channel info using the YouTube Data API v3
+                    resp = requests.get('https://www.googleapis.com/youtube/v3/channels', params={
+                        'part': 'id,snippet',
+                        'mine': 'true',
+                        'access_token': access_token,
+                    })
+                    
+                    if resp.status_code != 200:
+                        raise requests.RequestException(f"YouTube API returned {resp.status_code}")
+
+                except requests.RequestException as ex:
+                    notice_exception(ex)
+                    messages.error(
+                        request,
+                        'Something went wrong with the YouTube API. Please try '
+                        'again later',
+                    )
+                else:
+                    try:
+                        data = resp.json().get('items', [])
+                        if not data:
+                            raise ValueError("No channel found")
+                        channel_data = data[0]
+                    except (ValueError, KeyError, IndexError):
+                        messages.error(
+                            request,
+                            'Unable to retrieve your YouTube channel information. '
+                            'Please make sure you have a YouTube channel.',
+                        )
+                        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+                    channel_id = channel_data.get('id')
+                    
+                    # Check if the channel is allowed to stream (YouTube 24-hour holding period check)
+                    livestream_resp = requests.get('https://www.googleapis.com/youtube/v3/liveBroadcasts', params={
+                        'part': 'id,status',
+                        'mine': 'true',
+                        'maxResults': 1,
+                        'access_token': access_token,
+                    })
+                    
+                    if livestream_resp.status_code == 403:
+                        # Check the specific error to see if it's due to streaming restrictions
+                        error_data = livestream_resp.json()
+                        error_reason = error_data.get('error', {}).get('errors', [{}])[0].get('reason', '')
+                        
+                        if error_reason == 'liveStreamingNotEnabled':
+                            messages.error(
+                                request,
+                                mark_safe(
+                                    'Your YouTube channel is not enabled for live streaming. '
+                                    'You must enable live streaming on your YouTube channel and wait '
+                                    'for the 24-hour verification period before connecting your account. '
+                                    'You can verify your channel at <a href="https://www.youtube.com/verify" target="_blank" rel="noopener">https://www.youtube.com/verify</a>.'
+                                ),
+                            )
+                            return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                        elif error_reason == 'insufficientPermissions':
+                            messages.error(
+                                request,
+                                'Your YouTube channel does not have sufficient permissions for live streaming. '
+                                'Please ensure your channel meets YouTube\'s live streaming requirements.',
+                            )
+                            return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                    elif livestream_resp.status_code != 200:
+                        # Some other API error occurred
+                        messages.error(
+                            request,
+                            'Unable to verify your YouTube streaming capability. '
+                            'Please try again later or contact support if the problem persists.',
+                        )
+                        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+                    
+                    if models.User.objects.filter(
+                        youtube_id=channel_id,
+                    ).exclude(id=user.id).exists():
+                        messages.error(
+                            request,
+                            'Your YouTube account is already connected to another '
+                            'racetime.gg user account.',
+                        )
+                    else:
+                        user.youtube_id = channel_id
+                        user.save()
+                        user.log_action('youtube_auth', self.request)
+
+                        messages.success(
+                            self.request,
+                            'Thanks, you have successfully authorized your YouTube '
+                            'account. You can now join races that require streaming.',
+                        )
+
+        return http.HttpResponseRedirect(reverse('edit_account_connections'))
+
+
+class YouTubeDisconnect(LoginRequiredMixin, UserMixin, generic.View):
+    def post(self, request):
+        user = self.user
+
+        if user.active_race_entrant:
+            messages.error(
+                self.request,
+                'Sorry, you cannot disconnect your YouTube account whilst '
+                'entered in an active race.'
+            )
+        else:
+            user.youtube_token_data = None
+            user.youtube_id = None
+            user.save()
+            user.log_action('youtube_disconnect', self.request)
+
+            messages.success(
+                self.request,
+                'Your YouTube account has been disconnected.',
             )
 
         return http.HttpResponseRedirect(reverse('edit_account_connections'))

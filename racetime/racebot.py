@@ -18,8 +18,10 @@ class RaceBot:
     pid = None
     last_adoption = None
     last_twitch_refresh = None
+    last_youtube_refresh = None
     twitch_token = None
     twitch_token_refresh = None
+    youtube_streams_live = False  # Track if any YouTube streams are live
     races = []
     queryset = models.Race.objects.filter(
         state__in=[
@@ -56,6 +58,13 @@ class RaceBot:
             self.logger.debug('[Twitch] Refreshing stream statuses.')
             self.update_live_status()
             self.last_twitch_refresh = timezone.now()
+
+        # YouTube stream checking with adaptive timing
+        youtube_check_interval = timedelta(minutes=5 if self.youtube_streams_live else 1)
+        if not self.last_youtube_refresh or timezone.now() - self.last_youtube_refresh > youtube_check_interval:
+            self.logger.debug('[YouTube] Refreshing stream statuses.')
+            self.update_youtube_live_status()
+            self.last_youtube_refresh = timezone.now()
 
         sleep(0.01)
 
@@ -301,8 +310,11 @@ class RaceBot:
                     entrant_is_live = twitch_id in live_users
                     if entrant:
                         user = entrant.user
-                        if entrant.stream_live != entrant_is_live:
-                            entrant.stream_live = entrant_is_live
+                        # Update twitch_live field and combined stream_live field
+                        if entrant.twitch_live != entrant_is_live:
+                            entrant.twitch_live = entrant_is_live
+                            # Update combined stream_live to be true if either platform is live
+                            entrant.stream_live = entrant_is_live or entrant.youtube_live
                             entrants_to_update.append(entrant)
                             if entrant.race not in races_to_reload:
                                 races_to_reload.append(entrant.race)
@@ -319,7 +331,7 @@ class RaceBot:
         if entrants_to_update:
             models.Entrant.objects.bulk_update(
                 entrants_to_update,
-                ['stream_live'],
+                ['stream_live', 'twitch_live'],
             )
             self.logger.info(
                 '[Twitch] Updated %(entrants)d entrant(s) in %(races)d race(s).'
@@ -327,6 +339,128 @@ class RaceBot:
             )
         else:
             self.logger.debug('[Twitch] All stream info is up-to-date.')
+
+        for race in races_to_reload:
+            race.increment_version()
+            race.broadcast_data()
+
+    def get_youtube_access_token(self, user):
+        """Get a valid YouTube access token for the user."""
+        if not user.youtube_code:
+            return None
+        
+        # Get token using the updated method (will refresh if needed)
+        # Note: Token should be fresh since it was refreshed when user joined the race
+        try:
+            token = user.youtube_access_token()
+            if token:
+                return token
+            else:
+                # Token couldn't be refreshed, disconnect user
+                self.logger.warning(f'[YouTube] Could not refresh token for user {user.name}, disconnecting')
+                user.disconnect_youtube()
+                return None
+        except Exception as ex:
+            self.logger.warning(f'[YouTube] Error getting access token for user {user.name}: {ex}')
+            user.disconnect_youtube()
+            return None
+
+    def check_youtube_user_live_status(self, user):
+        """Check if a specific YouTube user is live using their access token."""
+        try:
+            token = self.get_youtube_access_token(user)
+            if not token:
+                return user.youtube_id, False, None
+                
+            # Use YouTube Data API v3 to check for live broadcasts
+            # Note: Cannot use both 'mine' and 'broadcastStatus' together, so we'll get all and filter
+            resp = requests.get('https://www.googleapis.com/youtube/v3/liveBroadcasts', params={
+                'part': 'id,snippet,status',
+                'mine': 'true',
+                'maxResults': 50,
+                'access_token': token,
+            })
+            
+            if resp.status_code != 200:
+                self.logger.warning(f'[YouTube] API returned {resp.status_code} for user {user.name}')
+                return user.youtube_id, False, None
+            
+            data = resp.json()
+            items = data.get("items", [])
+            
+            # Filter for live broadcasts that are public (lifeCycleStatus = "live" and privacy = "public")
+            live_broadcasts = [
+                item for item in items 
+                if (item.get("status", {}).get("lifeCycleStatus") == "live" and
+                    item.get("status", {}).get("privacyStatus") == "public")
+            ]
+            
+            is_live = len(live_broadcasts) > 0
+            broadcast_info = live_broadcasts[0] if live_broadcasts else None
+            
+            return user.youtube_id, is_live, broadcast_info
+            
+        except Exception as ex:
+            self.logger.warning(f'[YouTube] Error checking live status for user {user.name}: {ex}')
+            return user.youtube_id, False, None
+
+    def update_youtube_live_status(self):
+        """Update YouTube live status for all entrants in active races."""
+        if not self.races:
+            self.logger.debug('[YouTube] No races to check.')
+            return
+
+        entrants = {}
+
+        # Get all entrants with YouTube IDs and token data
+        entrants_query = models.Entrant.objects.filter(
+            race__in=[race['object'] for race in self.races],
+            user__youtube_id__isnull=False,
+            user__youtube_code__isnull=False,  # Must have token data
+            state=models.EntrantStates.joined.value,
+        ).select_related('user')
+        
+        for entrant in entrants_query:
+            entrants[entrant.user.youtube_id] = entrant
+
+        if not entrants:
+            self.logger.debug('[YouTube] No entrants to check.')
+            return
+
+        entrants_to_update = []
+        races_to_reload = []
+        any_streams_live = False
+
+        # Check each YouTube user's live status
+        for entrant in entrants.values():
+            user_id, is_live, broadcast_info = self.check_youtube_user_live_status(entrant.user)
+            
+            if is_live:
+                any_streams_live = True
+                
+            # Update youtube_live field and combined stream_live field
+            if entrant.youtube_live != is_live:
+                entrant.youtube_live = is_live
+                # Update combined stream_live to be true if either platform is live
+                entrant.stream_live = entrant.twitch_live or is_live
+                entrants_to_update.append(entrant)
+                if entrant.race not in races_to_reload:
+                    races_to_reload.append(entrant.race)
+
+        # Update the global live status for adaptive timing
+        self.youtube_streams_live = any_streams_live
+
+        if entrants_to_update:
+            models.Entrant.objects.bulk_update(
+                entrants_to_update,
+                ['stream_live', 'youtube_live'],
+            )
+            self.logger.info(
+                '[YouTube] Updated %(entrants)d entrant(s) in %(races)d race(s).'
+                % {'entrants': len(entrants_to_update), 'races': len(races_to_reload)}
+            )
+        else:
+            self.logger.debug('[YouTube] All stream info is up-to-date.')
 
         for race in races_to_reload:
             race.increment_version()
