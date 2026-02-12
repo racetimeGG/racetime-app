@@ -131,6 +131,14 @@ class Race(models.Model):
             'when the room closes.'
         ),
     )
+    reveal_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            'Define when this race should be publicly visible, in your local timezone. '
+            'Only available for races that are both unlisted and unranked.'
+        ),
+    )
     partitionable = models.BooleanField(
         default=False,
         verbose_name='1v1 ladder race',
@@ -304,6 +312,12 @@ class Race(models.Model):
                 name='unique_category_slug',
             ),
         ]
+        indexes = [
+            models.Index(
+                fields=['unlisted', 'recordable', 'reveal_at'],
+                name='reveal_hidden_races_idx',
+            ),
+        ]
 
     def api_dict_summary(self, include_category=False, include_entrants=False):
         summary = {
@@ -403,6 +417,7 @@ class Race(models.Model):
             'cancelled_at': self.cancelled_at,
             'ranked': self.ranked,
             'unlisted': self.unlisted,
+            'reveal_at': self.reveal_at,
             'time_limit': self.time_limit,
             'time_limit_auto_complete': self.time_limit_auto_complete,
             'require_even_teams': self.require_even_teams,
@@ -1320,7 +1335,7 @@ class Race(models.Model):
                 self.cancelled_at = self.ended_at
                 self.recordable = False
                 self.update_entrant_ratings()
-            if not self.recordable:
+            if not self.recordable and not self.reveal_at:
                 self.unlisted = False
             self.version = F('version') + 1
             self.save()

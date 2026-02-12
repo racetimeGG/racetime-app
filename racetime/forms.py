@@ -524,6 +524,8 @@ class RaceForm(forms.ModelForm):
             self.fields['unlisted'].initial = True
         if 'require_even_teams' in self.fields and self.instance.pk and not self.instance.team_race:
             del self.fields['require_even_teams']
+        if 'reveal_at' in self.fields and self.instance.pk and self.instance.ranked:
+            del self.fields['reveal_at']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -560,6 +562,19 @@ class RaceForm(forms.ModelForm):
             if 'allow_non_entrant_chat' in cleaned_data:
                 cleaned_data['allow_non_entrant_chat'] = False
 
+        if cleaned_data.get('reveal_at') and self.data.get('timezone_offset'):
+            try:
+                from datetime import timedelta
+                timezone_offset = int(self.data.get('timezone_offset', 0))
+                if timezone_offset < -840 or timezone_offset > 840:
+                    timezone_offset = 0
+             
+                local_time = cleaned_data['reveal_at']
+                utc_time = local_time + timedelta(minutes=timezone_offset)
+                cleaned_data['reveal_at'] = utc_time
+            except (ValueError, TypeError) as e:
+                pass
+
         return cleaned_data
 
 
@@ -587,6 +602,11 @@ class RaceCreationForm(RaceForm):
             'decline.'
         ),
     )
+    timezone_offset = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput,
+        help_text='User timezone offset in minutes (UTC)',
+    )
 
     class Meta:
         fields = (
@@ -596,6 +616,7 @@ class RaceCreationForm(RaceForm):
             'invitational',
             'ranked',
             'unlisted',
+            'reveal_at',
             'partitionable',
             'hide_entrants',
             'info_user',
@@ -612,10 +633,15 @@ class RaceCreationForm(RaceForm):
             'allow_midrace_chat',
             'allow_non_entrant_chat',
             'chat_message_delay',
+            'timezone_offset',
         )
         model = models.Race
         widgets = {
             'recordable': forms.HiddenInput,
+            'reveal_at': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
         }
 
 
@@ -633,12 +659,19 @@ class OAuthRaceCreationForm(RaceCreationForm, OAuthRaceForm):
 
 
 class RaceEditForm(RaceForm):
+    timezone_offset = forms.IntegerField(
+        required=False,
+        widget=forms.HiddenInput,
+        help_text='User timezone offset in minutes (UTC)',
+    )
+
     class Meta:
         fields = (
             'goal',
             'custom_goal',
             'ranked',
             'unlisted',
+            'reveal_at',
             'info_user',
             'recordable',
             'require_even_teams',
@@ -653,10 +686,15 @@ class RaceEditForm(RaceForm):
             'allow_midrace_chat',
             'allow_non_entrant_chat',
             'chat_message_delay',
+            'timezone_offset',
         )
         model = models.Race
         widgets = {
             'recordable': forms.HiddenInput,
+            'reveal_at': forms.DateTimeInput(
+                attrs={'type': 'datetime-local'},
+                format='%Y-%m-%dT%H:%M'
+            ),
         }
 
     def __init__(self, *args, **kwargs):
