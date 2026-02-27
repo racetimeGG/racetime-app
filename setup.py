@@ -7,7 +7,7 @@ setup(
         'asgiref>=3.5,<4.0',
         'beautifulsoup4>=4.11,<4.14',
         'channels[daphne]>=4.0,<5.0',
-        'Django>=5.2,<5.3',
+        'Django>=5.2,<6.1',
         'django-admin-list-filter-dropdown',
         'django-oauth-toolkit>=3.0,<4.0',
         'django-recaptcha>=4.0,<5.0',
