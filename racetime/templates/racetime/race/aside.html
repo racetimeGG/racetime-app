@@ -1,11 +1,14 @@
-{% if race.streaming_required and user.is_authenticated and not user.twitch_channel %}
+{% if race.streaming_required and user.is_authenticated and not user.twitch_channel and not user.youtube_channel %}
     <div class="streaming-required">
         <p>
-            Streaming is required to join this race. Use the button below to
-            link up your Twitch.tv account. Refresh this page when you're done.
+            Streaming is required to join this race. Use the buttons below to
+            link up your Twitch.tv or YouTube account. Refresh this page when you're done.
         </p>
         <a class="btn" href="{{ view.twitch_auth_url }}" target="_blank">
             Connect Twitch account
+        </a>
+        <a class="btn" href="{{ view.youtube_auth_url }}" target="_blank">
+            Connect YouTube account
         </a>
     </div>
 {% endif %}

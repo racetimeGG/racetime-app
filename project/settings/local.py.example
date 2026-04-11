@@ -6,6 +6,15 @@
 TWITCH_CLIENT_ID = 'changeme'
 TWITCH_CLIENT_SECRET = 'changeme'
 
+# YouTube API authorization
+
+# Create a YouTube application here: https://console.developers.google.com/
+# Enable the YouTube Data API v3 and create OAuth 2.0 credentials.
+# You must add http://localhost:8000/account/youtube_auth as a redirect URL.
+
+YOUTUBE_CLIENT_ID = 'changeme'
+YOUTUBE_CLIENT_SECRET = 'changeme'
+
 # You should only need to set these if you are doing supporter stuff.
 
 PATREON_CLIENT_ID = 'changeme'
