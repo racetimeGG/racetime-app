@@ -476,6 +476,9 @@ class RaceForm(forms.ModelForm):
 
     def __init__(self, category, can_moderate, goal_id=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.category = category
+
         if 'goal' in self.fields and isinstance(self.fields['goal'], forms.ModelChoiceField):
             self.fields['goal'].queryset = self.fields['goal'].queryset.filter(
                 category=category,
@@ -536,6 +539,12 @@ class RaceForm(forms.ModelForm):
                 cleaned_data['recordable'] = False
             else:
                 cleaned_data['recordable'] = cleaned_data.get('ranked')
+
+        if 'goal' in self.fields and 'team_race' in self.fields and self.fields['team_race'].disabled:
+            cleaned_data['team_race'] = cleaned_data['goal'].team_races_required
+        if 'streaming_required' in self.fields and self.fields['streaming_required'].disabled:
+            goc = cleaned_data.get('goal') or self.category
+            cleaned_data['streaming_required'] = goc.streaming_required
 
         if cleaned_data.get('team_race'):
             if 'hide_entrants' in self.fields and cleaned_data.get('hide_entrants'):
