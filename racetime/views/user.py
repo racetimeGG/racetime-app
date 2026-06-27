@@ -238,8 +238,12 @@ class DeleteAccount(LoginRequiredMixin, UserMixin, generic.TemplateView):
     template_name = 'racetime/user/delete_account.html'
 
     def post(self, request, *args, **kwargs):
-        if self.user.active_race_entrant:
-            messages.error(request, 'We are unable to delete your account while you are participating in a race.')
+        if self.user.pending_recordable_race_entrant:
+            messages.error(
+                request,
+                'We are unable to delete your account while you are entered '
+                'in a race that has not been recorded yet.'
+            )
             return http.HttpResponseRedirect(reverse('edit_account'))
 
         user = self.user

@@ -629,8 +629,8 @@ def chunkify(items, size=100):
 def delete_user(request, user, protect=True):
     if protect and (user.is_system or user.is_superuser or user.is_staff):
         raise Exception('Cannot delete protected user.')
-    if user.active_race_entrant:
-        raise Exception('User is currently racing.')
+    if user.pending_recordable_race_entrant:
+        raise Exception('User is entered in a race that has not been recorded yet.')
 
     user_email = user.email
     email_context = {

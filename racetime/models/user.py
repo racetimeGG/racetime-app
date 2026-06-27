@@ -272,6 +272,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         except self.entrant_set.model.DoesNotExist:
             return None
 
+    @cached_property
+    def pending_recordable_race_entrant(self):
+        """
+        Returns an Entrant object for a race that still needs this user to
+        remain attached so the result can be recorded.
+        """
+        return self.entrant_set.filter(
+            race__recordable=True,
+            race__recorded=False,
+        ).order_by('race__opened_at').first()
+
     @property
     def can_show_profile(self):
         """
