@@ -65,11 +65,14 @@ def _sort_key(group):
 
 
 def rate_race(race):
-    entrants = race.ordered_entrants
+    entrants = race.ordered_entrants.filter(user__isnull=False)
     users = [
         UserRating(entrant, race)
         for entrant in entrants
     ]
+    if not users:
+        return
+
     if not race.team_race:
         groups = [(user,) for user in users]
     else:
