@@ -1358,6 +1358,17 @@ class Race(models.Model):
         if self.hold:
             raise SafeException('Race cannot be finalized, it is on hold.')
         if self.recordable and not self.recorded:
+            has_deleted_entrants = self.entrant_set.filter(user__isnull=True).exists()
+            if has_deleted_entrants and self.team_race:
+                raise SafeException(
+                    'This race cannot be recorded because one or more entrants have '
+                    'deleted their account. Please set this race to "Do not record".'
+                )
+            if self.entrant_set.filter(user__isnull=False).count() < 2:
+                raise SafeException(
+                    'This race cannot be recorded because fewer than two entrants '
+                    'still have accounts. Please set this race to "Do not record".'
+                )
             self.recorded = True
             self.recorded_by = recorded_by
             self.unlisted = False
