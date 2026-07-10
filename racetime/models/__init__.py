@@ -5,13 +5,7 @@ from .chat import Message
 from .choices import EntrantStates, RaceStates
 from .race import Entrant, Race
 from .team import Team, TeamAuditLog, TeamMember
-from .user import (
-    Ban,
-    User,
-    UserAction,
-    UserLog,
-    UserRanking,
-)
+from .user import Ban, User, UserAction, UserLog, UserRanking
 
 __all__ = [
     # admin

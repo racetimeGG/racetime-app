@@ -9,9 +9,9 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.views import generic
 
-from .base import UserMixin
 from .. import forms, models
 from ..utils import get_hashids
+from .base import UserMixin
 
 
 class GoalPageMixin(UserPassesTestMixin, UserMixin):

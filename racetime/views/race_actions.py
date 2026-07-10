@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .base import BaseRaceAction
 from .. import race_actions
+from .base import BaseRaceAction
 
 
 class RaceAction(LoginRequiredMixin, BaseRaceAction):

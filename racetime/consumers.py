@@ -9,8 +9,14 @@ from oauth2_provider.settings import oauth2_settings
 from websockets import ConnectionClosed
 
 from . import race_actions, race_bot_actions
-from .models import Bot, Category, Race, Message
-from .utils import SafeException, exception_to_msglist, get_chat_history, get_hashids, get_action_button
+from .models import Bot, Category, Message, Race
+from .utils import (
+    SafeException,
+    exception_to_msglist,
+    get_action_button,
+    get_chat_history,
+    get_hashids,
+)
 
 
 class OAuthConsumerMixin:

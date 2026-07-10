@@ -9,9 +9,9 @@ from django.utils.functional import cached_property
 from django.views import generic
 from oauth2_provider.models import get_application_model
 
-from .base import UserMixin
 from .. import forms, models
 from ..utils import get_hashids
+from .base import UserMixin
 
 
 class BotPageMixin(UserPassesTestMixin, UserMixin):

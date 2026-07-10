@@ -16,8 +16,8 @@ from django.utils.safestring import mark_safe
 
 from racetime.models.abstract import AbstractAuditLog
 
-from .choices import RaceStates
 from ..utils import SafeException, generate_race_slug, get_hashids
+from .choices import RaceStates
 
 
 class Category(models.Model):

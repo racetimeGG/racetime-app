@@ -3,12 +3,12 @@ import json
 from django import http
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.humanize.templatetags.humanize import ordinal
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models as db_models
 from django.db.transaction import atomic
@@ -21,8 +21,8 @@ from django.utils.text import slugify
 from django.views import generic
 from oauth2_provider.views import ScopedProtectedResourceView
 
-from .base import BotMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
+from .base import BotMixin, PublicAPIMixin, UserMixin
 
 
 class Category(UserMixin, generic.DetailView):

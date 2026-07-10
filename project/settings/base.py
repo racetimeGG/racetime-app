@@ -2,8 +2,8 @@
 Quick-start development settings - unsuitable for production
 See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 """
-from datetime import datetime
 import os
+from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SECRET_KEY = '00aqmqedb05688z06d_%m%a==yu10am82ff)rcxk4il6@6%2=$'

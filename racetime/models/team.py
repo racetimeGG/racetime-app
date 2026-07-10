@@ -9,9 +9,9 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
-from .abstract import AbstractAuditLog
 from ..utils import generate_team_name
 from ..validators import UsernameValidator
+from .abstract import AbstractAuditLog
 
 
 class Team(models.Model):

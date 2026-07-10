@@ -1,7 +1,9 @@
-from django.apps import AppConfig as BaseAppConfig, apps
+from urllib.parse import quote
+
+from django.apps import AppConfig as BaseAppConfig
+from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
-from urllib.parse import quote
 
 
 class AppConfig(BaseAppConfig):

@@ -1,10 +1,10 @@
 from django.http import Http404
 from django.views import generic
 
-from .base import BaseRaceAction, CanModerateRaceMixin, CanMonitorRaceMixin
 from ..forms import InviteForm
 from ..models import Entrant, User
 from ..utils import SafeException
+from .base import BaseRaceAction, CanModerateRaceMixin, CanMonitorRaceMixin
 
 
 class EntrantAction(BaseRaceAction):

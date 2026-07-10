@@ -10,9 +10,9 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
-from .choices import EntrantStates, RaceStates
 from ..utils import determine_ip, get_hashids, timer_html
 from ..validators import UsernameValidator
+from .choices import EntrantStates, RaceStates
 
 
 class UserManager(BaseUserManager):

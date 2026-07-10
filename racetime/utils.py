@@ -1,5 +1,5 @@
-import datetime
 import colorsys
+import datetime
 import json
 import random
 from collections import OrderedDict
@@ -7,7 +7,8 @@ from urllib.parse import urlencode
 
 import requests
 from channels_redis.core import RedisChannelLayer as BaseRedisChannelLayer
-from channels_redis.serializers import JSONSerializer as BaseJSONSerializer, registry
+from channels_redis.serializers import JSONSerializer as BaseJSONSerializer
+from channels_redis.serializers import registry
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import send_mail

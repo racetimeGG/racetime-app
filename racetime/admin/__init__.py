@@ -7,8 +7,8 @@ from django.urls import reverse, set_urlconf
 from django.utils.safestring import mark_safe
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 
-from . import forms, options
 from .. import models
+from . import forms, options
 
 
 class BanAdmin(options.ModelAdmin):
