@@ -5,6 +5,7 @@ from django.db.models import F
 
 from racetime import forms, models
 from racetime.utils import SafeException, get_hashids
+
 from .race_actions import Message
 
 

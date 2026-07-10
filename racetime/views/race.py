@@ -5,8 +5,8 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django import http
 from django.conf import settings
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import F, Q
@@ -21,9 +21,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.detail import SingleObjectMixin
 from oauth2_provider.views import ScopedProtectedResourceView
 
-from .base import BotMixin, CanModerateRaceMixin, CanMonitorRaceMixin, PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..utils import get_action_button, get_hashids, twitch_auth_url
+from .base import (
+    BotMixin,
+    CanModerateRaceMixin,
+    CanMonitorRaceMixin,
+    PublicAPIMixin,
+    UserMixin,
+)
 
 
 class RaceMixin(SingleObjectMixin):

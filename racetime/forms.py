@@ -3,8 +3,6 @@ from copy import deepcopy
 from datetime import timedelta
 
 from bs4 import BeautifulSoup
-from django_recaptcha.fields import ReCaptchaField
-from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.core import validators
@@ -17,6 +15,8 @@ from django.http import Http404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.html import format_html
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 from . import models
 

@@ -6,11 +6,11 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, Q
 from django.db.transaction import atomic
 from django.forms import model_to_dict
-from django.shortcuts import resolve_url, get_object_or_404
+from django.shortcuts import get_object_or_404, resolve_url
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -22,10 +22,16 @@ from django.views.decorators.debug import sensitive_post_parameters
 from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.views import AuthorizationView, ProtectedResourceView
 
-from .base import PublicAPIMixin, UserMixin
 from .. import forms, models
 from ..middleware import CsrfViewMiddlewareTwitch
-from ..utils import delete_user, notice_exception, patreon_auth_url, patreon_update_memberships, twitch_auth_url
+from ..utils import (
+    delete_user,
+    notice_exception,
+    patreon_auth_url,
+    patreon_update_memberships,
+    twitch_auth_url,
+)
+from .base import PublicAPIMixin, UserMixin
 
 
 class ViewProfile(UserMixin, generic.DetailView):

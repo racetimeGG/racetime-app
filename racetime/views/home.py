@@ -4,8 +4,8 @@ from django.db.models import Count, Q
 from django.utils.functional import cached_property
 from django.views import generic
 
-from .base import UserMixin
 from ..models import Category, Entrant, RaceStates
+from .base import UserMixin
 
 
 class Home(UserMixin, generic.TemplateView):

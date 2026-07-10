@@ -21,12 +21,18 @@ from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from trueskill import Rating, TrueSkill, quality_1vs1
 
-from .choices import EntrantStates, RaceStates
 from ..rating import rate_race
 from ..utils import (
-    SafeException, ShieldedUser, SyncError, generate_team_name,
-    get_action_button, get_chat_history, timer_html, timer_str,
+    SafeException,
+    ShieldedUser,
+    SyncError,
+    generate_team_name,
+    get_action_button,
+    get_chat_history,
+    timer_html,
+    timer_str,
 )
+from .choices import EntrantStates, RaceStates
 
 
 class Race(models.Model):

@@ -2,9 +2,9 @@ import requests
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from . import TalksToTwitch
 from ...models import User
 from ...utils import chunkify
+from . import TalksToTwitch
 
 
 class Command(BaseCommand, TalksToTwitch):
