@@ -3,7 +3,7 @@
     margin: 0 auto;
 }
 .audit-log > li {
-    border: 3px solid #1a1c20;
+    border: 3px solid var(--foreground);
     border-radius: 10px;
     margin-top: 5px;
 }
@@ -14,7 +14,7 @@
     display: flex;
 }
 .audit-log > li > .summary > .avatar {
-    background: radial-gradient(#1a1c20, #8c898c) no-repeat center / cover;
+    background: radial-gradient(var(--foreground), var(--placeholder)) no-repeat center / cover;
     border-radius: 100%;
     height: 32px;
     margin: 5px 0 5px 5px;
@@ -32,7 +32,7 @@
     margin-left: 5px;
 }
 .audit-log > li > .summary > .text > time {
-    color: #8c898c;
+    color: var(--placeholder);
     flex: 1 0 100%;
     font-size: 13px;
     line-height: 1;
@@ -64,7 +64,7 @@
 }
 .audit-log > li > .details > dt,
 .audit-log > li > .details > dd {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
     box-sizing: border-box;
 }
 .audit-log > li > .details > dt {

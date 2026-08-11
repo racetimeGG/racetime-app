@@ -25,7 +25,7 @@
     flex-grow: 1;
 }
 .team-info > .created {
-    color: #8c898c;
+    color: var(--placeholder);
     font-size: 13px;
 }
 .team-info + .team-meta {
@@ -40,13 +40,13 @@
 }
 
 .team-members > ul > li {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
 }
 .team-members > ul > li:first-child {
     border-top: none;
 }
 .team-members > ul > li > .user-pop {
-    color: #eee;
+    color: var(--title2);
     font-size: 16px;
     line-height: 32px;
     margin: 5px 0;

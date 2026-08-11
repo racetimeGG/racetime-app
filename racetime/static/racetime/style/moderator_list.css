@@ -5,7 +5,7 @@
 }
 
 .mod-list > li {
-    border: 5px solid #1a1c20;
+    border: 5px solid var(--foreground);
     border-radius: 10px;
     display: inline-flex;
     padding: 5px;

@@ -6,7 +6,7 @@
     margin-right: 2vw;
 }
 .container > .content > main > .attract {
-    background: linear-gradient(to bottom, #1e1f24 0, #191a1e 100%);
+    background: linear-gradient(to bottom, var(--race-status1) 0, var(--race-status2) 100%);
     border-radius: 10px;
     display: block;
     font-size: 40px;
@@ -18,7 +18,7 @@
     transition: all 0.2s;
 }
 .container > .content > main > .attract > span {
-    background-image: linear-gradient(to bottom, #eee 40%, #ddd8dd 100%);
+    background-image: linear-gradient(to bottom, var(--title2) 40%, var(--muted) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -36,7 +36,7 @@
         left: -7px;
 }
 .container > .content > .focus > .attract {
-    box-shadow: inset 0 0 10px #26dd9a;
+    box-shadow: inset 0 0 10px var(--accent2);
 }
 .container > .content > .focus > .attract::before {
     content: "\a0";
@@ -62,7 +62,7 @@
         background: none;
     }
     .container > .content > main > .attract {
-        border: solid #26dd9a;
+        border: solid var(--accent2);
         border-width: 1px 0 0 1px;
         cursor: pointer;
     }

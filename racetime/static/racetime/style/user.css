@@ -9,7 +9,7 @@
     flex-direction: column;
 }
 .user-profile > .user-pop {
-    color: #eee;
+    color: var(--title2);
     font-size: 32px;
     margin: 5px 0;
 }
@@ -29,9 +29,9 @@
 }
 .user-profile > .role-badge {
     align-items: center;
-    background: #1a1c20;
+    background: var(--foreground);
     border-radius: 4px;
-    color: #1da674;
+    color: var(--accent1);
     cursor: default;
     display: flex;
     margin-top: 5px;
@@ -44,10 +44,10 @@
     width: 18px;
 }
 .user-profile > .role-badge a {
-    color: #beebd1;
+    color: var(--accent4);
 }
 .user-profile > .supporter-badge {
-    background: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    background: linear-gradient(to top right, var(--supporter1) 0, var(--supporter2) 100%);
     background-clip: padding-box;
     border-radius: 5px;
     cursor: default;
@@ -56,14 +56,14 @@
 .user-profile > .supporter-badge > div {
     align-items: center;
     border-radius: inherit;
-    background: #1a1c20;
+    background: var(--foreground);
     display: flex;
     margin: 1px;
     padding: 1px 5px;
 }
 .user-profile > .supporter-badge > div > .material-icons,
 .user-profile > .supporter-badge > div > span {
-    background: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    background: linear-gradient(to top right, var(--supporter1) 0, var(--supporter2) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -73,7 +73,7 @@
     margin-right: 3px;
 }
 .user-profile > .team-badge a {
-    color: #ddd8dd;
+    color: var(--muted);
 }
 .user-profile > .team-badge > img {
     border-radius: 100%;
@@ -82,9 +82,9 @@
     width: 22px;
 }
 .user-profile > .twitch-channel {
-    background: #1a1c20;
+    background: var(--foreground);
     border-radius: 4px;
-    color: #e0ccff;
+    color: var(--twitch);
     display: flex;
     margin-top: 5px;
     padding: 3px 5px;
@@ -110,7 +110,7 @@
 }
 
 .race-entrants {
-    border: 5px solid #1a1c20;
+    border: 5px solid var(--foreground);
     border-top: 0;
     border-radius: 0 0 10px 10px;
     box-sizing: border-box;
@@ -119,23 +119,23 @@
 }
 
 .entrant-row {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
 }
 
 .entrant-row.highlight {
-    background: #1a1c20;
+    background: var(--foreground);
 }
 .entrant-row.highlight .user-pop > .pronouns {
-    background: #212328;
+    background: var(--container);
 }
 .entrant-row.highlight > .user > .comment.open {
-    background-color: #212328;
-    border-color: #1a1c20;
+    background-color: var(--container);
+    border-color: var(--foreground);
     margin: -3px;
 }
 
 .user-categories > li {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
 }
 .user-categories > li:first-child {
     border-top: none;
@@ -160,7 +160,7 @@
     flex-direction: column;
 }
 .user-categories > li .info > .times-entered {
-    color: #8c898c;
+    color: var(--placeholder);
     font-size: 15px;
 }
 
