@@ -46,19 +46,19 @@ main {
 
 .race-entrants,
 .race-chat > .messages {
-    scrollbar-color: #1da674 #36393f;
+    scrollbar-color: var(--accent1) var(--background-gradient);
     scrollbar-width: thin;
 }
 
 .race-entrants::-webkit-scrollbar-track,
 .race-chat > .messages::-webkit-scrollbar-track {
-    background: #36393f;
+    background: var(--background-gradient);
 }
 
 .race-entrants::-webkit-scrollbar-thumb,
 .race-chat > .messages::-webkit-scrollbar-thumb {
-    background-color: #1da674;
-    border: 1px solid #36393f;
+    background-color: var(--accent1);
+    border: 1px solid var(--background-gradient);
 }
 
 .race-entrants {
@@ -95,8 +95,8 @@ main {
 }
 
 .race-actions .modal {
-    background: #1a1c20;
-    border: 1px solid #1da674;
+    background: var(--foreground);
+    border: 1px solid var(--accent1);
     border-radius: 4px;
     padding: 5px;
     z-index: 10;
@@ -117,7 +117,7 @@ main {
 }
 
 .streaming-required > p {
-    color: #a0e9a0;
+    color: var(--positive);
     margin: 0 0 5px;
     font-size: 13px;
 }
@@ -171,7 +171,7 @@ main {
 
 .race-chat > .disconnected > span {
     align-items: center;
-    background-color: #1a1c20;
+    background-color: var(--foreground);
     border-radius: 10px;
     display: flex;
     padding: 0 10px;
@@ -180,7 +180,7 @@ main {
 
 .race-chat > .scrollwarning > span {
     align-items: center;
-    background-color: #1a1c20;
+    background-color: var(--foreground);
     border-radius: 10px;
     display: flex;
     padding: 0 10px;
@@ -195,18 +195,18 @@ main {
 
 .race-chat > .disconnected > span > .material-icons {
     animation: blink 1.2s ease-in-out infinite;
-    color: #8c3030;
+    color: var(--warn);
     margin-right: 5px;
 }
 
 .race-chat > .scrollwarning > span > .material-icons {
     animation: blink 1.2s ease-in-out infinite;
-    color: #8c3030;
+    color: var(--warn);
     margin-right: 5px;
 }
 
 .race-chat > .messages.pinned {
-    box-shadow: 0 6px 3px -3px #212328;
+    box-shadow: 0 6px 3px -3px var(--container);
     margin: 8px 0 0;
     max-height: 50%;
     overflow-y: auto;
@@ -229,19 +229,19 @@ main {
 }
 
 .race-chat > .messages > li.system {
-    color: #8c898c;
+    color: var(--placeholder);
 }
 
 .race-chat > .messages > li.error {
-    color: #f08080;
+    color: var(--danger-accent);
 }
 
 .race-chat > .messages > li.highlight {
-    color: #a0e9a0;
+    color: var(--positive);
 }
 
 .race-chat > .messages > li.bot {
-    color: #a0ace8;
+    color: var(--bot);
 }
 
 .race-chat > .messages.pinned > li::before {
@@ -257,7 +257,7 @@ main {
 }
 
 .race-chat > .messages > li.mentioned {
-    background-color: #1a1c20;
+    background-color: var(--foreground);
     border-radius: 4px;
 }
 
@@ -265,10 +265,10 @@ main {
     padding-top: 15px;
 }
 .race-chat > .messages > li.dm.mentioned {
-    background-color: #454037;
+    background-color: var(--mention);
 }
 .race-chat > .messages > li.dm::after {
-    color: #8c898c;
+    color: var(--placeholder);
     content: 'visibility';
     font-family: 'Material Icons';
     font-size: 14px;
@@ -280,7 +280,7 @@ main {
         left: 2px;
 }
 .race-chat > .messages > li.dm > .dm-info {
-    color: #8c898c;
+    color: var(--placeholder);
     cursor: default;
     font-variant: all-small-caps;
     font-size: 12px;
@@ -291,7 +291,7 @@ main {
 }
 
 .race-chat > .messages > li > .timestamp {
-    color: #8c898c;
+    color: var(--placeholder);
     font-size: 12px;
     margin-right: 2px;
 }
@@ -310,10 +310,10 @@ main {
     margin-right: 4px;
 }
 .race-chat > .messages > li > .bot-actions > li > .msg-action {
-    background-color: #4757aa;
+    background-color: var(--bot-action);
     border: none;
     border-radius: 4px;
-    color: white;
+    color: var(--text);
     display: inline-block;
     font-size: 14px;
     line-height: 1;
@@ -322,11 +322,11 @@ main {
     transition: all 0.2s;
 }
 .race-chat > .messages > li > .bot-actions > li > .msg-action:hover {
-    background-color: #334293;
+    background-color: var(--bot-action-hover);
 }
 
 .race-chat > .messages > .bot-survey {
-    border: 1px solid #a0ace8;
+    border: 1px solid var(--bot);
     border-radius: 4px;
     margin-top: 6px;
 }
@@ -337,7 +337,7 @@ main {
     font-size: 14px;
 }
 .race-chat > .messages > .bot-survey input {
-    border-color: #a0ace8;
+    border-color: var(--bot);
 }
 .race-chat > .messages > .bot-survey select {
     max-width: 284px;
@@ -347,8 +347,8 @@ main {
     content: none;
 }
 .race-chat > .messages > .bot-survey > span {
-    background: #212328;
-    color: #a0ace8;
+    background: var(--container);
+    color: var(--bot);
     cursor: default;
     float: left;
     margin: -10px 0 0 3px;
@@ -364,15 +364,15 @@ main {
     padding: 4px 6px;
 }
 .race-chat > .messages > .bot-survey > .btn-row .msg-action {
-    border-color: #a0ace8;
+    border-color: var(--bot);
 }
 .race-chat > .messages > .bot-survey > .btn-row .msg-action:hover {
-    border-color: #334293;
-    color: #a0ace8;
+    border-color: var(--bot-action-hover);
+    color: var(--bot);
 }
 
 .race-chat > .messages > li > .mod-actions {
-    color: #ddd8dd;
+    color: var(--muted);
     display: none;
     vertical-align: top;
 }
@@ -397,7 +397,7 @@ main {
 
 .race-chat > .messages > li > .name {
     align-items: center;
-    color: #b9b4b9;
+    color: var(--checked);
     display: inline-flex;
     vertical-align: top;
 }
@@ -406,7 +406,7 @@ main {
 }
 
 .race-chat > .messages > li > .name.supporter > span {
-    background-image: linear-gradient(to top right, #cca32a 0, #ffea99 100%);
+    background-image: linear-gradient(to top right, var(--supporter1) 0, var(--supporter2) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -414,7 +414,7 @@ main {
 }
 
 .race-chat > .messages > li.bot > .name {
-    color: #a0ace8;
+    color: var(--bot);
 }
 
 .race-chat > .messages > li > .name::before {
@@ -451,15 +451,15 @@ main {
 }
 
 .race-chat > .messages > li > .message .good {
-    color: #a0e9a0;
+    color: var(--positive);
 }
 
 .race-chat > .messages > li > .message .bad {
-    color: #f08080;
+    color: var(--danger-accent);
 }
 
 .race-chat > .messages > li > .message .bot {
-    color: #a0ace8;
+    color: var(--bot);
 }
 
 .race-chat > .messages > li > .message .mention {
@@ -473,7 +473,7 @@ main {
 }
 
 .race-chat > .messages > li > .deleted {
-    color: #b9b4b9;
+    color: var(--checked);
     font-style: italic;
 }
 .race-chat > .messages > li.show-delete > .deleted {
@@ -496,7 +496,7 @@ main {
     transition: box-shadow 0.1s;
 }
 .race-chat > form.dm {
-    box-shadow: 0 0 3px 0 #f0b132;
+    box-shadow: 0 0 3px 0 var(--dm);
 }
 
 .race-chat > form label {
@@ -522,7 +522,7 @@ main {
 
 .race-chat > form input,
 .race-chat > form textarea {
-    caret-color: #1da674;
+    caret-color: var(--accent1);
     flex-grow: 1;
     font-size: 13px;
     height: 18px;
@@ -545,8 +545,8 @@ main {
 .race-chat > form.dm input,
 .race-chat > form.dm textarea,
 .race-chat > form.dm button {
-    border-color: #f0b132;
-    caret-color: #f0b132;
+    border-color: var(--dm);
+    caret-color: var(--dm);
 }
 
 .race-chat > form > .actions {
@@ -597,7 +597,7 @@ main {
 }
 
 .race-chat > form.dm > .actions > .send-dm {
-    color: #f0b132;
+    color: var(--dm);
 }
 
 .race-stream-control {
@@ -612,7 +612,7 @@ main {
 }
 
 .race-stream-control > ul > li {
-    border: 2px solid #1a1c20;
+    border: 2px solid var(--foreground);
     border-radius: 4px;
     cursor: pointer;
     display: none;
@@ -639,7 +639,7 @@ main {
 }
 
 .race-nav {
-    background: #1e1f24;
+    background: var(--race-status1);
     display: none;
 }
 
@@ -658,7 +658,7 @@ main {
 }
 
 .race-nav > ul > .active {
-    color: #beebd1;
+    color: var(--accent4);
 }
 
 .race-nav > ul > li > .title {

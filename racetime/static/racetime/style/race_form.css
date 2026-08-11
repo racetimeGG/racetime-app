@@ -22,7 +22,7 @@
 }
 #id_goal > div > label > span {
     align-items: center;
-    background: linear-gradient(to bottom, #1e1f24 0, #191a1e 100%);
+    background: linear-gradient(to bottom, var(--race-status1) 0, var(--race-status2) 100%);
     border-radius: 10px;
     display: flex;
     flex-grow: 1;
@@ -33,10 +33,10 @@
 }
 #id_goal > div > label > input:checked + span {
     box-shadow: inset 0 0 10px;
-    color: #26dd9a;
+    color: var(--accent2);
 }
 .is-loading #id_goal > div > label > input:checked + span {
-    color: #ebdfbe;
+    color: var(--best-time);
 }
 .duration-input input {
     width: 60px;

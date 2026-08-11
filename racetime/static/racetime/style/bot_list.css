@@ -1,5 +1,5 @@
 .bot-list > li > dl {
-    border: 5px solid #1a1c20;
+    border: 5px solid var(--foreground);
     border-radius: 10px;
     display: flex;
     flex-wrap: wrap;
@@ -7,7 +7,7 @@
 }
 .bot-list > li > dl > dt,
 .bot-list > li > dl > dd {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
     box-sizing: border-box;
 }
 
@@ -52,7 +52,7 @@
 }
 .bot-list > li > dl > .secret::before {
     content: '(Hover to reveal)';
-    color: #b9b4b9;
+    color: var(--secret);
 }
 .bot-list > li > dl > .secret:hover::before {
     content: none;

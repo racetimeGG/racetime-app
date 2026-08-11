@@ -64,7 +64,7 @@
 }
 .race-streams > ol > li > .meta {
     align-items: stretch;
-    border: 5px solid #1a1c20;
+    border: 5px solid var(--foreground);
     border-radius: 10px;
     display: flex;
     line-height: 32px;

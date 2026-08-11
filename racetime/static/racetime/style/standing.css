@@ -1,7 +1,7 @@
 .account-standing {
 }
 .account-standing > .item {
-    border: 5px solid #1a1c20;
+    border: 5px solid var(--foreground);
     border-radius: 10px;
     margin-top: 10px;
 }
@@ -11,10 +11,10 @@
     padding: 10px;
 }
 .account-standing > .item > .info.good-standing {
-    color: #26dd9a;
+    color: var(--accent2);
 }
 .account-standing > .item > .info > .image {
-    background: linear-gradient(to bottom, #36393f 0, #25272c 100%);
+    background: linear-gradient(to bottom, var(--background-gradient) 0, var(--background) 100%);
     border-radius: 10px;
     height: 32px;
     margin-right: 10px;
@@ -38,7 +38,7 @@
 .account-standing > .item > .expires,
 .account-standing > .item > .permanent,
 .account-standing > .item > .reason {
-    border-top: 1px solid #1a1c20;
+    border-top: 1px solid var(--foreground);
     padding: 10px;
 }
 .account-standing > .item > .expires {
