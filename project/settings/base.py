@@ -76,7 +76,10 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'racetime.utils.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('racetime.redis', 6379)],
+            "hosts": [{
+                'address': 'redis://racetime.redis:6379',
+                'socket_timeout': None
+            }],
         },
     },
 }
