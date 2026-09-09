@@ -420,8 +420,10 @@ class CategoryRequest(models.Model):
                 slug=self.slug,
             )
             category.owners.add(self.requested_by)
-            for goal in set(self.goals.split('\n')):
-                category.goal_set.create(name=goal)
+            for goal_name in set(self.goals.split('\n')):
+                goal_name = Goal.normalize_name(goal_name)
+                if goal_name:
+                    category.goal_set.create(name=goal_name)
 
             self.reviewed_at = timezone.now()
             self.accepted_as = category
@@ -568,6 +570,16 @@ class Goal(models.Model):
                 name='unique_category_name',
             ),
         ]
+
+    @staticmethod
+    def normalize_name(name):
+        if name is None:
+            return None
+        return name.strip()
+
+    def save(self, *args, **kwargs):
+        self.name = self.normalize_name(self.name) or ''
+        super().save(*args, **kwargs)
 
     @cached_property
     def completed_races(self):

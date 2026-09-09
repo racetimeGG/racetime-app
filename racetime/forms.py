@@ -327,7 +327,11 @@ class CategoryRequestForm(forms.ModelForm):
 
     def clean_goals(self):
         goals = self.cleaned_data.get('goals')
-        goals = set(goal.strip() for goal in goals.split('\n') if goal.strip())
+        goals = set(
+            name for name in
+            (models.Goal.normalize_name(g) for g in goals.split('\n'))
+            if name
+        )
 
         if not goals:
             raise ValidationError(
@@ -569,7 +573,7 @@ class OAuthRaceForm(RaceForm):
         super().__init__(category, True, *args, **kwargs)
 
     def clean_goal(self):
-        goal = self.cleaned_data.get('goal')
+        goal = models.Goal.normalize_name(self.cleaned_data.get('goal'))
         if goal:
             return self.category.goal_set.filter(
                 active=True,
